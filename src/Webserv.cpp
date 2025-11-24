@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:36:43 by fmaurer           #+#    #+#             */
-/*   Updated: 2025/11/20 13:29:30 by fmaurer          ###   ########.fr       */
+/*   Updated: 2025/11/21 14:47:07 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,3 +23,7 @@ Webserv& Webserv::operator=(const Webserv& other)
 }
 
 Webserv::~Webserv() {}
+
+Webserv::MyException::MyException(const std::string& msg):
+	std::runtime_error(" MyException: " + msg)
+{}

@@ -35,20 +35,26 @@ my guess right now is the following control flow:
 
 ## main.cpp
 
+
+**how do i want this? what about the logger? simply copy the vsnprintf
+approach?**
+
 ```cpp
 #include "webserv.hpp"
 
+WebservLogger logger;
 WebservConfig cfg;
 WebservParser parser;
 Webserv webserv;
 
-cfg = parser.parseCfg(av[1] ? av[1]: "path/to/default.conf");
+cfg = parser.parseCfg(av[1] ? av[1]: "path/to/default.conf", logger);
 if (cfg.fail()) {
- Logger::log.error(...);
+ logger.log_error(...);
+ // logger.log_info(...);
+ // logger.log_warn(...);
  return (-42);
 }
 webserv.run(cfg);
 
 return (0);
-
 ```
