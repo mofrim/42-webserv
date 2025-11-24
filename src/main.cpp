@@ -6,8 +6,17 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:37:25 by fmaurer           #+#    #+#             */
-/*   Updated: 2025/11/20 12:37:38 by fmaurer          ###   ########.fr       */
+/*   Updated: 2025/11/21 14:47:39 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-int main() { return (0); }
+#include "Webserv.hpp"
+
+int main()
+{
+	Webserv webserv;
+
+	throw Webserv::MyException("bla");
+
+	return (0);
+}

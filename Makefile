@@ -6,7 +6,7 @@
 #    By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/12/01 11:45:58 by fmaurer           #+#    #+#              #
-#    Updated: 2025/11/20 15:08:47 by fmaurer          ###   ########.fr        #
+#    Updated: 2025/11/24 19:57:31 by fmaurer          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -43,6 +43,8 @@ $(OBJDIR):
 
 # will never try to compile HDR or any other prequesite specified after `%.cpp`.
 # this is because the `%.o` and matched against all .c-files in the current dir.
+# !! Attention: Any misspelled filename in HDRS or SRCS will lead to `make` not
+# functioning without any meaningful error msg !!
 $(OBJDIR)/%.o: %.cpp $(HDRS) | $(OBJDIR)
 	$(CPP) $(IFLAGS) $(CFLAGS) -c $< -o $@
 
