@@ -6,12 +6,17 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/25 11:12:20 by fmaurer           #+#    #+#             */
-/*   Updated: 2025/11/25 15:21:11 by fmaurer          ###   ########.fr       */
+/*   Updated: 2025/11/26 09:49:52 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Config.hpp"
+#include "ConfigParser.hpp"
 #include "Logger.hpp"
+
+#include <iostream>
+
+//// OCF
 
 // Default constructor initializes Config with only the default server
 // available.
@@ -28,13 +33,19 @@ Config::Config(const Config& other):
 Config& Config::operator=(const Config& other)
 {
 	if (this != &other) {
-		this->_isDefaultCfg = other._isDefaultCfg;
-		this->_cfgs					= other._cfgs;
+		_isDefaultCfg = other._isDefaultCfg;
+		_cfgs					= other._cfgs;
 	}
 	return (*this);
 }
 
 Config::~Config() {}
+
+//// OCF end
+
+void Config::_setIsDefaultCfg(bool state) { _isDefaultCfg = state; }
+
+bool Config::isDefaultCfg() const { return (_isDefaultCfg); }
 
 Config::EmptyCfgVectorException::EmptyCfgVectorException(
 		const std::string& msg):
@@ -48,10 +59,22 @@ void Config::setCfgs(std::vector<ServerCfg> cfgs)
 	if (cfgs.size() == 0)
 		throw(Config::EmptyCfgVectorException(
 				"somehow u managed to pass an empty cfg vector."));
-	this->_cfgs = cfgs;
+	_cfgs = cfgs;
 }
 
-// TODO: implement this
-void Config::parseCfgFile(const std::string& fname) { (void)fname; }
+// TODO: implement this...
+// Maybe we put another step parser.checkCfg() in here...
+void Config::parseCfgFile(const std::string& fname)
+{
+	ConfigParser parser;
+
+	try {
+		parser.openCfg(fname);
+		_cfgs = parser.parse();
+		_setIsDefaultCfg(false);
+	} catch (const std::exception& e) {
+		std::cout << e.what() << std::endl;
+	}
+}
 
 std::vector<ServerCfg> Config::getCfgs() const { return (this->_cfgs); }

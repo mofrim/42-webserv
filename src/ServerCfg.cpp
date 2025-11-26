@@ -6,13 +6,16 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/25 08:35:42 by fmaurer           #+#    #+#             */
-/*   Updated: 2025/11/26 09:24:47 by fmaurer          ###   ########.fr       */
+/*   Updated: 2025/11/26 10:14:20 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ServerCfg.hpp"
 
 #include <cstring>
+#include <iostream>
+
+//// OCF
 
 // Default Constructor with default values.
 // NOTE: do all non-generic setting in ServerSetup
@@ -63,6 +66,8 @@ ServerCfg& ServerCfg::operator=(const ServerCfg& other)
 
 ServerCfg::~ServerCfg() {}
 
+//// OCF end
+
 void ServerCfg::setPort(uint16_t port) { this->_port = port; }
 void ServerCfg::setHost(in_addr_t host) { this->_host = host; }
 void ServerCfg::setServerName(std::string name) { this->_server_name = name; }
@@ -93,3 +98,22 @@ int					ServerCfg::getListenFd() { return (this->_listen_fd); }
 // unsigned long					ServerCfg::getClientMaxBodySize() {}
 // std::string						ServerCfg::getIndex() {}
 // std::vector<Location> ServerCfg::getLocations() {}
+
+// uint16_t	_port;
+// in_addr_t _host;
+// std::string				 _server_name;
+// std::string				 _root;
+// struct sockaddr_in _server_addr;
+// int								 _listen_fd;
+//
+// NEXT: for the other props we need conversion functions first. add utils.cpp
+// with our own conversion functions for ip-addrs.
+void ServerCfg::printCfg() const
+{
+	std::cout << "printing cfg for server \"" << _server_name << "\":\n"
+						<< std::endl;
+	std::cout << "  port: " << _port << std::endl;
+	std::cout << "  root: " << _root << std::endl;
+	std::cout << "  listen_fd: " << _listen_fd << std::endl;
+	std::cout << std::endl;
+}

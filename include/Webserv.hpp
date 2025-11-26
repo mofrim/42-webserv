@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:35:29 by fmaurer           #+#    #+#             */
-/*   Updated: 2025/11/26 09:20:23 by fmaurer          ###   ########.fr       */
+/*   Updated: 2025/11/26 09:52:11 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,8 @@ class Webserv {
 	private:
 		bool	 _shutdown_server;
 		Config _cfg;
+		void	 _setupServers();
+		void	 _setupOneServer(const ServerCfg& cfg);
 
 	public:
 		// OCF

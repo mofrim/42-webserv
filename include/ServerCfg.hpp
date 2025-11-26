@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/25 08:01:29 by fmaurer           #+#    #+#             */
-/*   Updated: 2025/11/26 09:21:12 by fmaurer          ###   ########.fr       */
+/*   Updated: 2025/11/26 09:53:45 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,6 +59,8 @@ class ServerCfg {
 		// unsigned long					getClientMaxBodySize();
 		// std::string						getIndex();
 		// std::vector<Location> getLocations();
+
+		void printCfg() const;
 };
 
 #endif
