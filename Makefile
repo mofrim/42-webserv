@@ -6,7 +6,7 @@
 #    By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/12/01 11:45:58 by fmaurer           #+#    #+#              #
-#    Updated: 2025/11/25 15:21:57 by fmaurer          ###   ########.fr        #
+#    Updated: 2025/11/26 10:08:43 by fmaurer          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -24,9 +24,10 @@ OBJDIR	= obj
 INC_DIR = ./include
 
 # The files..
-SRCS			= main.cpp Webserv.cpp Logger.cpp ServerCfg.cpp Config.cpp
+SRCS			= main.cpp Webserv.cpp Logger.cpp ServerCfg.cpp Config.cpp \
+						ConfigParser.cpp
 INT_HDRS	= IServerCfg.hpp
-HDRS			= Webserv.hpp Logger.hpp ServerCfg.hpp Config.hpp
+HDRS			= Webserv.hpp Logger.hpp ServerCfg.hpp Config.hpp ConfigParser.hpp
 HDRS			+= $(INT_HDRS)
 
 OBJS		= $(patsubst %.cpp,$(OBJDIR)/%.o,$(SRCS))

@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:37:25 by fmaurer           #+#    #+#             */
-/*   Updated: 2025/11/25 15:26:12 by fmaurer          ###   ########.fr       */
+/*   Updated: 2025/11/26 09:44:26 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,7 @@ int main(int ac, char **av)
 	g_webserv = &webserv;
 
 	if (signal(SIGINT, shutdownHandler) == SIG_ERR) {
-		Logger::log_err("signal handler error");
+		Logger::log_err("setting signal handler failed");
 		return (1);
 	}
 

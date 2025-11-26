@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/25 11:11:31 by fmaurer           #+#    #+#             */
-/*   Updated: 2025/11/26 09:15:44 by fmaurer          ###   ########.fr       */
+/*   Updated: 2025/11/26 09:49:37 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,6 +29,7 @@ class Config {
 	private:
 		bool									 _isDefaultCfg;
 		std::vector<ServerCfg> _cfgs;
+		void									 _setIsDefaultCfg(bool state);
 
 	public:
 		// OCF
@@ -39,9 +40,8 @@ class Config {
 
 		void									 setCfgs(std::vector<ServerCfg> cfgs);
 		std::vector<ServerCfg> getCfgs() const;
-		void									 setIsDefaultCfg(bool state);
-		bool									 getIsDefaultCfg() const;
 		void									 parseCfgFile(const std::string& fname);
+		bool									 isDefaultCfg() const;
 
 		class EmptyCfgVectorException: public std::logic_error {
 			public:
