@@ -1,0 +1,20 @@
+[
+  {
+    "arguments": [
+      "/run/current-system/sw/bin/c++",
+      "-I",
+      "./include",
+      "-Wall",
+      "-Werror",
+      "-Wextra",
+      "-std=c++98",
+      "-c",
+      "-o",
+      "obj/main.o",
+      "./src/main.cpp"
+    ],
+    "directory": "/home/frido/c0de/42/theCore/18-webserv/webserv",
+    "file": "/home/frido/c0de/42/theCore/18-webserv/webserv/src/main.cpp",
+    "output": "/home/frido/c0de/42/theCore/18-webserv/webserv/obj/main.o"
+  }
+]
