@@ -6,7 +6,7 @@
 #    By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/12/01 11:45:58 by fmaurer           #+#    #+#              #
-#    Updated: 2025/11/26 10:08:43 by fmaurer          ###   ########.fr        #
+#    Updated: 2025/11/26 15:03:24 by fmaurer          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -19,16 +19,14 @@ NAME 		= webserv
 # find any file in any directory listed in the VPATH. The same holds true for
 # the header files. This also applies to change-detection!
 # TL;DR: it makes things pretty easy ;)
-VPATH		= ./src ./include ./include/interfaces
+VPATH		= ./src ./inc
 OBJDIR	= obj
-INC_DIR = ./include
+INC_DIR = ./inc
 
 # The files..
 SRCS			= main.cpp Webserv.cpp Logger.cpp ServerCfg.cpp Config.cpp \
 						ConfigParser.cpp
-INT_HDRS	= IServerCfg.hpp
 HDRS			= Webserv.hpp Logger.hpp ServerCfg.hpp Config.hpp ConfigParser.hpp
-HDRS			+= $(INT_HDRS)
 
 OBJS		= $(patsubst %.cpp,$(OBJDIR)/%.o,$(SRCS))
 
