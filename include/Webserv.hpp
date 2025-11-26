@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:35:29 by fmaurer           #+#    #+#             */
-/*   Updated: 2025/11/26 09:52:11 by fmaurer          ###   ########.fr       */
+/*   Updated: 2025/11/26 10:38:52 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,9 @@
 
 #include <netinet/in.h>
 #include <sys/socket.h>
+
+#define DEFAULT_PORT 4284
+#define DEFAULT_SRV_NAME "localhost"
 
 // NOTE: Naming convention for private class-members / methods: underscore at
 // the beginning. In later use this enables us to omit the `this->`. This saves
@@ -29,6 +32,7 @@ class Webserv {
 		Config _cfg;
 		void	 _setupServers();
 		void	 _setupOneServer(const ServerCfg& cfg);
+		void	 _initDefaultCfg();
 
 	public:
 		// OCF

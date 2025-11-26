@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/25 11:12:20 by fmaurer           #+#    #+#             */
-/*   Updated: 2025/11/26 09:49:52 by fmaurer          ###   ########.fr       */
+/*   Updated: 2025/11/26 10:46:19 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,3 +78,5 @@ void Config::parseCfgFile(const std::string& fname)
 }
 
 std::vector<ServerCfg> Config::getCfgs() const { return (this->_cfgs); }
+
+void Config::setDefaultCfg(ServerCfg cfg) { _cfgs[0] = cfg; }
