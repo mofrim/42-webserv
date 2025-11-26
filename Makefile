@@ -6,7 +6,7 @@
 #    By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/12/01 11:45:58 by fmaurer           #+#    #+#              #
-#    Updated: 2025/11/24 19:57:31 by fmaurer          ###   ########.fr        #
+#    Updated: 2025/11/25 15:21:57 by fmaurer          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -19,13 +19,15 @@ NAME 		= webserv
 # find any file in any directory listed in the VPATH. The same holds true for
 # the header files. This also applies to change-detection!
 # TL;DR: it makes things pretty easy ;)
-VPATH		= ./src ./include
+VPATH		= ./src ./include ./include/interfaces
 OBJDIR	= obj
 INC_DIR = ./include
 
 # The files..
-SRCS		= main.cpp Webserv.cpp
-HDRS		= Webserv.hpp
+SRCS			= main.cpp Webserv.cpp Logger.cpp ServerCfg.cpp Config.cpp
+INT_HDRS	= IServerCfg.hpp
+HDRS			= Webserv.hpp Logger.hpp ServerCfg.hpp Config.hpp
+HDRS			+= $(INT_HDRS)
 
 OBJS		= $(patsubst %.cpp,$(OBJDIR)/%.o,$(SRCS))
 
@@ -34,6 +36,7 @@ CPP			= c++
 
 # compiler flags
 CFLAGS	= -Wall -Werror -Wextra -std=c++98
+CFLAGS	+= -g
 IFLAGS	= -I $(INC_DIR)
 
 all: $(NAME)
@@ -54,21 +57,10 @@ $(NAME): $(OBJS)
 clean:
 	rm -rf $(OBJDIR)
 
-nodebug: CFLAGS += -DDEBUG=0
-nodebug:
-	$(CPP) $(CFLAGS) -o $(NAME) $(SRC) $(MAINSRC)
-
-debug: CFLAGS += -g
-debug:
-	$(CPP) $(CFLAGS) -o $(NAME) $(SRC) $(MAINSRC)
-
 bear: fclean
 	bear -- make
 
-run: nodebug
-	./$(NAME)
-
-run-debug: debug
+run: $(NAME)
 	./$(NAME)
 
 fclean: clean
@@ -76,4 +68,4 @@ fclean: clean
 
 re: fclean $(NAME)
 
-.PHONY: all clean fclean re nodebug debug bear run run-debug
+.PHONY: all clean fclean re bear run

@@ -6,20 +6,28 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:35:29 by fmaurer           #+#    #+#             */
-/*   Updated: 2025/11/21 14:51:56 by fmaurer          ###   ########.fr       */
+/*   Updated: 2025/11/26 09:20:23 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <iostream>
-#include <stdexcept>
+#ifndef WEBSERV_HPP
+#define WEBSERV_HPP
 
-class Logger {
-	public:
-		void logMsg(const std::string& msg) { std::cout << msg << std::endl; };
-};
+#include "Config.hpp"
+
+#include <netinet/in.h>
+#include <sys/socket.h>
+
+// NOTE: Naming convention for private class-members / methods: underscore at
+// the beginning. In later use this enables us to omit the `this->`. This saves
+// a lot of typing while being clear enough as we are still hand-writing our
+// code here ;)
 
 class Webserv {
 	private:
+		bool	 _shutdown_server;
+		Config _cfg;
+
 	public:
 		// OCF
 		Webserv();
@@ -27,12 +35,8 @@ class Webserv {
 		Webserv& operator=(const Webserv& other);
 		~Webserv();
 
-		// defining exception runtime_error here because many errors we will
-		// encounter here will be produced during runtime
-		class MyException: public std::runtime_error {
-			public:
-				MyException(const std::string& msg);
-		};
-
-		class logger: public Logger {};
+		void shutdown();
+		void run(const Config& cfg);
 };
+
+#endif
