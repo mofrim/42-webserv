@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:35:29 by fmaurer           #+#    #+#             */
-/*   Updated: 2025/11/26 10:38:52 by fmaurer          ###   ########.fr       */
+/*   Updated: 2025/12/03 15:51:49 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 #define WEBSERV_HPP
 
 #include "Config.hpp"
+#include "Server.hpp"
 
 #include <netinet/in.h>
 #include <sys/socket.h>
@@ -28,11 +29,12 @@
 
 class Webserv {
 	private:
-		bool	 _shutdown_server;
-		Config _cfg;
-		void	 _setupServers();
-		void	 _setupOneServer(const ServerCfg& cfg);
-		void	 _initDefaultCfg();
+		bool									_shutdown_server;
+		Config								_cfg;
+		std::vector<Server *> _servers;
+		void									_setupServers();
+		void									_setupOneServer(const ServerCfg& cfg);
+		void									_initDefaultCfg();
 
 	public:
 		// OCF
