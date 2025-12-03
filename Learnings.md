@@ -60,3 +60,15 @@ typedef uint16_t in_port_t;
 
 ...
 ```
+
+## network byte order
+
+- for most protocols the standard byte order is **most significant first**, similar
+  to **big-endian** in terms of **bit-ordering**.
+- some protocols like *SMB* use little-endian
+- attention: it is really the **byte** ordering! meaning the most significatn
+  octet is transmitted first.
+
+## The whole bind-epoll-process
+
+

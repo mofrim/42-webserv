@@ -6,11 +6,12 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:36:43 by fmaurer           #+#    #+#             */
-/*   Updated: 2025/11/26 10:46:59 by fmaurer          ###   ########.fr       */
+/*   Updated: 2025/12/03 16:04:50 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Logger.hpp"
+#include "Server.hpp"
 #include "Webserv.hpp"
 
 // FIXME: remove cause sleep is not an allowed function!
@@ -29,7 +30,17 @@ Webserv& Webserv::operator=(const Webserv& other)
 	return (*this);
 }
 
-Webserv::~Webserv() {}
+// FIXME: does this really have to be like this? Do we really need pointers to
+// the Servers?
+Webserv::~Webserv()
+{
+	for (std::vector<Server *>::iterator it = _servers.begin();
+			it != _servers.end();
+			++it)
+	{
+		delete *it;
+	}
+}
 
 // TODO: there will be much more to do in here. What?
 //
@@ -63,7 +74,6 @@ void Webserv::run(const Config& cfg)
 // server_name="localhost", port="4284" etc...)
 void Webserv::_setupServers()
 {
-
 	if (_cfg.isDefaultCfg()) {
 		_initDefaultCfg();
 		_setupOneServer(_cfg.getCfgs()[0]);
@@ -71,7 +81,14 @@ void Webserv::_setupServers()
 }
 
 // NEXT: implement a first socket setup for only the default Server
-void Webserv::_setupOneServer(const ServerCfg& cfg) { cfg.printCfg(); }
+void Webserv::_setupOneServer(const ServerCfg& cfg)
+{
+	Logger::log_msg("Setting up this server:");
+	cfg.printCfg();
+	Server *srv = new Server(cfg);
+	srv->init();
+	_servers.push_back(srv);
+}
 
 void Webserv::_initDefaultCfg()
 {

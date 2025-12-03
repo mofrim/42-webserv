@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/25 08:01:29 by fmaurer           #+#    #+#             */
-/*   Updated: 2025/11/26 09:53:45 by fmaurer          ###   ########.fr       */
+/*   Updated: 2025/12/03 13:05:27 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,12 +49,12 @@ class ServerCfg {
 		// void setIndex(std::string index);
 		// void setLocations(std::vector<Location> locations);
 
-		uint16_t		getPort();
-		in_addr_t		getHost();
-		std::string getServerName();
-		std::string getRoot();
-		sockaddr_in getServerAddr();
-		int					getListenFd();
+		uint16_t		getPort() const;
+		in_addr_t		getHost() const;
+		std::string getServerName() const;
+		std::string getRoot() const;
+		sockaddr_in getServerAddr() const;
+		int					getListenFd() const;
 
 		// unsigned long					getClientMaxBodySize();
 		// std::string						getIndex();
