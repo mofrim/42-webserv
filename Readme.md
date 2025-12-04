@@ -58,3 +58,8 @@ webserv.run(cfg);
 
 return (0);
 ```
+
+
+// request handler / request class
+// http protocol parser
+// activity pub
