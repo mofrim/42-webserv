@@ -6,11 +6,11 @@
 #    By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/12/01 11:45:58 by fmaurer           #+#    #+#              #
-#    Updated: 2025/12/08 12:54:16 by fmaurer          ###   ########.fr        #
+#    Updated: 2025/12/08 12:50:08 by fmaurer          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
-NAME 		= webserv
+NAME 		= webserv_tests
 
 # The directories..
 #
@@ -19,17 +19,30 @@ NAME 		= webserv
 # find any file in any directory listed in the VPATH. The same holds true for
 # the header files. This also applies to change-detection!
 # TL;DR: it makes things pretty easy ;)
-VPATH		= ./src ./inc
-OBJDIR	= obj
-INC_DIR = ./inc
+VPATH		= ./ ./cpp_tests/
+VPATH		+= ../src/ ../inc/
+
+OBJDIR			= obj
+WSRV_OBJDIR	= ../obj
+
+INC 			= ./cpptests/inc ../inc
+WSRV_INC	= ../inc
 
 # The files..
-SRCS			= main.cpp Webserv.cpp Logger.cpp ServerCfg.cpp Config.cpp \
+WSRV_SRCS	= Webserv.cpp Logger.cpp ServerCfg.cpp Config.cpp \
 						ConfigParser.cpp utils.cpp Server.cpp
-HDRS			= Webserv.hpp Logger.hpp ServerCfg.hpp Config.hpp ConfigParser.hpp \
+WSRV_HDRS	= Webserv.hpp Logger.hpp ServerCfg.hpp Config.hpp ConfigParser.hpp \
 						utils.hpp Server.hpp
 
-OBJS		= $(patsubst %.cpp,$(OBJDIR)/%.o,$(SRCS))
+TEST_SRCS			= test-main.cpp \
+								test-utils.cpp \
+		test_example1.cpp \
+		test_example2.cpp 
+
+TEST_HDRS			= test-utils.hpp
+
+OBJS				= $(patsubst %.cpp,$(OBJDIR)/%.o,$(TEST_SRCS))
+WSRV_OBJS		= $(patsubst %.cpp,$(WSRV_OBJDIR)/%.o,$(WSRV_SRCS))
 
 # The programs..
 CPP			= c++
@@ -44,6 +57,9 @@ all: $(NAME)
 $(OBJDIR):
 	mkdir -p $(OBJDIR)
 
+$(WSRV_OBJDIR):
+	mkdir -p $(WSRV_OBJDIR)
+
 # will never try to compile HDR or any other prequesite specified after `%.cpp`.
 # this is because the `%.o` and matched against all .c-files in the current dir.
 # !! Attention: Any misspelled filename in HDRS or SRCS will lead to `make` not
@@ -51,7 +67,10 @@ $(OBJDIR):
 $(OBJDIR)/%.o: %.cpp $(HDRS) | $(OBJDIR)
 	$(CPP) $(IFLAGS) $(CFLAGS) -c $< -o $@
 
-$(NAME): $(OBJS)
+$(WSRV_OBJDIR)/%.o: %.cpp $(HDRS) | $(WSRV_OBJDIR)
+	$(CPP) $(IFLAGS) $(CFLAGS) -c $< -o $@
+
+$(NAME): $(OBJS) $(WSRV_OBJS)
 	$(CPP) $(IFLAGS) $(CFLAGS) -o $@ $^
 
 clean:
@@ -63,14 +82,9 @@ bear: fclean
 run: $(NAME)
 	./$(NAME)
 
-tests:
-	@cd tests && ./update_tests.sh
-	@make -C tests
-	@tests/webserv_tests
-
 fclean: clean
 	rm -f $(NAME)
 
 re: fclean $(NAME)
 
-.PHONY: all clean fclean re bear run tests
+.PHONY: all clean fclean re bear run
