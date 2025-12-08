@@ -4,3 +4,4 @@ obj/
 webserv
 .cache/
 tests/webserv_tests
+tests/Makefile
