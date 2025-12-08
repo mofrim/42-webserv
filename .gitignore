@@ -5,3 +5,5 @@ webserv
 .cache/
 tests/webserv_tests
 tests/Makefile
+tests/tests.hpp
+tests/test-main.cpp
