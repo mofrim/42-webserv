@@ -1,12 +1,12 @@
 # **************************************************************************** #
 #                                                                              #
 #                                                         :::      ::::::::    #
-#    Makefile                                           :+:      :+:    :+:    #
+#    Makefile.base                                      :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
 #    By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/12/01 11:45:58 by fmaurer           #+#    #+#              #
-#    Updated: 2025/12/08 12:50:08 by fmaurer          ###   ########.fr        #
+#    Updated: 2025/12/08 13:17:24 by fmaurer          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -25,8 +25,7 @@ VPATH		+= ../src/ ../inc/
 OBJDIR			= obj
 WSRV_OBJDIR	= ../obj
 
-INC 			= ./cpptests/inc ../inc
-WSRV_INC	= ../inc
+INC 			= ../inc
 
 # The files..
 WSRV_SRCS	= Webserv.cpp Logger.cpp ServerCfg.cpp Config.cpp \
@@ -48,7 +47,7 @@ CPP			= c++
 # compiler flags
 CFLAGS	= -Wall -Werror -Wextra -std=c++98
 CFLAGS	+= -g
-IFLAGS	= -I $(INC_DIR)
+IFLAGS	= -I $(INC)
 
 all: $(NAME)
 
