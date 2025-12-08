@@ -6,7 +6,7 @@
 #    By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/12/01 11:45:58 by fmaurer           #+#    #+#              #
-#    Updated: 2025/12/08 12:54:16 by fmaurer          ###   ########.fr        #
+#    Updated: 2025/12/08 12:57:39 by fmaurer          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -68,9 +68,12 @@ tests:
 	@make -C tests
 	@tests/webserv_tests
 
+tests-clean:
+	@make -C tests fclean
+
 fclean: clean
 	rm -f $(NAME)
 
 re: fclean $(NAME)
 
-.PHONY: all clean fclean re bear run tests
+.PHONY: all clean fclean re bear run tests tests-clean
