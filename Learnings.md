@@ -71,4 +71,27 @@ typedef uint16_t in_port_t;
 
 ## The whole bind-epoll-process
 
+major **TODO** !!!
 
+## Very general stuff
+
+the `push_back` method of `std::vector` internally uses the copy constructor!!
+so, if you haven't implemented this correctly for a class it won't work!
+
+
+## epoll vs. poll
+
+### Resources
+
+- [Actually a multithreaded webserv but my entry-point to the epoll vs. poll
+  story...](https://kaleid-liner.github.io/blog/2019/06/02/epoll-web-server.html)
+
+- [A quite good Medium article about epoll and fd's and inodes](https://copyconstruct.medium.com/the-method-to-epolls-madness-d9d2d6378642)
+
+- [Some epoll critique...](https://idea.popcount.org/2017-02-20-epoll-is-fundamentally-broken-12/)
+
+- [The epoll man](https://man7.org/linux/man-pages/man7/epoll.7.html)
+
+- [The epoll-ctl man](https://man7.org/linux/man-pages/man2/epoll_ctl.2.html)
+
+- [Start of the blog-series about I/O-Multiplexing](https://idea.popcount.org/2016-11-01-a-brief-history-of-select2/) 
