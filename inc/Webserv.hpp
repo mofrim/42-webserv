@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:35:29 by fmaurer           #+#    #+#             */
-/*   Updated: 2025/12/03 15:51:49 by fmaurer          ###   ########.fr       */
+/*   Updated: 2025/12/10 08:37:45 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,18 +29,21 @@
 
 class Webserv {
 	private:
-		bool									_shutdown_server;
-		Config								_cfg;
-		std::vector<Server *> _servers;
-		void									_setupServers();
-		void									_setupOneServer(const ServerCfg& cfg);
-		void									_initDefaultCfg();
+		bool								_shutdown_server;
+		Config							_cfg;
+		std::vector<Server> _servers;
+		int									_epoll_fd;
 
-	public:
-		// OCF
-		Webserv();
+		void _setupServers();
+		void _setupSingleServer(const ServerCfg& cfg);
+		void _initDefaultCfg();
+
+		// we do not use them, so keep em private
 		Webserv(const Webserv& other);
 		Webserv& operator=(const Webserv& other);
+
+	public:
+		Webserv();
 		~Webserv();
 
 		void shutdown();
