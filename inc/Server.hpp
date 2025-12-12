@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/03 12:50:36 by fmaurer           #+#    #+#             */
-/*   Updated: 2025/12/08 15:42:47 by fmaurer          ###   ########.fr       */
+/*   Updated: 2025/12/12 16:25:01 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,6 @@ class Server {
 		int								 _epoll_fd;
 
 		void _setupSocket();
-		void _setupEpoll();
 
 	public:
 		// OCF
@@ -41,10 +40,14 @@ class Server {
 		Server& operator=(const Server& other);
 		~Server();
 
-		std::string getServerName() const;
-
 		void init();
-		void run();
+
+		uint16_t		getPort() const;
+		in_addr_t		getHost() const;
+		std::string getServerName() const;
+		std::string getRoot() const;
+		sockaddr_in getServerAddr() const;
+		int					getListenFd() const;
 
 		// TODO: think about the whole exception thing! Maybe there should be
 		// some base-class called like this one and the special exceptions for every
@@ -52,11 +55,6 @@ class Server {
 		class ServerInitException: public std::runtime_error {
 			public:
 				ServerInitException(const std::string& msg);
-		};
-
-		class ServerRunException: public std::runtime_error {
-			public:
-				ServerRunException(const std::string& msg);
 		};
 };
 #endif

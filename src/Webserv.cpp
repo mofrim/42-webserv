@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:36:43 by fmaurer           #+#    #+#             */
-/*   Updated: 2025/12/10 08:37:41 by fmaurer          ###   ########.fr       */
+/*   Updated: 2025/12/12 18:31:16 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,9 +19,11 @@
 
 // for memset
 #include <cstring>
+#include <errno.h>
 #include <iostream>
+#include <utils.hpp>
 
-Webserv::Webserv(): _shutdown_server(false), _epoll_fd(-1) {}
+Webserv::Webserv(): _shutdown_server(false), _numOfServers(0), _epoll_fd(-1) {}
 
 Webserv::Webserv(const Webserv& other) { (void)other; }
 
@@ -31,7 +33,12 @@ Webserv& Webserv::operator=(const Webserv& other)
 	return (*this);
 }
 
-Webserv::~Webserv() {}
+// so far only closing all server sockets here
+Webserv::~Webserv()
+{
+	for (size_t i = 0; i < _numOfServers; i++)
+		close(_servers[i].getListenFd());
+}
 
 // TODO: there will be much more to do in here. What?
 //
@@ -44,26 +51,29 @@ void Webserv::shutdown()
 	_shutdown_server = true;
 }
 
-// NOTE: *THIS* is the main routine of the program!!!
-void Webserv::run(const Config& cfg)
+// TODO: what is being done here, what in the main loop. For now calling
+// epoll_create is done here and the listening sockets for each server are added
+// to the interest-list of epoll.
+void Webserv::_setupEpoll()
 {
-	_cfg = cfg;
-	_setupServers();
+	int listen_fd;
 
-	// the main loop
-	while (!_shutdown_server) {
-		for (std::vector<Server>::iterator srv = _servers.begin();
-				srv != _servers.end();
-				++srv)
-		{
-			try {
-				srv->run();
-			} catch (const Server::ServerRunException& e) {
-				std::cout << "e.what(): " << e.what() << std::endl;
-			}
+	_ev.resize(_numOfServers);
+
+	// param for epoll_create only has to be a positive number, so...
+	_epoll_fd = epoll_create(42);
+	if (_epoll_fd == -1)
+		throw(WebservInitException("epoll_create failed"));
+
+	for (size_t i = 0; i < _numOfServers; i++) {
+		listen_fd			 = _servers[i].getListenFd();
+		_ev[i].events	 = EPOLLIN;
+		_ev[i].data.fd = listen_fd;
+
+		if (epoll_ctl(_epoll_fd, EPOLL_CTL_ADD, listen_fd, &_ev[i]) == -1) {
+			close(_epoll_fd);
+			throw(WebservInitException("epoll_ctl failed"));
 		}
-		Logger::log_msg("webserv running!");
-		sleep(1);
 	}
 }
 
@@ -74,14 +84,14 @@ void Webserv::run(const Config& cfg)
 // server_name="localhost", port="4284" etc...)
 void Webserv::_setupServers()
 {
-	if (_cfg.isDefaultCfg()) {
+	if (_cfg.isDefaultCfg())
 		_initDefaultCfg();
-		_setupSingleServer(_cfg.getCfgs()[0]);
+
+	_numOfServers = _cfg.getCfgs().size();
+
+	for (size_t i = 0; i < _numOfServers; i++) {
+		_setupSingleServer(_cfg.getCfgs()[i]);
 	}
-	else
-		for (size_t i = 0; i < _cfg.getCfgs().size(); i++) {
-			_setupSingleServer(_cfg.getCfgs()[i]);
-		}
 }
 
 // here one server is being setup, meaning, the `init()` of a server is called
@@ -115,4 +125,101 @@ void Webserv::_initDefaultCfg()
 	dcfg.setHost(INADDR_LOOPBACK);
 
 	_cfg.setDefaultCfg(dcfg);
+	_numOfServers = 1;
+}
+
+Webserv::WebservInitException::WebservInitException(const std::string& msg):
+	std::runtime_error("WebservInitException: " + msg)
+{}
+
+Webserv::WebservRunException::WebservRunException(const std::string& msg):
+	std::runtime_error("WebservRunException: " + msg)
+{}
+
+// NOTE: *THIS* is the main routine of the program!!!
+// TODO: where should i start?
+void Webserv::run(const Config& cfg)
+{
+	struct epoll_event events[MAX_EVENTS];
+
+	_cfg = cfg;
+	_setupServers();
+	_setupEpoll();
+
+	// the main loop
+	while (_shutdown_server == false) {
+
+		// epoll_wait returns the number of ready fds
+		Logger::log_msg("calling epoll_wait...");
+
+		// TODO: figure out the best timeout value here. For now -1 is okay. but
+		// even a small timeout like 10ms might be okay. what are the benefits here?
+		int nfds = epoll_wait(_epoll_fd, events, MAX_EVENTS, 500);
+
+		// NOTE: i think checking errno here is okay as the subject only demands not
+		// checking it after read write.
+
+		if (nfds == -1 && errno != EINTR) // EINTR == epoll_wait was interrupted by
+																			// signal
+			throw(WebservRunException("epoll_wait failed"));
+
+		for (int i = 0; i < nfds; ++i) {
+			for (size_t k = 0; k < _numOfServers; k++) {
+				if (events[i].data.fd == _servers[k].getListenFd()) {
+
+					// save the fd of the server we are currently processing
+					int listen_fd = _servers[k].getListenFd();
+
+					// accept new connection
+					struct sockaddr_in client_addr;
+					socklen_t					 client_addr_len = sizeof(client_addr);
+					int								 client_fd			 = accept(listen_fd,
+							 (struct sockaddr *)&client_addr,
+							 &client_addr_len);
+					if (client_fd == -1) {
+						Logger::log_err("accept failed");
+						continue;
+					}
+
+					Logger::log_dbg("Client connected from address " +
+							inaddrToStr(client_addr.sin_addr));
+
+					// Add client socket to epoll
+					struct epoll_event client_ev;
+					client_ev.events	= EPOLLIN;
+					client_ev.data.fd = client_fd;
+					if (epoll_ctl(_epoll_fd, EPOLL_CTL_ADD, client_fd, &client_ev) == -1)
+					{
+						Logger::log_err("epoll_ctl failed");
+						close(client_fd);
+						continue;
+					}
+				}
+				else {
+
+					// for now simply print stuff
+
+					Logger::log_warn("reading from socket" + int2str(events[i].data.fd));
+					char		buffer[1024];
+					ssize_t bytes_read =
+							read(events[i].data.fd, buffer, sizeof(buffer) - 1);
+					if (bytes_read <= 0) {
+						if (bytes_read == 0) {
+							std::cout << "Client disconnected\n";
+						}
+						else {
+							Logger::log_err("read failed");
+						}
+						close(events[i].data.fd);
+					}
+					else {
+						buffer[bytes_read] = '\0';
+						std::cout << "Received: " << buffer << std::endl;
+					}
+				}
+			}
+		}
+	}
+	Logger::log_warn("closing epoll fd");
+	close(_epoll_fd);
 }
