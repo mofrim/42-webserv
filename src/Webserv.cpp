@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:36:43 by fmaurer           #+#    #+#             */
-/*   Updated: 2025/12/03 16:04:50 by fmaurer          ###   ########.fr       */
+/*   Updated: 2025/12/10 08:37:41 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,8 +19,9 @@
 
 // for memset
 #include <cstring>
+#include <iostream>
 
-Webserv::Webserv(): _shutdown_server(false) {}
+Webserv::Webserv(): _shutdown_server(false), _epoll_fd(-1) {}
 
 Webserv::Webserv(const Webserv& other) { (void)other; }
 
@@ -30,17 +31,7 @@ Webserv& Webserv::operator=(const Webserv& other)
 	return (*this);
 }
 
-// FIXME: does this really have to be like this? Do we really need pointers to
-// the Servers?
-Webserv::~Webserv()
-{
-	for (std::vector<Server *>::iterator it = _servers.begin();
-			it != _servers.end();
-			++it)
-	{
-		delete *it;
-	}
-}
+Webserv::~Webserv() {}
 
 // TODO: there will be much more to do in here. What?
 //
@@ -57,11 +48,20 @@ void Webserv::shutdown()
 void Webserv::run(const Config& cfg)
 {
 	_cfg = cfg;
-
 	_setupServers();
 
 	// the main loop
 	while (!_shutdown_server) {
+		for (std::vector<Server>::iterator srv = _servers.begin();
+				srv != _servers.end();
+				++srv)
+		{
+			try {
+				srv->run();
+			} catch (const Server::ServerRunException& e) {
+				std::cout << "e.what(): " << e.what() << std::endl;
+			}
+		}
 		Logger::log_msg("webserv running!");
 		sleep(1);
 	}
@@ -76,20 +76,28 @@ void Webserv::_setupServers()
 {
 	if (_cfg.isDefaultCfg()) {
 		_initDefaultCfg();
-		_setupOneServer(_cfg.getCfgs()[0]);
+		_setupSingleServer(_cfg.getCfgs()[0]);
 	}
+	else
+		for (size_t i = 0; i < _cfg.getCfgs().size(); i++) {
+			_setupSingleServer(_cfg.getCfgs()[i]);
+		}
 }
 
-// NEXT: implement a first socket setup for only the default Server
-void Webserv::_setupOneServer(const ServerCfg& cfg)
+// here one server is being setup, meaning, the `init()` of a server is called
+// which is only responsible for binding a socket to a port and start listening
+// on it. The rest of the server initialization is being done in... here too?!
+void Webserv::_setupSingleServer(const ServerCfg& cfg)
 {
 	Logger::log_msg("Setting up this server:");
 	cfg.printCfg();
-	Server *srv = new Server(cfg);
-	srv->init();
+	Server srv(cfg);
+	srv.init();
 	_servers.push_back(srv);
 }
 
+// NOTE: this _only_ needs to be done for the default config. all non-default
+// config wil have gone through parseCfg where all values will be set.
 void Webserv::_initDefaultCfg()
 {
 	ServerCfg		dcfg = _cfg.getCfgs()[0];

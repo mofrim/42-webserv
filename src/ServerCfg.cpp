@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/25 08:35:42 by fmaurer           #+#    #+#             */
-/*   Updated: 2025/12/03 13:08:31 by fmaurer          ###   ########.fr       */
+/*   Updated: 2025/12/08 13:39:55 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,8 @@ ServerCfg::ServerCfg()
 	_host				 = 0;
 	_server_name = "";
 	_root				 = "";
-	_listen_fd	 = 0;
+	// FIXME: is this a sensible initial value?
+	_listen_fd = -1;
 	memset(&_server_addr, 0, sizeof(_server_addr));
 }
 
