@@ -6,7 +6,7 @@
 #    By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/12/01 11:45:58 by fmaurer           #+#    #+#              #
-#    Updated: 2025/12/08 12:57:39 by fmaurer          ###   ########.fr        #
+#    Updated: 2025/12/12 18:22:04 by fmaurer          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -37,6 +37,7 @@ CPP			= c++
 # compiler flags
 CFLAGS	= -Wall -Werror -Wextra -std=c++98
 CFLAGS	+= -g
+CFLAGS	+= -DLOGLEVEL=0
 IFLAGS	= -I $(INC_DIR)
 
 all: $(NAME)

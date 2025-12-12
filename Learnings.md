@@ -73,6 +73,11 @@ typedef uint16_t in_port_t;
 
 major **TODO** !!!
 
+### epoll_wait is _always_ interrupted by signals
+
+Whenever you hit `ctrl-c` even if you catch that signal using a signal-handler
+`epoll_wait` will return -1 and `errno = EINTR` will be set!
+
 ## Very general stuff
 
 the `push_back` method of `std::vector` internally uses the copy constructor!!
