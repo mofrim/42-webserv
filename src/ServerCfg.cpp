@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/25 08:35:42 by fmaurer           #+#    #+#             */
-/*   Updated: 2025/12/08 13:39:55 by fmaurer          ###   ########.fr       */
+/*   Updated: 2025/12/13 08:25:05 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -98,7 +98,6 @@ int					ServerCfg::getListenFd() const { return (_listen_fd); }
 // struct sockaddr_in _server_addr;
 // int								 _listen_fd;
 //
-// NEXT: for the other props we need conversion functions first. add utils.cpp
 // with our own conversion functions for ip-addrs.
 void ServerCfg::printCfg() const
 {
