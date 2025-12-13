@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:36:43 by fmaurer           #+#    #+#             */
-/*   Updated: 2025/12/12 18:31:16 by fmaurer          ###   ########.fr       */
+/*   Updated: 2025/12/13 08:18:38 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -85,7 +85,7 @@ void Webserv::_setupEpoll()
 void Webserv::_setupServers()
 {
 	if (_cfg.isDefaultCfg())
-		_initDefaultCfg();
+		_initDefaultCfg2();
 
 	_numOfServers = _cfg.getCfgs().size();
 
@@ -103,6 +103,7 @@ void Webserv::_setupSingleServer(const ServerCfg& cfg)
 	cfg.printCfg();
 	Server srv(cfg);
 	srv.init();
+	_setOfServerFds.insert(srv.getListenFd());
 	_servers.push_back(srv);
 }
 
@@ -128,6 +129,44 @@ void Webserv::_initDefaultCfg()
 	_numOfServers = 1;
 }
 
+void Webserv::_initDefaultCfg2()
+{
+	ServerCfg		dcfg	= _cfg.getCfgs()[0];
+	ServerCfg		dcfg2 = _cfg.getCfgs()[0];
+	sockaddr_in srv_addr;
+
+	dcfg.setServerName(DEFAULT_SRV_NAME);
+	dcfg.setPort(DEFAULT_PORT);
+	dcfg.setRoot("./www");
+
+	memset(&srv_addr, 0, sizeof(srv_addr));
+	srv_addr.sin_family			 = AF_INET;
+	srv_addr.sin_addr.s_addr = INADDR_ANY;
+	srv_addr.sin_port				 = htons(DEFAULT_PORT);
+	dcfg.setServerAddr(srv_addr);
+	dcfg.setHost(INADDR_LOOPBACK);
+
+	_cfg.setDefaultCfg(dcfg);
+
+	dcfg2.setServerName("0.0.0.0");
+	dcfg2.setPort(4285);
+	dcfg2.setRoot("./www");
+
+	memset(&srv_addr, 0, sizeof(srv_addr));
+	srv_addr.sin_family			 = AF_INET;
+	srv_addr.sin_addr.s_addr = INADDR_ANY;
+	srv_addr.sin_port				 = htons(4285);
+	dcfg2.setServerAddr(srv_addr);
+	dcfg2.setHost(INADDR_LOOPBACK);
+
+	std::vector<ServerCfg> newcfgs;
+	newcfgs.push_back(dcfg);
+	newcfgs.push_back(dcfg2);
+
+	_cfg.setCfgs(newcfgs);
+	_numOfServers = 2;
+}
+
 Webserv::WebservInitException::WebservInitException(const std::string& msg):
 	std::runtime_error("WebservInitException: " + msg)
 {}
@@ -136,7 +175,6 @@ Webserv::WebservRunException::WebservRunException(const std::string& msg):
 	std::runtime_error("WebservRunException: " + msg)
 {}
 
-// NOTE: *THIS* is the main routine of the program!!!
 // TODO: where should i start?
 void Webserv::run(const Config& cfg)
 {
@@ -149,11 +187,11 @@ void Webserv::run(const Config& cfg)
 	// the main loop
 	while (_shutdown_server == false) {
 
-		// epoll_wait returns the number of ready fds
 		Logger::log_msg("calling epoll_wait...");
 
 		// TODO: figure out the best timeout value here. For now -1 is okay. but
 		// even a small timeout like 10ms might be okay. what are the benefits here?
+		// epoll_wait returns the number of ready fds
 		int nfds = epoll_wait(_epoll_fd, events, MAX_EVENTS, 500);
 
 		// NOTE: i think checking errno here is okay as the subject only demands not
@@ -164,58 +202,59 @@ void Webserv::run(const Config& cfg)
 			throw(WebservRunException("epoll_wait failed"));
 
 		for (int i = 0; i < nfds; ++i) {
-			for (size_t k = 0; k < _numOfServers; k++) {
-				if (events[i].data.fd == _servers[k].getListenFd()) {
+			int currentFd = events[i].data.fd;
+			if (_setOfServerFds.find(currentFd) != _setOfServerFds.end()) {
 
-					// save the fd of the server we are currently processing
-					int listen_fd = _servers[k].getListenFd();
+				Logger::log_dbg("accepting new conn on fd " + int2str(currentFd));
 
-					// accept new connection
-					struct sockaddr_in client_addr;
-					socklen_t					 client_addr_len = sizeof(client_addr);
-					int								 client_fd			 = accept(listen_fd,
-							 (struct sockaddr *)&client_addr,
-							 &client_addr_len);
-					if (client_fd == -1) {
-						Logger::log_err("accept failed");
-						continue;
+				// accept new connection
+				struct sockaddr_in client_addr;
+				socklen_t					 client_addr_len = sizeof(client_addr);
+				int								 client_fd			 = accept(currentFd,
+						 (struct sockaddr *)&client_addr,
+						 &client_addr_len);
+				if (client_fd == -1) {
+					Logger::log_err("accept failed");
+					continue;
+				}
+
+				Logger::log_dbg("Client connected from address " +
+						inaddrToStr(client_addr.sin_addr));
+
+				// Add client socket to epoll
+				struct epoll_event client_ev;
+				client_ev.events	= EPOLLIN;
+				client_ev.data.fd = client_fd;
+				if (epoll_ctl(_epoll_fd, EPOLL_CTL_ADD, client_fd, &client_ev) == -1) {
+					Logger::log_err("epoll_ctl failed");
+					close(client_fd);
+					continue;
+				}
+			}
+			else {
+				Logger::log_dbg("reading from socket" + int2str(currentFd));
+				char		buffer[1024];
+				ssize_t bytes_read = read(currentFd, buffer, sizeof(buffer) - 1);
+				if (bytes_read <= 0) {
+					if (bytes_read == 0) {
+						Logger::log_warn("Client disconnected");
+						Logger::log_warn("closing client conn on fd " + int2str(currentFd));
+						close(events[i].data.fd);
+						epoll_ctl(_epoll_fd, EPOLL_CTL_DEL, currentFd, 0);
 					}
-
-					Logger::log_dbg("Client connected from address " +
-							inaddrToStr(client_addr.sin_addr));
-
-					// Add client socket to epoll
-					struct epoll_event client_ev;
-					client_ev.events	= EPOLLIN;
-					client_ev.data.fd = client_fd;
-					if (epoll_ctl(_epoll_fd, EPOLL_CTL_ADD, client_fd, &client_ev) == -1)
-					{
-						Logger::log_err("epoll_ctl failed");
-						close(client_fd);
-						continue;
+					else {
+						Logger::log_err("read failed, errno: " + int2str(errno));
+						if (_setOfServerFds.find(currentFd) == _setOfServerFds.end()) {
+							Logger::log_err(
+									"closing client conn on fd " + int2str(currentFd));
+							close(events[i].data.fd);
+							epoll_ctl(_epoll_fd, EPOLL_CTL_DEL, currentFd, 0);
+						}
 					}
 				}
 				else {
-
-					// for now simply print stuff
-
-					Logger::log_warn("reading from socket" + int2str(events[i].data.fd));
-					char		buffer[1024];
-					ssize_t bytes_read =
-							read(events[i].data.fd, buffer, sizeof(buffer) - 1);
-					if (bytes_read <= 0) {
-						if (bytes_read == 0) {
-							std::cout << "Client disconnected\n";
-						}
-						else {
-							Logger::log_err("read failed");
-						}
-						close(events[i].data.fd);
-					}
-					else {
-						buffer[bytes_read] = '\0';
-						std::cout << "Received: " << buffer << std::endl;
-					}
+					buffer[bytes_read] = '\0';
+					std::cout << "Received:\n" << buffer << std::endl;
 				}
 			}
 		}

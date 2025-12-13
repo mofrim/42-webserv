@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:35:29 by fmaurer           #+#    #+#             */
-/*   Updated: 2025/12/12 18:03:18 by fmaurer          ###   ########.fr       */
+/*   Updated: 2025/12/13 08:18:38 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@
 #include "Server.hpp"
 
 #include <netinet/in.h>
+#include <set>
 #include <sys/epoll.h>
 #include <sys/socket.h>
 
@@ -40,6 +41,7 @@ class Webserv {
 		Config							_cfg;
 		std::vector<Server> _servers;
 		size_t							_numOfServers;
+		std::set<int>				_setOfServerFds; // set for collecting all listenFds
 
 		int															_epoll_fd;
 		std::vector<struct epoll_event> _ev;
@@ -47,6 +49,7 @@ class Webserv {
 		void _setupServers();
 		void _setupSingleServer(const ServerCfg& cfg);
 		void _initDefaultCfg();
+		void _initDefaultCfg2();
 		void _setupEpoll();
 
 		// we do not use them, so keep em private
