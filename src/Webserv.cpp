@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:36:43 by fmaurer           #+#    #+#             */
-/*   Updated: 2025/12/13 08:18:38 by fmaurer          ###   ########.fr       */
+/*   Updated: 2025/12/13 08:24:21 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -191,12 +191,10 @@ void Webserv::run(const Config& cfg)
 
 		// TODO: figure out the best timeout value here. For now -1 is okay. but
 		// even a small timeout like 10ms might be okay. what are the benefits here?
-		// epoll_wait returns the number of ready fds
 		int nfds = epoll_wait(_epoll_fd, events, MAX_EVENTS, 500);
 
 		// NOTE: i think checking errno here is okay as the subject only demands not
 		// checking it after read write.
-
 		if (nfds == -1 && errno != EINTR) // EINTR == epoll_wait was interrupted by
 																			// signal
 			throw(WebservRunException("epoll_wait failed"));
@@ -204,10 +202,7 @@ void Webserv::run(const Config& cfg)
 		for (int i = 0; i < nfds; ++i) {
 			int currentFd = events[i].data.fd;
 			if (_setOfServerFds.find(currentFd) != _setOfServerFds.end()) {
-
 				Logger::log_dbg("accepting new conn on fd " + int2str(currentFd));
-
-				// accept new connection
 				struct sockaddr_in client_addr;
 				socklen_t					 client_addr_len = sizeof(client_addr);
 				int								 client_fd			 = accept(currentFd,
@@ -217,9 +212,14 @@ void Webserv::run(const Config& cfg)
 					Logger::log_err("accept failed");
 					continue;
 				}
-
 				Logger::log_dbg("Client connected from address " +
 						inaddrToStr(client_addr.sin_addr));
+
+				// NEXT:
+				// FIXME: keep track of connected clients in order to close there
+				// sockets cleanly on webserv-shutdown
+				// -> implement client class
+				// -> implement request class
 
 				// Add client socket to epoll
 				struct epoll_event client_ev;
