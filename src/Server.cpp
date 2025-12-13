@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/03 12:51:23 by fmaurer           #+#    #+#             */
-/*   Updated: 2025/12/12 18:05:43 by fmaurer          ###   ########.fr       */
+/*   Updated: 2025/12/13 08:17:03 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,38 +57,58 @@ Server& Server::operator=(const Server& other)
 	return (*this);
 }
 
-// TODO: implement! there will definitely be stuff to do here, like freeing the
-// socket, shutting down connections etc.
-// FIXME: close sockets in Webserv class
 Server::~Server()
 {
-	// Logger::log_msg("closing socket for server \"" + _server_name + "\"");
-	// if (close(_listen_fd) == -1)
-	// 	Logger::log_err("could not close server socket");
+	Logger::log_dbg("server " + _server_name + " going out of scope");
 }
 
-// FIXME: make the socket non-blocking!
+// settings up sockets per server.
+//
+// the canonical workflow here is
+//
+//	 1) socket
+//	 2) bind
+//	 3) listen
+//
+// ... and accept, for the server, or connect for the client.
+//
+// socket() explained:
+//
+//	 - AF_INET:       socket for communication via IPv4
+//	 - SOCK_STREAM:   we want a reliable, bidirectional, byte-stream communi-
+//										cation channel
+//	 - SOCK_NONBLOCK: save a call to fcntl
+//	 - 0:             use default protocol
+//
+//	 NOTE: maybe we also want SOCK_CLOEXEC here as we maybe do not want our
+//	 sockets to be open in child processes.
+//
+// setsockopt() explained:
+//
+// 	- SOL_SOCKET: this is the level the sockopt will be applied to. SOL_SOCKET
+// 		is the sockets API level, another level would be SOL_IP.
+// 	- SO_REUSEADDR: avoid EADDRINUSE if webserv (or one of the servers) is being
+// 		restarted.
+//
+// listen() explained:
+//
+//	- SOMAXCONN: 4096 on my system, maximum number of connections in the backlog
+//		of listen
 void Server::_setupSocket()
 {
-	_listen_fd = socket(AF_INET, SOCK_STREAM, 0);
+	_listen_fd = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0);
 	if (_listen_fd == -1)
 		throw(ServerInitException("Socket setup failed"));
 
-	// set socket options (e.g., reuse address)
-	// FIXME: clarify and document params here
 	int opt = 1;
 	if (setsockopt(_listen_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) == -1)
 		throw(ServerInitException("setsockopt failed"));
 
-	// bind the socket
-	// TODO: document
 	if (bind(_listen_fd,
 					(struct sockaddr *)&_server_addr,
 					sizeof(_server_addr)) == -1)
 		throw(ServerInitException("bind failed"));
 
-	// Listen for connections
-	// TODO: document
 	if (listen(_listen_fd, SOMAXCONN) == -1)
 		throw(ServerInitException("listen failed"));
 
