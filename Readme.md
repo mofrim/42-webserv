@@ -35,7 +35,6 @@ my guess right now is the following control flow:
 
 ## main.cpp
 
-
 **how do i want this? what about the logger? simply copy the vsnprintf
 approach?**
 
@@ -58,3 +57,8 @@ webserv.run(cfg);
 
 return (0);
 ```
+## Client class, ConManager...
+
+For now i will do all the connection handling from Webserv class. Why? Because
+as i see by now, there won't be too much to do here and having an extra
+ConnManager class **and** a Client class seems to much to me.
