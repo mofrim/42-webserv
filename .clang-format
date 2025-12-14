@@ -33,7 +33,7 @@ UseTab: Always
 ## align the function args to the opening bracket only using a
 ## ContinuationIndentWidth from beginning of statement. dont align to the exact
 ## position of the opening bracket.
-AlignAfterOpenBracket: DontAlign
+AlignAfterOpenBracket: false
 ## this helps enforcing the above rule in certain situations.
 AlignOperands: DontAlign
 
@@ -50,13 +50,17 @@ AllowAllArgumentsOnNextLine: false
 AlwaysBreakAfterReturnType: None
 AlwaysBreakAfterDefinitionReturnType: None
 AlwaysBreakBeforeMultilineStrings: true
-BreakBeforeBinaryOperators: None
+BreakBeforeBinaryOperators: NonAssignment
 BreakBeforeTernaryOperators: true
 BreakStringLiterals: true
-BinPackArguments: false
-BinPackParameters: false
+BinPackArguments: true
+BinPackParameters: BinPack
 # Ensure comments don't exceed limit
 ReflowComments: true
 PenaltyExcessCharacter: 1000000
 
 AllowShortIfStatementsOnASingleLine: Never
+
+AlignTrailingComments:
+  Kind: Always
+  OverEmptyLines: 2
