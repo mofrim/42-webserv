@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/24 20:49:55 by fmaurer           #+#    #+#             */
-/*   Updated: 2025/12/12 18:19:35 by fmaurer          ###   ########.fr       */
+/*   Updated: 2025/12/14 21:31:00 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,8 @@ enum { DEBUG, INFO };
 #define LOGLEVEL INFO
 #endif
 
+// IDEA: try to pass a logfile to the Logger-Class via class global variable...
+// is this even possible with this utility class?
 class Logger {
 	private:
 		Logger();
