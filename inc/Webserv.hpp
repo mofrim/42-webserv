@@ -6,13 +6,14 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:35:29 by fmaurer           #+#    #+#             */
-/*   Updated: 2025/12/14 20:47:35 by fmaurer          ###   ########.fr       */
+/*   Updated: 2025/12/14 22:30:31 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef WEBSERV_HPP
 #define WEBSERV_HPP
 
+#include "ConManager.hpp"
 #include "Config.hpp"
 #include "Server.hpp"
 
@@ -41,10 +42,12 @@ class Webserv {
 		Config							_cfg;
 		std::vector<Server> _servers;
 		size_t							_numOfServers;
-		std::set<int>				_setOfServerFds; // set for collecting all listenFds
+		std::set<int>				_serverFds; // set for collecting all listenFds
 
 		int															_epoll_fd;
 		std::vector<struct epoll_event> _ev;
+
+		ConManager _con;
 
 		void _setupServers();
 		void _setupSingleServer(const ServerCfg& cfg);

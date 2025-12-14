@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:36:43 by fmaurer           #+#    #+#             */
-/*   Updated: 2025/12/13 08:24:21 by fmaurer          ###   ########.fr       */
+/*   Updated: 2025/12/14 22:30:31 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -103,7 +103,7 @@ void Webserv::_setupSingleServer(const ServerCfg& cfg)
 	cfg.printCfg();
 	Server srv(cfg);
 	srv.init();
-	_setOfServerFds.insert(srv.getListenFd());
+	_serverFds.insert(srv.getListenFd());
 	_servers.push_back(srv);
 }
 
@@ -201,26 +201,14 @@ void Webserv::run(const Config& cfg)
 
 		for (int i = 0; i < nfds; ++i) {
 			int currentFd = events[i].data.fd;
-			if (_setOfServerFds.find(currentFd) != _setOfServerFds.end()) {
-				Logger::log_dbg("accepting new conn on fd " + int2str(currentFd));
-				struct sockaddr_in client_addr;
-				socklen_t					 client_addr_len = sizeof(client_addr);
-				int								 client_fd			 = accept(currentFd,
-						 (struct sockaddr *)&client_addr,
-						 &client_addr_len);
-				if (client_fd == -1) {
-					Logger::log_err("accept failed");
-					continue;
-				}
-				Logger::log_dbg("Client connected from address " +
-						inaddrToStr(client_addr.sin_addr));
 
-				// NEXT:
-				// FIXME: keep track of connected clients in order to close there
-				// sockets cleanly on webserv-shutdown
-				// -> implement client class
-				// -> implement request class
+			// the logic here is simply: if we are getting an I/O event on one of our
+			// servers listening sockets (aka ports) this is a connection request ->
+			// add a new client!
+			if (_serverFds.find(currentFd) != _serverFds.end()) {
+				int client_fd = _con.addNewClient(currentFd);
 
+				// TODO: make Epoll class
 				// Add client socket to epoll
 				struct epoll_event client_ev;
 				client_ev.events	= EPOLLIN;
@@ -232,30 +220,9 @@ void Webserv::run(const Config& cfg)
 				}
 			}
 			else {
-				Logger::log_dbg("reading from socket" + int2str(currentFd));
-				char		buffer[1024];
-				ssize_t bytes_read = read(currentFd, buffer, sizeof(buffer) - 1);
-				if (bytes_read <= 0) {
-					if (bytes_read == 0) {
-						Logger::log_warn("Client disconnected");
-						Logger::log_warn("closing client conn on fd " + int2str(currentFd));
-						close(events[i].data.fd);
-						epoll_ctl(_epoll_fd, EPOLL_CTL_DEL, currentFd, 0);
-					}
-					else {
-						Logger::log_err("read failed, errno: " + int2str(errno));
-						if (_setOfServerFds.find(currentFd) == _setOfServerFds.end()) {
-							Logger::log_err(
-									"closing client conn on fd " + int2str(currentFd));
-							close(events[i].data.fd);
-							epoll_ctl(_epoll_fd, EPOLL_CTL_DEL, currentFd, 0);
-						}
-					}
-				}
-				else {
-					buffer[bytes_read] = '\0';
-					std::cout << "Received:\n" << buffer << std::endl;
-				}
+				if (_con.handleRequest(currentFd) == 1
+						&& _serverFds.find(currentFd) == _serverFds.end())
+					epoll_ctl(_epoll_fd, EPOLL_CTL_DEL, currentFd, 0);
 			}
 		}
 	}
