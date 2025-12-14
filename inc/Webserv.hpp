@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:35:29 by fmaurer           #+#    #+#             */
-/*   Updated: 2025/12/13 08:18:38 by fmaurer          ###   ########.fr       */
+/*   Updated: 2025/12/14 20:47:35 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,7 @@
 // default server name
 #define DEFAULT_SRV_NAME "localhost"
 
-// max num of events epoll will manage to in one epoll_wait loop
+// max num of events epoll will manage in one epoll_wait loop
 #define MAX_EVENTS 64
 
 // NOTE: Naming convention for private class-members / methods: underscore at
