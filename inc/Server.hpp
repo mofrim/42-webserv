@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/03 12:50:36 by fmaurer           #+#    #+#             */
-/*   Updated: 2025/12/12 16:25:01 by fmaurer          ###   ########.fr       */
+/*   Updated: 2025/12/14 22:55:12 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,6 @@ class Server {
 		std::string				 _root;
 		struct sockaddr_in _server_addr;
 		int								 _listen_fd;
-		int								 _epoll_fd;
 
 		void _setupSocket();
 

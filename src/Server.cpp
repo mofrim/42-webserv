@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/03 12:51:23 by fmaurer           #+#    #+#             */
-/*   Updated: 2025/12/13 08:17:03 by fmaurer          ###   ########.fr       */
+/*   Updated: 2025/12/14 22:55:09 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,6 @@
 #include "utils.hpp"
 
 #include <iostream>
-#include <sys/epoll.h>
 #include <unistd.h>
 
 // TODO: implement
@@ -29,9 +28,6 @@ Server::Server(const ServerCfg& srvcfg)
 	_root				 = srvcfg.getRoot();
 	_listen_fd	 = srvcfg.getListenFd();
 	_server_addr = srvcfg.getServerAddr();
-
-	// FIXME: move to Webserv class!!!
-	_epoll_fd = -1;
 }
 
 // TODO: implement
@@ -44,9 +40,6 @@ Server::Server(const Server& other)
 		_root				 = other._root;
 		_listen_fd	 = other._listen_fd;
 		_server_addr = other._server_addr;
-
-		// FIXME: move to Webserv class!!!
-		_epoll_fd = other._epoll_fd;
 	}
 }
 
@@ -104,9 +97,8 @@ void Server::_setupSocket()
 	if (setsockopt(_listen_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) == -1)
 		throw(ServerInitException("setsockopt failed"));
 
-	if (bind(_listen_fd,
-					(struct sockaddr *)&_server_addr,
-					sizeof(_server_addr)) == -1)
+	if (bind(_listen_fd, (struct sockaddr *)&_server_addr, sizeof(_server_addr))
+			== -1)
 		throw(ServerInitException("bind failed"));
 
 	if (listen(_listen_fd, SOMAXCONN) == -1)
