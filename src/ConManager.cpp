@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/14 21:24:38 by fmaurer           #+#    #+#             */
-/*   Updated: 2025/12/14 22:33:37 by fmaurer          ###   ########.fr       */
+/*   Updated: 2025/12/15 07:55:29 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 #include <Logger.hpp>
 #include <errno.h>
 #include <iostream>
+#include <string.h>
 #include <unistd.h>
 
 // -- OCF --
@@ -71,9 +72,9 @@ int ConManager::handleRequest(int client_fd)
 			Logger::log_warn("closing client conn on fd " + int2str(client_fd));
 		}
 		else
-			Logger::log_err("read failed, errno: " + int2str(errno));
-		close(client_fd);
-		return (1);
+			Logger::log_err(
+					"read failed, errno: " + int2str(errno) + strerror(errno));
+		return (-1);
 	}
 	// NEXT:
 	// IDEA: maybe it is enough to pass the server cfg of the server the

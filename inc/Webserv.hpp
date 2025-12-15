@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:35:29 by fmaurer           #+#    #+#             */
-/*   Updated: 2025/12/14 22:30:31 by fmaurer          ###   ########.fr       */
+/*   Updated: 2025/12/14 23:49:06 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 
 #include "ConManager.hpp"
 #include "Config.hpp"
+#include "Epoll.hpp"
 #include "Server.hpp"
 
 #include <netinet/in.h>
@@ -27,9 +28,6 @@
 
 // default server name
 #define DEFAULT_SRV_NAME "localhost"
-
-// max num of events epoll will manage in one epoll_wait loop
-#define MAX_EVENTS 64
 
 // NOTE: Naming convention for private class-members / methods: underscore at
 // the beginning. In later use this enables us to omit the `this->`. This saves
@@ -44,9 +42,7 @@ class Webserv {
 		size_t							_numOfServers;
 		std::set<int>				_serverFds; // set for collecting all listenFds
 
-		int															_epoll_fd;
-		std::vector<struct epoll_event> _ev;
-
+		Epoll			 _epoll;
 		ConManager _con;
 
 		void _setupServers();
