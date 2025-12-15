@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/14 21:24:38 by fmaurer           #+#    #+#             */
-/*   Updated: 2025/12/15 07:55:29 by fmaurer          ###   ########.fr       */
+/*   Updated: 2025/12/15 22:34:29 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,6 +34,10 @@ ConManager::~ConManager() {}
 // -- OCF end --
 
 // adds a new Client to the list and returns its fd
+//
+// the accept is already non-blocking as srv_fd is non-blocking. so, it will be
+// interesting to check for EAGAIN or EWOULDBLOCK as checking errno is allowed
+// here. not like in I/O, where just it just isn't :(
 int ConManager::addNewClient(int srv_fd)
 {
 	Logger::log_dbg("accepting new conn on fd " + int2str(srv_fd));
@@ -44,7 +48,10 @@ int ConManager::addNewClient(int srv_fd)
 	int client_fd =
 			accept(srv_fd, (struct sockaddr *)&client_addr, &client_addr_len);
 	if (client_fd == -1) {
-		Logger::log_err("accept failed");
+		if (errno == EAGAIN || errno == EWOULDBLOCK)
+			Logger::log_err("accept failed with EAGAIN || WOULDBLOCK");
+		else
+			Logger::log_err(std::string("accept failed: ", *strerror(errno)));
 	}
 	Logger::log_dbg(
 			"Client connected from address " + inaddrToStr(client_addr.sin_addr));
@@ -73,7 +80,7 @@ int ConManager::handleRequest(int client_fd)
 		}
 		else
 			Logger::log_err(
-					"read failed, errno: " + int2str(errno) + strerror(errno));
+					"read failed, errno: " + int2str(errno) + " = " + strerror(errno));
 		return (-1);
 	}
 	// NEXT:
