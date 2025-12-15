@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/14 21:20:37 by fmaurer           #+#    #+#             */
-/*   Updated: 2025/12/14 22:13:44 by fmaurer          ###   ########.fr       */
+/*   Updated: 2025/12/15 18:02:45 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,7 @@
 
 class ConManager {
 	private:
+		// TODO: make this a std::list
 		std::vector<Client> _clients;
 		std::set<int>				_clientFds;
 
