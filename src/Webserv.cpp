@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:36:43 by fmaurer           #+#    #+#             */
-/*   Updated: 2025/12/14 22:30:31 by fmaurer          ###   ########.fr       */
+/*   Updated: 2025/12/15 07:53:12 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,10 +20,9 @@
 // for memset
 #include <cstring>
 #include <errno.h>
-#include <iostream>
 #include <utils.hpp>
 
-Webserv::Webserv(): _shutdown_server(false), _numOfServers(0), _epoll_fd(-1) {}
+Webserv::Webserv(): _shutdown_server(false), _numOfServers(0) {}
 
 Webserv::Webserv(const Webserv& other) { (void)other; }
 
@@ -49,32 +48,6 @@ void Webserv::shutdown()
 {
 	Logger::log_warn("shutting down webserv...");
 	_shutdown_server = true;
-}
-
-// TODO: what is being done here, what in the main loop. For now calling
-// epoll_create is done here and the listening sockets for each server are added
-// to the interest-list of epoll.
-void Webserv::_setupEpoll()
-{
-	int listen_fd;
-
-	_ev.resize(_numOfServers);
-
-	// param for epoll_create only has to be a positive number, so...
-	_epoll_fd = epoll_create(42);
-	if (_epoll_fd == -1)
-		throw(WebservInitException("epoll_create failed"));
-
-	for (size_t i = 0; i < _numOfServers; i++) {
-		listen_fd			 = _servers[i].getListenFd();
-		_ev[i].events	 = EPOLLIN;
-		_ev[i].data.fd = listen_fd;
-
-		if (epoll_ctl(_epoll_fd, EPOLL_CTL_ADD, listen_fd, &_ev[i]) == -1) {
-			close(_epoll_fd);
-			throw(WebservInitException("epoll_ctl failed"));
-		}
-	}
 }
 
 // The main routine for setting up the servers listed in the Config.
@@ -167,6 +140,47 @@ void Webserv::_initDefaultCfg2()
 	_numOfServers = 2;
 }
 
+// TODO: figure out the best timeout for epoll_wait. For now -1 is okay. but
+// even a small timeout like 10ms might be okay. what are the benefits here?
+//
+// NOTE: i think checking errno here is okay as the subject only demands not
+// checking it after read write.
+//
+// the logic here is simple: if we are getting an I/O event on one of our
+// servers listening sockets (aka ports) this is a connection request ->
+// add a new client!
+//
+// EINTR == epoll_wait was interrupted by
+void Webserv::run(const Config& cfg)
+{
+	_cfg = cfg;
+	_setupServers();
+	_epoll.setup(_servers, _numOfServers);
+
+	// the main loop
+	while (_shutdown_server == false) {
+		int nfds = _epoll.wait();
+		if (nfds == -1 && errno != EINTR)
+			throw(WebservRunException("epoll_wait failed"));
+		for (int i = 0; i < nfds; ++i) {
+			int currentFd = _epoll.getEventFd(i);
+			if (_serverFds.find(currentFd) != _serverFds.end()) {
+				int client_fd = _con.addNewClient(currentFd);
+				_epoll.addClient(client_fd);
+			}
+			else {
+				int requestStatus = _con.handleRequest(currentFd);
+				if (requestStatus == -1)
+					_epoll.removeClient(currentFd);
+			}
+		}
+	}
+	_epoll.closeEpollFd();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+/// Exceptions
+
 Webserv::WebservInitException::WebservInitException(const std::string& msg):
 	std::runtime_error("WebservInitException: " + msg)
 {}
@@ -174,58 +188,3 @@ Webserv::WebservInitException::WebservInitException(const std::string& msg):
 Webserv::WebservRunException::WebservRunException(const std::string& msg):
 	std::runtime_error("WebservRunException: " + msg)
 {}
-
-// TODO: where should i start?
-void Webserv::run(const Config& cfg)
-{
-	struct epoll_event events[MAX_EVENTS];
-
-	_cfg = cfg;
-	_setupServers();
-	_setupEpoll();
-
-	// the main loop
-	while (_shutdown_server == false) {
-
-		Logger::log_msg("calling epoll_wait...");
-
-		// TODO: figure out the best timeout value here. For now -1 is okay. but
-		// even a small timeout like 10ms might be okay. what are the benefits here?
-		int nfds = epoll_wait(_epoll_fd, events, MAX_EVENTS, 500);
-
-		// NOTE: i think checking errno here is okay as the subject only demands not
-		// checking it after read write.
-		if (nfds == -1 && errno != EINTR) // EINTR == epoll_wait was interrupted by
-																			// signal
-			throw(WebservRunException("epoll_wait failed"));
-
-		for (int i = 0; i < nfds; ++i) {
-			int currentFd = events[i].data.fd;
-
-			// the logic here is simply: if we are getting an I/O event on one of our
-			// servers listening sockets (aka ports) this is a connection request ->
-			// add a new client!
-			if (_serverFds.find(currentFd) != _serverFds.end()) {
-				int client_fd = _con.addNewClient(currentFd);
-
-				// TODO: make Epoll class
-				// Add client socket to epoll
-				struct epoll_event client_ev;
-				client_ev.events	= EPOLLIN;
-				client_ev.data.fd = client_fd;
-				if (epoll_ctl(_epoll_fd, EPOLL_CTL_ADD, client_fd, &client_ev) == -1) {
-					Logger::log_err("epoll_ctl failed");
-					close(client_fd);
-					continue;
-				}
-			}
-			else {
-				if (_con.handleRequest(currentFd) == 1
-						&& _serverFds.find(currentFd) == _serverFds.end())
-					epoll_ctl(_epoll_fd, EPOLL_CTL_DEL, currentFd, 0);
-			}
-		}
-	}
-	Logger::log_warn("closing epoll fd");
-	close(_epoll_fd);
-}
