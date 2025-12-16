@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:35:29 by fmaurer           #+#    #+#             */
-/*   Updated: 2025/12/15 23:26:21 by fmaurer          ###   ########.fr       */
+/*   Updated: 2025/12/16 11:47:55 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,12 +14,11 @@
 #define WEBSERV_HPP
 
 #include "ConManager.hpp"
-#include "Config.hpp"
 #include "Epoll.hpp"
 #include "Server.hpp"
 
+#include <map>
 #include <netinet/in.h>
-#include <set>
 #include <sys/epoll.h>
 #include <sys/socket.h>
 
@@ -36,11 +35,11 @@
 
 class Webserv {
 	private:
-		bool								_defaultCfg;
-		bool								_shutdown_server;
-		std::vector<Server> _servers;
-		size_t							_numOfServers;
-		std::set<int>				_serverFds; // set for collecting all listenFds
+		bool										_defaultCfg;
+		bool										_shutdown_server;
+		std::vector<Server>			_servers;
+		std::map<int, Server *> _serverFdMap;
+		size_t									_numOfServers;
 
 		Epoll			 _epoll;
 		ConManager _con;
@@ -50,6 +49,7 @@ class Webserv {
 		void _initDefaultCfg();
 		void _initDefaultCfg2();
 		void _setupEpoll();
+		bool _isServerFd(int fd) const;
 
 		// we do not use them, so keep em private
 		Webserv(const Webserv& other);
