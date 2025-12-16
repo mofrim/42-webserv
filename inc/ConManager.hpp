@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/14 21:20:37 by fmaurer           #+#    #+#             */
-/*   Updated: 2025/12/15 18:02:45 by fmaurer          ###   ########.fr       */
+/*   Updated: 2025/12/16 10:05:43 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,15 +22,14 @@
 
 #include "Client.hpp"
 
+#include <list>
 #include <set>
 #include <stdexcept>
-#include <vector>
 
 class ConManager {
 	private:
-		// TODO: make this a std::list
-		std::vector<Client> _clients;
-		std::set<int>				_clientFds;
+		std::list<Client> _clients;
+		std::set<int>			_clientFds;
 
 		// we certainly won't need these 2 for
 		ConManager(const ConManager& other);

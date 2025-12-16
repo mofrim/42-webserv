@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:36:43 by fmaurer           #+#    #+#             */
-/*   Updated: 2025/12/16 11:48:17 by fmaurer          ###   ########.fr       */
+/*   Updated: 2025/12/16 13:10:58 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -190,22 +190,25 @@ void Webserv::run()
 
 			// 1) new connection
 			if (_isServerFd(currentFd)) {
-				int client_fd = _con.addNewClient(currentFd);
-				_epoll.addClient(client_fd);
+				Server *srv = _getServerByFd(currentFd);
+				Client *cli = srv->addClient(currentFd);
+				Logger::log_dbg2("got this fd from cli: " + int2str(cli->getFd()));
+				_addClientToClientFdServerMap(cli->getFd(), srv);
+				_epoll.addClient(cli->getFd());
 			}
+
+			// 2) existing connection
 			else {
-				int requestStatus = _con.handleRequest(currentFd);
-				if (requestStatus == -1)
+				Server *srv = _getServerByClientFd(currentFd);
+				if (srv == NULL)
+					throw(WebservRunException("could not find server by fd"));
+				if (srv->handleEvent(_epoll.getEvent(eventIdx), currentFd))
+
 					_epoll.removeClient(currentFd);
 			}
 		}
 	}
 	_epoll.closeEpollFd();
-}
-
-bool Webserv::_isServerFd(int fd) const
-{
-	return (_serverFdMap.find(fd) != _serverFdMap.end());
 }
 
 ////////////////////////////////////////////////////////////////////////////////

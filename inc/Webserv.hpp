@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:35:29 by fmaurer           #+#    #+#             */
-/*   Updated: 2025/12/16 11:47:55 by fmaurer          ###   ########.fr       */
+/*   Updated: 2025/12/16 12:54:07 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,6 +39,7 @@ class Webserv {
 		bool										_shutdown_server;
 		std::vector<Server>			_servers;
 		std::map<int, Server *> _serverFdMap;
+		std::map<int, Server *> _ClientFdServerMap;
 		size_t									_numOfServers;
 
 		Epoll			 _epoll;
@@ -49,7 +50,12 @@ class Webserv {
 		void _initDefaultCfg();
 		void _initDefaultCfg2();
 		void _setupEpoll();
-		bool _isServerFd(int fd) const;
+
+		// utils
+		bool		_isServerFd(int fd) const;
+		Server *_getServerByFd(int fd);
+		Server *_getServerByClientFd(int fd);
+		void		_addClientToClientFdServerMap(int fd, Server *srv);
 
 		// we do not use them, so keep em private
 		Webserv(const Webserv& other);

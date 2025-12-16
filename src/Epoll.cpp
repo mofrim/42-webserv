@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/14 23:12:17 by fmaurer           #+#    #+#             */
-/*   Updated: 2025/12/16 09:36:44 by fmaurer          ###   ########.fr       */
+/*   Updated: 2025/12/16 13:09:40 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -103,6 +103,11 @@ int Epoll::getEpollFd() const { return (_epoll_fd); }
 int Epoll::getEventFd(int event_idx) const
 {
 	return (_events[event_idx].data.fd);
+}
+
+const struct epoll_event& Epoll::getEvent(int event_idx) const
+{
+	return (_events[event_idx]);
 }
 
 std::string Epoll::_getEventStr(const uint32_t& ev) const

@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/14 23:11:35 by fmaurer           #+#    #+#             */
-/*   Updated: 2025/12/16 09:18:57 by fmaurer          ###   ########.fr       */
+/*   Updated: 2025/12/16 13:09:51 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,8 +43,9 @@ class Epoll {
 		void removeClient(int cfd);
 		void closeEpollFd();
 
-		int getEpollFd() const;
-		int getEventFd(int event_idx) const;
+		int												getEpollFd() const;
+		int												getEventFd(int event_idx) const;
+		const struct epoll_event& getEvent(int event_idx) const;
 
 		void printEvents() const;
 
