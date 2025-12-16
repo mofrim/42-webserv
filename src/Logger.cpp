@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/24 20:52:55 by fmaurer           #+#    #+#             */
-/*   Updated: 2025/12/12 18:14:03 by fmaurer          ###   ########.fr       */
+/*   Updated: 2025/12/16 09:35:23 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,25 +42,41 @@ std::string Logger::_get_logtime()
 void Logger::log_err(const std::string& msg)
 {
 	std::string logtime = _get_logtime();
-	std::cout << RED << logtime << msg << RST << std::endl;
+	std::cout << BRED << logtime << msg << RST << std::endl;
 }
 
 void Logger::log_msg(const std::string& msg)
 {
 	std::string logtime = _get_logtime();
-	std::cout << CYA << logtime << msg << RST << std::endl;
+	std::cout << BCYA << logtime << msg << RST << std::endl;
 }
 
 void Logger::log_warn(const std::string& msg)
 {
 	std::string logtime = _get_logtime();
-	std::cout << YLO << logtime << msg << RST << std::endl;
+	std::cout << BYLO << logtime << msg << RST << std::endl;
 }
 
-void Logger::log_dbg(const std::string& msg)
+void Logger::log_dbg0(const std::string& msg)
 {
 	if (LOGLEVEL == DEBUG) {
 		std::string logtime = _get_logtime();
-		std::cout << PUR << logtime << msg << RST << std::endl;
+		std::cout << GRY << logtime << msg << RST << std::endl;
+	}
+}
+
+void Logger::log_dbg1(const std::string& msg)
+{
+	if (LOGLEVEL == DEBUG) {
+		std::string logtime = _get_logtime();
+		std::cout << WHT << logtime << msg << RST << std::endl;
+	}
+}
+
+void Logger::log_dbg2(const std::string& msg)
+{
+	if (LOGLEVEL == DEBUG) {
+		std::string logtime = _get_logtime();
+		std::cout << BWHT << logtime << msg << RST << std::endl;
 	}
 }

@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/14 23:11:35 by fmaurer           #+#    #+#             */
-/*   Updated: 2025/12/15 00:31:15 by fmaurer          ###   ########.fr       */
+/*   Updated: 2025/12/16 09:18:57 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,8 +25,11 @@
 class Epoll {
 	private:
 		int															_epoll_fd;
+		int															_nfds;
 		std::vector<struct epoll_event> _ev;
 		struct epoll_event							_events[MAX_EVENTS];
+
+		std::string _getEventStr(const uint32_t& ev) const;
 
 	public:
 		Epoll();
@@ -42,6 +45,8 @@ class Epoll {
 
 		int getEpollFd() const;
 		int getEventFd(int event_idx) const;
+
+		void printEvents() const;
 
 		class EpollException: public std::runtime_error {
 			public:

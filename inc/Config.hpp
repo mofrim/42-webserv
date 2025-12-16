@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/25 11:11:31 by fmaurer           #+#    #+#             */
-/*   Updated: 2025/11/26 10:45:29 by fmaurer          ###   ########.fr       */
+/*   Updated: 2025/12/15 23:29:23 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,22 +27,17 @@
 
 class Config {
 	private:
-		bool									 _isDefaultCfg;
 		std::vector<ServerCfg> _cfgs;
-		void									 _setIsDefaultCfg(bool state);
 
 	public:
-		// OCF
 		Config();
 		Config(const Config& other);
 		Config& operator=(const Config& other);
 		~Config();
 
-		void									 setCfgs(std::vector<ServerCfg> cfgs);
-		void									 setDefaultCfg(ServerCfg cfg);
-		std::vector<ServerCfg> getCfgs() const;
-		void									 parseCfgFile(const std::string& fname);
-		bool									 isDefaultCfg() const;
+		void													setCfgs(std::vector<ServerCfg> cfgs);
+		const std::vector<ServerCfg>& getCfgs() const;
+		void													parseCfgFile(const std::string& fname);
 
 		class EmptyCfgVectorException: public std::logic_error {
 			public:

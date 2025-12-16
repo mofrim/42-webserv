@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:36:43 by fmaurer           #+#    #+#             */
-/*   Updated: 2025/12/15 07:53:12 by fmaurer          ###   ########.fr       */
+/*   Updated: 2025/12/16 09:21:20 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,9 +20,11 @@
 // for memset
 #include <cstring>
 #include <errno.h>
+#include <iostream>
 #include <utils.hpp>
 
-Webserv::Webserv(): _shutdown_server(false), _numOfServers(0) {}
+Webserv::Webserv(): _defaultCfg(true), _shutdown_server(false), _numOfServers(0)
+{}
 
 Webserv::Webserv(const Webserv& other) { (void)other; }
 
@@ -50,6 +52,29 @@ void Webserv::shutdown()
 	_shutdown_server = true;
 }
 
+// the Idea is: keep the existence of the Config object limited to this method.
+// After this method there should be only the vector<Server> which then holds
+// all the data. Additionally there can be some global config options which can
+// be saved in Webserv class or also in Server class.
+void Webserv::getServersFromCfg(const std::string& cfgFilename)
+{
+	(void)cfgFilename;
+	Config cfg;
+
+	try {
+		cfg.parseCfgFile(cfgFilename);
+	} catch (const std::exception& e) {
+		throw(e);
+	}
+
+	_numOfServers = cfg.getCfgs().size();
+
+	for (size_t i = 0; i < _numOfServers; i++) {
+		_servers.push_back(Server(cfg.getCfgs()[i]));
+	}
+	_defaultCfg = false;
+}
+
 // The main routine for setting up the servers listed in the Config.
 //
 // In the default case there is only one server with default values (like
@@ -57,86 +82,79 @@ void Webserv::shutdown()
 // server_name="localhost", port="4284" etc...)
 void Webserv::_setupServers()
 {
-	if (_cfg.isDefaultCfg())
+	if (_defaultCfg)
 		_initDefaultCfg2();
 
-	_numOfServers = _cfg.getCfgs().size();
-
 	for (size_t i = 0; i < _numOfServers; i++) {
-		_setupSingleServer(_cfg.getCfgs()[i]);
+		_setupSingleServer(_servers[i]);
 	}
 }
 
 // here one server is being setup, meaning, the `init()` of a server is called
 // which is only responsible for binding a socket to a port and start listening
 // on it. The rest of the server initialization is being done in... here too?!
-void Webserv::_setupSingleServer(const ServerCfg& cfg)
+// TODO: handle possible exceptions!!!
+void Webserv::_setupSingleServer(Server& srv)
 {
 	Logger::log_msg("Setting up this server:");
-	cfg.printCfg();
-	Server srv(cfg);
+	srv.printCfg();
 	srv.init();
 	_serverFds.insert(srv.getListenFd());
-	_servers.push_back(srv);
 }
 
 // NOTE: this _only_ needs to be done for the default config. all non-default
 // config wil have gone through parseCfg where all values will be set.
 void Webserv::_initDefaultCfg()
 {
-	ServerCfg		dcfg = _cfg.getCfgs()[0];
+	Server			dsrv;
 	sockaddr_in srv_addr;
 
-	dcfg.setServerName(DEFAULT_SRV_NAME);
-	dcfg.setPort(DEFAULT_PORT);
-	dcfg.setRoot("./www");
+	dsrv.setServerName(DEFAULT_SRV_NAME);
+	dsrv.setPort(DEFAULT_PORT);
+	dsrv.setRoot("./www");
 
 	memset(&srv_addr, 0, sizeof(srv_addr));
 	srv_addr.sin_family			 = AF_INET;
 	srv_addr.sin_addr.s_addr = INADDR_ANY;
 	srv_addr.sin_port				 = htons(DEFAULT_PORT);
-	dcfg.setServerAddr(srv_addr);
-	dcfg.setHost(INADDR_LOOPBACK);
+	dsrv.setServerAddr(srv_addr);
+	dsrv.setHost(INADDR_LOOPBACK);
 
-	_cfg.setDefaultCfg(dcfg);
 	_numOfServers = 1;
 }
 
 void Webserv::_initDefaultCfg2()
 {
-	ServerCfg		dcfg	= _cfg.getCfgs()[0];
-	ServerCfg		dcfg2 = _cfg.getCfgs()[0];
+
+	Server			dsrv1;
+	Server			dsrv2;
 	sockaddr_in srv_addr;
 
-	dcfg.setServerName(DEFAULT_SRV_NAME);
-	dcfg.setPort(DEFAULT_PORT);
-	dcfg.setRoot("./www");
+	dsrv1.setServerName(DEFAULT_SRV_NAME);
+	dsrv1.setPort(DEFAULT_PORT);
+	dsrv1.setRoot("./www");
 
 	memset(&srv_addr, 0, sizeof(srv_addr));
 	srv_addr.sin_family			 = AF_INET;
 	srv_addr.sin_addr.s_addr = INADDR_ANY;
 	srv_addr.sin_port				 = htons(DEFAULT_PORT);
-	dcfg.setServerAddr(srv_addr);
-	dcfg.setHost(INADDR_LOOPBACK);
+	dsrv1.setServerAddr(srv_addr);
+	dsrv1.setHost(INADDR_LOOPBACK);
 
-	_cfg.setDefaultCfg(dcfg);
-
-	dcfg2.setServerName("0.0.0.0");
-	dcfg2.setPort(4285);
-	dcfg2.setRoot("./www");
+	dsrv2.setServerName("0.0.0.0");
+	dsrv2.setPort(4285);
+	dsrv2.setRoot("./www");
 
 	memset(&srv_addr, 0, sizeof(srv_addr));
 	srv_addr.sin_family			 = AF_INET;
 	srv_addr.sin_addr.s_addr = INADDR_ANY;
 	srv_addr.sin_port				 = htons(4285);
-	dcfg2.setServerAddr(srv_addr);
-	dcfg2.setHost(INADDR_LOOPBACK);
+	dsrv2.setServerAddr(srv_addr);
+	dsrv2.setHost(INADDR_LOOPBACK);
 
-	std::vector<ServerCfg> newcfgs;
-	newcfgs.push_back(dcfg);
-	newcfgs.push_back(dcfg2);
+	_servers.push_back(dsrv1);
+	_servers.push_back(dsrv2);
 
-	_cfg.setCfgs(newcfgs);
 	_numOfServers = 2;
 }
 
@@ -151,9 +169,8 @@ void Webserv::_initDefaultCfg2()
 // add a new client!
 //
 // EINTR == epoll_wait was interrupted by
-void Webserv::run(const Config& cfg)
+void Webserv::run()
 {
-	_cfg = cfg;
 	_setupServers();
 	_epoll.setup(_servers, _numOfServers);
 
@@ -162,6 +179,7 @@ void Webserv::run(const Config& cfg)
 		int nfds = _epoll.wait();
 		if (nfds == -1 && errno != EINTR)
 			throw(WebservRunException("epoll_wait failed"));
+		_epoll.printEvents();
 		for (int i = 0; i < nfds; ++i) {
 			int currentFd = _epoll.getEventFd(i);
 			if (_serverFds.find(currentFd) != _serverFds.end()) {

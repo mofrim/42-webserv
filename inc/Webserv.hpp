@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:35:29 by fmaurer           #+#    #+#             */
-/*   Updated: 2025/12/14 23:49:06 by fmaurer          ###   ########.fr       */
+/*   Updated: 2025/12/15 23:26:21 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,8 +36,8 @@
 
 class Webserv {
 	private:
+		bool								_defaultCfg;
 		bool								_shutdown_server;
-		Config							_cfg;
 		std::vector<Server> _servers;
 		size_t							_numOfServers;
 		std::set<int>				_serverFds; // set for collecting all listenFds
@@ -46,7 +46,7 @@ class Webserv {
 		ConManager _con;
 
 		void _setupServers();
-		void _setupSingleServer(const ServerCfg& cfg);
+		void _setupSingleServer(Server& srv);
 		void _initDefaultCfg();
 		void _initDefaultCfg2();
 		void _setupEpoll();
@@ -59,8 +59,9 @@ class Webserv {
 		Webserv();
 		~Webserv();
 
+		void run();
+		void getServersFromCfg(const std::string& cfgFilename);
 		void shutdown();
-		void run(const Config& cfg);
 
 		class WebservInitException: public std::runtime_error {
 			public:

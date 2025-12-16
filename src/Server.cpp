@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/03 12:51:23 by fmaurer           #+#    #+#             */
-/*   Updated: 2025/12/14 22:55:09 by fmaurer          ###   ########.fr       */
+/*   Updated: 2025/12/16 09:40:54 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,11 +14,20 @@
 #include "Server.hpp"
 #include "utils.hpp"
 
+#include <cstring>
 #include <iostream>
 #include <unistd.h>
 
-// TODO: implement
-Server::Server() {}
+Server::Server()
+{
+	_port				 = 0;
+	_host				 = 0;
+	_server_name = "";
+	_root				 = "";
+	// FIXME: is this a sensible initial value?
+	_listen_fd = -1;
+	memset(&_server_addr, 0, sizeof(_server_addr));
+}
 
 Server::Server(const ServerCfg& srvcfg)
 {
@@ -30,7 +39,6 @@ Server::Server(const ServerCfg& srvcfg)
 	_server_addr = srvcfg.getServerAddr();
 }
 
-// TODO: implement
 Server::Server(const Server& other)
 {
 	if (this != &other) {
@@ -52,7 +60,7 @@ Server& Server::operator=(const Server& other)
 
 Server::~Server()
 {
-	Logger::log_dbg("server " + _server_name + " going out of scope");
+	Logger::log_dbg0("server " + _server_name + " going out of scope");
 }
 
 // settings up sockets per server.
@@ -91,7 +99,7 @@ void Server::_setupSocket()
 {
 	_listen_fd = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0);
 	if (_listen_fd == -1)
-		throw(ServerInitException("Socket setup failed"));
+		throw(ServerInitException("socket failed"));
 
 	int opt = 1;
 	if (setsockopt(_listen_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) == -1)
@@ -118,6 +126,21 @@ void Server::init()
 	Logger::log_msg("server \"" + _server_name + "\" initialized!");
 }
 
+void Server::printCfg() const
+{
+	struct in_addr host_addr;
+	host_addr.s_addr = htonl(_host);
+	Logger::log_dbg0("  server_name: \"" + _server_name + "\"");
+	Logger::log_dbg0("  port: " + int2str(_port));
+	Logger::log_dbg0("  root: " + _root);
+	Logger::log_dbg0("  listen_fd: " + int2str(_listen_fd));
+
+	// FIXME: remove inet_ntoa because we cannot use it but keep it for now to
+	// see if our function is fine. std::cout << "  host: " <<
+	// inet_ntoa(host_addr) << std::endl;
+	Logger::log_dbg0("  host: " + inaddrToStr(host_addr));
+}
+
 Server::ServerInitException::ServerInitException(const std::string& msg):
 	std::runtime_error("ServerInitException: " + msg)
 {}
@@ -129,3 +152,14 @@ std::string Server::getServerName() const { return (_server_name); }
 std::string Server::getRoot() const { return (_root); }
 sockaddr_in Server::getServerAddr() const { return (_server_addr); }
 int					Server::getListenFd() const { return (_listen_fd); }
+
+// the setters
+void Server::setPort(uint16_t port) { _port = port; }
+void Server::setHost(in_addr_t host) { _host = host; }
+void Server::setServerName(std::string name) { _server_name = name; }
+void Server::setRoot(std::string root) { _root = root; }
+void Server::setServerAddr(sockaddr_in server_addr)
+{
+	this->_server_addr = server_addr;
+}
+void Server::setListenFd(int listen_fd) { _listen_fd = listen_fd; }

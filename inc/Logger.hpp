@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/24 20:49:55 by fmaurer           #+#    #+#             */
-/*   Updated: 2025/12/14 21:31:00 by fmaurer          ###   ########.fr       */
+/*   Updated: 2025/12/16 09:35:30 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,12 +17,27 @@
 
 // shell colors
 #define RED "\e[31m"
-#define CYA "\e[36m"
+#define GRN "\e[32m"
 #define YLO "\e[33m"
 #define PUR "\e[34m"
+#define PNK "\e[35m"
+#define CYA "\e[36m"
+#define GRY "\e[37m"
+#define WHT "\e[38m"
 #define RST "\e[0m"
 
-enum { DEBUG, INFO };
+// bold
+#define BRED "\e[1;90m"
+#define BGRN "\e[1;91m"
+#define BYLO "\e[1;92m"
+#define BPUR "\e[1;93m"
+#define BPNK "\e[1;94m"
+#define BCYA "\e[1;95m"
+#define BGRY "\e[1;96m"
+#define BWHT "\e[1;97m"
+#define BRST "\e[1;98m"
+
+enum { DEBUG = 0, INFO = 1 };
 
 #ifndef LOGLEVEL
 #define LOGLEVEL INFO
@@ -43,7 +58,9 @@ class Logger {
 		static void log_err(const std::string& msg);
 		static void log_msg(const std::string& msg);
 		static void log_warn(const std::string& msg);
-		static void log_dbg(const std::string& msg);
+		static void log_dbg0(const std::string& msg);
+		static void log_dbg1(const std::string& msg);
+		static void log_dbg2(const std::string& msg);
 };
 
 #endif

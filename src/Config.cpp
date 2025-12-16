@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/25 11:12:20 by fmaurer           #+#    #+#             */
-/*   Updated: 2025/11/26 10:46:19 by fmaurer          ###   ########.fr       */
+/*   Updated: 2025/12/15 23:30:18 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,32 +20,24 @@
 
 // Default constructor initializes Config with only the default server
 // available.
-Config::Config(): _isDefaultCfg(true)
+Config::Config()
 {
 	ServerCfg defaultServer;
 	this->_cfgs.push_back(defaultServer);
 }
 
-Config::Config(const Config& other):
-	_isDefaultCfg(other._isDefaultCfg), _cfgs(other._cfgs)
-{}
+Config::Config(const Config& other): _cfgs(other._cfgs) {}
 
 Config& Config::operator=(const Config& other)
 {
-	if (this != &other) {
-		_isDefaultCfg = other._isDefaultCfg;
-		_cfgs					= other._cfgs;
-	}
+	if (this != &other)
+		_cfgs = other._cfgs;
 	return (*this);
 }
 
 Config::~Config() {}
 
 //// OCF end
-
-void Config::_setIsDefaultCfg(bool state) { _isDefaultCfg = state; }
-
-bool Config::isDefaultCfg() const { return (_isDefaultCfg); }
 
 Config::EmptyCfgVectorException::EmptyCfgVectorException(
 		const std::string& msg):
@@ -71,12 +63,9 @@ void Config::parseCfgFile(const std::string& fname)
 	try {
 		parser.openCfg(fname);
 		_cfgs = parser.parse();
-		_setIsDefaultCfg(false);
 	} catch (const std::exception& e) {
 		std::cout << e.what() << std::endl;
 	}
 }
 
-std::vector<ServerCfg> Config::getCfgs() const { return (this->_cfgs); }
-
-void Config::setDefaultCfg(ServerCfg cfg) { _cfgs[0] = cfg; }
+const std::vector<ServerCfg>& Config::getCfgs() const { return (this->_cfgs); }
