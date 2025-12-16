@@ -6,10 +6,11 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:36:43 by fmaurer           #+#    #+#             */
-/*   Updated: 2025/12/16 09:21:20 by fmaurer          ###   ########.fr       */
+/*   Updated: 2025/12/16 11:48:17 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "Config.hpp"
 #include "Logger.hpp"
 #include "Server.hpp"
 #include "Webserv.hpp"
@@ -99,7 +100,7 @@ void Webserv::_setupSingleServer(Server& srv)
 	Logger::log_msg("Setting up this server:");
 	srv.printCfg();
 	srv.init();
-	_serverFds.insert(srv.getListenFd());
+	_serverFdMap.insert(std::pair<int, Server *>(srv.getListenFd(), &srv));
 }
 
 // NOTE: this _only_ needs to be done for the default config. all non-default
@@ -168,7 +169,9 @@ void Webserv::_initDefaultCfg2()
 // servers listening sockets (aka ports) this is a connection request ->
 // add a new client!
 //
-// EINTR == epoll_wait was interrupted by
+// EINTR == epoll_wait was interrupted by signal_handler being calles (expl:
+// epoll_wait is a syscall and as such atomic. so if any interupt is being
+// called the syscall exits)
 void Webserv::run()
 {
 	_setupServers();
@@ -179,10 +182,14 @@ void Webserv::run()
 		int nfds = _epoll.wait();
 		if (nfds == -1 && errno != EINTR)
 			throw(WebservRunException("epoll_wait failed"));
-		_epoll.printEvents();
-		for (int i = 0; i < nfds; ++i) {
-			int currentFd = _epoll.getEventFd(i);
-			if (_serverFds.find(currentFd) != _serverFds.end()) {
+
+		_epoll.printEvents(); // debug
+
+		for (int eventIdx = 0; eventIdx < nfds; ++eventIdx) {
+			int currentFd = _epoll.getEventFd(eventIdx);
+
+			// 1) new connection
+			if (_isServerFd(currentFd)) {
 				int client_fd = _con.addNewClient(currentFd);
 				_epoll.addClient(client_fd);
 			}
@@ -194,6 +201,11 @@ void Webserv::run()
 		}
 	}
 	_epoll.closeEpollFd();
+}
+
+bool Webserv::_isServerFd(int fd) const
+{
+	return (_serverFdMap.find(fd) != _serverFdMap.end());
 }
 
 ////////////////////////////////////////////////////////////////////////////////
