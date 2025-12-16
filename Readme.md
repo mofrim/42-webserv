@@ -4,61 +4,75 @@
 
 - **use exceptions wherever possible!!!**
 
-## structuring the project
+## the initial webserv data-flow
 
-### Partitioning
+- if we have a cmdline arg -> try to parse this as the configuration file. if
+  not: start with default config
 
-A Natural Partitioning would be:
+- parsing is happening in the config class but the lifetime of this class is
+  restricted to `Webserv::getServersFromCfg()`. Why? Because we want to free the
+  memory of the config after parse as we do not need it anymore.
 
-1. webserver logic: sockets, polling, connection management =: **Pt1**
-2. config file parsing and validation =: **Pt2**
-3. http protocol implementation =: **Pt3**
-4. CGI
+- after parsing _all_ relevant information is stored in the `std::vector<Server>
+  _servers` private member of Webserv-class.
 
-### links between the partitions
+## handling connections
 
-#### how much of the protocol layer interacts with the webserver logic?
-
-my guess right now is the following control flow:
-
-- webserver launches listens on ports for incoming connections
-- if a connection is established dispatches to **Pt3**
-- what happens if connection breaks or anything goes wrong while **Pt3** is
-  working?
-- what to do with multiple connection on multiple servers?
-
-## classes
-
-1. `Webserv`
-2. `Parser`
-3. `Logger` but only as a callable class -> private constructors
-
-## main.cpp
-
-**how do i want this? what about the logger? simply copy the vsnprintf
-approach?**
+this is the current main loop:
 
 ```cpp
-#include "webserv.hpp"
-
-WebservLogger logger;
-WebservConfig cfg;
-WebservParser parser;
-Webserv webserv;
-
-cfg = parser.parseCfg(av[1] ? av[1]: "path/to/default.conf", logger);
-if (cfg.fail()) {
- logger.log_error(...);
- // logger.log_info(...);
- // logger.log_warn(...);
- return (-42);
+	// the main loop
+	while (_shutdown_server == false) {
+		int nfds = _epoll.wait();
+		if (nfds == -1 && errno != EINTR)
+			throw(WebservRunException("epoll_wait failed"));
+		for (int i = 0; i < nfds; ++i) {
+			int currentFd = _epoll.getEventFd(i);
+			if (_serverFds.find(currentFd) != _serverFds.end()) {
+				int client_fd = _con.addNewClient(currentFd);
+				_epoll.addClient(client_fd);
+			}
+			else {
+				int requestStatus = _con.handleRequest(currentFd);
+				if (requestStatus == -1)
+					_epoll.removeClient(currentFd);
+			}
+		}
+	}
+	_epoll.closeEpollFd();
 }
-webserv.run(cfg);
-
-return (0);
 ```
-## Client class, ConManager...
 
-For now i will do all the connection handling from Webserv class. Why? Because
-as i see by now, there won't be too much to do here and having an extra
-ConnManager class **and** a Client class seems to much to me.
+we personally find it more logically sound to add a client to a server. because
+that is where they connect to!
+
+but the 3 possible cases after `epoll_wait()` returns remain the same:
+
+1) we got an I/O-event ready on a server-fd -> a new client wants to connect, so we
+   assign the client to the correpsonding server _and_ start handling its
+   requests (monitor keepalive, etc..)
+
+2) we've got an event on a already existing client socket (so we also need a
+   link between the client-socket the corresponding client _and_ its Server!). This is
+
+  - if the event == `EPOLLIN` this is either a request (GET, POST, DELETE) coming in from the client
+
+  - if the event == `EPOLLOUT` this is our response to a request
+
+  - if the event == `EPOLLIN` and `read()` returns 0 this is a disconnect from
+    the client -> remove the Client from the client list, the associated servers
+    client-list, EPOLL_CTL_DEL from interest list the socket-fd and close
+    socket-fd
+
+  => as a conclusion: we should keep a client list around in Webserv-class. new
+  clients are added to this list. the client stores a pointer to its server, and
+  the server stores a pointer to the entry in the client list.
+
+
+
+
+
+
+
+
+
