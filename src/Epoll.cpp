@@ -6,19 +6,20 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/14 23:12:17 by fmaurer           #+#    #+#             */
-/*   Updated: 2025/12/15 00:41:38 by fmaurer          ###   ########.fr       */
+/*   Updated: 2025/12/16 09:36:44 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Epoll.hpp"
 #include "Logger.hpp"
+#include "utils.hpp"
 
 #include <unistd.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 /// OCF
 
-Epoll::Epoll() {}
+Epoll::Epoll(): _nfds(0) {}
 
 Epoll::Epoll(const Epoll& other) { (void)other; }
 
@@ -57,11 +58,13 @@ void Epoll::setup(const std::vector<Server>& servers,
 	}
 }
 
-// a simple wrapper for our one and only epoll_wait call
+// a simple wrapper for our one and only epoll_wait call. stores the number of
+// ready fds in _nfds vor usage in printEvents f.ex.
 int Epoll::wait()
 {
 	Logger::log_msg("calling epoll_wait...");
-	return (epoll_wait(_epoll_fd, _events, MAX_EVENTS, 500));
+	_nfds = epoll_wait(_epoll_fd, _events, MAX_EVENTS, 500);
+	return (_nfds);
 }
 
 // Add a client's fd to epoll interest list
@@ -100,6 +103,24 @@ int Epoll::getEpollFd() const { return (_epoll_fd); }
 int Epoll::getEventFd(int event_idx) const
 {
 	return (_events[event_idx].data.fd);
+}
+
+std::string Epoll::_getEventStr(const uint32_t& ev) const
+{
+	if (ev & EPOLLIN)
+		return (std::string("EPOLLIN"));
+	return (std::string("UNKNOWN EVENT"));
+}
+
+void Epoll::printEvents() const
+{
+	Logger::log_dbg1("epoll_wait returned nfds = " + int2str(_nfds));
+	if (_nfds > 0) {
+		Logger::log_dbg1("Printing Events in the epoll-ready-list:");
+		for (int i = 0; i < _nfds; i++)
+			Logger::log_dbg1("  fd: " + int2str(_events[i].data.fd)
+					+ ", event: " + _getEventStr(_events[i].events));
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/14 21:24:38 by fmaurer           #+#    #+#             */
-/*   Updated: 2025/12/15 22:34:29 by fmaurer          ###   ########.fr       */
+/*   Updated: 2025/12/16 09:28:24 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,7 +40,7 @@ ConManager::~ConManager() {}
 // here. not like in I/O, where just it just isn't :(
 int ConManager::addNewClient(int srv_fd)
 {
-	Logger::log_dbg("accepting new conn on fd " + int2str(srv_fd));
+	Logger::log_dbg0("accepting new conn on fd " + int2str(srv_fd));
 
 	struct sockaddr_in client_addr;
 	socklen_t					 client_addr_len = sizeof(client_addr);
@@ -53,7 +53,7 @@ int ConManager::addNewClient(int srv_fd)
 		else
 			Logger::log_err(std::string("accept failed: ", *strerror(errno)));
 	}
-	Logger::log_dbg(
+	Logger::log_dbg0(
 			"Client connected from address " + inaddrToStr(client_addr.sin_addr));
 
 	_clients.push_back(Client(client_fd, clock()));
@@ -67,7 +67,7 @@ int ConManager::handleRequest(int client_fd)
 	if (_clientFds.find(client_fd) == _clientFds.end())
 		throw(ClientNotFoundException("client_fd in handleRequest() not found"));
 
-	Logger::log_dbg("reading from socket" + int2str(client_fd));
+	Logger::log_dbg0("reading from socket" + int2str(client_fd));
 	char		buffer[1024];
 	ssize_t bytes_read = read(client_fd, buffer, sizeof(buffer) - 1);
 
