@@ -6,7 +6,7 @@
 #    By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/12/01 11:45:58 by fmaurer           #+#    #+#              #
-#    Updated: 2025/12/15 00:38:50 by fmaurer          ###   ########.fr        #
+#    Updated: 2025/12/16 12:12:57 by fmaurer          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -26,7 +26,7 @@ INC_DIR = ./inc
 # The files..
 SRCS			= main.cpp Webserv.cpp Logger.cpp ServerCfg.cpp Config.cpp \
 						ConfigParser.cpp utils.cpp Server.cpp Client.cpp ConManager.cpp \
-						Epoll.cpp
+						Epoll.cpp Webserv_Utils.cpp Server_Utils.cpp
 HDRS			= Webserv.hpp Logger.hpp ServerCfg.hpp Config.hpp ConfigParser.hpp \
 						utils.hpp Server.hpp Client.hpp ConManager.hpp Epoll.hpp
 

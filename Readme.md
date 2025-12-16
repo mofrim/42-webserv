@@ -68,6 +68,52 @@ but the 3 possible cases after `epoll_wait()` returns remain the same:
   clients are added to this list. the client stores a pointer to its server, and
   the server stores a pointer to the entry in the client list.
 
+  ## how i want the connection handling to look like
+
+  ```cpp
+	while (_shutdown_server == false) {
+		int nfds = _epoll.wait();
+		if (nfds == -1 && errno != EINTR)
+			throw(WebservRunException("epoll_wait failed"));
+
+    // TODO: maybe... check if any connection should time out and close Remove
+    // client if so.
+    _checkKeepaliveConnectionTimeout();
+
+    for (int eventIdx = 0; i < nfds; ++eventIdx) {
+      int currentFd = _epoll.getEventFd(eventIdx);
+      // 1. new connection
+      if (_isServerFd(currentFd))
+      {
+        Server *srv = _getServerByFd(currentFd);
+
+        // opens socket and so on. adds the Client to the servers Client list
+        // returns a pointer to the new client from the servers client list
+        Client *cli = srv->addClient(currentFd);
+
+        _epoll.addClient(cli->getFd());
+      }
+      // 2. existing connection -> handle the 3 cases!
+      else
+      {
+        // in order to do this efficiently store Fd's and pointers to servers in
+        // a map!
+        // is this save? is the mapping of fd -> server one-to-one? or can there
+        // be a fd mapping to multiple servers or?
+        Server *srv = _getServerByClientFd(currentFd);
+        if (srv == NULL)
+          throw (killer exception);
+
+        // so in this case the server.handelEvent() routine will have to do much
+        // work! also the remove-client thing as 
+
+        if (srv->handleEvent(_epoll.getEvent(eventIdx)) == -1);
+					_epoll.removeClient(currentFd);
+      }
+    }
+
+  ```
+
 
 
 

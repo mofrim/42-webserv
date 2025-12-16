@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/03 12:51:23 by fmaurer           #+#    #+#             */
-/*   Updated: 2025/12/16 09:40:54 by fmaurer          ###   ########.fr       */
+/*   Updated: 2025/12/16 13:12:15 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,8 @@
 #include "utils.hpp"
 
 #include <cstring>
+#include <errno.h>
+#include <fcntl.h>
 #include <iostream>
 #include <unistd.h>
 
@@ -126,40 +128,79 @@ void Server::init()
 	Logger::log_msg("server \"" + _server_name + "\" initialized!");
 }
 
-void Server::printCfg() const
+// TODO: maybe design some more helper functions to make this more compact.
+Client *Server::addClient(int fd)
 {
-	struct in_addr host_addr;
-	host_addr.s_addr = htonl(_host);
-	Logger::log_dbg0("  server_name: \"" + _server_name + "\"");
-	Logger::log_dbg0("  port: " + int2str(_port));
-	Logger::log_dbg0("  root: " + _root);
-	Logger::log_dbg0("  listen_fd: " + int2str(_listen_fd));
+	if (fd != _listen_fd)
+		throw(ServerException(
+				"server_fd = " + int2str(_listen_fd) + ", conn_fd = " + int2str(fd)));
+	Logger::log_dbg0("accepting new conn on fd " + int2str(fd));
 
-	// FIXME: remove inet_ntoa because we cannot use it but keep it for now to
-	// see if our function is fine. std::cout << "  host: " <<
-	// inet_ntoa(host_addr) << std::endl;
-	Logger::log_dbg0("  host: " + inaddrToStr(host_addr));
+	struct sockaddr_in client_addr;
+	socklen_t					 client_addr_len = sizeof(client_addr);
+
+	int client_fd = accept(fd, (struct sockaddr *)&client_addr, &client_addr_len);
+	if (client_fd == -1) {
+		if (errno == EAGAIN || errno == EWOULDBLOCK)
+			Logger::log_err("accept failed with EAGAIN || WOULDBLOCK");
+		else
+			Logger::log_err(std::string("accept failed: ", *strerror(errno)));
+	}
+	Logger::log_dbg0(
+			"Client connected from address " + inaddrToStr(client_addr.sin_addr));
+
+	if (setFdNonBlocking(client_fd) == -1)
+		throw(ServerException("could not set new clients fd non-blocking"));
+
+	_clients.push_back(Client(client_fd, clock()));
+	_clientFdMap.insert(std::pair<int, Client *>(client_fd, &_clients.back()));
+	return (&_clients.back());
 }
+
+// NEXT: this is a big one.... _ALL_ request handling logic continues here
+// FIXME: ASAP implement clean client removal!
+int Server::handleEvent(const struct epoll_event& ev, int client_fd)
+{
+	(void)ev;
+
+	if (_clientFdMap.find(client_fd) == _clientFdMap.end())
+		throw(ServerException("client_fd in handleEvent() not found"));
+
+	Logger::log_dbg0("reading from socket" + int2str(client_fd));
+	char		buffer[1024];
+	ssize_t bytes_read = read(client_fd, buffer, sizeof(buffer) - 1);
+
+	// if there was a read error, or there was nothing to read, return 1 in order
+	// to signal deletion from epoll interest list
+	if (bytes_read <= 0) {
+		if (bytes_read == 0) {
+			Logger::log_warn("Client disconnected");
+			Logger::log_warn("closing client conn on fd " + int2str(client_fd));
+		}
+		else
+			Logger::log_err(
+					"read failed, errno: " + int2str(errno) + " = " + strerror(errno));
+		return (-1);
+	}
+	// NEXT:
+	// IDEA: maybe it is enough to pass the server cfg of the server the
+	// client is connected to here?!?!
+	// Biiiiiiig QUESTION: how and where is it elegant to really handle the
+	// request!?!?!?!? Is there some max-size for a request??!?!?!?!
+	// what if i start handling the request down here but do not have any idead
+	// about the server config!?!? this would be complete bullshit!!!!
+	buffer[bytes_read] = '\0';
+	std::cout << "Received:\n" << buffer << std::endl;
+	return (0);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+/// exceptions
 
 Server::ServerInitException::ServerInitException(const std::string& msg):
 	std::runtime_error("ServerInitException: " + msg)
 {}
 
-// the getters
-uint16_t		Server::getPort() const { return (_port); }
-in_addr_t		Server::getHost() const { return (_host); }
-std::string Server::getServerName() const { return (_server_name); }
-std::string Server::getRoot() const { return (_root); }
-sockaddr_in Server::getServerAddr() const { return (_server_addr); }
-int					Server::getListenFd() const { return (_listen_fd); }
-
-// the setters
-void Server::setPort(uint16_t port) { _port = port; }
-void Server::setHost(in_addr_t host) { _host = host; }
-void Server::setServerName(std::string name) { _server_name = name; }
-void Server::setRoot(std::string root) { _root = root; }
-void Server::setServerAddr(sockaddr_in server_addr)
-{
-	this->_server_addr = server_addr;
-}
-void Server::setListenFd(int listen_fd) { _listen_fd = listen_fd; }
+Server::ServerException::ServerException(const std::string& msg):
+	std::runtime_error("ServerException: " + msg)
+{}
