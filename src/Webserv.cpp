@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:36:43 by fmaurer           #+#    #+#             */
-/*   Updated: 2025/12/16 13:10:58 by fmaurer          ###   ########.fr       */
+/*   Updated: 2025/12/17 17:12:01 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -202,9 +202,10 @@ void Webserv::run()
 				Server *srv = _getServerByClientFd(currentFd);
 				if (srv == NULL)
 					throw(WebservRunException("could not find server by fd"));
-				if (srv->handleEvent(_epoll.getEvent(eventIdx), currentFd))
-
+				if (srv->handleEvent(_epoll.getEvent(eventIdx), currentFd) == -1) {
 					_epoll.removeClient(currentFd);
+					srv->removeClient(currentFd);
+				}
 			}
 		}
 	}

@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/03 12:51:23 by fmaurer           #+#    #+#             */
-/*   Updated: 2025/12/16 13:12:15 by fmaurer          ###   ########.fr       */
+/*   Updated: 2025/12/17 17:10:35 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -155,6 +155,29 @@ Client *Server::addClient(int fd)
 	_clients.push_back(Client(client_fd, clock()));
 	_clientFdMap.insert(std::pair<int, Client *>(client_fd, &_clients.back()));
 	return (&_clients.back());
+}
+
+// remove all traces of a client from the Server _and_ close the socket. things
+// to be cleaned up:
+//
+// 	1) remove from clients list
+// 	2) remove from pair from clientFdMap
+// 	3) close socket
+void Server::removeClient(int fd)
+{
+	if (_clientFdMap.find(fd) == _clientFdMap.end())
+		throw(
+				ServerException("fd " + int2str(fd) + " in removeClient() not found"));
+
+	std::list<Client>::iterator it = _clients.begin();
+	while (it != _clients.end()) {
+		if (it->getFd() == fd)
+			it = _clients.erase(it);
+		else
+			++it;
+	}
+	_clientFdMap.erase(fd);
+	close(fd);
 }
 
 // NEXT: this is a big one.... _ALL_ request handling logic continues here

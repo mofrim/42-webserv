@@ -86,6 +86,37 @@ so, if you haven't implemented this correctly for a class it won't work!
 
 ## epoll vs. poll
 
+## a learning about iterating over a list and removing things
+
+this code, is obviously _very_ problematic: 
+
+  ```cpp
+	for (std::list<Client>::iterator it = _clients.begin(); it != _clients.end();
+			it++)
+	{
+		if (it->getFd() == fd)
+			_clients.erase(it);
+	}
+  ```
+  if the only list-member is erased the iterator run into memory locations where
+  it shouldn't be -> **segfault**.
+
+  better do this:
+  ```cpp
+  std::list<Client>::iterator it = _clients.begin();
+	while(it != _clients.end())
+	{
+		if (it->getFd() == fd)
+			it = _clients.erase(it);
+    else
+      ++it;
+	}
+  ```
+  why the pre-increment operator `++it`? the pre-increment operator does not
+  create a copy of the iterator and returns this not-yet-incremented copy. so
+  using `++it` is just about memory-efficiency.
+
+
 ### Resources
 
 - [Actually a multithreaded webserv but my entry-point to the epoll vs. poll
