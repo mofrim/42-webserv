@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/03 12:50:36 by fmaurer           #+#    #+#             */
-/*   Updated: 2025/12/16 13:02:12 by fmaurer          ###   ########.fr       */
+/*   Updated: 2025/12/17 16:34:35 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,6 +46,7 @@ class Server {
 
 		void		init();
 		Client *addClient(int fd);
+		void		removeClient(int fd);
 		int			handleEvent(const struct epoll_event& ev, int client_fd);
 
 		// utils, getters setters
@@ -62,6 +63,7 @@ class Server {
 		void				setListenFd(int listen_fd);
 		void				setServerAddr(sockaddr_in server_addr);
 		void				printCfg() const;
+		void				printClients();
 
 		// TODO: think about the whole exception thing! Maybe there should be
 		// some base-class called like this one and the special exceptions for every

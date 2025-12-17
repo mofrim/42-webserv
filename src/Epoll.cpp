@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/14 23:12:17 by fmaurer           #+#    #+#             */
-/*   Updated: 2025/12/16 13:09:40 by fmaurer          ###   ########.fr       */
+/*   Updated: 2025/12/17 16:38:30 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -85,9 +85,7 @@ void Epoll::addClient(int cfd)
 void Epoll::removeClient(int cfd)
 {
 	int epoll_del_return = epoll_ctl(_epoll_fd, EPOLL_CTL_DEL, cfd, 0);
-	int close_return		 = close(cfd);
-
-	if (epoll_del_return == -1 || close_return == -1)
+	if (epoll_del_return == -1)
 		throw(EpollException("removing client from epoll failed"));
 }
 
