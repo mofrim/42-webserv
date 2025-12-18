@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/24 20:49:55 by fmaurer           #+#    #+#             */
-/*   Updated: 2025/12/18 17:22:07 by fmaurer          ###   ########.fr       */
+/*   Updated: 2025/12/18 20:53:34 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,7 @@
 #define BGRY "\e[1;97m"
 #define BWHT "\e[1;98m"
 
-enum { DEBUG = 0, INFO = 1 };
+enum { INFO = 0, DEBUG = 1, BRUTAL = 2 };
 
 #ifndef LOGLEVEL
 #define LOGLEVEL INFO
@@ -44,6 +44,7 @@ enum { DEBUG = 0, INFO = 1 };
 
 // IDEA: try to pass a logfile to the Logger-Class via class global variable...
 // is this even possible with this utility class?
+// ... gotta try this any time soon.
 class Logger {
 	private:
 		Logger();
@@ -57,10 +58,17 @@ class Logger {
 		static void log_err(const std::string& msg);
 		static void log_msg(const std::string& msg);
 		static void log_warn(const std::string& msg);
+		static void log_srv(const std::string& srv_name, const std::string& msg);
+
+		// The idead behind log_dbg{0,1,2} goes like this: at compile-time specify
+		// `-DLOGLEVEL={0,1,2}` and in the code use debug functions accordingly. so
+		// if you want to have the most brutally detailed level of debugging output
+		// compile with `-DLOGLEVEL=2`. Then even messages with log_dbg2() will be
+		// printed. In LOGLEVEL == DEBUG == 1 log_dbg1 and log_dbg0 will be printed,
+		// and in LOGLEVEL == INFO == 0 only log_dbg0 will be shown.
 		static void log_dbg0(const std::string& msg);
 		static void log_dbg1(const std::string& msg);
 		static void log_dbg2(const std::string& msg);
-		static void log_srv(const std::string& srv_name, const std::string& msg);
 };
 
 #endif

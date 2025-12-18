@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/03 12:51:23 by fmaurer           #+#    #+#             */
-/*   Updated: 2025/12/18 18:01:42 by fmaurer          ###   ########.fr       */
+/*   Updated: 2025/12/18 21:23:46 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,20 +18,20 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <iostream>
+#include <sys/epoll.h>
 #include <unistd.h>
 
-Server::Server()
+Server::Server(): _reqHandler(this)
 {
 	_port				 = 0;
 	_host				 = 0;
 	_server_name = "";
 	_root				 = "";
-	// FIXME: is this a sensible initial value?
-	_listen_fd = -1;
+	_listen_fd	 = -1;
 	memset(&_server_addr, 0, sizeof(_server_addr));
 }
 
-Server::Server(const ServerCfg& srvcfg)
+Server::Server(const ServerCfg& srvcfg): _reqHandler(this)
 {
 	_port				 = srvcfg.getPort();
 	_host				 = srvcfg.getHost();
@@ -41,7 +41,7 @@ Server::Server(const ServerCfg& srvcfg)
 	_server_addr = srvcfg.getServerAddr();
 }
 
-Server::Server(const Server& other)
+Server::Server(const Server& other): _reqHandler(this)
 {
 	if (this != &other) {
 		_port				 = other._port;
@@ -53,7 +53,6 @@ Server::Server(const Server& other)
 	}
 }
 
-// TODO: implement
 Server& Server::operator=(const Server& other)
 {
 	(void)other;
@@ -202,42 +201,15 @@ void Server::removeAllClients()
 	_clients.clear();
 }
 
-// NEXT: this is a big one.... _ALL_ request handling logic continues here
-// FIXME: ASAP implement clean client removal!
+// INFO: this is another heart-piece of this webserv.
 int Server::handleEvent(const struct epoll_event& ev, int client_fd)
 {
-	(void)ev;
-
-	if (_clients.find(client_fd) == _clients.end())
-		throw(ServerException("client_fd in handleEvent() not found"));
-
-	Logger::log_srv(_server_name, "reading from socket" + int2str(client_fd));
-	char		buffer[1024];
-	ssize_t bytes_read = read(client_fd, buffer, sizeof(buffer) - 1);
-
-	// if there was a read error, or there was nothing to read, return 1 in order
-	// to signal deletion from epoll interest list
-	if (bytes_read <= 0) {
-		if (bytes_read == 0) {
-			Logger::log_srv(_server_name, "Client disconnected");
-			Logger::log_srv(_server_name,
-					"closing client conn on fd " + int2str(client_fd));
-		}
-		else
-			Logger::log_err(
-					"read failed, errno: " + int2str(errno) + " = " + strerror(errno));
-		return (-1);
-	}
-	// NEXT:
-	// IDEA: maybe it is enough to pass the server cfg of the server the
-	// client is connected to here?!?!
-	// Biiiiiiig QUESTION: how and where is it elegant to really handle the
-	// request!?!?!?!? Is there some max-size for a request??!?!?!?!
-	// what if i start handling the request down here but do not have any idead
-	// about the server config!?!? this would be complete bullshit!!!!
-	buffer[bytes_read] = '\0';
-	std::cout << "Received:\n" << buffer << std::endl;
-	return (0);
+	int return_value = 0;
+	if (ev.events & EPOLLIN)
+		return_value = _reqHandler.readRequest(client_fd);
+	if (ev.events & EPOLLOUT)
+		return_value = _reqHandler.writeResponse(client_fd);
+	return (return_value);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

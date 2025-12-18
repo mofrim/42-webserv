@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/03 12:50:36 by fmaurer           #+#    #+#             */
-/*   Updated: 2025/12/18 17:03:29 by fmaurer          ###   ########.fr       */
+/*   Updated: 2025/12/18 19:38:38 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,14 +14,12 @@
 #define SERVER_HPP
 
 #include "Client.hpp"
+#include "RequestHandler.hpp"
 #include "ServerCfg.hpp"
 
 #include <map>
 #include <stdexcept>
 
-// the Server class
-//
-// can only be constructed using a ServerCfg.
 class Server {
 	private:
 		uint16_t					 _port;
@@ -33,15 +31,19 @@ class Server {
 
 		std::map<int, Client *> _clients;
 
+		RequestHandler _reqHandler;
+
 		void _setupSocket();
 		void _removeAllClients();
+
+		// we aren't using this.
+		Server& operator=(const Server& other);
 
 	public:
 		// OCF
 		Server();
 		Server(const ServerCfg& srvcfg);
 		Server(const Server& other);
-		Server& operator=(const Server& other);
 		~Server();
 
 		void		init();
@@ -65,6 +67,7 @@ class Server {
 		void				setServerAddr(sockaddr_in server_addr);
 		void				printCfg() const;
 		void				printClients();
+		bool				isValidClientFd(int fd);
 
 		// TODO: think about the whole exception thing! Maybe there should be
 		// some base-class called like this one and the special exceptions for every
