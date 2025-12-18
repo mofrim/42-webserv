@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/16 12:11:11 by fmaurer           #+#    #+#             */
-/*   Updated: 2025/12/18 20:45:43 by fmaurer          ###   ########.fr       */
+/*   Updated: 2025/12/18 23:20:55 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,10 +46,6 @@ void Server::printCfg() const
 	Logger::log_msg("  port: " + int2str(_port));
 	Logger::log_msg("  root: " + _root);
 	Logger::log_msg("  listen_fd: " + int2str(_listen_fd));
-
-	// FIXME: remove inet_ntoa because we cannot use it but keep it for now to
-	// see if our function is fine. std::cout << "  host: " <<
-	// inet_ntoa(host_addr) << std::endl;
 	Logger::log_msg("  host: " + inaddrToStr(host_addr));
 }
 
