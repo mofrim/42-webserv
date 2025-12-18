@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:35:29 by fmaurer           #+#    #+#             */
-/*   Updated: 2025/12/18 17:45:02 by fmaurer          ###   ########.fr       */
+/*   Updated: 2025/12/18 21:38:23 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,6 +29,9 @@
 
 // max num of clients.
 #define MAX_CLIENTS 1000
+
+// just for explicitness sake define these 2 as macros
+enum { REQ_READ = 0, REQ_WRITE = 1, REQ_ERR = -1, REQ_NTERM = -2 };
 
 // NOTE: Naming convention for private class-members / methods: underscore at
 // the beginning. In later use this enables us to omit the `this->`. This saves

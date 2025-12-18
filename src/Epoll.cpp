@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/14 23:12:17 by fmaurer           #+#    #+#             */
-/*   Updated: 2025/12/17 16:38:30 by fmaurer          ###   ########.fr       */
+/*   Updated: 2025/12/18 21:20:10 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,7 +62,7 @@ void Epoll::setup(const std::vector<Server>& servers,
 // ready fds in _nfds vor usage in printEvents f.ex.
 int Epoll::wait()
 {
-	Logger::log_msg("calling epoll_wait...");
+	Logger::log_dbg2("calling epoll_wait...");
 	_nfds = epoll_wait(_epoll_fd, _events, MAX_EVENTS, 500);
 	return (_nfds);
 }
@@ -77,6 +77,19 @@ void Epoll::addClient(int cfd)
 		Logger::log_err("epoll_ctl failed");
 		close(cfd);
 		throw(EpollException("adding client to epoll failed"));
+	}
+}
+
+// this is used as an external interface to modify the listening event for a
+// client. After processed request modify to EPOLLIN | EPOLLOUT. after the
+// response again only to EPOLLIN
+void Epoll::modifyClient(int cfd, uint32_t events)
+{
+	struct epoll_event ev;
+	ev.events	 = events;
+	ev.data.fd = cfd;
+	if (epoll_ctl(_epoll_fd, EPOLL_CTL_MOD, cfd, &ev) == -1) {
+		throw(EpollException("epoll_ctl: EPOLL_CTL_MOD failed"));
 	}
 }
 

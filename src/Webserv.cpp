@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:36:43 by fmaurer           #+#    #+#             */
-/*   Updated: 2025/12/18 17:48:32 by fmaurer          ###   ########.fr       */
+/*   Updated: 2025/12/18 21:35:48 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -146,15 +146,24 @@ void Webserv::run()
 			// 2) existing connection
 			else {
 				Server *srv = _getServerByClientFd(currentFd);
-				srv->printClients();
 				if (srv == NULL)
 					throw(WebservRunException("could not find server by fd"));
-				if (srv->handleEvent(_epoll.getEvent(eventIdx), currentFd) == -1) {
+				if (LOGLEVEL == BRUTAL)
+					srv->printClients();
+
+				int evHandlerReturn =
+						srv->handleEvent(_epoll.getEvent(eventIdx), currentFd);
+
+				if (evHandlerReturn == REQ_ERR) {
 					_epoll.removeClient(currentFd);
 					srv->removeClient(currentFd);
 					_clientFdServerMap.erase(currentFd);
 					_numOfClients--;
 				}
+				else if (evHandlerReturn == REQ_READ)
+					_epoll.modifyClient(currentFd, EPOLLIN | EPOLLOUT);
+				else if (evHandlerReturn == REQ_WRITE)
+					_epoll.modifyClient(currentFd, EPOLLIN);
 			}
 		}
 	}
