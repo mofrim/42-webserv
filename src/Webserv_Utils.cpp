@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/16 11:54:27 by fmaurer           #+#    #+#             */
-/*   Updated: 2025/12/18 17:16:14 by fmaurer          ###   ########.fr       */
+/*   Updated: 2025/12/18 18:03:26 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,7 +71,7 @@ void Webserv::_initDefaultCfg2()
 	Server			dsrv2;
 	sockaddr_in srv_addr;
 
-	dsrv1.setServerName("4284");
+	dsrv1.setServerName("testsrv_4284");
 	dsrv1.setPort(DEFAULT_PORT);
 	dsrv1.setRoot("./www");
 
@@ -82,7 +82,7 @@ void Webserv::_initDefaultCfg2()
 	dsrv1.setServerAddr(srv_addr);
 	dsrv1.setHost(INADDR_LOOPBACK);
 
-	dsrv2.setServerName("4285");
+	dsrv2.setServerName("testsrv_4285");
 	dsrv2.setPort(4285);
 	dsrv2.setRoot("./www");
 
