@@ -6,11 +6,15 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/14 20:51:06 by fmaurer           #+#    #+#             */
-/*   Updated: 2025/12/16 12:51:29 by fmaurer          ###   ########.fr       */
+/*   Updated: 2025/12/18 16:36:23 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Client.hpp"
+#include "Logger.hpp"
+#include "utils.hpp"
+
+#include <unistd.h>
 
 // -- OCF --
 Client::Client(): _client_fd(-1) {}
@@ -31,7 +35,11 @@ Client& Client::operator=(const Client& other)
 	return (*this);
 }
 
-Client::~Client() {}
+Client::~Client()
+{
+	Logger::log_dbg0("Client closing fd " + int2str(_client_fd));
+	close(_client_fd);
+}
 // -- OCF end --
 
 void Client::setFd(int fd) { _client_fd = fd; }

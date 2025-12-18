@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/03 12:50:36 by fmaurer           #+#    #+#             */
-/*   Updated: 2025/12/17 16:34:35 by fmaurer          ###   ########.fr       */
+/*   Updated: 2025/12/18 17:03:29 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,6 @@
 #include "Client.hpp"
 #include "ServerCfg.hpp"
 
-#include <list>
 #include <map>
 #include <stdexcept>
 
@@ -25,16 +24,17 @@
 // can only be constructed using a ServerCfg.
 class Server {
 	private:
-		uint16_t								_port;
-		in_addr_t								_host;
-		std::string							_server_name;
-		std::string							_root;
-		struct sockaddr_in			_server_addr;
-		int											_listen_fd;
-		std::list<Client>				_clients;
-		std::map<int, Client *> _clientFdMap;
+		uint16_t					 _port;
+		in_addr_t					 _host;
+		std::string				 _server_name;
+		std::string				 _root;
+		struct sockaddr_in _server_addr;
+		int								 _listen_fd;
+
+		std::map<int, Client *> _clients;
 
 		void _setupSocket();
+		void _removeAllClients();
 
 	public:
 		// OCF
@@ -48,6 +48,7 @@ class Server {
 		Client *addClient(int fd);
 		void		removeClient(int fd);
 		int			handleEvent(const struct epoll_event& ev, int client_fd);
+		void		removeAllClients();
 
 		// utils, getters setters
 		uint16_t		getPort() const;

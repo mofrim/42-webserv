@@ -6,14 +6,13 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:35:29 by fmaurer           #+#    #+#             */
-/*   Updated: 2025/12/16 12:54:07 by fmaurer          ###   ########.fr       */
+/*   Updated: 2025/12/18 17:16:13 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef WEBSERV_HPP
 #define WEBSERV_HPP
 
-#include "ConManager.hpp"
 #include "Epoll.hpp"
 #include "Server.hpp"
 
@@ -39,23 +38,23 @@ class Webserv {
 		bool										_shutdown_server;
 		std::vector<Server>			_servers;
 		std::map<int, Server *> _serverFdMap;
-		std::map<int, Server *> _ClientFdServerMap;
+		std::map<int, Server *> _clientFdServerMap;
 		size_t									_numOfServers;
 
-		Epoll			 _epoll;
-		ConManager _con;
+		Epoll _epoll;
 
 		void _setupServers();
 		void _setupSingleServer(Server& srv);
-		void _initDefaultCfg();
-		void _initDefaultCfg2();
 		void _setupEpoll();
+		void _shutdownAllServers();
 
 		// utils
 		bool		_isServerFd(int fd) const;
 		Server *_getServerByFd(int fd);
 		Server *_getServerByClientFd(int fd);
 		void		_addClientToClientFdServerMap(int fd, Server *srv);
+		void		_initDefaultCfg();
+		void		_initDefaultCfg2();
 
 		// we do not use them, so keep em private
 		Webserv(const Webserv& other);

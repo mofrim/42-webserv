@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/24 20:49:55 by fmaurer           #+#    #+#             */
-/*   Updated: 2025/12/16 12:43:20 by fmaurer          ###   ########.fr       */
+/*   Updated: 2025/12/18 17:22:07 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,6 +60,7 @@ class Logger {
 		static void log_dbg0(const std::string& msg);
 		static void log_dbg1(const std::string& msg);
 		static void log_dbg2(const std::string& msg);
+		static void log_srv(const std::string& srv_name, const std::string& msg);
 };
 
 #endif
