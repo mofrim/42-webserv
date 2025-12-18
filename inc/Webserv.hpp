@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:35:29 by fmaurer           #+#    #+#             */
-/*   Updated: 2025/12/18 17:16:13 by fmaurer          ###   ########.fr       */
+/*   Updated: 2025/12/18 17:45:02 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,9 @@
 // default server name
 #define DEFAULT_SRV_NAME "localhost"
 
+// max num of clients.
+#define MAX_CLIENTS 1000
+
 // NOTE: Naming convention for private class-members / methods: underscore at
 // the beginning. In later use this enables us to omit the `this->`. This saves
 // a lot of typing while being clear enough as we are still hand-writing our
@@ -40,6 +43,7 @@ class Webserv {
 		std::map<int, Server *> _serverFdMap;
 		std::map<int, Server *> _clientFdServerMap;
 		size_t									_numOfServers;
+		uint16_t								_numOfClients;
 
 		Epoll _epoll;
 

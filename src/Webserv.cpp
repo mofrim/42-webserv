@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:36:43 by fmaurer           #+#    #+#             */
-/*   Updated: 2025/12/18 17:16:30 by fmaurer          ###   ########.fr       */
+/*   Updated: 2025/12/18 17:46:23 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,8 @@
 #include <unistd.h>
 #include <utils.hpp>
 
-Webserv::Webserv(): _defaultCfg(true), _shutdown_server(false), _numOfServers(0)
+Webserv::Webserv():
+	_defaultCfg(true), _shutdown_server(false), _numOfServers(0), _numOfClients(0)
 {}
 
 Webserv::Webserv(const Webserv& other) { (void)other; }
@@ -136,11 +137,12 @@ void Webserv::run()
 			int currentFd = _epoll.getEventFd(eventIdx);
 
 			// 1) new connection
-			if (_isServerFd(currentFd)) {
+			if (_isServerFd(currentFd) && _numOfClients < MAX_CLIENTS) {
 				Server *srv = _getServerByFd(currentFd);
 				Client *cli = srv->addClient(currentFd);
 				_addClientToClientFdServerMap(cli->getFd(), srv);
 				_epoll.addClient(cli->getFd());
+				_numOfClients++;
 			}
 
 			// 2) existing connection
@@ -153,6 +155,7 @@ void Webserv::run()
 					_epoll.removeClient(currentFd);
 					srv->removeClient(currentFd);
 					_clientFdServerMap.erase(currentFd);
+					_numOfClients--;
 				}
 			}
 		}
