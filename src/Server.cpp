@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/03 12:51:23 by fmaurer           #+#    #+#             */
-/*   Updated: 2025/12/17 17:10:35 by fmaurer          ###   ########.fr       */
+/*   Updated: 2025/12/18 17:28:23 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,7 +62,11 @@ Server& Server::operator=(const Server& other)
 
 Server::~Server()
 {
-	Logger::log_dbg0("server " + _server_name + " going out of scope");
+	Logger::log_srv(_server_name, "going out of scope");
+	if (!_clients.empty()) {
+		Logger::log_srv(_server_name, "removing all clients");
+		_clients.clear();
+	}
 }
 
 // settings up sockets per server.
@@ -129,6 +133,18 @@ void Server::init()
 }
 
 // TODO: maybe design some more helper functions to make this more compact.
+//
+// The crazy syntax of this block
+//
+// 	std::pair<std::map<int, Client>::iterator, bool> insertReturn =
+// 		_clients.insert(
+// 				std::pair<int, Client>(client_fd, Client(client_fd, clock())));
+//
+// explained: std::map::insert returns a std::pair where the `first` member is
+// an iterator pointing to the newly inserted element (a pair again) and the
+// `second` member is a bool flag indicating wether a new element could be
+// inserted or not. if the key already exists the new element can not be
+// inserted.
 Client *Server::addClient(int fd)
 {
 	if (fd != _listen_fd)
@@ -152,9 +168,15 @@ Client *Server::addClient(int fd)
 	if (setFdNonBlocking(client_fd) == -1)
 		throw(ServerException("could not set new clients fd non-blocking"));
 
-	_clients.push_back(Client(client_fd, clock()));
-	_clientFdMap.insert(std::pair<int, Client *>(client_fd, &_clients.back()));
-	return (&_clients.back());
+	Client *newCli = new Client(client_fd, clock());
+	std::pair<std::map<int, Client *>::iterator, bool> insertReturn =
+			_clients.insert(std::pair<int, Client *>(client_fd, newCli));
+
+	if (insertReturn.second == false)
+		throw(ServerException(
+				"could not insert new client into Server's _clients map"));
+
+	return (insertReturn.first->second);
 }
 
 // remove all traces of a client from the Server _and_ close the socket. things
@@ -165,19 +187,19 @@ Client *Server::addClient(int fd)
 // 	3) close socket
 void Server::removeClient(int fd)
 {
-	if (_clientFdMap.find(fd) == _clientFdMap.end())
+	if (_clients.find(fd) == _clients.end())
 		throw(
 				ServerException("fd " + int2str(fd) + " in removeClient() not found"));
+	delete _clients.find(fd)->second;
+	_clients.erase(fd);
+}
 
-	std::list<Client>::iterator it = _clients.begin();
-	while (it != _clients.end()) {
-		if (it->getFd() == fd)
-			it = _clients.erase(it);
-		else
-			++it;
-	}
-	_clientFdMap.erase(fd);
-	close(fd);
+void Server::removeAllClients()
+{
+	for (std::map<int, Client *>::iterator it = _clients.begin();
+			it != _clients.end(); it++)
+		delete it->second;
+	_clients.clear();
 }
 
 // NEXT: this is a big one.... _ALL_ request handling logic continues here
@@ -186,10 +208,10 @@ int Server::handleEvent(const struct epoll_event& ev, int client_fd)
 {
 	(void)ev;
 
-	if (_clientFdMap.find(client_fd) == _clientFdMap.end())
+	if (_clients.find(client_fd) == _clients.end())
 		throw(ServerException("client_fd in handleEvent() not found"));
 
-	Logger::log_dbg0("reading from socket" + int2str(client_fd));
+	Logger::log_srv(_server_name, "reading from socket" + int2str(client_fd));
 	char		buffer[1024];
 	ssize_t bytes_read = read(client_fd, buffer, sizeof(buffer) - 1);
 

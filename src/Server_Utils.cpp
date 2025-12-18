@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/16 12:11:11 by fmaurer           #+#    #+#             */
-/*   Updated: 2025/12/17 16:40:07 by fmaurer          ###   ########.fr       */
+/*   Updated: 2025/12/18 17:26:28 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,14 +55,14 @@ void Server::printCfg() const
 
 void Server::printClients()
 {
-	Logger::log_dbg0("Printing Clients of Server " + _server_name + ":");
+	Logger::log_srv(_server_name, "Printing Clients:");
 	if (_clients.empty()) {
 		Logger::log_dbg0("-> Server has got no clients");
 		return;
 	}
-	for (std::list<Client>::iterator it = _clients.begin(); it != _clients.end();
-			it++)
+	for (std::map<int, Client *>::iterator it = _clients.begin();
+			it != _clients.end(); it++)
 	{
-		std::cout << "  fd: " << it->getFd() << std::endl;
+		std::cout << "  fd: " << it->second->getFd() << std::endl;
 	}
 }

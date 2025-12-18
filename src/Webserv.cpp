@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:36:43 by fmaurer           #+#    #+#             */
-/*   Updated: 2025/12/17 17:12:01 by fmaurer          ###   ########.fr       */
+/*   Updated: 2025/12/18 17:16:30 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,12 +16,8 @@
 #include "Webserv.hpp"
 
 // FIXME: remove cause sleep is not an allowed function!
-#include <unistd.h>
-
-// for memset
-#include <cstring>
 #include <errno.h>
-#include <iostream>
+#include <unistd.h>
 #include <utils.hpp>
 
 Webserv::Webserv(): _defaultCfg(true), _shutdown_server(false), _numOfServers(0)
@@ -103,60 +99,11 @@ void Webserv::_setupSingleServer(Server& srv)
 	_serverFdMap.insert(std::pair<int, Server *>(srv.getListenFd(), &srv));
 }
 
-// NOTE: this _only_ needs to be done for the default config. all non-default
-// config wil have gone through parseCfg where all values will be set.
-void Webserv::_initDefaultCfg()
+void Webserv::_shutdownAllServers()
 {
-	Server			dsrv;
-	sockaddr_in srv_addr;
-
-	dsrv.setServerName(DEFAULT_SRV_NAME);
-	dsrv.setPort(DEFAULT_PORT);
-	dsrv.setRoot("./www");
-
-	memset(&srv_addr, 0, sizeof(srv_addr));
-	srv_addr.sin_family			 = AF_INET;
-	srv_addr.sin_addr.s_addr = INADDR_ANY;
-	srv_addr.sin_port				 = htons(DEFAULT_PORT);
-	dsrv.setServerAddr(srv_addr);
-	dsrv.setHost(INADDR_LOOPBACK);
-
-	_numOfServers = 1;
-}
-
-void Webserv::_initDefaultCfg2()
-{
-
-	Server			dsrv1;
-	Server			dsrv2;
-	sockaddr_in srv_addr;
-
-	dsrv1.setServerName(DEFAULT_SRV_NAME);
-	dsrv1.setPort(DEFAULT_PORT);
-	dsrv1.setRoot("./www");
-
-	memset(&srv_addr, 0, sizeof(srv_addr));
-	srv_addr.sin_family			 = AF_INET;
-	srv_addr.sin_addr.s_addr = INADDR_ANY;
-	srv_addr.sin_port				 = htons(DEFAULT_PORT);
-	dsrv1.setServerAddr(srv_addr);
-	dsrv1.setHost(INADDR_LOOPBACK);
-
-	dsrv2.setServerName("0.0.0.0");
-	dsrv2.setPort(4285);
-	dsrv2.setRoot("./www");
-
-	memset(&srv_addr, 0, sizeof(srv_addr));
-	srv_addr.sin_family			 = AF_INET;
-	srv_addr.sin_addr.s_addr = INADDR_ANY;
-	srv_addr.sin_port				 = htons(4285);
-	dsrv2.setServerAddr(srv_addr);
-	dsrv2.setHost(INADDR_LOOPBACK);
-
-	_servers.push_back(dsrv1);
-	_servers.push_back(dsrv2);
-
-	_numOfServers = 2;
+	for (std::vector<Server>::iterator it = _servers.begin();
+			it != _servers.end(); it++)
+		it->removeAllClients();
 }
 
 // TODO: figure out the best timeout for epoll_wait. For now -1 is okay. but
@@ -183,7 +130,7 @@ void Webserv::run()
 		if (nfds == -1 && errno != EINTR)
 			throw(WebservRunException("epoll_wait failed"));
 
-		_epoll.printEvents(); // debug
+		// _epoll.printEvents();
 
 		for (int eventIdx = 0; eventIdx < nfds; ++eventIdx) {
 			int currentFd = _epoll.getEventFd(eventIdx);
@@ -192,7 +139,6 @@ void Webserv::run()
 			if (_isServerFd(currentFd)) {
 				Server *srv = _getServerByFd(currentFd);
 				Client *cli = srv->addClient(currentFd);
-				Logger::log_dbg2("got this fd from cli: " + int2str(cli->getFd()));
 				_addClientToClientFdServerMap(cli->getFd(), srv);
 				_epoll.addClient(cli->getFd());
 			}
@@ -200,16 +146,19 @@ void Webserv::run()
 			// 2) existing connection
 			else {
 				Server *srv = _getServerByClientFd(currentFd);
+				srv->printClients();
 				if (srv == NULL)
 					throw(WebservRunException("could not find server by fd"));
 				if (srv->handleEvent(_epoll.getEvent(eventIdx), currentFd) == -1) {
 					_epoll.removeClient(currentFd);
 					srv->removeClient(currentFd);
+					_clientFdServerMap.erase(currentFd);
 				}
 			}
 		}
 	}
 	_epoll.closeEpollFd();
+	_shutdownAllServers();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
