@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/03 12:51:23 by fmaurer           #+#    #+#             */
-/*   Updated: 2025/12/18 17:28:23 by fmaurer          ###   ########.fr       */
+/*   Updated: 2025/12/18 18:01:42 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,7 +62,8 @@ Server& Server::operator=(const Server& other)
 
 Server::~Server()
 {
-	Logger::log_srv(_server_name, "going out of scope");
+	if (_listen_fd != -1)
+		Logger::log_srv(_server_name, "going out of scope");
 	if (!_clients.empty()) {
 		Logger::log_srv(_server_name, "removing all clients");
 		_clients.clear();
@@ -118,8 +119,7 @@ void Server::_setupSocket()
 	if (listen(_listen_fd, SOMAXCONN) == -1)
 		throw(ServerInitException("listen failed"));
 
-	Logger::log_msg(
-			"server \"" + _server_name + "\" listening on fd " + int2str(_listen_fd));
+	Logger::log_srv(_server_name, "listening on fd " + int2str(_listen_fd));
 }
 
 void Server::init()
@@ -129,7 +129,7 @@ void Server::init()
 	} catch (const Server::ServerInitException& e) {
 		std::cout << "e.what(): " << e.what() << std::endl;
 	}
-	Logger::log_msg("server \"" + _server_name + "\" initialized!");
+	Logger::log_srv(_server_name, "initialized!");
 }
 
 // TODO: maybe design some more helper functions to make this more compact.
@@ -150,7 +150,7 @@ Client *Server::addClient(int fd)
 	if (fd != _listen_fd)
 		throw(ServerException(
 				"server_fd = " + int2str(_listen_fd) + ", conn_fd = " + int2str(fd)));
-	Logger::log_dbg0("accepting new conn on fd " + int2str(fd));
+	Logger::log_srv(_server_name, "accepting new conn on fd " + int2str(fd));
 
 	struct sockaddr_in client_addr;
 	socklen_t					 client_addr_len = sizeof(client_addr);
@@ -162,7 +162,7 @@ Client *Server::addClient(int fd)
 		else
 			Logger::log_err(std::string("accept failed: ", *strerror(errno)));
 	}
-	Logger::log_dbg0(
+	Logger::log_srv(_server_name,
 			"Client connected from address " + inaddrToStr(client_addr.sin_addr));
 
 	if (setFdNonBlocking(client_fd) == -1)
@@ -219,8 +219,9 @@ int Server::handleEvent(const struct epoll_event& ev, int client_fd)
 	// to signal deletion from epoll interest list
 	if (bytes_read <= 0) {
 		if (bytes_read == 0) {
-			Logger::log_warn("Client disconnected");
-			Logger::log_warn("closing client conn on fd " + int2str(client_fd));
+			Logger::log_srv(_server_name, "Client disconnected");
+			Logger::log_srv(_server_name,
+					"closing client conn on fd " + int2str(client_fd));
 		}
 		else
 			Logger::log_err(
