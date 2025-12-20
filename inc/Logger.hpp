@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/24 20:49:55 by fmaurer           #+#    #+#             */
-/*   Updated: 2025/12/18 20:53:34 by fmaurer          ###   ########.fr       */
+/*   Updated: 2025/12/20 16:50:48 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,6 +59,7 @@ class Logger {
 		static void log_msg(const std::string& msg);
 		static void log_warn(const std::string& msg);
 		static void log_srv(const std::string& srv_name, const std::string& msg);
+		static void log_reqres(const std::string& resreq, const std::string& data);
 
 		// The idead behind log_dbg{0,1,2} goes like this: at compile-time specify
 		// `-DLOGLEVEL={0,1,2}` and in the code use debug functions accordingly. so

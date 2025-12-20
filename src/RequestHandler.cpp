@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 19:13:35 by fmaurer           #+#    #+#             */
-/*   Updated: 2025/12/20 01:23:24 by fmaurer          ###   ########.fr       */
+/*   Updated: 2025/12/20 16:51:16 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -94,9 +94,9 @@ int RequestHandler::readRequest(int fd)
 // the main routine responsible for sending the response off to the cient!
 int RequestHandler::writeResponse(int fd)
 {
-	Logger::log_warn("Writing our Response!");
+	Logger::log_msg("Writing our Response!");
 	std::string response = _requests.back().getResponse();
-	Logger::log_err("response: " + response);
+	Logger::log_reqres("Response", response);
 	ssize_t bytes_sent = send(fd, response.c_str(), strlen(response.c_str()), 0);
 	if (bytes_sent == -1) {
 		Logger::log_err("couldn't send response!");
