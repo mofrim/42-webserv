@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/24 20:52:55 by fmaurer           #+#    #+#             */
-/*   Updated: 2025/12/18 20:40:57 by fmaurer          ###   ########.fr       */
+/*   Updated: 2025/12/20 16:54:41 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -87,5 +87,16 @@ void Logger::log_srv(const std::string& srv_name, const std::string& msg)
 		std::string logtime = _get_logtime();
 		std::cout << GRY << logtime << GRN << "(" << srv_name << ") " << GRY << msg
 							<< RST << std::endl;
+	}
+}
+
+// for logging response and requests
+void Logger::log_reqres(const std::string& resreq, const std::string& data)
+{
+	if (LOGLEVEL >= INFO) {
+		std::string logtime = _get_logtime();
+		std::cout << WHT << logtime << resreq << ":\n---" << std::endl;
+		std::cout << data;
+		std::cout << "---" << RST << std::endl;
 	}
 }

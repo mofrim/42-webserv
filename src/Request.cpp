@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 23:39:57 by fmaurer           #+#    #+#             */
-/*   Updated: 2025/12/20 01:20:56 by fmaurer          ###   ########.fr       */
+/*   Updated: 2025/12/20 16:55:23 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,8 +47,7 @@ Request::Request(const ServerCfg *scfg, const std::string& reqstr)
 {
 	_srvcfg = scfg;
 	_reqstr = reqstr;
-	std::cout << "Received:\n\n" << _reqstr << std::endl;
-	Logger::log_msg("Processing request...");
+	Logger::log_reqres("Request", _reqstr);
 	_parseRequest();
 }
 
