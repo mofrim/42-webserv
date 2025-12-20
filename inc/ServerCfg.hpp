@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/25 08:01:29 by fmaurer           #+#    #+#             */
-/*   Updated: 2025/12/03 13:05:27 by fmaurer          ###   ########.fr       */
+/*   Updated: 2025/12/19 00:04:35 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,10 @@ class ServerCfg {
 		std::string				 _server_name;
 		std::string				 _root;
 		struct sockaddr_in _server_addr;
-		int								 _listen_fd;
+
+		// FIXME: maybe remove this here as it belongs to the Server class and is
+		// not in any way configurable
+		int _listen_fd;
 
 		// std::string						_index;
 		// std::vector<Location> _locations;

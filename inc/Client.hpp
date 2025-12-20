@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/14 20:50:12 by fmaurer           #+#    #+#             */
-/*   Updated: 2025/12/16 12:46:20 by fmaurer          ###   ########.fr       */
+/*   Updated: 2025/12/19 18:19:22 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,11 +14,15 @@
 #define CLIENT_HPP
 
 #include <ctime>
+#include <netinet/in.h>
+#include <string>
 
 class Client {
 	private:
-		// TODO: somehow add (which?) info to server client is connected with.
-		int			_client_fd;
+		int					_client_fd;
+		std::string _hostname;
+		in_port_t		_port;
+
 		clock_t _last_access;
 
 	public:
@@ -27,7 +31,7 @@ class Client {
 		Client& operator=(const Client& other);
 		~Client();
 
-		Client(int fd, clock_t la);
+		Client(int fd, const std::string& hostname, in_port_t port);
 
 		void setFd(int fd);
 		int	 getFd() const;

@@ -6,14 +6,17 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 19:12:58 by fmaurer           #+#    #+#             */
-/*   Updated: 2025/12/18 21:23:44 by fmaurer          ###   ########.fr       */
+/*   Updated: 2025/12/20 00:43:59 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef REQUESTHANDLER_HPP
 #define REQUESTHANDLER_HPP
 
+#include "Request.hpp"
+
 #include <unistd.h>
+#include <vector>
 
 // FIXME: for now this is the read buffer size. definitely coud be higher.
 #define READ_BUFSIZE 4096
@@ -22,7 +25,8 @@ class Server;
 
 class RequestHandler {
 	private:
-		Server *_srv;
+		Server							*_srv;
+		std::vector<Request> _requests;
 
 		RequestHandler(const RequestHandler& other);
 		RequestHandler& operator=(const RequestHandler& other);

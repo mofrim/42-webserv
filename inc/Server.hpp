@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/03 12:50:36 by fmaurer           #+#    #+#             */
-/*   Updated: 2025/12/18 19:38:38 by fmaurer          ###   ########.fr       */
+/*   Updated: 2025/12/19 00:15:58 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,10 @@ class Server {
 		std::string				 _root;
 		struct sockaddr_in _server_addr;
 		int								 _listen_fd;
+
+		// FIXME: maybe only keep the cfg in here and don't store ^^ those extra
+		// values seperately bc this is redundant!
+		ServerCfg _cfg;
 
 		std::map<int, Client *> _clients;
 
@@ -53,21 +57,22 @@ class Server {
 		void		removeAllClients();
 
 		// utils, getters setters
-		uint16_t		getPort() const;
-		in_addr_t		getHost() const;
-		std::string getServerName() const;
-		std::string getRoot() const;
-		sockaddr_in getServerAddr() const;
-		int					getListenFd() const;
-		void				setPort(uint16_t port);
-		void				setHost(in_addr_t host);
-		void				setServerName(std::string name);
-		void				setRoot(std::string root);
-		void				setListenFd(int listen_fd);
-		void				setServerAddr(sockaddr_in server_addr);
-		void				printCfg() const;
-		void				printClients();
-		bool				isValidClientFd(int fd);
+		uint16_t				 getPort() const;
+		in_addr_t				 getHost() const;
+		std::string			 getServerName() const;
+		std::string			 getRoot() const;
+		sockaddr_in			 getServerAddr() const;
+		int							 getListenFd() const;
+		const ServerCfg *getCfg() const;
+		void						 setPort(uint16_t port);
+		void						 setHost(in_addr_t host);
+		void						 setServerName(std::string name);
+		void						 setRoot(std::string root);
+		void						 setListenFd(int listen_fd);
+		void						 setServerAddr(sockaddr_in server_addr);
+		void						 printCfg() const;
+		void						 printClients();
+		bool						 isValidClientFd(int fd);
 
 		// TODO: think about the whole exception thing! Maybe there should be
 		// some base-class called like this one and the special exceptions for every

@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/16 12:11:11 by fmaurer           #+#    #+#             */
-/*   Updated: 2025/12/18 23:20:55 by fmaurer          ###   ########.fr       */
+/*   Updated: 2025/12/19 00:16:08 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,12 +20,13 @@
 /// Server methods of minor importance
 
 // the getters
-uint16_t		Server::getPort() const { return (_port); }
-in_addr_t		Server::getHost() const { return (_host); }
-std::string Server::getServerName() const { return (_server_name); }
-std::string Server::getRoot() const { return (_root); }
-sockaddr_in Server::getServerAddr() const { return (_server_addr); }
-int					Server::getListenFd() const { return (_listen_fd); }
+uint16_t				 Server::getPort() const { return (_port); }
+in_addr_t				 Server::getHost() const { return (_host); }
+std::string			 Server::getServerName() const { return (_server_name); }
+std::string			 Server::getRoot() const { return (_root); }
+sockaddr_in			 Server::getServerAddr() const { return (_server_addr); }
+int							 Server::getListenFd() const { return (_listen_fd); }
+const ServerCfg *Server::getCfg() const { return (&_cfg); }
 
 // the setters
 void Server::setPort(uint16_t port) { _port = port; }
