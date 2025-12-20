@@ -6,11 +6,12 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 19:13:35 by fmaurer           #+#    #+#             */
-/*   Updated: 2025/12/18 21:44:12 by fmaurer          ###   ########.fr       */
+/*   Updated: 2025/12/20 01:23:24 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Logger.hpp"
+#include "Request.hpp"
 #include "RequestHandler.hpp"
 #include "Server.hpp"
 #include "Webserv.hpp"
@@ -38,12 +39,9 @@ RequestHandler::~RequestHandler() {}
 
 RequestHandler::RequestHandler(Server *srv): _srv(srv) {}
 
-// Handler for an EPOLLIN aka I/O read event.
+// Handler for an EPOLLIN aka I/O read event aka a _Request_
 //
 // FIXME: move exception to ReqHandler class
-//
-// if there was a read error, or there was nothing to read, return 1 in order
-// to signal deletion from epoll interest list
 int RequestHandler::readRequest(int fd)
 {
 	std::string srv_name(_srv->getServerName());
@@ -60,7 +58,7 @@ int RequestHandler::readRequest(int fd)
 	if (bytes_read <= 0) {
 		if (bytes_read == 0) {
 			Logger::log_srv(srv_name, "Client disconnected");
-			Logger::log_srv(srv_name, "closing client conn on fd " + int2str(fd));
+			Logger::log_srv(srv_name, "-> closing client conn on fd " + int2str(fd));
 		}
 		else
 			Logger::log_err(
@@ -68,11 +66,23 @@ int RequestHandler::readRequest(int fd)
 		return (REQ_ERR);
 	}
 
-	// we've read less or just enough bytes...
+	// NEXT: José this is where you join in!
+	//
+	// we've read less or just enough bytes... let's process the Request!!!
+	// add the new request _to the front_ of _requests vector bc we will send
+	// response by FIFO principle using pop_back()
+	//
+	// FIXME: actually, we only have to save the response in the vector here. or
+	// do we need a vector here at all?!
 	if (bytes_read <= READ_BUFSIZE - 1 && _isTerminatedReq(buffer, bytes_read)) {
-		std::cout << "Received:\n\n" << buffer << std::endl;
+		Request newReq(_srv->getCfg(), buffer);
+		_requests.insert(_requests.begin(), newReq);
 	}
 
+	// FIXME: what to do with incomplete requests?! normally we should keep
+	// collecting data until a request is complete. but at some pont this has to
+	// stop because otherwise someone could just blow up our mem with incomplete
+	// reqs.
 	if (_isTerminatedReq(buffer, bytes_read) == false) {
 		Logger::log_err("Request was not correctly terminated!");
 		return (REQ_NTERM);
@@ -81,13 +91,13 @@ int RequestHandler::readRequest(int fd)
 	return (REQ_READ);
 }
 
+// the main routine responsible for sending the response off to the cient!
 int RequestHandler::writeResponse(int fd)
 {
 	Logger::log_warn("Writing our Response!");
-	const char *response =
-			"HTTP/1.1 200 OK\r\nContent-Length: 40\r\n\r\nHello from José's and "
-			"Frido's webserv!\n";
-	ssize_t bytes_sent = send(fd, response, strlen(response), 0);
+	std::string response = _requests.back().getResponse();
+	Logger::log_err("response: " + response);
+	ssize_t bytes_sent = send(fd, response.c_str(), strlen(response.c_str()), 0);
 	if (bytes_sent == -1) {
 		Logger::log_err("couldn't send response!");
 		return (REQ_READ);

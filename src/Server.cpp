@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/03 12:51:23 by fmaurer           #+#    #+#             */
-/*   Updated: 2025/12/18 21:23:46 by fmaurer          ###   ########.fr       */
+/*   Updated: 2025/12/20 00:40:34 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,6 +39,7 @@ Server::Server(const ServerCfg& srvcfg): _reqHandler(this)
 	_root				 = srvcfg.getRoot();
 	_listen_fd	 = srvcfg.getListenFd();
 	_server_addr = srvcfg.getServerAddr();
+	_cfg				 = srvcfg;
 }
 
 Server::Server(const Server& other): _reqHandler(this)
@@ -50,6 +51,7 @@ Server::Server(const Server& other): _reqHandler(this)
 		_root				 = other._root;
 		_listen_fd	 = other._listen_fd;
 		_server_addr = other._server_addr;
+		_cfg				 = other._cfg;
 	}
 }
 
@@ -161,13 +163,15 @@ Client *Server::addClient(int fd)
 		else
 			Logger::log_err(std::string("accept failed: ", *strerror(errno)));
 	}
+	std::string hostname(inaddrToStr(client_addr.sin_addr));
 	Logger::log_srv(_server_name,
-			"Client connected from address " + inaddrToStr(client_addr.sin_addr));
+			"Client connected from " + hostname + ":"
+					+ int2str(client_addr.sin_port));
 
 	if (setFdNonBlocking(client_fd) == -1)
 		throw(ServerException("could not set new clients fd non-blocking"));
 
-	Client *newCli = new Client(client_fd, clock());
+	Client *newCli = new Client(client_fd, hostname, client_addr.sin_port);
 	std::pair<std::map<int, Client *>::iterator, bool> insertReturn =
 			_clients.insert(std::pair<int, Client *>(client_fd, newCli));
 

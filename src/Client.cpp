@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/14 20:51:06 by fmaurer           #+#    #+#             */
-/*   Updated: 2025/12/18 16:36:23 by fmaurer          ###   ########.fr       */
+/*   Updated: 2025/12/19 18:19:04 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,9 @@ Client::Client(const Client& other)
 	}
 }
 
-Client::Client(int fd, clock_t la): _client_fd(fd), _last_access(la) {}
+Client::Client(int fd, const std::string& hostname, in_port_t port):
+	_client_fd(fd), _hostname(hostname), _port(port), _last_access(clock())
+{}
 
 Client& Client::operator=(const Client& other)
 {
