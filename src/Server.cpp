@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/03 12:51:23 by fmaurer           #+#    #+#             */
-/*   Updated: 2025/12/20 00:40:34 by fmaurer          ###   ########.fr       */
+/*   Updated: 2025/12/27 09:35:14 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -98,6 +98,8 @@ Server::~Server()
 // 		is the sockets API level, another level would be SOL_IP.
 // 	- SO_REUSEADDR: avoid EADDRINUSE if webserv (or one of the servers) is being
 // 		restarted.
+// 	- SO_REUSEPORT (not used): only useful for multi-threaded servers. allows
+// 		binding socket to the same src_addr:port pair
 //
 // listen() explained:
 //
