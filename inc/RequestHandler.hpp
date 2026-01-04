@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 19:12:58 by fmaurer           #+#    #+#             */
-/*   Updated: 2025/12/20 00:43:59 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/01/04 08:30:05 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,6 @@ class RequestHandler {
 		std::vector<Request> _requests;
 
 		RequestHandler(const RequestHandler& other);
-		RequestHandler& operator=(const RequestHandler& other);
 		RequestHandler();
 
 		// utils
@@ -37,6 +36,7 @@ class RequestHandler {
 
 	public:
 		RequestHandler(Server *srv);
+		RequestHandler& operator=(const RequestHandler& other);
 		~RequestHandler();
 
 		int readRequest(int fd);

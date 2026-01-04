@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/16 11:54:27 by fmaurer           #+#    #+#             */
-/*   Updated: 2025/12/18 18:03:26 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/01/02 08:52:12 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,7 +80,7 @@ void Webserv::_initDefaultCfg2()
 	srv_addr.sin_addr.s_addr = INADDR_ANY;
 	srv_addr.sin_port				 = htons(DEFAULT_PORT);
 	dsrv1.setServerAddr(srv_addr);
-	dsrv1.setHost(INADDR_LOOPBACK);
+	dsrv1.setHost(INADDR_ANY);
 
 	dsrv2.setServerName("testsrv_4285");
 	dsrv2.setPort(4285);
@@ -91,7 +91,7 @@ void Webserv::_initDefaultCfg2()
 	srv_addr.sin_addr.s_addr = INADDR_ANY;
 	srv_addr.sin_port				 = htons(4285);
 	dsrv2.setServerAddr(srv_addr);
-	dsrv2.setHost(INADDR_LOOPBACK);
+	dsrv2.setHost(INADDR_ANY);
 
 	_servers.push_back(dsrv1);
 	_servers.push_back(dsrv2);
