@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/03 12:50:36 by fmaurer           #+#    #+#             */
-/*   Updated: 2025/12/19 00:15:58 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/01/04 08:15:51 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,7 @@ class Server {
 		std::string				 _root;
 		struct sockaddr_in _server_addr;
 		int								 _listen_fd;
+		bool							 _setupFailed;
 
 		// FIXME: maybe only keep the cfg in here and don't store ^^ those extra
 		// values seperately bc this is redundant!
@@ -40,14 +41,12 @@ class Server {
 		void _setupSocket();
 		void _removeAllClients();
 
-		// we aren't using this.
-		Server& operator=(const Server& other);
-
 	public:
 		// OCF
 		Server();
 		Server(const ServerCfg& srvcfg);
 		Server(const Server& other);
+		Server& operator=(const Server& other);
 		~Server();
 
 		void		init();
@@ -64,15 +63,19 @@ class Server {
 		sockaddr_in			 getServerAddr() const;
 		int							 getListenFd() const;
 		const ServerCfg *getCfg() const;
-		void						 setPort(uint16_t port);
-		void						 setHost(in_addr_t host);
-		void						 setServerName(std::string name);
-		void						 setRoot(std::string root);
-		void						 setListenFd(int listen_fd);
-		void						 setServerAddr(sockaddr_in server_addr);
-		void						 printCfg() const;
-		void						 printClients();
-		bool						 isValidClientFd(int fd);
+		bool						 getSetupFailed() const;
+
+		void setPort(uint16_t port);
+		void setHost(in_addr_t host);
+		void setServerName(std::string name);
+		void setRoot(std::string root);
+		void setListenFd(int listen_fd);
+		void setServerAddr(sockaddr_in server_addr);
+		void setSetupFailed();
+
+		void printCfg() const;
+		void printClients();
+		bool isValidClientFd(int fd);
 
 		// TODO: think about the whole exception thing! Maybe there should be
 		// some base-class called like this one and the special exceptions for every

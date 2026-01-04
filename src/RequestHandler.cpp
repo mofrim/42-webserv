@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 19:13:35 by fmaurer           #+#    #+#             */
-/*   Updated: 2025/12/20 16:51:16 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/01/04 08:31:41 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,6 @@
 #include "utils.hpp"
 
 #include <errno.h>
-#include <iostream>
 #include <string.h>
 #include <unistd.h>
 
@@ -30,7 +29,10 @@ RequestHandler::RequestHandler(const RequestHandler& other) { (void)other; }
 
 RequestHandler& RequestHandler::operator=(const RequestHandler& other)
 {
-	(void)other;
+	if (this != &other) {
+		_srv			= other._srv;
+		_requests = other._requests;
+	}
 	return (*this);
 }
 

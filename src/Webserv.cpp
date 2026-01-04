@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:36:43 by fmaurer           #+#    #+#             */
-/*   Updated: 2025/12/18 21:35:48 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/01/04 09:08:23 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,6 +86,21 @@ void Webserv::_setupServers()
 	for (size_t i = 0; i < _numOfServers; i++) {
 		_setupSingleServer(_servers[i]);
 	}
+
+	// NEXT:
+	// TODO: handle removal of servers from server list where setup failed. also
+	// handle case where no servers remain. update _numOfServers.
+
+	std::vector<Server>::iterator it = _servers.begin();
+	while (it != _servers.end()) {
+		if (it->getSetupFailed()) {
+			it = _servers.erase(it);
+			--_numOfServers;
+		}
+		else
+			++it;
+	}
+	Logger::log_dbg2("Number of Servers left: " + int2str(_numOfServers));
 }
 
 // here one server is being setup, meaning, the `init()` of a server is called
@@ -96,8 +111,15 @@ void Webserv::_setupSingleServer(Server& srv)
 {
 	Logger::log_msg("Setting up this server:");
 	srv.printCfg();
-	srv.init();
-	_serverFdMap.insert(std::pair<int, Server *>(srv.getListenFd(), &srv));
+	try {
+		srv.init();
+		_serverFdMap.insert(std::pair<int, Server *>(srv.getListenFd(), &srv));
+	} catch (const Server::ServerInitException& e) {
+		Logger::log_err(e.what());
+		Logger::log_err(
+				"Caught exception while trying to init srv " + srv.getServerName());
+		srv.setSetupFailed();
+	}
 }
 
 void Webserv::_shutdownAllServers()

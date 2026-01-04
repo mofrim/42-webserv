@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/03 12:51:23 by fmaurer           #+#    #+#             */
-/*   Updated: 2025/12/27 09:35:14 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/01/04 08:34:53 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,6 @@
 #include <cstring>
 #include <errno.h>
 #include <fcntl.h>
-#include <iostream>
 #include <sys/epoll.h>
 #include <unistd.h>
 
@@ -28,6 +27,7 @@ Server::Server(): _reqHandler(this)
 	_server_name = "";
 	_root				 = "";
 	_listen_fd	 = -1;
+	_setupFailed = false;
 	memset(&_server_addr, 0, sizeof(_server_addr));
 }
 
@@ -40,6 +40,7 @@ Server::Server(const ServerCfg& srvcfg): _reqHandler(this)
 	_listen_fd	 = srvcfg.getListenFd();
 	_server_addr = srvcfg.getServerAddr();
 	_cfg				 = srvcfg;
+	_setupFailed = false;
 }
 
 Server::Server(const Server& other): _reqHandler(this)
@@ -50,14 +51,30 @@ Server::Server(const Server& other): _reqHandler(this)
 		_server_name = other._server_name;
 		_root				 = other._root;
 		_listen_fd	 = other._listen_fd;
+
 		_server_addr = other._server_addr;
+		_setupFailed = other._setupFailed;
 		_cfg				 = other._cfg;
 	}
 }
 
+// NOTE: only for this use-case implemented the copy assignment constructor for
+// RequestHandler. only place this is used: Webserv::_setupServers.
 Server& Server::operator=(const Server& other)
 {
-	(void)other;
+	if (this != &other) {
+		_port				 = other._port;
+		_host				 = other._host;
+		_server_name = other._server_name;
+		_root				 = other._root;
+		_listen_fd	 = other._listen_fd;
+
+		_server_addr = other._server_addr;
+		_setupFailed = other._setupFailed;
+		_cfg				 = other._cfg;
+		_clients		 = other._clients;
+		_reqHandler	 = RequestHandler(this);
+	}
 	return (*this);
 }
 
@@ -130,7 +147,7 @@ void Server::init()
 	try {
 		_setupSocket();
 	} catch (const Server::ServerInitException& e) {
-		std::cout << "e.what(): " << e.what() << std::endl;
+		throw;
 	}
 	Logger::log_srv(_server_name, "initialized!");
 }
