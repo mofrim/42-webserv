@@ -17,6 +17,10 @@
 
 - [Killer Stack-Overflow thread on SO_REUSEADDR](https://stackoverflow.com/questions/14388706/how-do-so-reuseaddr-and-so-reuseport-differ)
 
+- [all the status codes](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status)
+
+- [nginx config about error pages](https://nginx.org/en/docs/http/ngx_http_core_module.html#error_page)
+
 
 ## Networking, TCP/IP, socket-bind-listen-Business
 
