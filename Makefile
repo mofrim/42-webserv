@@ -6,7 +6,7 @@
 #    By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/12/01 11:45:58 by fmaurer           #+#    #+#              #
-#    Updated: 2025/12/20 00:39:18 by fmaurer          ###   ########.fr        #
+#    Updated: 2026/01/04 08:37:35 by fmaurer          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -27,11 +27,11 @@ INC_DIR = ./inc
 SRCS			= main.cpp Webserv.cpp Logger.cpp ServerCfg.cpp Config.cpp \
 						ConfigParser.cpp utils.cpp Server.cpp Client.cpp Epoll.cpp \
 						Webserv_Utils.cpp Server_Utils.cpp RequestHandler.cpp \
-						Request.cpp
+						Request.cpp Socket.cpp
 
 HDRS			= Webserv.hpp Logger.hpp ServerCfg.hpp Config.hpp ConfigParser.hpp \
 						utils.hpp Server.hpp Client.hpp Epoll.hpp RequestHandler.hpp \
-						Request.hpp
+						Request.hpp Socket.hpp
 
 OBJS		= $(patsubst %.cpp,$(OBJDIR)/%.o,$(SRCS))
 
@@ -41,7 +41,6 @@ CPP			= c++
 # compiler flags
 CFLAGS	= -Wall -Werror -Wextra -std=c++98
 CFLAGS	+= -g
-CFLAGS	+= -DLOGLEVEL=0
 IFLAGS	= -I $(INC_DIR)
 
 all: $(NAME)
@@ -56,6 +55,7 @@ $(OBJDIR):
 $(OBJDIR)/%.o: %.cpp $(HDRS) | $(OBJDIR)
 	$(CPP) $(IFLAGS) $(CFLAGS) -c $< -o $@
 
+$(NAME): CFLAGS	+= -DLOGLEVEL=0
 $(NAME): $(OBJS)
 	$(CPP) $(IFLAGS) $(CFLAGS) -o $@ $^
 
@@ -67,6 +67,13 @@ bear: fclean
 
 run: $(NAME)
 	./$(NAME)
+
+debug: CFLAGS += -DLOGLEVEL=2
+debug: $(SRCS)
+	$(CPP) $(IFLAGS) $(CFLAGS) -o $(NAME) $^
+
+debug-run: debug
+	./webserv
 
 valgrind: $(NAME)
 	valgrind --track-fds=yes -- ./webserv
@@ -84,4 +91,4 @@ fclean: clean
 
 re: fclean $(NAME)
 
-.PHONY: all clean fclean re bear run tests tests-clean
+.PHONY: all clean fclean re bear run tests tests-clean debug debug-run
