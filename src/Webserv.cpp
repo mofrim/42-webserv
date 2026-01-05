@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:36:43 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/01/04 09:08:23 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/01/05 07:08:40 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -100,7 +100,8 @@ void Webserv::_setupServers()
 		else
 			++it;
 	}
-	Logger::log_dbg2("Number of Servers left: " + int2str(_numOfServers));
+	Logger::log_dbg2("Number of not-failed Servers left after cleanup: "
+			+ int2str(_numOfServers));
 }
 
 // here one server is being setup, meaning, the `init()` of a server is called

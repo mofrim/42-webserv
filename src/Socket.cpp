@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/28 07:26:35 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/01/02 08:13:18 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/01/05 07:18:36 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,6 @@ Socket& Socket::operator=(const Socket& other)
 Socket::~Socket()
 {
 	if (_addrllist != NULL) {
-		std::cout << "Freeing addrlist" << std::endl;
 		freeaddrinfo(_addrllist);
 	}
 }
@@ -67,6 +66,8 @@ Socket::Socket(const std::string& hostname, uint16_t port):
 	_addrllist = result;
 }
 
+// FIXME: implement/use own version of inet_ntop() as it is not allowed by
+// subject.
 void Socket::print_addrllist() const
 {
 	struct addrinfo *ap = _addrllist;
