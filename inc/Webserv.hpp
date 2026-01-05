@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:35:29 by fmaurer           #+#    #+#             */
-/*   Updated: 2025/12/18 23:25:17 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/01/05 07:48:03 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,7 @@
 
 // just for explicitness sake define the possible return values of the
 // requestHandler as constants here
-enum { REQ_READ = 0, REQ_WRITE = 1, REQ_ERR = -1, REQ_NTERM = -2 };
+enum { REQ_READ = 0, REQ_WRITE = 1, REQ_ERR = -1 };
 
 // NOTE: Naming convention for private class-members / methods: underscore at
 // the beginning. In later use this enables us to omit the `this->`. This saves

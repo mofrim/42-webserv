@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 19:13:35 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/01/04 08:31:41 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/01/05 08:28:06 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,26 +76,19 @@ int RequestHandler::readRequest(int fd)
 	//
 	// FIXME: actually, we only have to save the response in the vector here. or
 	// do we need a vector here at all?!
-	if (bytes_read <= READ_BUFSIZE - 1 && _isTerminatedReq(buffer, bytes_read)) {
-		Request newReq(_srv->getCfg(), buffer);
-		_requests.insert(_requests.begin(), newReq);
-	}
-
-	// FIXME: what to do with incomplete requests?! normally we should keep
-	// collecting data until a request is complete. but at some pont this has to
-	// stop because otherwise someone could just blow up our mem with incomplete
-	// reqs.
-	if (_isTerminatedReq(buffer, bytes_read) == false) {
-		Logger::log_err("Request was not correctly terminated!");
-		return (REQ_NTERM);
-	}
+	Request newReq(_srv->getCfg(), buffer);
+	_requests.insert(_requests.begin(), newReq);
 
 	return (REQ_READ);
 }
 
 // the main routine responsible for sending the response off to the cient!
+// taking the response from the back of the _requests vector as new requests
+// will be pushed to the front (see above)
 int RequestHandler::writeResponse(int fd)
 {
+	if (_requests.empty())
+		throw(ReqHandlerException("Cannot write response! Ain't got no requests!"));
 	Logger::log_msg("Writing our Response!");
 	std::string response = _requests.back().getResponse();
 	Logger::log_reqres("Response", response);
@@ -104,13 +97,10 @@ int RequestHandler::writeResponse(int fd)
 		Logger::log_err("couldn't send response!");
 		return (REQ_READ);
 	}
+	_requests.pop_back();
 	return (REQ_WRITE);
 }
 
-// check if received request was erminated with '\r\n'
-bool RequestHandler::_isTerminatedReq(char *buf, ssize_t bytes_read)
-{
-	if (buf[bytes_read - 2] == '\r' && buf[bytes_read - 1] == '\n')
-		return (true);
-	return (false);
-}
+RequestHandler::ReqHandlerException::ReqHandlerException(
+		const std::string& msg): std::runtime_error("ReqHandlerException: " + msg)
+{}
