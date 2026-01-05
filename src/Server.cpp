@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/03 12:51:23 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/01/04 08:34:53 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/01/05 07:15:42 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -122,6 +122,7 @@ Server::~Server()
 //
 //	- SOMAXCONN: 4096 on my system, maximum number of connections in the backlog
 //		of listen
+// TODO: use Socket-class here.
 void Server::_setupSocket()
 {
 	_listen_fd = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0);
@@ -142,11 +143,15 @@ void Server::_setupSocket()
 	Logger::log_srv(_server_name, "listening on fd " + int2str(_listen_fd));
 }
 
+// Init a server. If initialization fails after call to socket we would be left
+// with a open fd, so we need to close it for proper cleanup
 void Server::init()
 {
 	try {
 		_setupSocket();
 	} catch (const Server::ServerInitException& e) {
+		if (_listen_fd != -1)
+			close(_listen_fd);
 		throw;
 	}
 	Logger::log_srv(_server_name, "initialized!");
