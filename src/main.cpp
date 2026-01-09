@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:37:25 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/01/04 08:35:08 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/01/09 10:53:14 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@ void shutdownHandler(int signum)
 {
 	(void)signum;
 	if (g_webserv) {
-		g_webserv->shutdown();
+		g_webserv->shutdownWebserv();
 	}
 }
 

@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:35:29 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/01/05 07:48:03 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/01/09 10:53:14 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,7 +74,7 @@ class Webserv {
 
 		void run();
 		void getServersFromCfg(const std::string& cfgFilename);
-		void shutdown();
+		void shutdownWebserv();
 
 		class WebservInitException: public std::runtime_error {
 			public:
