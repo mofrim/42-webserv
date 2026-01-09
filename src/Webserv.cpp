@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:36:43 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/01/05 07:08:40 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/01/09 11:10:57 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,7 @@ Webserv::~Webserv()
 // - close sockets
 // - disconnect clients
 // - etc....
-void Webserv::shutdown()
+void Webserv::shutdownWebserv()
 {
 	Logger::log_warn("shutting down webserv...");
 	_shutdown_server = true;
@@ -83,16 +83,9 @@ void Webserv::_setupServers()
 	if (_defaultCfg)
 		_initDefaultCfg2();
 
-	for (size_t i = 0; i < _numOfServers; i++) {
-		_setupSingleServer(_servers[i]);
-	}
-
-	// NEXT:
-	// TODO: handle removal of servers from server list where setup failed. also
-	// handle case where no servers remain. update _numOfServers.
-
 	std::vector<Server>::iterator it = _servers.begin();
 	while (it != _servers.end()) {
+		_setupSingleServer(*it);
 		if (it->getSetupFailed()) {
 			it = _servers.erase(it);
 			--_numOfServers;
@@ -102,6 +95,10 @@ void Webserv::_setupServers()
 	}
 	Logger::log_dbg2("Number of not-failed Servers left after cleanup: "
 			+ int2str(_numOfServers));
+	if (_numOfServers == 0) {
+		Logger::log_err("Could not setup any Server!");
+		shutdownWebserv();
+	}
 }
 
 // here one server is being setup, meaning, the `init()` of a server is called
