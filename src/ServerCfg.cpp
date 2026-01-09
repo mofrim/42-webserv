@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/25 08:35:42 by fmaurer           #+#    #+#             */
-/*   Updated: 2025/12/13 08:25:05 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/01/09 17:00:08 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,8 +28,6 @@ ServerCfg::ServerCfg()
 	_host				 = 0;
 	_server_name = "";
 	_root				 = "";
-	// FIXME: is this a sensible initial value?
-	_listen_fd = -1;
 	memset(&_server_addr, 0, sizeof(_server_addr));
 }
 
@@ -39,7 +37,6 @@ ServerCfg::ServerCfg(const ServerCfg& other)
 	_host				 = other._host;
 	_server_name = other._server_name;
 	_root				 = other._root;
-	_listen_fd	 = other._listen_fd;
 	_server_addr = other._server_addr;
 }
 
@@ -50,7 +47,6 @@ ServerCfg& ServerCfg::operator=(const ServerCfg& other)
 		_host				 = other._host;
 		_server_name = other._server_name;
 		_root				 = other._root;
-		_listen_fd	 = other._listen_fd;
 		_server_addr = other._server_addr;
 	}
 	return (*this);
@@ -68,7 +64,6 @@ void ServerCfg::setServerAddr(sockaddr_in server_addr)
 {
 	this->_server_addr = server_addr;
 }
-void ServerCfg::setListenFd(int listen_fd) { _listen_fd = listen_fd; }
 
 // void ServerCfg::setClientMaxBodySize(unsigned long max_body_size)
 // {
@@ -85,7 +80,6 @@ in_addr_t		ServerCfg::getHost() const { return (_host); }
 std::string ServerCfg::getServerName() const { return (_server_name); }
 std::string ServerCfg::getRoot() const { return (_root); }
 sockaddr_in ServerCfg::getServerAddr() const { return (_server_addr); }
-int					ServerCfg::getListenFd() const { return (_listen_fd); }
 
 // unsigned long
 // ServerCfg::getClientMaxBodySize() {} std::string
@@ -96,7 +90,6 @@ int					ServerCfg::getListenFd() const { return (_listen_fd); }
 // std::string				 _server_name;
 // std::string				 _root;
 // struct sockaddr_in _server_addr;
-// int								 _listen_fd;
 //
 // with our own conversion functions for ip-addrs.
 void ServerCfg::printCfg() const
@@ -106,7 +99,7 @@ void ServerCfg::printCfg() const
 	std::cout << "  server_name: \"" << _server_name << "\"" << std::endl;
 	std::cout << "  port: " << _port << std::endl;
 	std::cout << "  root: " << _root << std::endl;
-	std::cout << "  listen_fd: " << _listen_fd << std::endl;
+
 	// FIXME: remove inet_ntoa because we cannot use it but keep it for now to see
 	// if our function is fine.
 	// std::cout << "  host: " << inet_ntoa(host_addr) << std::endl;
