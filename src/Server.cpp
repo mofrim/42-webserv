@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/03 12:51:23 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/01/05 07:15:42 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/01/09 17:02:20 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,11 +33,11 @@ Server::Server(): _reqHandler(this)
 
 Server::Server(const ServerCfg& srvcfg): _reqHandler(this)
 {
+	_listen_fd	 = -1;
 	_port				 = srvcfg.getPort();
 	_host				 = srvcfg.getHost();
 	_server_name = srvcfg.getServerName();
 	_root				 = srvcfg.getRoot();
-	_listen_fd	 = srvcfg.getListenFd();
 	_server_addr = srvcfg.getServerAddr();
 	_cfg				 = srvcfg;
 	_setupFailed = false;

@@ -6,7 +6,7 @@
 #    By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/12/01 11:45:58 by fmaurer           #+#    #+#              #
-#    Updated: 2026/01/04 08:37:35 by fmaurer          ###   ########.fr        #
+#    Updated: 2026/01/09 17:00:27 by fmaurer          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -27,11 +27,11 @@ INC_DIR = ./inc
 SRCS			= main.cpp Webserv.cpp Logger.cpp ServerCfg.cpp Config.cpp \
 						ConfigParser.cpp utils.cpp Server.cpp Client.cpp Epoll.cpp \
 						Webserv_Utils.cpp Server_Utils.cpp RequestHandler.cpp \
-						Request.cpp Socket.cpp
+						Request.cpp Socket.cpp Route.cpp
 
 HDRS			= Webserv.hpp Logger.hpp ServerCfg.hpp Config.hpp ConfigParser.hpp \
 						utils.hpp Server.hpp Client.hpp Epoll.hpp RequestHandler.hpp \
-						Request.hpp Socket.hpp
+						Request.hpp Socket.hpp Route.hpp
 
 OBJS		= $(patsubst %.cpp,$(OBJDIR)/%.o,$(SRCS))
 

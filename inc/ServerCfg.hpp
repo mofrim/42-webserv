@@ -6,16 +6,19 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/25 08:01:29 by fmaurer           #+#    #+#             */
-/*   Updated: 2025/12/19 00:04:35 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/01/09 17:06:14 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef SERVERCFG_HPP
 #define SERVERCFG_HPP
 
+#include "Route.hpp"
+
 #include <netinet/in.h>
 #include <string>
 #include <sys/socket.h>
+#include <vector>
 
 class ServerCfg {
 	private:
@@ -25,14 +28,10 @@ class ServerCfg {
 		std::string				 _server_name;
 		std::string				 _root;
 		struct sockaddr_in _server_addr;
+		std::string				 _index;
+		unsigned long			 _client_max_body_size;
 
-		// FIXME: maybe remove this here as it belongs to the Server class and is
-		// not in any way configurable
-		int _listen_fd;
-
-		// std::string						_index;
-		// std::vector<Location> _locations;
-		// unsigned long					_client_max_body_size;
+		std::vector<Route> _routes;
 
 	public:
 		// OCF
@@ -45,7 +44,6 @@ class ServerCfg {
 		void setHost(in_addr_t host);
 		void setServerName(std::string name);
 		void setRoot(std::string root);
-		void setListenFd(int listen_fd);
 		void setServerAddr(sockaddr_in server_addr);
 		//
 		// void setClientMaxBodySize(unsigned long cli_max_body_size);
@@ -57,7 +55,6 @@ class ServerCfg {
 		std::string getServerName() const;
 		std::string getRoot() const;
 		sockaddr_in getServerAddr() const;
-		int					getListenFd() const;
 
 		// unsigned long					getClientMaxBodySize();
 		// std::string						getIndex();
