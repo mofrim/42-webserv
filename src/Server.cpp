@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/03 12:51:23 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/01/09 17:02:20 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/01/12 17:40:44 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,6 +78,8 @@ Server& Server::operator=(const Server& other)
 	return (*this);
 }
 
+// a little hack to avoid printing the "out of scope msg" for tmp servers not
+// fully initialized
 Server::~Server()
 {
 	if (_listen_fd != -1)

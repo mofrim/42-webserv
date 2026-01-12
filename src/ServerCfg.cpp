@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/25 08:35:42 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/01/09 17:00:08 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/01/12 17:47:23 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,10 +56,14 @@ ServerCfg::~ServerCfg() {}
 
 //// OCF end
 
-void ServerCfg::setPort(uint16_t port) { _port = port; }
-void ServerCfg::setHost(in_addr_t host) { _host = host; }
 void ServerCfg::setServerName(std::string name) { _server_name = name; }
 void ServerCfg::setRoot(std::string root) { _root = root; }
+void ServerCfg::setDefaultFile(std::string default_file)
+{
+	this->_default_file = default_file;
+}
+void ServerCfg::setPort(uint16_t port) { _port = port; }
+void ServerCfg::setHost(in_addr_t host) { _host = host; }
 void ServerCfg::setServerAddr(sockaddr_in server_addr)
 {
 	this->_server_addr = server_addr;
@@ -69,7 +73,6 @@ void ServerCfg::setServerAddr(sockaddr_in server_addr)
 // {
 // 	this->_client_max_body_size = max_body_size;
 // }
-// void ServerCfg::setIndex(std::string index) { this->_index = index; }
 // void ServerCfg::setLocations(std::vector<Location> locations)
 // {
 // 	this->_locations = locations;
@@ -80,6 +83,7 @@ in_addr_t		ServerCfg::getHost() const { return (_host); }
 std::string ServerCfg::getServerName() const { return (_server_name); }
 std::string ServerCfg::getRoot() const { return (_root); }
 sockaddr_in ServerCfg::getServerAddr() const { return (_server_addr); }
+std::string ServerCfg::getDefaultFile() const { return (_default_file); }
 
 // unsigned long
 // ServerCfg::getClientMaxBodySize() {} std::string
