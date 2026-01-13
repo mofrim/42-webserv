@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/15 12:38:44 by fmaurer           #+#    #+#             */
-/*   Updated: 2025/12/08 11:39:38 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/01/13 13:22:26 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,10 +15,13 @@
 
 #include <string>
 
-void				newline();
+void newline();
+void print_test_section_header(const std::string& title);
+void print_test_topic(const std::string& what);
+void print_test_file_header(const std::string& what);
+void print_test_success(const std::string& what);
+void print_test_fail(const std::string& what);
+
 std::string toString(long num);
-void				print_test_section_header(const std::string& title);
-void				print_test_topic(const std::string& what);
-void				print_test_file_header(const std::string& what);
 
 #endif
