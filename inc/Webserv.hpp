@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:35:29 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/01/09 10:53:14 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/01/13 15:21:34 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,6 +63,7 @@ class Webserv {
 		void		_addClientToClientFdServerMap(int fd, Server *srv);
 		void		_initDefaultCfg();
 		void		_initDefaultCfg2();
+		void		_printSockname(int sock);
 
 		// we do not use them, so keep em private
 		Webserv(const Webserv& other);

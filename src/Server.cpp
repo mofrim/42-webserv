@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/03 12:51:23 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/01/12 17:40:44 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/01/13 15:46:00 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -189,18 +189,17 @@ Client *Server::addClient(int fd)
 		else
 			Logger::log_err(std::string("accept failed: ", *strerror(errno)));
 	}
-	std::string hostname(inaddrToStr(client_addr.sin_addr));
 	Logger::log_srv(_server_name,
-			"Client connected from " + hostname + ":"
-					+ int2str(client_addr.sin_port));
+			"Client connected from " + getAddrPortStr4(client_addr));
 
 	if (setFdNonBlocking(client_fd) == -1)
 		throw(ServerException("could not set new clients fd non-blocking"));
 
-	Client *newCli = new Client(client_fd, hostname, client_addr.sin_port);
+	std::string hostname(inAddrToStr(client_addr.sin_addr));
+	Client		 *newCli = new Client(client_fd, hostname, client_addr.sin_port);
+
 	std::pair<std::map<int, Client *>::iterator, bool> insertReturn =
 			_clients.insert(std::pair<int, Client *>(client_fd, newCli));
-
 	if (insertReturn.second == false)
 		throw(ServerException(
 				"could not insert new client into Server's _clients map"));
