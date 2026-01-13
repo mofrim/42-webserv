@@ -36,12 +36,12 @@ void print_test_file_header(const std::string& what)
 
 void print_test_success(const std::string& what)
 {
-	std::cout << "\e[32m[TEST] " << what << "\e[0m" << std::endl;
+	std::cout << "\e[32m[OK]\e[0m " << what << std::endl;
 }
 
 void print_test_fail(const std::string& what)
 {
-	std::cout << "\e[31m[TEST] " << what << "\e[0m" << std::endl;
+	std::cout << "\e[31m[KO]\e[0m " << what << std::endl;
 }
 
 // convert an integer to string, as there is no such thing in c++1972 :(
