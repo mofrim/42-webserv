@@ -6,11 +6,13 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/16 11:54:27 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/01/02 08:52:12 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/01/13 15:42:10 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "Logger.hpp"
 #include "Webserv.hpp"
+#include "utils.hpp"
 
 // for memset
 #include <cstring>
@@ -31,11 +33,21 @@ Server *Webserv::_getServerByFd(int fd)
 
 Server *Webserv::_getServerByClientFd(int fd)
 {
+	_printSockname(fd);
 	std::map<int, Server *>::iterator it;
 	it = _clientFdServerMap.find(fd);
 	if (it == _clientFdServerMap.end())
 		return (NULL);
 	return (it->second);
+}
+
+void Webserv::_printSockname(int sock)
+{
+	struct sockaddr_in addr;
+	socklen_t					 addrlen = sizeof(addr);
+	if (getsockname(sock, (struct sockaddr *)&addr, &addrlen) == -1)
+		throw(WebservRunException("could not getsockname for fd " + int2str(sock)));
+	Logger::log_dbg0("getsockname: " + getAddrPortStr4(addr));
 }
 
 void Webserv::_addClientToClientFdServerMap(int fd, Server *srv)

@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/25 08:35:42 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/01/12 17:47:23 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/01/13 15:42:39 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -107,5 +107,5 @@ void ServerCfg::printCfg() const
 	// FIXME: remove inet_ntoa because we cannot use it but keep it for now to see
 	// if our function is fine.
 	// std::cout << "  host: " << inet_ntoa(host_addr) << std::endl;
-	std::cout << "  host: " << inaddrToStr(host_addr) << std::endl;
+	std::cout << "  host: " << inAddrToStr(host_addr) << std::endl;
 }

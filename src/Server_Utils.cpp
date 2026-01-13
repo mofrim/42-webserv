@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/16 12:11:11 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/01/02 09:09:58 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/01/13 15:42:58 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,7 +49,7 @@ void Server::printCfg() const
 	Logger::log_msg("  port: " + int2str(_port));
 	Logger::log_msg("  root: " + _root);
 	Logger::log_msg("  listen_fd: " + int2str(_listen_fd));
-	Logger::log_msg("  host: " + inaddrToStr(host_addr));
+	Logger::log_msg("  host: " + inAddrToStr(host_addr));
 }
 
 void Server::printClients()
