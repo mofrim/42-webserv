@@ -34,6 +34,16 @@ void print_test_file_header(const std::string& what)
 	std::cout << "\e[36m[TESTFILE] " << what << "\e[0m" << std::endl;
 }
 
+void print_test_success(const std::string& what)
+{
+	std::cout << "\e[32m[TEST] " << what << "\e[0m" << std::endl;
+}
+
+void print_test_fail(const std::string& what)
+{
+	std::cout << "\e[31m[TEST] " << what << "\e[0m" << std::endl;
+}
+
 // convert an integer to string, as there is no such thing in c++1972 :(
 std::string toString(long num)
 {

@@ -8,6 +8,7 @@ if [[ ! -e cpp_tests || ! -d cpp_tests ]]; then
 	exit 1
 fi
 
+wsrv_makefile="../Makefile"
 mainfile="test-main.cpp"
 testhdr="tests.hpp"
 tf_func=""
@@ -61,3 +62,15 @@ last_file="$(cat $tmpf | tail -n 1 | sed 's/\\//')"
 last_file_double_bs="$(cat $tmpf | tail -n 1 | sed 's/\\/\\\\/')"
 sed -i "s/$last_file_double_bs/$last_file/" Makefile
 rm -f $tmpf
+
+# fill in all srcs and headers we currently have available in our proj
+
+cpp_files=$(ls -x -w 0 ../src)
+wsrv_srcs=$(echo "WSRV_SRCS = $cpp_files" | sed 's/main.cpp//')
+hpp_files=$(ls -x -w 0 ../inc)
+wsrv_hdrs=$(echo "WSRV_HDRS = $cpp_files")
+sed -i "s/WSRV_SRCS_HERE/$wsrv_srcs/" Makefile
+sed -i "s/WSRV_HDRS_HERE/$wsrv_hdrs/" Makefile
+
+
+
