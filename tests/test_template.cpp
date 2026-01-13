@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/13 13:06:35 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/01/13 13:44:14 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/01/13 15:12:59 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,10 +27,10 @@ void test_template()
 		ret = _test_template();
 	} catch (const std::exception& e) {
 		print_test_fail(
-				">> Test \"test_template\" failed with following exception:\n"
+				"Test \"test_template\" failed with following exception:\n"
 				+ std::string(e.what()));
 	}
 	if (ret == -1) {
-		print_test_fail(">> Test \"test_template\" failed with -1");
+		print_test_fail("Test \"test_template\" failed with -1");
 	}
 }
