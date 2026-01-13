@@ -64,3 +64,6 @@ AllowShortIfStatementsOnASingleLine: Never
 AlignTrailingComments:
   Kind: Always
   OverEmptyLines: 2
+
+# avoid problems with >> in template-like dfns
+SpacesInAngles: Leave
