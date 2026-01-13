@@ -7,3 +7,10 @@ tests/webserv_tests
 tests/Makefile
 tests/tests.hpp
 tests/test-main.cpp
+
+# fine-grained control over everything in _play.
+# first ignore everything..
+_play/**
+# ..then unignore what we want in the repo
+!_play/echo_srv.cpp
+!_play/nginx/**
