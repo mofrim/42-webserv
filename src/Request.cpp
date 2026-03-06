@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 23:39:57 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/01/05 08:50:35 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/03/06 20:00:08 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,7 +81,8 @@ void Request::_parseRequest()
 	}
 	else
 		_response =
-				"HTTP/1.1 200 OK\r\nContent-Length: 40\r\n\r\nHello from José's and "
+				"HTTP/1.1 200 OK\r\nContent-Length: 40\r\nContent-Type: text/plain; "
+				"charset=utf-8\r\n\r\nHello from José's and "
 				"Frido's webserv!\n";
 }
 
