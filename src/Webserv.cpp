@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:36:43 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/01/09 11:10:57 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/03/06 20:25:25 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -155,6 +155,9 @@ void Webserv::run()
 			int currentFd = _epoll.getEventFd(eventIdx);
 
 			// 1) new connection
+			// FIXME: it is possible for us to have servers with different server
+			// names listening on the same hostname:port connection. will this work
+			// for them too?
 			if (_isServerFd(currentFd) && _numOfClients < MAX_CLIENTS) {
 				Server *srv = _getServerByFd(currentFd);
 				Client *cli = srv->addClient(currentFd);
@@ -163,6 +166,9 @@ void Webserv::run()
 				_numOfClients++;
 			}
 
+			// QUESTION: what if _numOfClients >= MAX_CLIENTS ?!?! we need to handle
+			// this!!! Also:
+			// FIXME: clarify how we handle connection keepalive with clients
 			// 2) existing connection
 			else {
 				Server *srv = _getServerByClientFd(currentFd);
