@@ -6,12 +6,12 @@ BraceWrapping:
   AfterFunction: true
   AfterClass: false
   AfterControlStatement: MultiLine
-  
   BeforeElse: true # wow! but this is what i want.
   SplitEmptyFunction: false
-AllowShortFunctionsOnASingleLine: true
+AllowShortFunctionsOnASingleLine: false # found this to be anoying during editing
 SpaceBeforeCtorInitializerColon: false
 
+# BreakConstructorInitializers: BeforeComma
 BreakConstructorInitializers: AfterColon
 
 SpaceBeforeInheritanceColon: false
@@ -29,15 +29,19 @@ AlignConsecutiveAssignments:
   AcrossEmptyLines: false
   AcrossComments: false
 
-UseTab: Always
+## Only works properly with clang >= 22
+Cpp11BracedListStyle: true
+BreakAfterOpenBracketBracedList: true
+
+UseTab: Never
 ## align the function args to the opening bracket only using a
 ## ContinuationIndentWidth from beginning of statement. dont align to the exact
 ## position of the opening bracket.
-AlignAfterOpenBracket: false
+AlignAfterOpenBracket: DontAlign
 ## this helps enforcing the above rule in certain situations.
 AlignOperands: DontAlign
 
-# FIXME: why is this behaving the way it does?
+# FIXME: why is this behaving the way it does? 
 TabWidth: 2
 ## nice idea: continuation indent different from normal indent ;)
 IndentWidth: 2
@@ -45,25 +49,22 @@ ContinuationIndentWidth: 4
 ConstructorInitializerIndentWidth: 2
 
 ColumnLimit: 80
-AllowAllParametersOfDeclarationOnNextLine: false
-AllowAllArgumentsOnNextLine: false
+AllowAllParametersOfDeclarationOnNextLine: true
+AllowAllArgumentsOnNextLine: true
 AlwaysBreakAfterReturnType: None
 AlwaysBreakAfterDefinitionReturnType: None
 AlwaysBreakBeforeMultilineStrings: true
-BreakBeforeBinaryOperators: NonAssignment
+BreakBeforeBinaryOperators: None
 BreakBeforeTernaryOperators: true
 BreakStringLiterals: true
-BinPackArguments: true
-BinPackParameters: BinPack
+BinPackArguments: false
+# BinPackParameters: BinPack
+BinPackParameters: false
 # Ensure comments don't exceed limit
 ReflowComments: true
 PenaltyExcessCharacter: 1000000
 
 AllowShortIfStatementsOnASingleLine: Never
+BreakTemplateDeclarations: Yes
 
-AlignTrailingComments:
-  Kind: Always
-  OverEmptyLines: 2
-
-# avoid problems with >> in template-like dfns
 SpacesInAngles: Leave
