@@ -1,3 +1,18 @@
+- [webserv Learnings](#webserv-learnings)
+  - [Resources](#resources)
+  - [Networking, TCP/IP, socket-bind-listen-Business](#networking-tcpip-socket-bind-listen-business)
+    - [struct sockaddr_in](#struct-sockaddr_in)
+    - [network byte order](#network-byte-order)
+    - [The whole epoll-process](#the-whole-epoll-process)
+      - [epoll vs. poll](#epoll-vs-poll)
+      - [epoll_wait is _always_ interrupted by signals](#epoll_wait-is-always-interrupted-by-signals)
+    - [Notes about getaddrinfo](#notes-about-getaddrinfo)
+      - [Where will we use this?](#where-will-we-use-this)
+      - [what is is in struct addrinfo?](#what-is-is-in-struct-addrinfo)
+  - [Very general stuff](#very-general-stuff)
+  - [a learning about iterating over a list and removing things](#a-learning-about-iterating-over-a-list-and-removing-things)
+
+
 # webserv Learnings
 
 ## Resources
@@ -20,6 +35,8 @@
 - [all the status codes](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status)
 
 - [nginx config about error pages](https://nginx.org/en/docs/http/ngx_http_core_module.html#error_page)
+
+- [nginx: alpabetical index of all directives](https://nginx.org/en/docs/dirindex.html)
 
 
 ## Networking, TCP/IP, socket-bind-listen-Business
@@ -190,4 +207,54 @@ this code, is obviously _very_ problematic:
   why the pre-increment operator `++it`? the pre-increment operator does not
   create a copy of the iterator and returns this not-yet-incremented copy. so
   using `++it` is just about memory-efficiency.
+
+## NginX
+
+**This is rather important bit of information as we are currently not getting
+this right!!!**
+
+So we got a major TODO here! In principle a nginx config like this is possible
+and even common practice:
+
+```nginx
+server {
+    listen 80;
+    server_name example.com;
+    # Configuration for example.com
+}
+
+server {
+    listen 80;
+    server_name another.com;
+    # Configuration for another.com
+}
+```
+
+### about routing, server_name and listen
+
+
+When a request arrives, nginx uses the following logic to select the server
+block:
+
+IP and Port Matching:
+
+  nginx first selects all server blocks that match the IP address and port the
+  request was received on (as defined by the listen directive).
+
+Host Header Matching:
+
+  From the matching server blocks, nginx then selects the one whose server_name
+  best matches the Host header in the request. The matching is done as follows:
+
+Exact name match (e.g., server_name example.com; matches Host: example.com).
+
+Longest wildcard match at the beginning (e.g., server_name *.example.com; matches Host: foo.example.com).
+
+Longest wildcard match at the end (e.g., server_name example.*; matches Host: example.org).
+
+First matching regular expression (if any).
+
+**If no server_name matches, the default server for the IP/port is used (the first
+server block in the configuration file for that IP/port, unless explicitly
+marked as default_server).**
 

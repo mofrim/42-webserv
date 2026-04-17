@@ -2,6 +2,9 @@
 
 ## current TODOs
 
+- [ ] GET THE CONFIG FORMAT STRAIGHT!!!
+  - [ ] which config options will i support???
+- [ ] redesign logging to support logging to file
 - [ ] clarify how to initialize the interfaces for a server!!!
 - [ ] implement multiple servers on the same port handling.
 - [ ] implement tokenization
@@ -33,5 +36,3 @@
   ```
   so, how are we gonna make this work? how do we treat all possible default
   values and stuff?
-
-

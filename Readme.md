@@ -1,8 +1,18 @@
-# project ideas
+# About webserv
 
-## general ideas
+## general ideas / Design Decisions
 
-- **use exceptions wherever possible!!!**
+### use exceptions wherever possible... or not?!
+
+maybe not... as clean-code in c++ prefers clear return value based error
+handling over the possibly random occurence of exceptions
+
+### do not implement file-based logging
+
+this is not necessary and definitely something i can save time on
+
+
+---
 
 ## the initial webserv data-flow
 
@@ -68,7 +78,7 @@ but the 3 possible cases after `epoll_wait()` returns remain the same:
   clients are added to this list. the client stores a pointer to its server, and
   the server stores a pointer to the entry in the client list.
 
-  ## how i want the connection handling to look like
+## how i want the connection handling to look like
 
   ```cpp
 	while (_shutdown_server == false) {
@@ -114,11 +124,19 @@ but the 3 possible cases after `epoll_wait()` returns remain the same:
 
   ```
 
+## CGI Notes
 
+From the [main resource](https://en.wikipedia.org/wiki/Common_Gateway_Interface):
 
+- requests can look like: `webserv/cgi-bin/myscript.py?param1=moep&param2=miep`
+- also they might look like:
+  `webserv/cgi-bin/myscript.py/path/to/sth?and=some&params=yo`
+- the additional path part is parsed into a env var `PATH_INFO` and the params
+  are parsed to `QUERY_STRING` which are both passed to the scripts environment.
+- in a POST request the message body is send to the `STDIN` of the script.
 
-
-
+So, do i need to take anything here into account for my request handling
+routine? It doesn't feel like.
 
 
 
