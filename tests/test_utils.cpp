@@ -11,43 +11,49 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "test-utils.hpp"
+#include "test_utils.hpp"
 
 #include <iostream>
 #include <sstream>
 #include <string>
 
-void newline() { std::cout << std::endl; }
+void nl()
+{
+  std::cout << std::endl;
+}
 
 void print_test_section_header(const std::string& title)
 {
-	std::cout << "\e[35m[TESTING] __" << title << "__" << "\e[0m" << std::endl;
+  std::cout << "\e[35m========[ TESTING " << title << " ]========" << "\e[0m"
+            << std::endl;
 }
 
-void print_test_topic(const std::string& what)
+void print_final_result()
 {
-	std::cout << "\e[34m[TEST] " << what << "\e[0m" << std::endl;
+  std::cout << "\e[36m========[ FINAL RESULT ]========" << "\e[0m" << std::endl;
 }
 
-void print_test_file_header(const std::string& what)
+void print_test_topic(const std::string& sec, const std::string& what)
 {
-	std::cout << "\e[36m[TESTFILE] " << what << "\e[0m" << std::endl;
+  std::cout << "\e[34m------=[\e[33m " << sec << "\e[34m " << what
+            << " ]=------\e[0m" << std::endl;
 }
 
-void print_test_success(const std::string& what)
+void print_test_result(bool res, const std::string& msg)
 {
-	std::cout << "\e[32m[OK]\e[0m " << what << std::endl;
+  std::string pre;
+  if (!res)
+    pre = "\e[31mKO\e[0m";
+  if (res)
+    pre = "\e[32mOK\e[0m";
+
+  std::cout << pre << ": " << msg << "" << std::endl;
 }
 
-void print_test_fail(const std::string& what)
-{
-	std::cout << "\e[31m[KO]\e[0m " << what << std::endl;
-}
-
-// convert an integer to string, as there is no such thing in c++1972 :(
+// convert an integer to string, as there is no such thing in c++1872 :(
 std::string toString(long num)
 {
-	std::ostringstream oss;
-	oss << num;
-	return (oss.str());
+  std::ostringstream oss;
+  oss << num;
+  return (oss.str());
 }

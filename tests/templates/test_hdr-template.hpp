@@ -1,23 +1,29 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   test_server_init.cpp                               :+:      :+:    :+:   */
+/*   test_hdr-template.hpp                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/12/08 11:40:47 by fmaurer           #+#    #+#             */
-/*   Updated: 2025/12/08 13:21:20 by fmaurer          ###   ########.fr       */
+/*   Created: 2026/04/01 16:00:31 by fmaurer           #+#    #+#             */
+/*   Updated: 2026/04/17 21:25:30 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../test-utils.hpp"
-#include "Server.hpp"
-#include "ServerCfg.hpp"
+#pragma once
 
-// TODO: implement this
-void test_server_init()
-{
-	print_test_section_header("Server init test");
-	ServerCfg cfg;
-	Server		srv(cfg);
-}
+#ifndef OK
+#define OK true
+#endif
+
+#ifndef KO
+#define KO false
+#endif
+
+// global result marker
+extern bool g_GlobalResult;
+
+#include <cassert>
+#include <iostream>
+#include <map>
+#include <stdexcept>

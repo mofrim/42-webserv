@@ -1,16 +1,13 @@
 # **************************************************************************** #
 #                                                                              #
 #                                                         :::      ::::::::    #
-#    Makefile.base                                      :+:      :+:    :+:    #
-#                                                     +:+ +:+         +:+      #
-#    By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+         #
-#                                                 +#+#+#+#+#+   +#+            #
+#    Makefile.base                                      :+:      :+:    :+:    # +:+ +:+         +:+      # By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+         # +#+#+#+#+#+   +#+            #
 #    Created: 2024/12/01 11:45:58 by fmaurer           #+#    #+#              #
-#    Updated: 2026/01/13 13:42:48 by fmaurer          ###   ########.fr        #
+#    Updated: 2026/04/01 16:16:18 by fmaurer          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
-NAME 		= webserv_tests
+NAME 		= run_tests
 
 # The directories..
 #
@@ -19,57 +16,74 @@ NAME 		= webserv_tests
 # find any file in any directory listed in the VPATH. The same holds true for
 # the header files. This also applies to change-detection!
 # TL;DR: it makes things pretty easy ;)
-VPATH		= ./ ./cpp_tests/
-VPATH		+= ../src/ ../inc/
+VPATH		= ./ ./tests
+VPATH		+= ../src ../inc
 
 OBJDIR			= obj
-WSRV_OBJDIR	= ../obj
+PROJ_OBJDIR	= ../obj
 
 INC 			= ../inc
 
 # The files..
-WSRV_SRCS_HERE
-WSRV_HDRS_HERE
+PROJ_SRCS_HERE
+PROJ_HDRS_HERE
 
-TEST_SRCS			= test-main.cpp \
-								test-utils.cpp
+TEST_SRCS			= test_main.cpp \
+								test_utils.cpp
 
-TEST_HDRS			= test-utils.hpp
+TEST_HDRS			= test_utils.hpp
 
 OBJS				= $(patsubst %.cpp,$(OBJDIR)/%.o,$(TEST_SRCS))
-WSRV_OBJS		= $(patsubst %.cpp,$(WSRV_OBJDIR)/%.o,$(WSRV_SRCS))
+PROJ_OBJS		= $(patsubst %.cpp,$(PROJ_OBJDIR)/%.o,$(PROJ_SRCS))
 
-# The programs..
 CPP			= c++
 
 # compiler flags
 CFLAGS	= -Wall -Werror -Wextra -std=c++98
-CFLAGS	+= -g
-IFLAGS	= -I $(INC)
+
+# if command line var 'DBG=yes' is set activate debug options
+ifeq ($(DBG),yes)
+	CFLAGS	+= -g -DDEBUG=1
+endif
+
+IFLAGS	= -I$(INC) -I.
 
 all: $(NAME)
 
 $(OBJDIR):
 	mkdir -p $(OBJDIR)
 
-$(WSRV_OBJDIR):
-	mkdir -p $(WSRV_OBJDIR)
+$(PROJ_OBJDIR):
+	mkdir -p $(PROJ_OBJDIR)
 
 # will never try to compile HDR or any other prequesite specified after `%.cpp`.
 # this is because the `%.o` and matched against all .c-files in the current dir.
 # !! Attention: Any misspelled filename in HDRS or SRCS will lead to `make` not
 # functioning without any meaningful error msg !!
-$(OBJDIR)/%.o: %.cpp $(HDRS) | $(OBJDIR)
+$(OBJDIR)/%.o: %.cpp $(TEST_HDRS) | $(OBJDIR)
 	$(CPP) $(IFLAGS) $(CFLAGS) -c $< -o $@
 
-$(WSRV_OBJDIR)/%.o: %.cpp $(HDRS) | $(WSRV_OBJDIR)
+# TODO: understand why order-only prereq is not obeyed here! Must have
+# something to do with files being in a parent dir...
+$(PROJ_OBJDIR)/%.o: %.cpp $(PROJ_HDRS) | $(PROJ_OBJDIR)
+	@mkdir -p $(PROJ_OBJDIR)
 	$(CPP) $(IFLAGS) $(CFLAGS) -c $< -o $@
 
-$(NAME): $(OBJS) $(WSRV_OBJS)
+$(NAME): $(OBJS) $(PROJ_OBJS)
 	$(CPP) $(IFLAGS) $(CFLAGS) -o $@ $^
 
-clean:
+debug: fclean proj-clean
+	make -C .. clean
+	make DBG=yes
+
+debug-run: debug
+	./$(NAME)
+
+clean: proj-clean
 	rm -rf $(OBJDIR)
+
+proj-clean:
+	make -C .. clean
 
 bear: fclean
 	bear -- make
@@ -77,9 +91,11 @@ bear: fclean
 run: $(NAME)
 	./$(NAME)
 
-fclean: clean
+fclean: clean proj-clean
 	rm -f $(NAME)
 
 re: fclean $(NAME)
 
-.PHONY: all clean fclean re bear run
+.PHONY: all clean fclean re bear run debug debug-run proj-clean
+
+#vim: ft=make
