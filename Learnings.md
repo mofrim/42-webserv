@@ -41,6 +41,12 @@
 
 ## Networking, TCP/IP, socket-bind-listen-Business
 
+### Learnings about `bind`
+
+- when binding the address `0.0.0.0` and port `X` to a socket this binds to
+  **all** possible local interfaces, i.e. also `127.0.0.1`, `localhost` and
+  whatever IP is found in the routing table which resolves to localhost
+
 ### struct sockaddr_in
 
 `struct sockaddr_in` is short for *Socket Address Internet*. There is also

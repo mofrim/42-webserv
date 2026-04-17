@@ -11,6 +11,19 @@ handling over the possibly random occurence of exceptions
 
 this is not necessary and definitely something i can save time on
 
+### we won't do IPv6!
+
+as it is not demanded by the subject
+
+### i will implement virtual servers!
+
+this is some consequences... namely:
+
+- during setup i need to check if some server already was initialized with the
+  same addr:port combination _BUT_ as a different name
+- what about the first server having bound the address `0.0.0.0`?
+  Answer: any local address with the same port must have a different name.
+  otherwise ignore the late-comer.
 
 ---
 

@@ -40,7 +40,7 @@ example:
 ```
 vserver {
   server_name moep!
-  listen 1.1.1.1:1111
+  listen 1.1.1.1:1111!
   ...
 }
 ```
@@ -74,7 +74,6 @@ server_name: miep.moep.de
 
 rules:
   - 
-
 
 
 
