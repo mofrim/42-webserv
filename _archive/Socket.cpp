@@ -6,11 +6,10 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/28 07:26:35 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/18 00:18:36 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/17 23:21:02 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "Logger.hpp"
 #include "Socket.hpp"
 #include "utils.hpp"
 
@@ -20,12 +19,12 @@
 #include <iostream>
 #include <netdb.h>
 
-// --------------------------------=[ OCF ]=-------------------------------- //
+// -- OCF --
 
-Socket::Socket()
+Socket::Socket(): _addr(""), _port(0), _addrllist(NULL)
 {}
 
-Socket::Socket(const Socket& other)
+Socket::Socket(const Socket& other): _addr(""), _port(0)
 {
   (void)other;
 }
@@ -37,15 +36,21 @@ Socket& Socket::operator=(const Socket& other)
 }
 
 Socket::~Socket()
-{}
+{
+  if (_addrllist != NULL) {
+    freeaddrinfo(_addrllist);
+  }
+}
 
-// ------------------------------=[ Methods ]=------------------------------ //
+Socket::Socket(const std::string& addr, uint16_t port):
+  _addr(addr), _port(port), _addrllist(NULL)
+{}
 
 // AI_NUMERICSERV: forces interpretion of port number passed to getaddrinfo as
 // numeric -> there is no service name lookup performed in /etc/services.
 //
 // AI_NUMERICHOST: would do the same for the hostname/addr
-struct addrinfo *Socket::getAddrInfo(const str& addr, u16 port)
+void Socket::getAddrInfo()
 {
   struct addrinfo  hints;
   struct addrinfo *result;
@@ -60,32 +65,23 @@ struct addrinfo *Socket::getAddrInfo(const str& addr, u16 port)
   hints.ai_socktype  = SOCK_STREAM;
   hints.ai_flags     = AI_PASSIVE | AI_NUMERICSERV | AI_CANONNAME;
 
-  s = getaddrinfo(addr.c_str(), int2str(port).c_str(), &hints, &result);
+  s = getaddrinfo(_addr.c_str(), int2str(_port).c_str(), &hints, &result);
 
   if (s != 0) {
     throw(AddrInfoException(
-        "(" + addr + ", " + int2str(port) + ") " + gai_strerror(s)));
+        "(" + _addr + ", " + int2str(_port) + ") " + gai_strerror(s)));
   }
-  return result;
+  _addrllist = result;
 }
 
 // FIXME: implement/use own version of inet_ntop() as it is not allowed by
 // subject.
-void Socket::printAddrlist(const str& addr, u16 port)
+void Socket::printAddrlist() const
 {
-  struct addrinfo *ai;
-  struct addrinfo *ap;
-
-  try {
-    ai = getAddrInfo(addr, port);
-  } catch (const std::runtime_error& e) {
-    throw;
-  }
-
-  std::string out("addrinfo for " + addr + ":" + int2str(port) + "\n");
+  struct addrinfo *ap = _addrllist;
+  std::string      out("addrinfo for " + _addr + ":" + int2str(_port) + "\n");
   out += "  ---\n";
 
-  ap = ai;
   while (ap != NULL) {
     switch (ap->ai_family) {
     case AF_UNSPEC:
@@ -144,16 +140,16 @@ void Socket::printAddrlist(const str& addr, u16 port)
               &((struct sockaddr_in6 *)ap->ai_addr)->sin6_addr,
               ip,
               INET6_ADDRSTRLEN) != NULL)
-        out += "  ai_addr: " + str(ip) + ", ";
+        out += "  ai_addr: " + std::string(ip) + ", ";
       else
-        out += "  ai_addr: " + str(strerror(errno)) + ", ";
+        out += "  ai_addr: " + std::string(strerror(errno)) + ", ";
 
       port = ntohs(((struct sockaddr_in6 *)ap->ai_addr)->sin6_port);
       out += "port: " + int2str(port) + "\n";
     }
 
     if (ap->ai_canonname != NULL)
-      out += "  ai_canonname: " + str(ap->ai_canonname) + "\n";
+      out += "  ai_canonname: " + std::string(ap->ai_canonname) + "\n";
     else
       out += "  ai_canonname: null\n";
 
@@ -162,42 +158,13 @@ void Socket::printAddrlist(const str& addr, u16 port)
   }
 
   std::cout << out << std::endl;
-  if (ai != NULL)
-    freeaddrinfo(ai);
 }
 
-int Socket::bindSocket(const str& addr, u16 port)
-{
-  struct addrinfo *ai;
-  int              fd;
-
-  try {
-    ai = getAddrInfo(addr, port);
-  } catch (const AddrInfoException& e) {
-    throw;
-  }
-
-  if (ai == NULL)
-    return -1;
-
-  if ((fd = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, ai->ai_protocol)) ==
-      -1)
-  {
-    Logger::log_err(str("bindSocket socket failed: ", *strerror(errno)));
-    return -1;
-  }
-
-  if (bind(fd, ai->ai_addr, ai->ai_addrlen) == -1) {
-    Logger::log_err(str("bindSocket bind failed: ", *strerror(errno)));
-    return -1;
-  }
-
-  // TODO: maybe add setsockopt here.
-
-  freeaddrinfo(ai);
-
-  return fd;
-}
+// Socket::bind() {
+//   if (_addrllist == NULL)
+//
+//
+// }
 
 Socket::AddrInfoException::AddrInfoException(const std::string& msg):
   std::runtime_error("AddrInfoException: " + msg)
