@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/13 13:06:35 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/18 00:26:19 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/18 00:29:30 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,21 +47,21 @@ int _test_socket()
 void test_socket()
 {
   int ret = 0;
-  print_test_section_header("socket test section header");
+  print_test_section_header("Socket test section header");
   try {
     ret = _test_socket();
   } catch (const std::exception& e) {
     print_test_result(false,
-        "Test \"socket\" failed with following exception:\n" +
+        "Test \"Socket\" failed with following exception:\n" +
             std::string(e.what()));
     g_GlobalResult = KO;
     return;
   }
   if (ret == -1) {
-    print_test_result(false, "Test \"socket\" failed with -1");
+    print_test_result(false, "Test \"Socket\" failed with -1");
     g_GlobalResult = KO;
     return;
   }
-  print_test_section_header("socket");
-  print_test_result(true, "Test \"socket\" succeeded =)");
+  print_test_section_header("Socket");
+  print_test_result(true, "Test \"Socket\" succeeded =)");
 }
