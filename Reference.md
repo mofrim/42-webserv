@@ -29,3 +29,13 @@ options related to network programming on Linux.
   + `SOL_SOCK`: 
 - `int option_name`:
   + `SOCK_NONBLOCK`
+
+## `struct in_addr`
+
+`#include <netinet/in.h>`
+
+```c
+struct in_addr {
+           in_addr_t s_addr;
+       };
+```
