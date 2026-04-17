@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 19:12:58 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/01/05 08:25:13 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/17 16:00:39 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,9 +15,9 @@
 
 #include "Request.hpp"
 
+#include <deque>
 #include <stdexcept>
 #include <unistd.h>
-#include <vector>
 
 // FIXME: for now this is the read buffer size. definitely coud be higher.
 #define READ_BUFSIZE 4096
@@ -25,24 +25,26 @@
 class Server;
 
 class RequestHandler {
-	private:
-		Server							*_srv;
-		std::vector<Request> _requests;
+  private:
+    Server *_srv;
 
-		RequestHandler(const RequestHandler& other);
-		RequestHandler();
+    // choosing a deque here as we are going insert new request at the beginning
+    std::deque<Request> _requests;
 
-	public:
-		RequestHandler(Server *srv);
-		RequestHandler& operator=(const RequestHandler& other);
-		~RequestHandler();
+    RequestHandler(const RequestHandler& other);
+    RequestHandler();
 
-		int readRequest(int fd);
-		int writeResponse(int fd);
+  public:
+    RequestHandler(Server *srv);
+    RequestHandler& operator=(const RequestHandler& other);
+    ~RequestHandler();
 
-		class ReqHandlerException: public std::runtime_error {
-			public:
-				ReqHandlerException(const std::string& msg);
-		};
+    int readRequest(int fd);
+    int writeResponse(int fd);
+
+    class ReqHandlerException: public std::runtime_error {
+      public:
+        ReqHandlerException(const std::string& msg);
+    };
 };
 #endif
