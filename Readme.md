@@ -137,6 +137,3 @@ From the [main resource](https://en.wikipedia.org/wiki/Common_Gateway_Interface)
 
 So, do i need to take anything here into account for my request handling
 routine? It doesn't feel like.
-
-
-
