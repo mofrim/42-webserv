@@ -1,6 +1,6 @@
-# About webserv
+# About mofrim's webserv
 
-## general ideas / Design Decisions
+## General Ideas / Design Decisions
 
 ### use exceptions wherever possible... or not?!
 

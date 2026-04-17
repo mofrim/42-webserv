@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
 
-if [ $# = 1 ]; then
-	echo "reloading config"
-	nginx -p ./ -e ./error.log -s reload
+if [ $# = 1 ] && [ -e $1 ]; then
+	nginx -p ./ -c $1
 else
-	nginx -p ./ -e ./error.log -g "daemon off;"
+	nginx -p ./ -e ./error.log
 fi
