@@ -120,8 +120,64 @@ server {
   # TODO: CGI ...
 
 }
+```
+
+### Clarification along with subject.pdf
+
+In the configuration file, you should be able to:
+
+    Define all the interface:port pairs on which your server will listen to (defining mul-
+    tiple websites served by your program).
+
+=> we need multiple server blocks
+=> per server we can have multiple interface:port
+
+**Question**:
+will i require at least one `listen`-directive per server block?
+Yes!
+
+So the structure i derive from this is:
 
 ```
+server {
+  listen localhost:80!
+  listen 10.0.0.1:999!
+}
+```
+
+- There will be only IPv4/domain.name:Port pairs allowed !!!
+- So, sth like `listen localhost` or `listen :80` like in nginx is invalid
+  syntax!
+
+I also want a `server_name` here! so:
+
+```
+server {
+  server_name "kallehoinz"!
+  listen localhost:80!
+  listen 10.0.0.1:999!
+}
+```
+
+- `server_name` restrictions: string **without whitespaces** containing only
+  alphanumerics and dots.
+
+---
+
+
+• Set up default error pages.
+• Set the maximum allowed size for client request bodies.
+• Specify rules or configurations on a URL/route (no regex required here), for a
+website, among the following:
+◦List of accepted HTTP methods for the route.
+◦HTTP redirection.
+◦Directory where the requested file should be located (e.g., if URL /kapouet
+is rooted to /tmp/www, URL /kapouet/pouic/toto/pouet will search for
+/tmp/www/pouic/toto/pouet).
+◦Enabling or disabling directory listing.
+◦Default file to serve when the requested resource is a directory.
+◦Uploading files from the clients to the server is authorized, and storage location
+is provided.
 
 ### Tokenization / Lexing
 
