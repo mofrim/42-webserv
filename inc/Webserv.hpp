@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:35:29 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/01/13 15:21:34 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/17 13:06:36 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,52 +40,52 @@ enum { REQ_READ = 0, REQ_WRITE = 1, REQ_ERR = -1 };
 // code here ;)
 
 class Webserv {
-	private:
-		bool										_defaultCfg;
-		bool										_shutdown_server;
-		std::vector<Server>			_servers;
-		std::map<int, Server *> _serverFdMap;
-		std::map<int, Server *> _clientFdServerMap;
-		size_t									_numOfServers;
-		uint16_t								_numOfClients;
+  private:
+    bool                    _defaultCfg;
+    bool                    _shutdown_server;
+    std::vector<Server>     _servers;
+    std::map<int, Server *> _serverFdMap;
+    std::map<int, Server *> _clientFdServerMap;
+    size_t                  _numOfServers;
+    uint16_t                _numOfClients;
 
-		Epoll _epoll;
+    Epoll _epoll;
 
-		void _setupServers();
-		void _setupSingleServer(Server& srv);
-		void _setupEpoll();
-		void _shutdownAllServers();
+    void _setupServers();
+    void _setupSingleServer(Server& srv);
+    void _setupEpoll();
+    void _shutdownAllServers();
 
-		// utils
-		bool		_isServerFd(int fd) const;
-		Server *_getServerByFd(int fd);
-		Server *_getServerByClientFd(int fd);
-		void		_addClientToClientFdServerMap(int fd, Server *srv);
-		void		_initDefaultCfg();
-		void		_initDefaultCfg2();
-		void		_printSockname(int sock);
+    // utils
+    bool    _isServerFd(int fd) const;
+    Server *_getServerByFd(int fd);
+    Server *_getServerByClientFd(int fd);
+    void    _addClientToClientFdServerMap(int fd, Server *srv);
+    void    _initDefaultCfg();
+    void    _initDefaultCfg2();
+    void    _printSockname(int sock);
 
-		// we do not use them, so keep em private
-		Webserv(const Webserv& other);
-		Webserv& operator=(const Webserv& other);
+    // we do not use them, so keep em private
+    Webserv(const Webserv& other);
+    Webserv& operator=(const Webserv& other);
 
-	public:
-		Webserv();
-		~Webserv();
+  public:
+    Webserv();
+    ~Webserv();
 
-		void run();
-		void getServersFromCfg(const std::string& cfgFilename);
-		void shutdownWebserv();
+    void run();
+    void getServersFromCfg(const std::string& cfgFilename);
+    void shutdownWebserv();
 
-		class WebservInitException: public std::runtime_error {
-			public:
-				WebservInitException(const std::string& msg);
-		};
+    class WebservInitException: public std::runtime_error {
+      public:
+        WebservInitException(const std::string& msg);
+    };
 
-		class WebservRunException: public std::runtime_error {
-			public:
-				WebservRunException(const std::string& msg);
-		};
+    class WebservRunException: public std::runtime_error {
+      public:
+        WebservRunException(const std::string& msg);
+    };
 };
 
 #endif

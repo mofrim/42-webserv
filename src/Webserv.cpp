@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:36:43 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/03/06 20:25:25 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/17 12:21:05 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,22 +21,25 @@
 #include <utils.hpp>
 
 Webserv::Webserv():
-	_defaultCfg(true), _shutdown_server(false), _numOfServers(0), _numOfClients(0)
+  _defaultCfg(true), _shutdown_server(false), _numOfServers(0), _numOfClients(0)
 {}
 
-Webserv::Webserv(const Webserv& other) { (void)other; }
+Webserv::Webserv(const Webserv& other)
+{
+  (void)other;
+}
 
 Webserv& Webserv::operator=(const Webserv& other)
 {
-	(void)other;
-	return (*this);
+  (void)other;
+  return (*this);
 }
 
 // so far only closing all server sockets here
 Webserv::~Webserv()
 {
-	for (size_t i = 0; i < _numOfServers; i++)
-		close(_servers[i].getListenFd());
+  for (size_t i = 0; i < _numOfServers; i++)
+    close(_servers[i].getListenFd());
 }
 
 // TODO: there will be much more to do in here. What?
@@ -46,8 +49,8 @@ Webserv::~Webserv()
 // - etc....
 void Webserv::shutdownWebserv()
 {
-	Logger::log_warn("shutting down webserv...");
-	_shutdown_server = true;
+  Logger::log_warn("shutting down webserv...");
+  _shutdown_server = true;
 }
 
 // the Idea is: keep the existence of the Config object limited to this method.
@@ -56,21 +59,21 @@ void Webserv::shutdownWebserv()
 // be saved in Webserv class or also in Server class.
 void Webserv::getServersFromCfg(const std::string& cfgFilename)
 {
-	(void)cfgFilename;
-	Config cfg;
+  (void)cfgFilename;
+  Config cfg;
 
-	try {
-		cfg.parseCfgFile(cfgFilename);
-	} catch (const std::exception& e) {
-		throw(e);
-	}
+  try {
+    cfg.parseCfgFile(cfgFilename);
+  } catch (const std::exception& e) {
+    throw(e);
+  }
 
-	_numOfServers = cfg.getCfgs().size();
+  _numOfServers = cfg.getCfgs().size();
 
-	for (size_t i = 0; i < _numOfServers; i++) {
-		_servers.push_back(Server(cfg.getCfgs()[i]));
-	}
-	_defaultCfg = false;
+  for (size_t i = 0; i < _numOfServers; i++) {
+    _servers.push_back(Server(cfg.getCfgs()[i]));
+  }
+  _defaultCfg = false;
 }
 
 // The main routine for setting up the servers listed in the Config.
@@ -80,25 +83,25 @@ void Webserv::getServersFromCfg(const std::string& cfgFilename)
 // server_name="localhost", port="4284" etc...)
 void Webserv::_setupServers()
 {
-	if (_defaultCfg)
-		_initDefaultCfg2();
+  if (_defaultCfg)
+    _initDefaultCfg2();
 
-	std::vector<Server>::iterator it = _servers.begin();
-	while (it != _servers.end()) {
-		_setupSingleServer(*it);
-		if (it->getSetupFailed()) {
-			it = _servers.erase(it);
-			--_numOfServers;
-		}
-		else
-			++it;
-	}
-	Logger::log_dbg2("Number of not-failed Servers left after cleanup: "
-			+ int2str(_numOfServers));
-	if (_numOfServers == 0) {
-		Logger::log_err("Could not setup any Server!");
-		shutdownWebserv();
-	}
+  std::vector<Server>::iterator it = _servers.begin();
+  while (it != _servers.end()) {
+    _setupSingleServer(*it);
+    if (it->getSetupFailed()) {
+      it = _servers.erase(it);
+      --_numOfServers;
+    }
+    else
+      ++it;
+  }
+  Logger::log_dbg2("Number of not-failed Servers left after cleanup: " +
+      int2str(_numOfServers));
+  if (_numOfServers == 0) {
+    Logger::log_err("Could not setup any Server!");
+    shutdownWebserv();
+  }
 }
 
 // here one server is being setup, meaning, the `init()` of a server is called
@@ -107,24 +110,25 @@ void Webserv::_setupServers()
 // TODO: handle possible exceptions!!!
 void Webserv::_setupSingleServer(Server& srv)
 {
-	Logger::log_msg("Setting up this server:");
-	srv.printCfg();
-	try {
-		srv.init();
-		_serverFdMap.insert(std::pair<int, Server *>(srv.getListenFd(), &srv));
-	} catch (const Server::ServerInitException& e) {
-		Logger::log_err(e.what());
-		Logger::log_err(
-				"Caught exception while trying to init srv " + srv.getServerName());
-		srv.setSetupFailed();
-	}
+  Logger::log_msg("Setting up this server:");
+  srv.printCfg();
+  try {
+    srv.init();
+    _serverFdMap.insert(std::pair<int, Server *>(srv.getListenFd(), &srv));
+  } catch (const Server::ServerInitException& e) {
+    Logger::log_err(e.what());
+    Logger::log_err(
+        "Caught exception while trying to init srv " + srv.getServerName());
+    srv.setSetupFailed();
+  }
 }
 
 void Webserv::_shutdownAllServers()
 {
-	for (std::vector<Server>::iterator it = _servers.begin();
-			it != _servers.end(); it++)
-		it->removeAllClients();
+  for (std::vector<Server>::iterator it = _servers.begin();
+      it != _servers.end();
+      it++)
+    it->removeAllClients();
 }
 
 // TODO: figure out the best timeout for epoll_wait. For now -1 is okay. but
@@ -142,68 +146,80 @@ void Webserv::_shutdownAllServers()
 // called the syscall exits)
 void Webserv::run()
 {
-	_setupServers();
-	_epoll.setup(_servers, _numOfServers);
+  _setupServers();
+  _epoll.setup(_servers, _numOfServers);
 
-	// the main loop
-	while (_shutdown_server == false) {
-		int nfds = _epoll.wait();
-		if (nfds == -1 && errno != EINTR)
-			throw(WebservRunException("epoll_wait failed"));
+  // the main loop
+  while (_shutdown_server == false) {
+    int nfds = _epoll.wait();
+    if (nfds == -1 && errno != EINTR)
+      throw(WebservRunException("epoll_wait failed"));
 
-		for (int eventIdx = 0; eventIdx < nfds; ++eventIdx) {
-			int currentFd = _epoll.getEventFd(eventIdx);
+    for (int eventIdx = 0; eventIdx < nfds; ++eventIdx) {
+      Logger::log_dbg0("Got so many nfds for epoll: " + int2str(nfds));
+      int currentFd = _epoll.getEventFd(eventIdx);
 
-			// 1) new connection
-			// FIXME: it is possible for us to have servers with different server
-			// names listening on the same hostname:port connection. will this work
-			// for them too?
-			if (_isServerFd(currentFd) && _numOfClients < MAX_CLIENTS) {
-				Server *srv = _getServerByFd(currentFd);
-				Client *cli = srv->addClient(currentFd);
-				_addClientToClientFdServerMap(cli->getFd(), srv);
-				_epoll.addClient(cli->getFd());
-				_numOfClients++;
-			}
+      // 1) new connection
+      //
+      // FIXME: it is possible for us to have servers with different server
+      // names listening on the same hostname:port connection. will this work
+      // for them too?
+      // ANSWER: Yes! But the selection process will become a little more
+      // difficult. Meaning: _getServerByFd will return a list of servers. and
+      // the request will have to be parsed here in order to find out the
+      // server_name
+      // There is 1 event for the connect. And another one, EPOLLIN, which is
+      // the write/send which contains the request. So in order to handle
+      // Virtual Servers we only have to return the list of all Servers
+      // listening on a fd the client is connected to. In the request handling
+      // part we can then route the request to the correct vsrv.
+      if (_isServerFd(currentFd) && _numOfClients < MAX_CLIENTS) {
+        Server *srv = _getServerByFd(currentFd);
+        Client *cli = srv->addClient(currentFd);
+        _addClientToClientFdServerMap(cli->getFd(), srv);
+        _epoll.addClient(cli->getFd());
+        _numOfClients++;
+      }
 
-			// QUESTION: what if _numOfClients >= MAX_CLIENTS ?!?! we need to handle
-			// this!!! Also:
-			// FIXME: clarify how we handle connection keepalive with clients
-			// 2) existing connection
-			else {
-				Server *srv = _getServerByClientFd(currentFd);
-				if (srv == NULL)
-					throw(WebservRunException("could not find server by fd"));
-				if (LOGLEVEL == BRUTAL)
-					srv->printClients();
+      // 2) existing connection
+      //
+      // QUESTION: what if _numOfClients >= MAX_CLIENTS ?!?! we need to handle
+      // this!!! Also:
+      // FIXME: clarify how we handle connection keepalive with clients
+      else {
+        Server *srv = _getServerByClientFd(currentFd);
+        if (srv == NULL)
+          throw(WebservRunException("could not find server by fd"));
+        if (LOGLEVEL == BRUTAL)
+          srv->printClients();
 
-				int evHandlerReturn =
-						srv->handleEvent(_epoll.getEvent(eventIdx), currentFd);
+        int evHandlerReturn =
+            srv->handleEvent(_epoll.getEvent(eventIdx), currentFd);
 
-				if (evHandlerReturn == REQ_ERR) {
-					_epoll.removeClient(currentFd);
-					srv->removeClient(currentFd);
-					_clientFdServerMap.erase(currentFd);
-					_numOfClients--;
-				}
-				else if (evHandlerReturn == REQ_READ)
-					_epoll.modifyClient(currentFd, EPOLLIN | EPOLLOUT);
-				else if (evHandlerReturn == REQ_WRITE)
-					_epoll.modifyClient(currentFd, EPOLLIN);
-			}
-		}
-	}
-	_epoll.closeEpollFd();
-	_shutdownAllServers();
+        if (evHandlerReturn == REQ_ERR) {
+          _epoll.removeClient(currentFd);
+          srv->removeClient(currentFd);
+          _clientFdServerMap.erase(currentFd);
+          _numOfClients--;
+        }
+        else if (evHandlerReturn == REQ_READ)
+          _epoll.modifyClient(currentFd, EPOLLIN | EPOLLOUT);
+        else if (evHandlerReturn == REQ_WRITE)
+          _epoll.modifyClient(currentFd, EPOLLIN);
+      }
+    }
+  }
+  _epoll.closeEpollFd();
+  _shutdownAllServers();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Exceptions
 
 Webserv::WebservInitException::WebservInitException(const std::string& msg):
-	std::runtime_error("WebservInitException: " + msg)
+  std::runtime_error("WebservInitException: " + msg)
 {}
 
 Webserv::WebservRunException::WebservRunException(const std::string& msg):
-	std::runtime_error("WebservRunException: " + msg)
+  std::runtime_error("WebservRunException: " + msg)
 {}

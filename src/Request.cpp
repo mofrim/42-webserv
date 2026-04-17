@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 23:39:57 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/03/06 20:00:08 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/17 11:36:03 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,38 +17,40 @@
 
 // -- OCF --
 
-Request::Request(): _srvcfg(NULL), _reqstr("") {}
+Request::Request(): _srvcfg(NULL), _reqstr("")
+{}
 
 Request::Request(const Request& other)
 {
-	if (this != &other) {
-		_srvcfg		= other._srvcfg;
-		_reqstr		= other._reqstr;
-		_response = other._response;
-	}
+  if (this != &other) {
+    _srvcfg   = other._srvcfg;
+    _reqstr   = other._reqstr;
+    _response = other._response;
+  }
 }
 
 Request& Request::operator=(const Request& other)
 {
-	if (this != &other) {
-		_srvcfg		= other._srvcfg;
-		_reqstr		= other._reqstr;
-		_response = other._response;
-	}
-	return (*this);
+  if (this != &other) {
+    _srvcfg   = other._srvcfg;
+    _reqstr   = other._reqstr;
+    _response = other._response;
+  }
+  return (*this);
 }
 
-Request::~Request() {}
+Request::~Request()
+{}
 // -- OCF end --
 
 // the standard ctor we use for initializing a request _and_ parse the request
 // at the same time.
 Request::Request(const ServerCfg *scfg, const std::string& reqstr)
 {
-	_srvcfg = scfg;
-	_reqstr = reqstr;
-	Logger::log_reqres("Request", _reqstr);
-	_parseRequest();
+  _srvcfg = scfg;
+  _reqstr = reqstr;
+  Logger::log_reqres("Request", _reqstr);
+  _parseRequest();
 }
 
 // TODO: a. lot. of. work. to. be. done. in. here!
@@ -61,39 +63,41 @@ Request::Request(const ServerCfg *scfg, const std::string& reqstr)
 void Request::_parseRequest()
 {
 
-	if (!_isTerminatedReq()) {
-		_statusCode = 400;
-		_response =
-				"HTTP/1.1 400 Bad Request\r\n"
-				"Server: nginx/1.28.0\r\n"
-				"Date: Mon, 05 Jan 2026 07:08:57 GMT\r\n"
-				"Content-Type: text/html\r\n"
-				"Content-Length: 157\r\n"
-				"Connection: close\r\n"
-				"\r\n"
-				"<html>\r\n"
-				"<head><title>400 Bad Request</title></head>\r\n"
-				"<body>\r\n"
-				"<center><h1>400 Bad Request</h1></center>\r\n"
-				"<hr><center>nginx/1.28.0</center>\r\n"
-				"</body>\r\n"
-				"</html>\r\n";
-	}
-	else
-		_response =
-				"HTTP/1.1 200 OK\r\nContent-Length: 40\r\nContent-Type: text/plain; "
-				"charset=utf-8\r\n\r\nHello from José's and "
-				"Frido's webserv!\n";
+  if (!_isTerminatedReq()) {
+    _statusCode = 400;
+    _response =
+        "HTTP/1.1 400 Bad Request\r\n"
+        "Server: nginx/1.28.0\r\n"
+        "Date: Mon, 05 Jan 2026 07:08:57 GMT\r\n"
+        "Content-Type: text/html\r\n"
+        "Content-Length: 157\r\n"
+        "Connection: close\r\n"
+        "\r\n"
+        "<html>\r\n"
+        "<head><title>400 Bad Request</title></head>\r\n"
+        "<body>\r\n"
+        "<center><h1>400 Bad Request</h1></center>\r\n"
+        "<hr><center>nginx/1.28.0</center>\r\n"
+        "</body>\r\n"
+        "</html>\r\n";
+  }
+  else
+    _response =
+        "HTTP/1.1 200 OK\r\nContent-Length: 29\r\nContent-Type: text/plain; "
+        "charset=utf-8\r\n\r\nHello from m0fr1m's webserv!\n";
 }
 
-std::string Request::getResponse() const { return (_response); }
+std::string Request::getResponse() const
+{
+  return (_response);
+}
 
 // check if received request was erminated with '\r\n'
 bool Request::_isTerminatedReq()
 {
-	if (_reqstr.size() < 2)
-		return (false);
-	if (_reqstr.compare(_reqstr.size() - 2, 2, "\r\n") == 0)
-		return (true);
-	return (false);
+  if (_reqstr.size() < 2)
+    return (false);
+  if (_reqstr.compare(_reqstr.size() - 2, 2, "\r\n") == 0)
+    return (true);
+  return (false);
 }
