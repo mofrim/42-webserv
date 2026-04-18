@@ -6,7 +6,7 @@
 #    By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/12/01 11:45:58 by fmaurer           #+#    #+#              #
-#    Updated: 2026/04/18 16:06:32 by fmaurer          ###   ########.fr        #
+#    Updated: 2026/04/18 20:11:30 by fmaurer          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -75,7 +75,7 @@ debug: $(SRCS)
 debug-run: debug
 	./webserv
 
-valgrind: $(NAME)
+val: $(NAME)
 	valgrind --track-fds=yes -- ./webserv
 
 tests:
