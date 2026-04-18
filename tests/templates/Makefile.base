@@ -43,7 +43,7 @@ CFLAGS	= -Wall -Werror -Wextra -std=c++98
 
 # if command line var 'DBG=yes' is set activate debug options
 ifeq ($(DBG),yes)
-	CFLAGS	+= -g -DDEBUG=1
+	CFLAGS	+= -g -DLOGLEVEL=1
 endif
 
 IFLAGS	= -I$(INC) -I.

@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/13 13:06:35 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/18 13:21:34 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/18 13:48:09 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,7 @@ int _test_template()
 void test_template()
 {
   int ret = 0;
-  print_test_section_header("template");
+  print_test_section_header("BEGIN template");
   try {
     ret = _test_template();
   } catch (const std::exception& e) {
@@ -39,6 +39,6 @@ void test_template()
     g_GlobalResult = KO;
     return;
   }
-  print_test_section_header("template");
+  print_test_section_header("END template");
   print_test_result(true, "Test \"test_template\" succeeded =)");
 }
