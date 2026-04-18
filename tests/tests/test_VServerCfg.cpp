@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   test_ServerCfg.cpp                                 :+:      :+:    :+:   */
+/*   test_VServerCfg.cpp                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/13 13:06:35 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/18 15:57:09 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/18 16:15:22 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,6 +50,29 @@ int _test_VServerCfg()
     std::map< str, std::set<u16> >::const_iterator it =
         cfg.getInterfaces().begin();
     for (; it != cfg.getInterfaces().end(); it++) {
+      std::cout << "addr: " << it->first << ", port(s): " << it->second;
+      std::cout << std::endl;
+    }
+  }
+
+  print_test_topic("test_VServerCfg", "assignment operator");
+  {
+    VServerCfg cfg0;
+
+    std::map< str, std::set<u16> > lst;
+
+    lst["10.0.0.1"].insert(0);
+    lst["10.0.0.1"].insert(1);
+    lst["10.0.0.1"].insert(2);
+    lst["10.0.0.2"].insert(3);
+    lst["10.0.0.3"];
+    cfg0.addInterfaces(lst);
+
+    VServerCfg cfg1 = cfg0;
+
+    std::map< str, std::set<u16> >::const_iterator it =
+        cfg1.getInterfaces().begin();
+    for (; it != cfg1.getInterfaces().end(); it++) {
       std::cout << "addr: " << it->first << ", port(s): " << it->second;
       std::cout << std::endl;
     }

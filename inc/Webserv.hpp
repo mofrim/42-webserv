@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:35:29 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/18 16:01:18 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/18 16:55:24 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,7 @@
 
 #include <map>
 #include <netinet/in.h>
+#include <set>
 #include <sys/epoll.h>
 #include <sys/socket.h>
 

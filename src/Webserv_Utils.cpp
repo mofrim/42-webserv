@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/16 11:54:27 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/18 16:00:15 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/18 17:42:05 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,10 +86,15 @@ void Webserv::_initDefaultCfg()
 void Webserv::_initDefaultCfg2()
 {
 
-  VServer     dsrv1;
-  VServer     dsrv2;
+  // VServer     dsrv2;
   sockaddr_in srv_addr;
 
+  VServerCfg cfg1;
+
+  cfg1.addInterface("0.0.0.0", 4284);
+  cfg1.addInterface("0.0.0.0", 4285);
+  cfg1.setServerName("Test_4284");
+  VServer dsrv1(cfg1);
   dsrv1.setServerName("testsrv_4284");
   dsrv1.setPort(DEFAULT_PORT);
   dsrv1.setRoot("./www");
@@ -101,19 +106,20 @@ void Webserv::_initDefaultCfg2()
   dsrv1.setServerAddr(srv_addr);
   dsrv1.setHost(INADDR_ANY);
 
-  dsrv2.setServerName("testsrv_4285");
-  dsrv2.setPort(4285);
-  dsrv2.setRoot("./www");
-
-  memset(&srv_addr, 0, sizeof(srv_addr));
-  srv_addr.sin_family      = AF_INET;
-  srv_addr.sin_addr.s_addr = INADDR_ANY;
-  srv_addr.sin_port        = htons(4285);
-  dsrv2.setServerAddr(srv_addr);
-  dsrv2.setHost(INADDR_ANY);
+  // dsrv2.setServerName("testsrv_4285");
+  // dsrv2.setPort(4285);
+  // dsrv2.setRoot("./www");
+  //
+  // memset(&srv_addr, 0, sizeof(srv_addr));
+  // srv_addr.sin_family      = AF_INET;
+  // srv_addr.sin_addr.s_addr = INADDR_ANY;
+  // srv_addr.sin_port        = htons(4285);
+  // dsrv2.setServerAddr(srv_addr);
+  // dsrv2.setHost(INADDR_ANY);
 
   _servers.push_back(dsrv1);
-  _servers.push_back(dsrv2);
+  // _servers.push_back(dsrv2);
 
-  _numOfServers = 2;
+  // _numOfServers = 2;
+  _numOfServers = 1;
 }

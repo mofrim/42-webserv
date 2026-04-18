@@ -6,13 +6,13 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/03 12:51:23 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/18 16:01:19 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/18 17:55:59 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Logger.hpp"
+#include "Socket.hpp"
 #include "VServer.hpp"
-// #include "Socket.hpp"
 #include "utils.hpp"
 
 #include <cstring>
@@ -44,36 +44,36 @@ VServer::VServer(const VServerCfg& srvcfg): _reqHandler(this)
   _setupFailed = false;
 }
 
-VServer::VServer(const VServer& other): _reqHandler(this)
+VServer::VServer(const VServer& o): _reqHandler(this)
 {
-  if (this != &other) {
-    _port        = other._port;
-    _host        = other._host;
-    _server_name = other._server_name;
-    _root        = other._root;
-    _listen_fd   = other._listen_fd;
+  if (this != &o) {
+    _port        = o._port;
+    _host        = o._host;
+    _server_name = o._server_name;
+    _root        = o._root;
+    _listen_fd   = o._listen_fd;
 
-    _server_addr = other._server_addr;
-    _setupFailed = other._setupFailed;
-    _cfg         = other._cfg;
+    _server_addr = o._server_addr;
+    _setupFailed = o._setupFailed;
+    _cfg         = o._cfg;
   }
 }
 
 // NOTE: only for this use-case implemented the copy assignment constructor for
 // RequestHandler. only place this is used: Webserv::_setupServers.
-VServer& VServer::operator=(const VServer& other)
+VServer& VServer::operator=(const VServer& o)
 {
-  if (this != &other) {
-    _port        = other._port;
-    _host        = other._host;
-    _server_name = other._server_name;
-    _root        = other._root;
-    _listen_fd   = other._listen_fd;
+  if (this != &o) {
+    _port        = o._port;
+    _host        = o._host;
+    _server_name = o._server_name;
+    _root        = o._root;
+    _listen_fd   = o._listen_fd;
 
-    _server_addr = other._server_addr;
-    _setupFailed = other._setupFailed;
-    _cfg         = other._cfg;
-    _clients     = other._clients;
+    _server_addr = o._server_addr;
+    _setupFailed = o._setupFailed;
+    _cfg         = o._cfg;
+    _clients     = o._clients;
     _reqHandler  = RequestHandler(this);
   }
   return (*this);
@@ -83,7 +83,7 @@ VServer& VServer::operator=(const VServer& other)
 // fully initialized
 VServer::~VServer()
 {
-  if (_listen_fd != -1)
+  if (_listen_fds.empty())
     Logger::log_srv(_server_name, "going out of scope");
   if (!_clients.empty()) {
     Logger::log_srv(_server_name, "removing all clients");
@@ -126,36 +126,75 @@ VServer::~VServer()
 //	- SOMAXCONN: 4096 on my system, maximum number of connections in the backlog
 //		of listen
 // TODO: use Socket-class here.
-void VServer::_setupSocket()
+
+// void VServer::_setupSocket()
+// {
+//   _listen_fd = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0);
+//   if (_listen_fd == -1)
+//     throw(ServerInitException("socket failed"));
+//
+//   int opt = 1;
+//   if (setsockopt(_listen_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) ==
+//   -1)
+//     throw(ServerInitException("setsockopt failed"));
+//
+//   if (bind(_listen_fd,
+//           (struct sockaddr *)&_server_addr,
+//           sizeof(_server_addr)) == -1)
+//     throw(ServerInitException("bind failed"));
+//
+//   if (listen(_listen_fd, SOMAXCONN) == -1)
+//     throw(ServerInitException("listen failed"));
+//
+//   Logger::log_srv(_server_name, "listening on fd " + int2str(_listen_fd));
+// }
+
+void VServer::_setupSockets()
 {
-  _listen_fd = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0);
-  if (_listen_fd == -1)
-    throw(ServerInitException("socket failed"));
+  std::map< str, std::set<u16> >::const_iterator it =
+      _cfg.getInterfaces().begin();
+  while (it != _cfg.getInterfaces().end()) {
+    str addr = it->first;
 
-  int opt = 1;
-  if (setsockopt(_listen_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) == -1)
-    throw(ServerInitException("setsockopt failed"));
+    // NOTE: when we get here there must be a port for every interface. so in
+    // some earlier parsing step we will have to add port 80 for interfaces
+    // without specified ports.
+    // No! We demand that interfaces always come in the form addr:port!
+    std::set<u16> ports = it->second;
+    // better safe then sorry
+    if (ports.size() == 0) {
+      it++;
+      continue;
+    }
+    int newFd;
+    for (std::set<u16>::iterator itp = ports.begin(); itp != ports.end(); itp++)
+    {
+      newFd = Socket::bindSocket(addr, *itp);
+      if (newFd == -1)
+        continue;
+      if (listen(newFd, SOMAXCONN) == -1) {
+        close(newFd);
+        continue;
+      }
+      _listen_fds.insert(newFd);
+      _ports.insert(*itp);
 
-  if (bind(_listen_fd,
-          (struct sockaddr *)&_server_addr,
-          sizeof(_server_addr)) == -1)
-    throw(ServerInitException("bind failed"));
-
-  if (listen(_listen_fd, SOMAXCONN) == -1)
-    throw(ServerInitException("listen failed"));
-
-  Logger::log_srv(_server_name, "listening on fd " + int2str(_listen_fd));
+      // the question here is: wouldn't it be better to only store ip-addrs
+      // here?
+      _activeInterfaces[addr].insert(*itp);
+    }
+    it++;
+  }
+  if (_listen_fds.size() == 0)
+    throw(ServerInitException("could not setup a single socket"));
 }
-
 // Init a server. If initialization fails after call to socket we would be left
 // with a open fd, so we need to close it for proper cleanup
 void VServer::init()
 {
   try {
-    _setupSocket();
+    _setupSockets();
   } catch (const VServer::ServerInitException& e) {
-    if (_listen_fd != -1)
-      close(_listen_fd);
     throw;
   }
   Logger::log_srv(_server_name, "initialized!");
@@ -176,9 +215,10 @@ void VServer::init()
 // inserted.
 Client *VServer::addClient(int fd)
 {
-  if (fd != _listen_fd)
-    throw(ServerException(
-        "server_fd = " + int2str(_listen_fd) + ", conn_fd = " + int2str(fd)));
+  if (_listen_fds.find(fd) == _listen_fds.end())
+    throw(ServerException("server_fds = " + getSetStr(_listen_fds) +
+        ", conn_fd = " + int2str(fd)));
+
   Logger::log_srv(_server_name, "accepting new conn on fd " + int2str(fd));
 
   struct sockaddr_in client_addr;

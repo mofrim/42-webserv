@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:36:43 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/18 16:01:17 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/18 17:45:26 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -111,16 +111,19 @@ void Webserv::_setupServers()
 void Webserv::_setupSingleServer(VServer& srv)
 {
   Logger::log_msg("Setting up this server:");
-  srv.printCfg();
   try {
     srv.init();
-    _serverFdMap.insert(std::pair<int, VServer *>(srv.getListenFd(), &srv));
+    for (std::set<int>::const_iterator it = srv.getListenFds().begin();
+        it != srv.getListenFds().end();
+        it++)
+      _serverFdMap.insert(std::pair<int, VServer *>(*it, &srv));
   } catch (const VServer::ServerInitException& e) {
     Logger::log_err(
         "Caught exception while trying to init srv " + srv.getServerName());
     Logger::log_err(e.what());
     srv.setSetupFailed();
   }
+  srv.printCfg();
 }
 
 void Webserv::_shutdownAllServers()

@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/14 23:12:17 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/18 16:00:15 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/18 17:36:39 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,29 +36,34 @@ Epoll& Epoll::operator=(const Epoll& other)
 Epoll::~Epoll()
 {}
 
-////////////////////////////////////////////////////////////////////////////////
-/// methods
+// ------------------------------=[ methods ]=------------------------------ //
 
+// setup epoll to watch all server FDs
+//
+// we first need to count fds, because every vserver can listen on multiple FDs
 void Epoll::setup(
-    const std::vector<VServer>& servers, const size_t& numOfServers)
+    const std::vector<VServer>& vservers, const size_t& numOfServers)
 {
-  int listen_fd;
-
-  _ev.resize(numOfServers);
+  std::set<int> listenFds;
 
   // arg for epoll_create only has to be a positive number, so...
   _epoll_fd = epoll_create(42);
   if (_epoll_fd == -1)
     throw(EpollException("epoll_create failed"));
 
-  for (size_t i = 0; i < numOfServers; i++) {
-    listen_fd      = servers[i].getListenFd();
-    _ev[i].events  = EPOLLIN;
-    _ev[i].data.fd = listen_fd;
+  for (size_t k = 0; k < numOfServers; k++) {
+    listenFds = vservers[k].getListenFds();
+    for (std::set<int>::iterator itListen = listenFds.begin();
+        itListen != listenFds.end();
+        itListen++)
+    {
+      struct epoll_event e = {.events = EPOLLIN, .data = {.fd = *itListen}};
+      _ev.push_back(e);
 
-    if (epoll_ctl(_epoll_fd, EPOLL_CTL_ADD, listen_fd, &_ev[i]) == -1) {
-      close(_epoll_fd);
-      throw(EpollException("epoll_ctl failed"));
+      if (epoll_ctl(_epoll_fd, EPOLL_CTL_ADD, *itListen, &_ev.back()) == -1) {
+        close(_epoll_fd);
+        throw(EpollException("epoll_ctl failed"));
+      }
     }
   }
 }

@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/16 12:11:11 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/18 16:06:03 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/18 17:55:59 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,30 +24,37 @@ uint16_t VServer::getPort() const
 {
   return (_port);
 }
+
 in_addr_t VServer::getHost() const
 {
   return (_host);
 }
+
 std::string VServer::getServerName() const
 {
   return (_server_name);
 }
+
 std::string VServer::getRoot() const
 {
   return (_root);
 }
+
 sockaddr_in VServer::getServerAddr() const
 {
   return (_server_addr);
 }
+
 int VServer::getListenFd() const
 {
   return (_listen_fd);
 }
+
 const VServerCfg *VServer::getCfg() const
 {
   return (&_cfg);
 }
+
 bool VServer::getSetupFailed() const
 {
   return (_setupFailed);
@@ -58,6 +65,7 @@ void VServer::setPort(uint16_t port)
 {
   _port = port;
 }
+
 void VServer::setHost(in_addr_t host)
 {
   _host = host;
@@ -83,14 +91,15 @@ void VServer::setSetupFailed()
   _setupFailed = true;
 }
 
+// FIXME: display port list
 void VServer::printCfg() const
 {
   struct in_addr host_addr;
   host_addr.s_addr = htonl(_host);
   Logger::log_msg("  server_name: \"" + _server_name + "\"");
-  Logger::log_msg("  port: " + int2str(_port));
+  Logger::log_msg("  port: " + getSetStr(_ports));
   Logger::log_msg("  root: " + _root);
-  Logger::log_msg("  listen_fd: " + int2str(_listen_fd));
+  Logger::log_msg("  listen_fds: " + getSetStr(_listen_fds));
   Logger::log_msg("  host: " + inAddrToStr(host_addr));
 }
 
@@ -113,4 +122,14 @@ void VServer::printClients()
 bool VServer::isValidClientFd(int fd)
 {
   return (_clients.find(fd) != _clients.end());
+}
+
+const std::set<int>& VServer::getListenFds() const
+{
+  return _listen_fds;
+}
+
+const std::set<u16>& VServer::getPorts() const
+{
+  return _ports;
 }
