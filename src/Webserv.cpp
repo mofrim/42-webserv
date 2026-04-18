@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:36:43 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/17 12:21:05 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/18 11:10:07 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -116,9 +116,9 @@ void Webserv::_setupSingleServer(Server& srv)
     srv.init();
     _serverFdMap.insert(std::pair<int, Server *>(srv.getListenFd(), &srv));
   } catch (const Server::ServerInitException& e) {
-    Logger::log_err(e.what());
     Logger::log_err(
         "Caught exception while trying to init srv " + srv.getServerName());
+    Logger::log_err(e.what());
     srv.setSetupFailed();
   }
 }
