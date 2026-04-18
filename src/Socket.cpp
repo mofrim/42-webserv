@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/28 07:26:35 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/18 00:18:36 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/18 11:19:49 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -166,6 +166,14 @@ void Socket::printAddrlist(const str& addr, u16 port)
     freeaddrinfo(ai);
 }
 
+// QUESTION: i think i only need one bind-wrapping function for the Server
+// sockets, right? Then, it should be really clear which socket options to set.
+//
+// @return the fd of the socket the addr:port pair is bound to. in case of error
+// -> -1
+// @throws never throws exception
+//
+// TODO: document! especially SO_REUSEADDR
 int Socket::bindSocket(const str& addr, u16 port)
 {
   struct addrinfo *ai;
@@ -184,6 +192,12 @@ int Socket::bindSocket(const str& addr, u16 port)
       -1)
   {
     Logger::log_err(str("bindSocket socket failed: ", *strerror(errno)));
+    return -1;
+  }
+
+  int opt = 1;
+  if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) == -1) {
+    Logger::log_err(str("bindSocket setsockopt failed: ", *strerror(errno)));
     return -1;
   }
 
