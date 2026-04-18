@@ -6,14 +6,12 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/13 13:06:35 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/04 08:54:51 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/18 13:21:34 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "test_hdr.hpp"
 #include "test_utils.hpp"
-
-g_GlobalResult = OK;
 
 // test logic goes here, for any failure return (-1) or throw exception.
 // otherwise -> success
