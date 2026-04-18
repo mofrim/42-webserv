@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/03 12:50:36 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/18 17:51:54 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/18 20:18:30 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -94,6 +94,8 @@ class VServer {
     int                  getListenFd() const;
     const std::set<int>& getListenFds() const;
     const std::set<u16>& getPorts() const;
+
+    void cleanup();
 
     // TODO: think about the whole exception thing! Maybe there should be
     // some base-class called like this one and the special exceptions for every

@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/03 12:51:23 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/18 20:09:25 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/18 20:25:45 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -282,6 +282,20 @@ int VServer::handleEvent(const struct epoll_event& ev, int client_fd)
   if (ev.events & EPOLLOUT)
     return_value = _reqHandler.writeResponse(client_fd);
   return (return_value);
+}
+
+// close all socket fds
+// not handling any errors for close except displaying a short warning msg.
+//
+// TODO: in principle i could try and have small retry loop here
+void VServer::cleanup()
+{
+  for (std::set<int>::iterator it = _listen_fds.begin();
+      it != _listen_fds.end();
+      it++)
+    if (*it != -1 && close(*it) == -1)
+      Logger::log_warn("VServer::cleanup: failed to close fd " + int2str(*it) +
+          " with error: " + strerror(errno));
 }
 
 ////////////////////////////////////////////////////////////////////////////////

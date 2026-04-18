@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:36:43 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/18 17:45:26 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/18 20:17:36 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,7 +39,7 @@ Webserv& Webserv::operator=(const Webserv& other)
 Webserv::~Webserv()
 {
   for (size_t i = 0; i < _numOfServers; i++)
-    close(_servers[i].getListenFd());
+    _servers[i].cleanup();
 }
 
 // TODO: there will be much more to do in here. What?

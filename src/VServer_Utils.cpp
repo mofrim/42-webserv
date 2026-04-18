@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/16 12:11:11 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/18 20:09:25 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/18 20:10:52 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,22 +70,27 @@ void VServer::setHost(in_addr_t host)
 {
   _host = host;
 }
+
 void VServer::setServerName(std::string name)
 {
   _server_name = name;
 }
+
 void VServer::setRoot(std::string root)
 {
   _root = root;
 }
+
 void VServer::setServerAddr(sockaddr_in server_addr)
 {
   this->_server_addr = server_addr;
 }
+
 void VServer::setListenFd(int listen_fd)
 {
   _listen_fd = listen_fd;
 }
+
 void VServer::setSetupFailed()
 {
   _setupFailed = true;
