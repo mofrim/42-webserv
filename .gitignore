@@ -3,7 +3,7 @@ compile_commands.json
 obj/
 webserv
 .cache/
-tests/webserv_tests
+tests/run_tests
 tests/Makefile
 tests/tests.hpp
 tests/test-main.cpp
@@ -15,3 +15,4 @@ _play/**
 !_play/echo_srv.cpp
 !_play/*.cpp
 !_play/nginx/**
+
