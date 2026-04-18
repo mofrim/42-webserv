@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/26 10:03:57 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/18 13:56:52 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/18 15:38:25 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,6 +61,10 @@ std::string getAddrPortStr4(const struct sockaddr_in& addr)
 // an easy output operator for a set of ports 8)
 std::ostream& operator<<(std::ostream& os, std::set<u16> lst)
 {
+  if (lst.size() == 0) {
+    os << "";
+    return os;
+  }
   os << "{";
   for (std::set<u16>::iterator it = lst.begin(); it != lst.end();)
     os << *it << (++it != lst.end() ? ", " : "}");

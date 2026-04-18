@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/03 12:51:23 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/18 12:51:36 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/18 15:55:17 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,7 @@ Server::Server(): _reqHandler(this)
   memset(&_server_addr, 0, sizeof(_server_addr));
 }
 
-Server::Server(const ServerCfg& srvcfg): _reqHandler(this)
+Server::Server(const VServerCfg& srvcfg): _reqHandler(this)
 {
   _listen_fd   = -1;
   _port        = srvcfg.getPort();

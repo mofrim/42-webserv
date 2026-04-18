@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ServerCfg.hpp                                      :+:      :+:    :+:   */
+/*   VServerCfg.hpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/25 08:01:29 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/18 13:49:58 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/18 15:54:54 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,7 @@
 
 // NEXT: bit by bit refactor this until we have what we want for config
 // compatibility
-class ServerCfg {
+class VServerCfg {
   private:
     std::string _server_name;
 
@@ -65,10 +65,10 @@ class ServerCfg {
 
   public:
     // OCF
-    ServerCfg();
-    ServerCfg(const ServerCfg& other);
-    ServerCfg& operator=(const ServerCfg& other);
-    ~ServerCfg();
+    VServerCfg();
+    VServerCfg(const VServerCfg& other);
+    VServerCfg& operator=(const VServerCfg& other);
+    ~VServerCfg();
 
     void setServerName(std::string name);
     void setRoot(std::string root);
@@ -81,10 +81,13 @@ class ServerCfg {
     void      setHost(in_addr_t host);
     uint16_t  getPort() const;
     in_addr_t getHost() const;
-    void      addInterface(const str& addr, u16 port);
-    void      addInterfaces(std::map<str, std::set<u16> > _interfaces);
-    std::map< str, std::set<u16> >& getInterfaces();
-    std::set<u16>&                  getPorts(const str& addr);
+
+    void addInterface(const str& addr, u16 port);
+    void addInterfaces(std::map<str, std::set<u16> > _interfaces);
+    const std::map< str, std::set<u16> >& getInterfaces();
+    const std::set<u16>&                  getPorts(const str& addr);
+    int delPort(const str& interface, u16 port);
+    int delInterface(const str& interface);
 
     //
     // void setClientMaxBodySize(unsigned long cli_max_body_size);

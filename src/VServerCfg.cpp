@@ -1,16 +1,16 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ServerCfg.cpp                                      :+:      :+:    :+:   */
+/*   VServerCfg.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/25 08:35:42 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/18 13:51:12 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/18 15:54:14 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "ServerCfg.hpp"
+#include "VServerCfg.hpp"
 #include "utils.hpp"
 
 #include <arpa/inet.h>
@@ -22,7 +22,7 @@
 
 // Default Constructor with default values.
 // NOTE: do all non-generic setting in ServerSetup
-ServerCfg::ServerCfg()
+VServerCfg::VServerCfg()
 {
   _port        = 0;
   _host        = 0;
@@ -31,7 +31,7 @@ ServerCfg::ServerCfg()
   memset(&_server_addr, 0, sizeof(_server_addr));
 }
 
-ServerCfg::ServerCfg(const ServerCfg& o)
+VServerCfg::VServerCfg(const VServerCfg& o)
 {
   _port        = o._port;
   _host        = o._host;
@@ -41,7 +41,7 @@ ServerCfg::ServerCfg(const ServerCfg& o)
   _interfaces  = o._interfaces;
 }
 
-ServerCfg& ServerCfg::operator=(const ServerCfg& o)
+VServerCfg& VServerCfg::operator=(const VServerCfg& o)
 {
   if (this != &o) {
     _port        = o._port;
@@ -54,32 +54,32 @@ ServerCfg& ServerCfg::operator=(const ServerCfg& o)
   return (*this);
 }
 
-ServerCfg::~ServerCfg()
+VServerCfg::~VServerCfg()
 {}
 
 //// OCF end
 
-void ServerCfg::setServerName(std::string name)
+void VServerCfg::setServerName(std::string name)
 {
   _server_name = name;
 }
-void ServerCfg::setRoot(std::string root)
+void VServerCfg::setRoot(std::string root)
 {
   _root = root;
 }
-void ServerCfg::setDefaultFile(std::string default_file)
+void VServerCfg::setDefaultFile(std::string default_file)
 {
   this->_default_file = default_file;
 }
-void ServerCfg::setPort(uint16_t port)
+void VServerCfg::setPort(uint16_t port)
 {
   _port = port;
 }
-void ServerCfg::setHost(in_addr_t host)
+void VServerCfg::setHost(in_addr_t host)
 {
   _host = host;
 }
-void ServerCfg::setServerAddr(sockaddr_in server_addr)
+void VServerCfg::setServerAddr(sockaddr_in server_addr)
 {
   this->_server_addr = server_addr;
 }
@@ -93,27 +93,27 @@ void ServerCfg::setServerAddr(sockaddr_in server_addr)
 // 	this->_locations = locations;
 // }
 
-uint16_t ServerCfg::getPort() const
+uint16_t VServerCfg::getPort() const
 {
   return (_port);
 }
-in_addr_t ServerCfg::getHost() const
+in_addr_t VServerCfg::getHost() const
 {
   return (_host);
 }
-std::string ServerCfg::getServerName() const
+std::string VServerCfg::getServerName() const
 {
   return (_server_name);
 }
-std::string ServerCfg::getRoot() const
+std::string VServerCfg::getRoot() const
 {
   return (_root);
 }
-sockaddr_in ServerCfg::getServerAddr() const
+sockaddr_in VServerCfg::getServerAddr() const
 {
   return (_server_addr);
 }
-std::string ServerCfg::getDefaultFile() const
+std::string VServerCfg::getDefaultFile() const
 {
   return (_default_file);
 }
@@ -129,7 +129,7 @@ std::string ServerCfg::getDefaultFile() const
 // struct sockaddr_in _server_addr;
 //
 // with our own conversion functions for ip-addrs.
-void ServerCfg::printCfg() const
+void VServerCfg::printCfg() const
 {
   struct in_addr host_addr;
   host_addr.s_addr = htonl(_host);
@@ -144,12 +144,12 @@ void ServerCfg::printCfg() const
 }
 
 // silently fails if addr:port pair already exists
-void ServerCfg::addInterface(const str& addr, u16 port)
+void VServerCfg::addInterface(const str& addr, u16 port)
 {
   _interfaces[addr].insert(port);
 }
 
-void ServerCfg::addInterfaces(std::map<str, std::set<u16> > interfaces)
+void VServerCfg::addInterfaces(std::map<str, std::set<u16> > interfaces)
 {
   for (std::map<str, std::set<u16> >::iterator it = interfaces.begin();
       it != interfaces.end();
@@ -157,14 +157,34 @@ void ServerCfg::addInterfaces(std::map<str, std::set<u16> > interfaces)
     _interfaces[it->first] = it->second;
 }
 
-std::map< str, std::set<u16> >& ServerCfg::getInterfaces()
+// give access to _interfaces... prly we want this this at least const-ref
+// FIXME:
+const std::map< str, std::set<u16> >& VServerCfg::getInterfaces()
 {
   return _interfaces;
 }
 
 // FIXME: is it okay to return a reference here? or should it be a complete
 // object?
-std::set<u16>& ServerCfg::getPorts(const str& addr)
+const std::set<u16>& VServerCfg::getPorts(const str& addr)
 {
   return _interfaces[addr];
+}
+
+// delete a port from an interface.
+// @return int 0 if sth was erased, -1 otherwise
+int VServerCfg::delPort(const str& interface, u16 port)
+{
+  if (_interfaces[interface].erase(port) == 0)
+    return -1;
+  return 0;
+}
+
+// delete interface
+// @return int 0 if sth was erased, -1 otherwise
+int VServerCfg::delInterface(const str& interface)
+{
+  if (_interfaces.erase(interface) == 0)
+    return -1;
+  return 0;
 }

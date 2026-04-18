@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 23:39:57 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/17 11:36:03 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/18 15:52:51 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,7 +45,7 @@ Request::~Request()
 
 // the standard ctor we use for initializing a request _and_ parse the request
 // at the same time.
-Request::Request(const ServerCfg *scfg, const std::string& reqstr)
+Request::Request(const VServerCfg *scfg, const std::string& reqstr)
 {
   _srvcfg = scfg;
   _reqstr = reqstr;

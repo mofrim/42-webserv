@@ -1,16 +1,14 @@
-#include "test_hdr.hpp"
-#include "test_utils.hpp"
 #include "tests.hpp"
-
+#include "test_utils.hpp"
+#include "test_hdr.hpp"
 bool g_GlobalResult = OK;
-
 int main()
 {
-  test_example2();
-  nl();
   test_server_init();
   nl();
   test_socket();
+  nl();
+  test_VServerCfg();
   nl();
   print_final_result();
   if (g_GlobalResult == OK)
