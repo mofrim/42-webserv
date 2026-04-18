@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/03 12:51:23 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/18 17:55:59 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/18 20:09:25 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -216,7 +216,7 @@ void VServer::init()
 Client *VServer::addClient(int fd)
 {
   if (_listen_fds.find(fd) == _listen_fds.end())
-    throw(ServerException("server_fds = " + getSetStr(_listen_fds) +
+    throw(ServerException("server_fds = " + getSetAsStr(_listen_fds) +
         ", conn_fd = " + int2str(fd)));
 
   Logger::log_srv(_server_name, "accepting new conn on fd " + int2str(fd));

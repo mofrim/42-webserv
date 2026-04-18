@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/16 12:11:11 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/18 17:55:59 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/18 20:09:25 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -97,9 +97,9 @@ void VServer::printCfg() const
   struct in_addr host_addr;
   host_addr.s_addr = htonl(_host);
   Logger::log_msg("  server_name: \"" + _server_name + "\"");
-  Logger::log_msg("  port: " + getSetStr(_ports));
+  Logger::log_msg("  port: " + getSetAsStr(_ports));
   Logger::log_msg("  root: " + _root);
-  Logger::log_msg("  listen_fds: " + getSetStr(_listen_fds));
+  Logger::log_msg("  listen_fds: " + getSetAsStr(_listen_fds));
   Logger::log_msg("  host: " + inAddrToStr(host_addr));
 }
 

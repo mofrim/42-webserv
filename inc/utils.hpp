@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/03 11:26:23 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/18 17:55:59 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/18 20:09:25 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@ int           setFdNonBlocking(int fd);
 std::ostream& operator<<(std::ostream& os, std::set<u16> lst);
 
 template <typename T>
-str getSetStr(const std::set<T>& s)
+str getSetAsStr(const std::set<T>& s)
 {
   str ret("");
   if (s.size() == 0)
