@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/25 08:01:29 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/17 11:26:44 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/18 13:49:58 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,8 +14,11 @@
 #define SERVERCFG_HPP
 
 #include "Route.hpp"
+#include "typesAndConstants.hpp"
 
+#include <map>
 #include <netinet/in.h>
+#include <set>
 #include <string>
 #include <sys/socket.h>
 #include <vector>
@@ -43,6 +46,11 @@ class ServerCfg {
     uint16_t  _port;
     in_addr_t _host;
 
+    // this is where all the `listen` addr:port pairs will go
+    // - addr: can be valid domain-name or IPv4 dotted-decimal addr
+    // - port: 16 bit unsigned int
+    std::map<str, std::set<u16> > _interfaces;
+
     std::string _root;
 
     // what is this????
@@ -62,19 +70,27 @@ class ServerCfg {
     ServerCfg& operator=(const ServerCfg& other);
     ~ServerCfg();
 
-    void setPort(uint16_t port);
-    void setHost(in_addr_t host);
     void setServerName(std::string name);
     void setRoot(std::string root);
     void setServerAddr(sockaddr_in server_addr);
     void setDefaultFile(std::string default_file);
+
+    // WIP: refactoring to interaces list
+    // prly will need another function that adds acomplete list of interfaces
+    void      setPort(uint16_t port);
+    void      setHost(in_addr_t host);
+    uint16_t  getPort() const;
+    in_addr_t getHost() const;
+    void      addInterface(const str& addr, u16 port);
+    void      addInterfaces(std::map<str, std::set<u16> > _interfaces);
+    std::map< str, std::set<u16> >& getInterfaces();
+    std::set<u16>&                  getPorts(const str& addr);
+
     //
     // void setClientMaxBodySize(unsigned long cli_max_body_size);
     // void setIndex(std::string index);
     // void setLocations(std::vector<Location> locations);
 
-    uint16_t    getPort() const;
-    in_addr_t   getHost() const;
     std::string getServerName() const;
     std::string getRoot() const;
     sockaddr_in getServerAddr() const;
