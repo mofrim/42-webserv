@@ -13,4 +13,5 @@ tests/test-main.cpp
 _play/**
 # ..then unignore what we want in the repo
 !_play/echo_srv.cpp
+!_play/*.cpp
 !_play/nginx/**
