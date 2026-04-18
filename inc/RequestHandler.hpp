@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 19:12:58 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/17 16:00:39 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/18 16:00:14 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,11 +22,11 @@
 // FIXME: for now this is the read buffer size. definitely coud be higher.
 #define READ_BUFSIZE 4096
 
-class Server;
+class VServer;
 
 class RequestHandler {
   private:
-    Server *_srv;
+    VServer *_srv;
 
     // choosing a deque here as we are going insert new request at the beginning
     std::deque<Request> _requests;
@@ -35,7 +35,7 @@ class RequestHandler {
     RequestHandler();
 
   public:
-    RequestHandler(Server *srv);
+    RequestHandler(VServer *srv);
     RequestHandler& operator=(const RequestHandler& other);
     ~RequestHandler();
 

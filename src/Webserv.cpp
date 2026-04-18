@@ -6,13 +6,13 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:36:43 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/18 11:10:07 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/18 16:01:17 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Config.hpp"
 #include "Logger.hpp"
-#include "Server.hpp"
+#include "VServer.hpp"
 #include "Webserv.hpp"
 
 // FIXME: remove cause sleep is not an allowed function!
@@ -71,7 +71,7 @@ void Webserv::getServersFromCfg(const std::string& cfgFilename)
   _numOfServers = cfg.getCfgs().size();
 
   for (size_t i = 0; i < _numOfServers; i++) {
-    _servers.push_back(Server(cfg.getCfgs()[i]));
+    _servers.push_back(VServer(cfg.getCfgs()[i]));
   }
   _defaultCfg = false;
 }
@@ -86,7 +86,7 @@ void Webserv::_setupServers()
   if (_defaultCfg)
     _initDefaultCfg2();
 
-  std::vector<Server>::iterator it = _servers.begin();
+  std::vector<VServer>::iterator it = _servers.begin();
   while (it != _servers.end()) {
     _setupSingleServer(*it);
     if (it->getSetupFailed()) {
@@ -108,14 +108,14 @@ void Webserv::_setupServers()
 // which is only responsible for binding a socket to a port and start listening
 // on it. The rest of the server initialization is being done in... here too?!
 // TODO: handle possible exceptions!!!
-void Webserv::_setupSingleServer(Server& srv)
+void Webserv::_setupSingleServer(VServer& srv)
 {
   Logger::log_msg("Setting up this server:");
   srv.printCfg();
   try {
     srv.init();
-    _serverFdMap.insert(std::pair<int, Server *>(srv.getListenFd(), &srv));
-  } catch (const Server::ServerInitException& e) {
+    _serverFdMap.insert(std::pair<int, VServer *>(srv.getListenFd(), &srv));
+  } catch (const VServer::ServerInitException& e) {
     Logger::log_err(
         "Caught exception while trying to init srv " + srv.getServerName());
     Logger::log_err(e.what());
@@ -125,7 +125,7 @@ void Webserv::_setupSingleServer(Server& srv)
 
 void Webserv::_shutdownAllServers()
 {
-  for (std::vector<Server>::iterator it = _servers.begin();
+  for (std::vector<VServer>::iterator it = _servers.begin();
       it != _servers.end();
       it++)
     it->removeAllClients();
@@ -174,8 +174,8 @@ void Webserv::run()
       // listening on a fd the client is connected to. In the request handling
       // part we can then route the request to the correct vsrv.
       if (_isServerFd(currentFd) && _numOfClients < MAX_CLIENTS) {
-        Server *srv = _getServerByFd(currentFd);
-        Client *cli = srv->addClient(currentFd);
+        VServer *srv = _getServerByFd(currentFd);
+        Client  *cli = srv->addClient(currentFd);
         _addClientToClientFdServerMap(cli->getFd(), srv);
         _epoll.addClient(cli->getFd());
         _numOfClients++;
@@ -187,7 +187,7 @@ void Webserv::run()
       // this!!! Also:
       // FIXME: clarify how we handle connection keepalive with clients
       else {
-        Server *srv = _getServerByClientFd(currentFd);
+        VServer *srv = _getServerByClientFd(currentFd);
         if (srv == NULL)
           throw(WebservRunException("could not find server by fd"));
         if (LOGLEVEL == BRUTAL)

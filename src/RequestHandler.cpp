@@ -6,14 +6,14 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 19:13:35 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/17 15:59:38 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/18 16:01:18 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Logger.hpp"
 #include "Request.hpp"
 #include "RequestHandler.hpp"
-#include "Server.hpp"
+#include "VServer.hpp"
 #include "Webserv.hpp"
 #include "utils.hpp"
 
@@ -44,7 +44,7 @@ RequestHandler::~RequestHandler()
 {}
 // -- OCF end --
 
-RequestHandler::RequestHandler(Server *srv): _srv(srv)
+RequestHandler::RequestHandler(VServer *srv): _srv(srv)
 {}
 
 // Handler for an EPOLLIN aka I/O read event aka a _Request_
@@ -56,7 +56,7 @@ int RequestHandler::readRequest(int fd)
 
   Logger::log_dbg2("Read request handler called!");
   if (_srv->isValidClientFd(fd) == false)
-    throw(Server::ServerException("fd in handleEvent() not found"));
+    throw(VServer::ServerException("fd in handleEvent() not found"));
 
   Logger::log_srv(srv_name, "reading from socket" + int2str(fd));
 

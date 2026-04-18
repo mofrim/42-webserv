@@ -1,17 +1,16 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   Server.hpp                                         :+:      :+:    :+:   */
+/*   VServer.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/03 12:50:36 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/18 15:54:54 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/18 16:02:34 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef SERVER_HPP
-#define SERVER_HPP
+#pragma once
 
 #include "Client.hpp"
 #include "RequestHandler.hpp"
@@ -20,7 +19,7 @@
 #include <map>
 #include <stdexcept>
 
-class Server {
+class VServer {
   private:
     uint16_t           _port;
     in_addr_t          _host;
@@ -43,11 +42,11 @@ class Server {
 
   public:
     // OCF
-    Server();
-    Server(const VServerCfg& srvcfg);
-    Server(const Server& other);
-    Server& operator=(const Server& other);
-    ~Server();
+    VServer();
+    VServer(const VServerCfg& srvcfg);
+    VServer(const VServer& other);
+    VServer& operator=(const VServer& other);
+    ~VServer();
 
     void    init();
     Client *addClient(int fd);
@@ -90,4 +89,3 @@ class Server {
         ServerException(const std::string& msg);
     };
 };
-#endif

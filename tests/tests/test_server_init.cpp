@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/08 11:40:47 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/18 15:58:25 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/18 16:01:49 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@ int _test_server_init()
 {
   print_test_topic("test_server_init", "moep");
   VServerCfg cfg;
-  Server     srv(cfg);
+  VServer    srv(cfg);
   return (0);
 }
 

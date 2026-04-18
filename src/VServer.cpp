@@ -1,17 +1,17 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   Server.cpp                                         :+:      :+:    :+:   */
+/*   VServer.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/03 12:51:23 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/18 15:55:17 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/18 16:01:19 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Logger.hpp"
-#include "Server.hpp"
+#include "VServer.hpp"
 // #include "Socket.hpp"
 #include "utils.hpp"
 
@@ -21,7 +21,7 @@
 #include <sys/epoll.h>
 #include <unistd.h>
 
-Server::Server(): _reqHandler(this)
+VServer::VServer(): _reqHandler(this)
 {
   _port        = 0;
   _host        = 0;
@@ -32,7 +32,7 @@ Server::Server(): _reqHandler(this)
   memset(&_server_addr, 0, sizeof(_server_addr));
 }
 
-Server::Server(const VServerCfg& srvcfg): _reqHandler(this)
+VServer::VServer(const VServerCfg& srvcfg): _reqHandler(this)
 {
   _listen_fd   = -1;
   _port        = srvcfg.getPort();
@@ -44,7 +44,7 @@ Server::Server(const VServerCfg& srvcfg): _reqHandler(this)
   _setupFailed = false;
 }
 
-Server::Server(const Server& other): _reqHandler(this)
+VServer::VServer(const VServer& other): _reqHandler(this)
 {
   if (this != &other) {
     _port        = other._port;
@@ -61,7 +61,7 @@ Server::Server(const Server& other): _reqHandler(this)
 
 // NOTE: only for this use-case implemented the copy assignment constructor for
 // RequestHandler. only place this is used: Webserv::_setupServers.
-Server& Server::operator=(const Server& other)
+VServer& VServer::operator=(const VServer& other)
 {
   if (this != &other) {
     _port        = other._port;
@@ -81,7 +81,7 @@ Server& Server::operator=(const Server& other)
 
 // a little hack to avoid printing the "out of scope msg" for tmp servers not
 // fully initialized
-Server::~Server()
+VServer::~VServer()
 {
   if (_listen_fd != -1)
     Logger::log_srv(_server_name, "going out of scope");
@@ -126,7 +126,7 @@ Server::~Server()
 //	- SOMAXCONN: 4096 on my system, maximum number of connections in the backlog
 //		of listen
 // TODO: use Socket-class here.
-void Server::_setupSocket()
+void VServer::_setupSocket()
 {
   _listen_fd = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0);
   if (_listen_fd == -1)
@@ -149,11 +149,11 @@ void Server::_setupSocket()
 
 // Init a server. If initialization fails after call to socket we would be left
 // with a open fd, so we need to close it for proper cleanup
-void Server::init()
+void VServer::init()
 {
   try {
     _setupSocket();
-  } catch (const Server::ServerInitException& e) {
+  } catch (const VServer::ServerInitException& e) {
     if (_listen_fd != -1)
       close(_listen_fd);
     throw;
@@ -174,7 +174,7 @@ void Server::init()
 // `second` member is a bool flag indicating wether a new element could be
 // inserted or not. if the key already exists the new element can not be
 // inserted.
-Client *Server::addClient(int fd)
+Client *VServer::addClient(int fd)
 {
   if (fd != _listen_fd)
     throw(ServerException(
@@ -215,7 +215,7 @@ Client *Server::addClient(int fd)
 // 	1) remove from clients list
 // 	2) remove from pair from clientFdMap
 // 	3) close socket
-void Server::removeClient(int fd)
+void VServer::removeClient(int fd)
 {
   if (_clients.find(fd) == _clients.end())
     throw(
@@ -224,7 +224,7 @@ void Server::removeClient(int fd)
   _clients.erase(fd);
 }
 
-void Server::removeAllClients()
+void VServer::removeAllClients()
 {
   for (std::map<int, Client *>::iterator it = _clients.begin();
       it != _clients.end();
@@ -234,7 +234,7 @@ void Server::removeAllClients()
 }
 
 // INFO: this is another heart-piece of this webserv.
-int Server::handleEvent(const struct epoll_event& ev, int client_fd)
+int VServer::handleEvent(const struct epoll_event& ev, int client_fd)
 {
   int return_value = 0;
   if (ev.events & EPOLLIN)
@@ -247,10 +247,10 @@ int Server::handleEvent(const struct epoll_event& ev, int client_fd)
 ////////////////////////////////////////////////////////////////////////////////
 /// exceptions
 
-Server::ServerInitException::ServerInitException(const std::string& msg):
+VServer::ServerInitException::ServerInitException(const std::string& msg):
   std::runtime_error("ServerInitException: " + msg)
 {}
 
-Server::ServerException::ServerException(const std::string& msg):
+VServer::ServerException::ServerException(const std::string& msg):
   std::runtime_error("ServerException: " + msg)
 {}

@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:35:29 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/17 13:06:36 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/18 16:01:18 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 #define WEBSERV_HPP
 
 #include "Epoll.hpp"
-#include "Server.hpp"
+#include "VServer.hpp"
 
 #include <map>
 #include <netinet/in.h>
@@ -41,29 +41,29 @@ enum { REQ_READ = 0, REQ_WRITE = 1, REQ_ERR = -1 };
 
 class Webserv {
   private:
-    bool                    _defaultCfg;
-    bool                    _shutdown_server;
-    std::vector<Server>     _servers;
-    std::map<int, Server *> _serverFdMap;
-    std::map<int, Server *> _clientFdServerMap;
-    size_t                  _numOfServers;
-    uint16_t                _numOfClients;
+    bool                     _defaultCfg;
+    bool                     _shutdown_server;
+    std::vector<VServer>     _servers;
+    std::map<int, VServer *> _serverFdMap;
+    std::map<int, VServer *> _clientFdServerMap;
+    size_t                   _numOfServers;
+    uint16_t                 _numOfClients;
 
     Epoll _epoll;
 
     void _setupServers();
-    void _setupSingleServer(Server& srv);
+    void _setupSingleServer(VServer& srv);
     void _setupEpoll();
     void _shutdownAllServers();
 
     // utils
-    bool    _isServerFd(int fd) const;
-    Server *_getServerByFd(int fd);
-    Server *_getServerByClientFd(int fd);
-    void    _addClientToClientFdServerMap(int fd, Server *srv);
-    void    _initDefaultCfg();
-    void    _initDefaultCfg2();
-    void    _printSockname(int sock);
+    bool     _isServerFd(int fd) const;
+    VServer *_getServerByFd(int fd);
+    VServer *_getServerByClientFd(int fd);
+    void     _addClientToClientFdServerMap(int fd, VServer *srv);
+    void     _initDefaultCfg();
+    void     _initDefaultCfg2();
+    void     _printSockname(int sock);
 
     // we do not use them, so keep em private
     Webserv(const Webserv& other);

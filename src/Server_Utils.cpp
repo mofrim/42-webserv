@@ -6,12 +6,12 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/16 12:11:11 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/18 15:52:51 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/18 16:01:17 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Logger.hpp"
-#include "Server.hpp"
+#include "VServer.hpp"
 #include "utils.hpp"
 
 #include <iostream>
@@ -20,70 +20,70 @@
 /// Server methods of minor importance
 
 // the getters
-uint16_t Server::getPort() const
+uint16_t VServer::getPort() const
 {
   return (_port);
 }
-in_addr_t Server::getHost() const
+in_addr_t VServer::getHost() const
 {
   return (_host);
 }
-std::string Server::getServerName() const
+std::string VServer::getServerName() const
 {
   return (_server_name);
 }
-std::string Server::getRoot() const
+std::string VServer::getRoot() const
 {
   return (_root);
 }
-sockaddr_in Server::getServerAddr() const
+sockaddr_in VServer::getServerAddr() const
 {
   return (_server_addr);
 }
-int Server::getListenFd() const
+int VServer::getListenFd() const
 {
   return (_listen_fd);
 }
-const VServerCfg *Server::getCfg() const
+const VServerCfg *VServer::getCfg() const
 {
   return (&_cfg);
 }
-bool Server::getSetupFailed() const
+bool VServer::getSetupFailed() const
 {
   return (_setupFailed);
 }
 
 // the setters
-void Server::setPort(uint16_t port)
+void VServer::setPort(uint16_t port)
 {
   _port = port;
 }
-void Server::setHost(in_addr_t host)
+void VServer::setHost(in_addr_t host)
 {
   _host = host;
 }
-void Server::setServerName(std::string name)
+void VServer::setServerName(std::string name)
 {
   _server_name = name;
 }
-void Server::setRoot(std::string root)
+void VServer::setRoot(std::string root)
 {
   _root = root;
 }
-void Server::setServerAddr(sockaddr_in server_addr)
+void VServer::setServerAddr(sockaddr_in server_addr)
 {
   this->_server_addr = server_addr;
 }
-void Server::setListenFd(int listen_fd)
+void VServer::setListenFd(int listen_fd)
 {
   _listen_fd = listen_fd;
 }
-void Server::setSetupFailed()
+void VServer::setSetupFailed()
 {
   _setupFailed = true;
 }
 
-void Server::printCfg() const
+void VServer::printCfg() const
 {
   struct in_addr host_addr;
   host_addr.s_addr = htonl(_host);
@@ -94,7 +94,7 @@ void Server::printCfg() const
   Logger::log_msg("  host: " + inAddrToStr(host_addr));
 }
 
-void Server::printClients()
+void VServer::printClients()
 {
   Logger::log_srv(_server_name, "Printing Clients:");
   if (_clients.empty()) {
@@ -110,7 +110,7 @@ void Server::printClients()
 }
 
 // returns true if fd is a member of _clients belonging to this server.
-bool Server::isValidClientFd(int fd)
+bool VServer::isValidClientFd(int fd)
 {
   return (_clients.find(fd) != _clients.end());
 }

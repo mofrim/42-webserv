@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/16 11:54:27 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/18 12:32:35 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/18 16:00:15 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,19 +25,19 @@ bool Webserv::_isServerFd(int fd) const
 // TODO: refactor to return a list of possible servers, namely the servers
 // listening on this specific fd.
 // NOTE: std::map -> std::multimap
-Server *Webserv::_getServerByFd(int fd)
+VServer *Webserv::_getServerByFd(int fd)
 {
-  std::map<int, Server *>::iterator it;
+  std::map<int, VServer *>::iterator it;
   it = _serverFdMap.find(fd);
   if (it == _serverFdMap.end())
     return (NULL);
   return (it->second);
 }
 
-Server *Webserv::_getServerByClientFd(int fd)
+VServer *Webserv::_getServerByClientFd(int fd)
 {
   _printSockname(fd);
-  std::map<int, Server *>::iterator it;
+  std::map<int, VServer *>::iterator it;
   it = _clientFdServerMap.find(fd);
   if (it == _clientFdServerMap.end())
     return (NULL);
@@ -53,16 +53,16 @@ void Webserv::_printSockname(int sock)
   Logger::log_dbg0("getsockname: " + getAddrPortStr4(addr));
 }
 
-void Webserv::_addClientToClientFdServerMap(int fd, Server *srv)
+void Webserv::_addClientToClientFdServerMap(int fd, VServer *srv)
 {
-  _clientFdServerMap.insert(std::pair<int, Server *>(fd, srv));
+  _clientFdServerMap.insert(std::pair<int, VServer *>(fd, srv));
 }
 
 // NOTE: this _only_ needs to be done for the default config. all non-default
 // config wil have gone through parseCfg where all values will be set.
 void Webserv::_initDefaultCfg()
 {
-  Server      dsrv;
+  VServer     dsrv;
   sockaddr_in srv_addr;
 
   dsrv.setServerName(DEFAULT_SRV_NAME);
@@ -86,8 +86,8 @@ void Webserv::_initDefaultCfg()
 void Webserv::_initDefaultCfg2()
 {
 
-  Server      dsrv1;
-  Server      dsrv2;
+  VServer     dsrv1;
+  VServer     dsrv2;
   sockaddr_in srv_addr;
 
   dsrv1.setServerName("testsrv_4284");
