@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/20 16:51:47 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/20 17:21:13 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/20 17:36:50 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,11 +43,12 @@ str ErrPages::_getTemplateWithErrStr(const str& s)
       "<title>m0fr1m's Webserv Error Page</title>\n"
       "<style>\n"
       "body {\n"
-      "margin: 300px 100px 0px 100px;\n"
+      "margin: 100px 100px 0px 100px;\n"
       "text-align: center;\n"
       "}\n"
       ".msg {\n"
-      "margin: 200px;\n"
+      "margin: 100px;\n"
+      "padding: 6px;\n"
       "background-color: red;\n"
       "border-radius: 10px;\n"
       "border: 4px;\n"
@@ -60,8 +61,10 @@ str ErrPages::_getTemplateWithErrStr(const str& s)
       "<div class=\"msg\">\n"
       "<h1>\n";
   ret += s +
-      "</h1>\n"
+      "\n</h1>\n"
       "</div>\n"
+      "<hr>\n"
+      "<p>m0fr1m's webserv</p>\n"
       "</body>\n"
       "</html>\n";
   return ret;
