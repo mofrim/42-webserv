@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/13 13:06:35 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/18 00:29:30 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/20 13:44:08 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,6 @@
 #include "test_utils.hpp"
 
 #include <iostream>
-#include <stdexcept>
 
 // test logic goes here, for any failure return (-1) or throw exception.
 // otherwise -> success
@@ -33,7 +32,7 @@ int _test_socket()
 
   int r = -1;
   try {
-    r = Socket::bindSocket("", 1234);
+    r = Socket::bindSocket("", 1234).second;
   } catch (const Socket::AddrInfoException& e) {
     std::cout << "caught exception: " << e.what() << std::endl;
     r = 0;
