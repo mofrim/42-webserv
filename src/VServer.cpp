@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/03 12:51:23 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/18 20:25:45 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/20 12:13:02 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,13 +81,18 @@ VServer& VServer::operator=(const VServer& o)
 
 // a little hack to avoid printing the "out of scope msg" for tmp servers not
 // fully initialized
+//
+// FIXME: can this client removal go wrong? question arises bc _removeAllClients
+// really deletes the Client object referenced by the pointers in _clients. But
+// technically the cline-server relation is one-to-one, no?
 VServer::~VServer()
 {
-  if (_listen_fds.empty())
+  if (!_listen_fds.empty())
     Logger::log_srv(_server_name, "going out of scope");
   if (!_clients.empty()) {
     Logger::log_srv(_server_name, "removing all clients");
-    _clients.clear();
+    // _clients.clear();
+    removeAllClients();
   }
 }
 
