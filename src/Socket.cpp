@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/28 07:26:35 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/18 11:19:49 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/20 12:41:13 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -134,7 +134,7 @@ void Socket::printAddrlist(const str& addr, u16 port)
               INET6_ADDRSTRLEN) != NULL)
         out += "  ai_addr: " + std::string(ip) + ", ";
       else
-        out += "  ai_addr: " + std::string(strerror(errno)) + ", ";
+        out += "  ai_addr: " + getErrStr() + ", ";
 
       port = ntohs(((struct sockaddr_in *)ap->ai_addr)->sin_port);
       out += "port: " + int2str(port) + "\n";
@@ -146,7 +146,7 @@ void Socket::printAddrlist(const str& addr, u16 port)
               INET6_ADDRSTRLEN) != NULL)
         out += "  ai_addr: " + str(ip) + ", ";
       else
-        out += "  ai_addr: " + str(strerror(errno)) + ", ";
+        out += "  ai_addr: " + getErrStr() + ", ";
 
       port = ntohs(((struct sockaddr_in6 *)ap->ai_addr)->sin6_port);
       out += "port: " + int2str(port) + "\n";
@@ -191,18 +191,18 @@ int Socket::bindSocket(const str& addr, u16 port)
   if ((fd = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, ai->ai_protocol)) ==
       -1)
   {
-    Logger::log_err(str("bindSocket socket failed: ", *strerror(errno)));
+    Logger::log_err("bindSocket socket failed: " + getErrStr());
     return -1;
   }
 
   int opt = 1;
   if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) == -1) {
-    Logger::log_err(str("bindSocket setsockopt failed: ", *strerror(errno)));
+    Logger::log_err("bindSocket setsockopt failed: " + getErrStr());
     return -1;
   }
 
   if (bind(fd, ai->ai_addr, ai->ai_addrlen) == -1) {
-    Logger::log_err(str("bindSocket bind failed: ", *strerror(errno)));
+    Logger::log_err("bindSocket bind failed: " + getErrStr());
     return -1;
   }
 

@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 19:13:35 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/18 16:01:18 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/20 12:41:22 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,7 +70,7 @@ int RequestHandler::readRequest(int fd)
     }
     else
       Logger::log_err(
-          "read failed, errno: " + int2str(errno) + " = " + strerror(errno));
+          "read failed, errno: " + int2str(errno) + " = " + getErrStr());
     return (REQ_ERR);
   }
 

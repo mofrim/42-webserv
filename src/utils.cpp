@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/26 10:03:57 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/20 11:46:29 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/20 12:39:20 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,8 @@
 
 #include "utils.hpp"
 
+#include <cstring>
+#include <errno.h>
 #include <fcntl.h>
 
 str int2str(int n)
@@ -53,4 +55,10 @@ str getAddrPortStr4(const struct sockaddr_in& addr)
   ret += inAddrToStr(addr.sin_addr);
   ret += ":" + int2str(ntohs(addr.sin_port));
   return (ret);
+}
+
+// wrapper for getting the error string for current errno
+str getErrStr()
+{
+  return str(strerror(errno));
 }

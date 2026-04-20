@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/03 12:51:23 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/20 12:26:55 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/20 12:40:51 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -226,7 +226,7 @@ Client *VServer::addClient(int fd)
     if (errno == EAGAIN || errno == EWOULDBLOCK)
       Logger::log_err("accept failed with EAGAIN || WOULDBLOCK");
     else
-      Logger::log_err(std::string("accept failed: ", *strerror(errno)));
+      Logger::log_err("accept failed: " + getErrStr());
   }
   Logger::log_srv(
       _server_name, "Client connected from " + getAddrPortStr4(client_addr));
@@ -292,7 +292,7 @@ void VServer::cleanup()
       it++)
     if (*it != -1 && close(*it) == -1)
       Logger::log_warn("VServer::cleanup: failed to close fd " + int2str(*it) +
-          " with error: " + strerror(errno));
+          " with error: " + getErrStr());
 }
 
 ////////////////////////////////////////////////////////////////////////////////
