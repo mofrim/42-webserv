@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/28 07:26:01 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/18 00:02:06 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/20 13:22:23 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,9 +28,9 @@ class Socket {
     ~Socket();
 
   public:
-    static void             printAddrlist(const str& addr, u16 port);
-    static struct addrinfo *getAddrInfo(const str& addr, u16 port);
-    static int              bindSocket(const str& addr, u16 port);
+    static void                printAddrlist(const str& addr, u16 port);
+    static struct addrinfo    *getAddrInfo(const str& addr, u16 port);
+    static std::pair<str, int> bindSocket(const str& addr, u16 port);
 
     class AddrInfoException: public std::runtime_error {
       public:

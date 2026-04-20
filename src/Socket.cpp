@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/28 07:26:35 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/20 12:41:13 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/20 13:28:08 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -174,7 +174,7 @@ void Socket::printAddrlist(const str& addr, u16 port)
 // @throws never throws exception
 //
 // TODO: document! especially SO_REUSEADDR
-int Socket::bindSocket(const str& addr, u16 port)
+std::pair<str, int> Socket::bindSocket(const str& addr, u16 port)
 {
   struct addrinfo *ai;
   int              fd;
@@ -186,31 +186,32 @@ int Socket::bindSocket(const str& addr, u16 port)
   }
 
   if (ai == NULL)
-    return -1;
+    return std::make_pair(addr, -1);
 
   if ((fd = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, ai->ai_protocol)) ==
       -1)
   {
     Logger::log_err("bindSocket socket failed: " + getErrStr());
-    return -1;
+    return std::make_pair(addr, -1);
   }
 
   int opt = 1;
   if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) == -1) {
     Logger::log_err("bindSocket setsockopt failed: " + getErrStr());
-    return -1;
+    return std::make_pair(addr, -1);
   }
 
   if (bind(fd, ai->ai_addr, ai->ai_addrlen) == -1) {
     Logger::log_err("bindSocket bind failed: " + getErrStr());
-    return -1;
+    return std::make_pair(addr, -1);
   }
-
-  // TODO: maybe add setsockopt here.
 
   freeaddrinfo(ai);
 
-  return fd;
+  str ipaddr = inAddrToStr(
+      reinterpret_cast<struct sockaddr_in *>(ai->ai_addr)->sin_addr);
+
+  return std::make_pair(ipaddr, fd);
 }
 
 Socket::AddrInfoException::AddrInfoException(const std::string& msg):

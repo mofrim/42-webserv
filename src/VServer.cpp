@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/03 12:51:23 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/20 12:40:51 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/20 13:33:13 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -163,22 +163,25 @@ void VServer::_setupSockets()
       it++;
       continue;
     }
-    int newFd;
+    std::pair<str, int> addrFd;
     for (std::set<u16>::iterator itp = ports.begin(); itp != ports.end(); itp++)
     {
-      newFd = Socket::bindSocket(addr, *itp);
-      if (newFd == -1)
+      addrFd = Socket::bindSocket(addr, *itp);
+      if (addrFd.second == -1)
         continue;
-      if (listen(newFd, SOMAXCONN) == -1) {
-        close(newFd);
+      if (listen(addrFd.second, SOMAXCONN) == -1) {
+        close(addrFd.second);
         continue;
       }
-      _listen_fds.insert(newFd);
+      _listen_fds.insert(addrFd.second);
       _ports.insert(*itp);
 
-      // the question here is: wouldn't it be better to only store ip-addrs
-      // here?
+      // FIXME: maybe later refactor to only use one of these
+      // store addr as given in cfg and port
       _activeInterfaces[addr].insert(*itp);
+
+      // store IP and port
+      _activeAddrPortPairs[addrFd.first].insert(*itp);
     }
     it++;
   }

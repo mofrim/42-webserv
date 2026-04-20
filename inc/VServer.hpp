@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/03 12:50:36 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/20 12:27:04 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/20 13:31:47 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,6 +36,7 @@ class VServer {
     std::set<int> _listen_fds;
 
     std::map< str, std::set<u16> > _activeInterfaces;
+    std::map< str, std::set<u16> > _activeAddrPortPairs;
 
     bool _setupFailed;
 
