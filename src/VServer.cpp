@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/03 12:51:23 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/20 13:33:13 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/20 13:45:10 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -177,6 +177,7 @@ void VServer::_setupSockets()
       _ports.insert(*itp);
 
       // FIXME: maybe later refactor to only use one of these
+
       // store addr as given in cfg and port
       _activeInterfaces[addr].insert(*itp);
 
