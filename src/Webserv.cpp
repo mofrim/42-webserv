@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:36:43 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/20 12:13:09 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/20 12:17:13 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -126,12 +126,10 @@ void Webserv::_setupSingleServer(VServer& srv)
   srv.printCfg();
 }
 
+// nothing to do here so far...
 void Webserv::_shutdownAllServers()
 {
-  for (std::vector<VServer>::iterator it = _servers.begin();
-      it != _servers.end();
-      it++)
-    it->removeAllClients();
+  Logger::log_msg("Bye-bye from m0fr1m's webserv!");
 }
 
 // TODO: figure out the best timeout for epoll_wait. For now -1 is okay. but

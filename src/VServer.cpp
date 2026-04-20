@@ -92,7 +92,7 @@ VServer::~VServer()
   if (!_clients.empty()) {
     Logger::log_srv(_server_name, "removing all clients");
     // _clients.clear();
-    removeAllClients();
+    _removeAllClients();
   }
 }
 
@@ -269,7 +269,7 @@ void VServer::removeClient(int fd)
   _clients.erase(fd);
 }
 
-void VServer::removeAllClients()
+void VServer::_removeAllClients()
 {
   for (std::map<int, Client *>::iterator it = _clients.begin();
       it != _clients.end();
