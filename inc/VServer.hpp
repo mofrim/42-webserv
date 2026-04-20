@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/03 12:50:36 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/18 20:18:30 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/20 12:15:59 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,8 +23,6 @@
 
 class VServer {
   private:
-    // this will be multiple ports
-    uint16_t      _port;
     std::set<u16> _ports;
 
     in_addr_t   _host;
@@ -85,10 +83,6 @@ class VServer {
     void printCfg() const;
     void printClients();
     bool isValidClientFd(int fd);
-
-    // WIP:
-    uint16_t getPort() const;
-    void     setPort(uint16_t port);
 
     int                  getListenFd() const;
     const std::set<int>& getListenFds() const;

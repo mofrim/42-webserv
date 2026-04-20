@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/16 12:11:11 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/18 20:10:52 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/20 12:02:10 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,12 +18,6 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Server methods of minor importance
-
-// the getters
-uint16_t VServer::getPort() const
-{
-  return (_port);
-}
 
 in_addr_t VServer::getHost() const
 {
@@ -58,12 +52,6 @@ const VServerCfg *VServer::getCfg() const
 bool VServer::getSetupFailed() const
 {
   return (_setupFailed);
-}
-
-// the setters
-void VServer::setPort(uint16_t port)
-{
-  _port = port;
 }
 
 void VServer::setHost(in_addr_t host)

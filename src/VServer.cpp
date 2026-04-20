@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/03 12:51:23 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/20 12:13:02 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/20 12:18:15 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,6 @@
 
 VServer::VServer(): _reqHandler(this)
 {
-  _port        = 0;
   _host        = 0;
   _server_name = "";
   _root        = "";
@@ -35,7 +34,6 @@ VServer::VServer(): _reqHandler(this)
 VServer::VServer(const VServerCfg& srvcfg): _reqHandler(this)
 {
   _listen_fd   = -1;
-  _port        = srvcfg.getPort();
   _host        = srvcfg.getHost();
   _server_name = srvcfg.getServerName();
   _root        = srvcfg.getRoot();
@@ -47,7 +45,6 @@ VServer::VServer(const VServerCfg& srvcfg): _reqHandler(this)
 VServer::VServer(const VServer& o): _reqHandler(this)
 {
   if (this != &o) {
-    _port        = o._port;
     _host        = o._host;
     _server_name = o._server_name;
     _root        = o._root;
@@ -64,7 +61,6 @@ VServer::VServer(const VServer& o): _reqHandler(this)
 VServer& VServer::operator=(const VServer& o)
 {
   if (this != &o) {
-    _port        = o._port;
     _host        = o._host;
     _server_name = o._server_name;
     _root        = o._root;

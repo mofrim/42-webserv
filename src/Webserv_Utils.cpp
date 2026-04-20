@@ -66,7 +66,6 @@ void Webserv::_initDefaultCfg()
   sockaddr_in srv_addr;
 
   dsrv.setServerName(DEFAULT_SRV_NAME);
-  dsrv.setPort(DEFAULT_PORT);
   dsrv.setRoot("./www");
 
   memset(&srv_addr, 0, sizeof(srv_addr));
@@ -96,7 +95,6 @@ void Webserv::_initDefaultCfg2()
   cfg1.setServerName("Test_4284");
   VServer dsrv1(cfg1);
   dsrv1.setServerName("testsrv_4284");
-  dsrv1.setPort(DEFAULT_PORT);
   dsrv1.setRoot("./www");
 
   memset(&srv_addr, 0, sizeof(srv_addr));
