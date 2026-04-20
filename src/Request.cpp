@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 23:39:57 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/20 18:20:46 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/20 23:06:19 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,13 +18,13 @@
 
 // -- OCF --
 
-Request::Request(): _srvcfg(NULL), _reqstr("")
+Request::Request(): _vsrv(NULL), _reqstr("")
 {}
 
 Request::Request(const Request& other)
 {
   if (this != &other) {
-    _srvcfg   = other._srvcfg;
+    _vsrv     = other._vsrv;
     _reqstr   = other._reqstr;
     _response = other._response;
   }
@@ -33,7 +33,7 @@ Request::Request(const Request& other)
 Request& Request::operator=(const Request& other)
 {
   if (this != &other) {
-    _srvcfg   = other._srvcfg;
+    _vsrv     = other._vsrv;
     _reqstr   = other._reqstr;
     _response = other._response;
   }
@@ -46,9 +46,9 @@ Request::~Request()
 
 // the standard ctor we use for initializing a request _and_ parse the request
 // at the same time.
-Request::Request(const VServerCfg *scfg, const std::string& reqstr)
+Request::Request(const VServer *vsrv, const std::string& reqstr)
 {
-  _srvcfg = scfg;
+  _vsrv   = vsrv;
   _reqstr = reqstr;
   Logger::log_reqres("Request", _reqstr);
   _parseRequest();

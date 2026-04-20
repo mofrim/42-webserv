@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 19:13:35 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/20 12:41:22 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/20 23:09:54 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,7 +80,7 @@ int RequestHandler::readRequest(int fd)
   //
   // FIXME: actually, we only have to save the response in the vector here. or
   // do we need a vector here at all?!
-  Request newReq(_srv->getCfg(), buffer);
+  Request newReq(_srv, buffer);
   _requests.insert(_requests.begin(), newReq);
 
   return (REQ_READ);

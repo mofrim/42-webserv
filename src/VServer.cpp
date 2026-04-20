@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/03 12:51:23 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/20 15:08:34 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/20 23:15:56 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,16 +23,14 @@
 VServer::VServer(): _reqHandler(this)
 {
   _server_name = "";
-  _root        = "";
   _setupFailed = false;
 }
 
-VServer::VServer(const VServerCfg& srvcfg): _reqHandler(this)
+VServer::VServer(const VServerCfg& cfg): _reqHandler(this)
 {
-  _server_name = srvcfg.getServerName();
-  _root        = srvcfg.getRoot();
-  _cfg         = srvcfg;
-  _setupFailed = false;
+  _server_name      = cfg.getServerName();
+  _activeInterfaces = cfg.getInterfaces();
+  _setupFailed      = false;
 }
 
 // FIXME: think about if assignment and stuff like this really make sense for my
@@ -40,12 +38,11 @@ VServer::VServer(const VServerCfg& srvcfg): _reqHandler(this)
 VServer::VServer(const VServer& o): _reqHandler(this)
 {
   if (this != &o) {
-    _server_name = o._server_name;
-    _root        = o._root;
-    _listen_fds  = o._listen_fds;
-
-    _setupFailed = o._setupFailed;
-    _cfg         = o._cfg;
+    _server_name      = o._server_name;
+    _listen_fds       = o._listen_fds;
+    _setupFailed      = o._setupFailed;
+    _activeInterfaces = o._activeInterfaces;
+    _routes           = o._routes;
   }
 }
 
@@ -54,14 +51,13 @@ VServer::VServer(const VServer& o): _reqHandler(this)
 VServer& VServer::operator=(const VServer& o)
 {
   if (this != &o) {
-    _server_name = o._server_name;
-    _root        = o._root;
-    _listen_fds  = o._listen_fds;
-
-    _setupFailed = o._setupFailed;
-    _cfg         = o._cfg;
-    _clients     = o._clients;
-    _reqHandler  = RequestHandler(this);
+    _server_name      = o._server_name;
+    _listen_fds       = o._listen_fds;
+    _setupFailed      = o._setupFailed;
+    _activeInterfaces = o._activeInterfaces;
+    _routes           = o._routes;
+    _clients          = o._clients;
+    _reqHandler       = RequestHandler(this);
   }
   return (*this);
 }
@@ -117,50 +113,63 @@ VServer::~VServer()
 //
 //	- SOMAXCONN: 4096 on my system, maximum number of connections in the backlog
 //		of listen
+
+// NEXT:
+// FIXME:
+// TODO: refac to use _activeInterfaces and erase failed things from it.
 void VServer::_setupSockets()
 {
-  std::map< str, std::set<u16> >::const_iterator it =
-      _cfg.getInterfaces().begin();
-  while (it != _cfg.getInterfaces().end()) {
+  std::map< str, std::set<u16> >::iterator it = _activeInterfaces.begin();
+  while (it != _activeInterfaces.end()) {
     str addr = it->first;
 
     // NOTE: when we get here there must be a port for every interface. so in
     // some earlier parsing step we will have to add port 80 for interfaces
     // without specified ports.
     // No! We demand that interfaces always come in the form addr:port!
+
     std::set<u16> ports = it->second;
 
     // better safe then sorry
     if (ports.size() == 0) {
-      it++;
+      it = eraseIt(_activeInterfaces, it);
       continue;
     }
 
-    std::pair<str, int> addrFd;
-    for (std::set<u16>::iterator itp = ports.begin(); itp != ports.end(); itp++)
-    {
-      addrFd = Socket::bindSocket(addr, *itp);
-      if (addrFd.second == -1)
-        continue;
-      if (listen(addrFd.second, SOMAXCONN) == -1) {
-        close(addrFd.second);
+    std::pair<str, int>     addrFd;
+    std::set<u16>::iterator itp = ports.begin();
+    while (itp != ports.end()) {
+      addrFd     = Socket::bindSocket(addr, *itp);
+      int sockFd = addrFd.second;
+
+      if (sockFd == -1) {
+        itp = eraseIt(ports, itp);
         continue;
       }
-      _listen_fds.insert(addrFd.second);
+
+      if (listen(sockFd, SOMAXCONN) == -1) {
+        close(sockFd);
+        itp = eraseIt(ports, itp);
+        continue;
+      }
+
+      _listen_fds.insert(sockFd);
       _ports.insert(*itp);
 
       // FIXME: maybe later refactor to only use one of these
 
-      // store addr as given in cfg and port
-      _activeInterfaces[addr].insert(*itp);
-
       // store IP and port
       _activeAddrPortPairs[addrFd.first].insert(*itp);
+      itp++;
+    }
+    if (ports.size() == 0) {
+      it = eraseIt(_activeInterfaces, it);
+      continue;
     }
     it++;
   }
   if (_listen_fds.size() == 0)
-    throw(ServerInitException("could not setup a single socket"));
+    throw(ServerInitException("Could not setup a single socket!"));
 }
 
 // Init a server. If initialization fails after call to socket we would be left

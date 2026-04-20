@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/28 07:26:35 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/20 13:28:08 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/20 22:56:47 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@
 #include <errno.h>
 #include <iostream>
 #include <netdb.h>
+#include <unistd.h>
 
 // --------------------------------=[ OCF ]=-------------------------------- //
 
@@ -174,6 +175,7 @@ void Socket::printAddrlist(const str& addr, u16 port)
 // @throws never throws exception
 //
 // TODO: document! especially SO_REUSEADDR
+// FIXME: remove code duplicattion with cleanup function
 std::pair<str, int> Socket::bindSocket(const str& addr, u16 port)
 {
   struct addrinfo *ai;
@@ -191,18 +193,26 @@ std::pair<str, int> Socket::bindSocket(const str& addr, u16 port)
   if ((fd = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, ai->ai_protocol)) ==
       -1)
   {
-    Logger::log_err("bindSocket socket failed: " + getErrStr());
+    Logger::log_err("bindSocket: socket failed for (" + addr + ":" +
+        int2str(port) + ") with: " + getErrStr());
+    freeaddrinfo(ai);
     return std::make_pair(addr, -1);
   }
 
   int opt = 1;
   if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) == -1) {
-    Logger::log_err("bindSocket setsockopt failed: " + getErrStr());
+    Logger::log_err("bindSocket: setsockopt failed for (" + addr + ":" +
+        int2str(port) + ") with: " + getErrStr());
+    close(fd);
+    freeaddrinfo(ai);
     return std::make_pair(addr, -1);
   }
 
   if (bind(fd, ai->ai_addr, ai->ai_addrlen) == -1) {
-    Logger::log_err("bindSocket bind failed: " + getErrStr());
+    Logger::log_err("bindSocket: bind failed for (" + addr + ":" +
+        int2str(port) + ") with: " + getErrStr());
+    close(fd);
+    freeaddrinfo(ai);
     return std::make_pair(addr, -1);
   }
 

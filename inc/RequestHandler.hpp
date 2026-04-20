@@ -6,12 +6,11 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 19:12:58 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/18 16:00:14 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/20 23:08:27 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef REQUESTHANDLER_HPP
-#define REQUESTHANDLER_HPP
+#pragma once
 
 #include "Request.hpp"
 
@@ -47,4 +46,3 @@ class RequestHandler {
         ReqHandlerException(const std::string& msg);
     };
 };
-#endif

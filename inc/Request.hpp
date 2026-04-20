@@ -6,14 +6,13 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 23:39:07 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/18 15:54:18 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/20 23:09:08 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef REQUEST_HPP
-#define REQUEST_HPP
+#pragma once
 
-#include "VServerCfg.hpp"
+#include "typesAndConstants.hpp"
 
 #include <string>
 
@@ -28,14 +27,16 @@
 // pass the statusCode and somehow decide, taking the servers cfg into account,
 // what error page to display.
 
+class VServer;
+
 class Request {
   private:
-    const VServerCfg *_srvcfg;
-    std::string       _reqstr;
-    void              _parseRequest();
-    std::string _response; // FIXME: leave this as a string ?! No! Can also
-                           // be a stream of bytes. Will be another class!
-    uint16_t _statusCode;
+    const VServer *_vsrv;
+    std::string    _reqstr;
+    void           _parseRequest();
+    std::string    _response; // FIXME: leave this as a string ?! No! Can also
+                              // be a stream of bytes. Will be another class!
+    u16 _statusCode;
 
     bool _isTerminatedReq();
 
@@ -43,11 +44,9 @@ class Request {
     // TODO: decide which ctors we really use here!
     Request();
     Request(const Request& other);
-    Request(const VServerCfg *scfg, const std::string& rstr);
+    Request(const VServer *srv, const std::string& rstr);
     Request& operator=(const Request& other);
     ~Request();
 
     std::string getResponse() const;
 };
-
-#endif

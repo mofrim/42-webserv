@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/16 11:54:27 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/20 15:04:37 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/20 22:39:54 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,7 +67,6 @@ void Webserv::_initDefaultCfg()
   VServer dsrv;
 
   dsrv.setServerName(DEFAULT_SRV_NAME);
-  dsrv.setRoot("./www");
   _numOfServers = 1;
 }
 
@@ -79,9 +78,9 @@ void Webserv::_initDefaultCfg2()
 {
   VServerCfg cfg1;
   cfg1.addInterface("127.0.0.1", 4284);
-  cfg1.addInterface("10.0.0.1", 4284);
+  cfg1.addInterface("10.0.0.1", 4285);
+  cfg1.addInterface("10.0.0.1", 4286);
   cfg1.setServerName("Test_4284");
-  cfg1.setRoot("./www");
   VServer dsrv1(cfg1);
 
   // VServer     dsrv2;

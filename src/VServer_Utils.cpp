@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/16 12:11:11 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/20 13:50:09 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/20 22:59:52 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,16 +24,6 @@ std::string VServer::getServerName() const
   return (_server_name);
 }
 
-std::string VServer::getRoot() const
-{
-  return (_root);
-}
-
-const VServerCfg *VServer::getCfg() const
-{
-  return (&_cfg);
-}
-
 bool VServer::getSetupFailed() const
 {
   return (_setupFailed);
@@ -44,11 +34,6 @@ void VServer::setServerName(std::string name)
   _server_name = name;
 }
 
-void VServer::setRoot(std::string root)
-{
-  _root = root;
-}
-
 void VServer::setSetupFailed()
 {
   _setupFailed = true;
@@ -57,7 +42,6 @@ void VServer::setSetupFailed()
 void VServer::printCfg() const
 {
   Logger::log_msg("  server_name: \"" + _server_name + "\"");
-  Logger::log_msg("  root: " + _root);
   Logger::log_msg("  listen_fds: " + getSetAsStr(_listen_fds));
   Logger::log_msg("  active [ipaddr:port] listen interfaces:");
   for (std::map< str, std::set<u16> >::const_iterator it =

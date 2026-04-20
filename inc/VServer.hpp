@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/03 12:50:36 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/20 15:10:36 by fmaurer          ###   ########.fr       */
+/*  Updated: 2026/04/20 20:40:40 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,17 +25,14 @@ class VServer {
   private:
     std::set<u16> _ports;
     std::string   _server_name;
-    std::string   _root;
     std::set<int> _listen_fds;
 
     std::map< str, std::set<u16> > _activeInterfaces;
     std::map< str, std::set<u16> > _activeAddrPortPairs;
 
-    bool _setupFailed;
+    std::map<str, Route> _routes;
 
-    // FIXME: maybe only keep the cfg in here and don't store ^^ those extra
-    // values seperately bc this is redundant!
-    VServerCfg _cfg;
+    bool _setupFailed;
 
     std::map<int, Client *> _clients;
 
@@ -59,14 +56,12 @@ class VServer {
 
     // utils, getters setters
     std::string       getServerName() const;
-    std::string       getRoot() const;
     sockaddr_in       getServerAddr() const;
     const VServerCfg *getCfg() const;
     bool              getSetupFailed() const;
     u16               getNumOfListenFds() const;
 
     void setServerName(std::string name);
-    void setRoot(std::string root);
     void setServerAddr(sockaddr_in server_addr);
     void setSetupFailed();
 

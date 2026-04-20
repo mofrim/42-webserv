@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/03 11:26:23 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/20 12:37:29 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/20 22:49:02 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,4 +49,18 @@ str getSetAsStr(const std::set<T>& s)
   for (typename std::set<T>::iterator it = s.begin(); it != s.end();)
     ret += int2str(*it) + (++it != s.end() ? ", " : "}");
   return ret;
+}
+
+// well in C++11 std::map::erase and std::set::erase return an iterator to the
+// next elem after erasure. in C++98 they don't. that's why.
+//
+// CAUTION: only use in while loops because otherwise itertor will be
+// overincremented!!!
+template <typename T>
+typename T::iterator eraseIt(T& conti, typename T::iterator it)
+{
+  typename T::iterator itBak = it;
+  it++;
+  conti.erase(itBak);
+  return it;
 }

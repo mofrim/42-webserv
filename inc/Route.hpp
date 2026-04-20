@@ -6,22 +6,38 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/09 16:41:56 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/01/09 16:51:03 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/20 20:34:56 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef ROUTE_HPP
-#define ROUTE_HPP
+#pragma once
+
+#include "typesAndConstants.hpp"
 
 // A Route must be able to store data for a config like this
 
 class Route {
-	private:
-	public:
-		Route();
-		Route(const Route& other);
-		Route& operator=(const Route& other);
-		~Route();
-};
+  private:
+    str  _path;
+    bool _autoindex;
+    str  _default_file;
+    str  _root;
 
-#endif
+  public:
+    Route();
+    Route(const Route& other);
+    Route& operator=(const Route& other);
+    ~Route();
+
+    void setPath(str p);
+    str  getPath() const;
+
+    void setAutoindex(bool a);
+    bool getAutoindex() const;
+
+    void setDefaultFile(const str& s);
+    str  getDefaultFile() const;
+
+    void setRoot(str root);
+    str  getRoot() const;
+};
