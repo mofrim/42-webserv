@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/03 12:50:36 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/20 12:15:59 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/20 12:27:04 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,6 @@ class VServer {
   private:
     std::set<u16> _ports;
 
-    in_addr_t   _host;
     std::string _server_name;
     std::string _root;
 
@@ -65,7 +64,6 @@ class VServer {
     int     handleEvent(const struct epoll_event& ev, int client_fd);
 
     // utils, getters setters
-    in_addr_t         getHost() const;
     std::string       getServerName() const;
     std::string       getRoot() const;
     sockaddr_in       getServerAddr() const;
@@ -73,7 +71,6 @@ class VServer {
     bool              getSetupFailed() const;
     u16               getNumOfListenFds() const;
 
-    void setHost(in_addr_t host);
     void setServerName(std::string name);
     void setRoot(std::string root);
     void setListenFd(int listen_fd);

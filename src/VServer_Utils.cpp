@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/16 12:11:11 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/20 12:02:10 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/20 12:26:46 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,11 +18,6 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Server methods of minor importance
-
-in_addr_t VServer::getHost() const
-{
-  return (_host);
-}
 
 std::string VServer::getServerName() const
 {
@@ -54,11 +49,6 @@ bool VServer::getSetupFailed() const
   return (_setupFailed);
 }
 
-void VServer::setHost(in_addr_t host)
-{
-  _host = host;
-}
-
 void VServer::setServerName(std::string name)
 {
   _server_name = name;
@@ -84,16 +74,17 @@ void VServer::setSetupFailed()
   _setupFailed = true;
 }
 
-// FIXME: display port list
 void VServer::printCfg() const
 {
-  struct in_addr host_addr;
-  host_addr.s_addr = htonl(_host);
+  // FIXME: display list of interfaces as ip-addr:port pairs.
+  //
+  // struct in_addr host_addr;
+  // host_addr.s_addr = htonl(_host);
   Logger::log_msg("  server_name: \"" + _server_name + "\"");
   Logger::log_msg("  port: " + getSetAsStr(_ports));
   Logger::log_msg("  root: " + _root);
   Logger::log_msg("  listen_fds: " + getSetAsStr(_listen_fds));
-  Logger::log_msg("  host: " + inAddrToStr(host_addr));
+  // Logger::log_msg("  host: " + inAddrToStr(host_addr));
 }
 
 void VServer::printClients()

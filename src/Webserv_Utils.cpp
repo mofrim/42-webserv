@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/16 11:54:27 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/18 17:42:05 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/20 12:28:16 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,8 @@ bool Webserv::_isServerFd(int fd) const
 // TODO: refactor to return a list of possible servers, namely the servers
 // listening on this specific fd.
 // NOTE: std::map -> std::multimap
+// FIXME: This has to be refactor to handle multiple real VServers listening on
+// the same FD but differing bny server_name
 VServer *Webserv::_getServerByFd(int fd)
 {
   std::map<int, VServer *>::iterator it;
@@ -73,7 +75,6 @@ void Webserv::_initDefaultCfg()
   srv_addr.sin_addr.s_addr = INADDR_ANY;
   srv_addr.sin_port        = htons(DEFAULT_PORT);
   dsrv.setServerAddr(srv_addr);
-  dsrv.setHost(INADDR_LOOPBACK);
 
   _numOfServers = 1;
 }
@@ -85,7 +86,6 @@ void Webserv::_initDefaultCfg()
 void Webserv::_initDefaultCfg2()
 {
 
-  // VServer     dsrv2;
   sockaddr_in srv_addr;
 
   VServerCfg cfg1;
@@ -102,18 +102,8 @@ void Webserv::_initDefaultCfg2()
   srv_addr.sin_addr.s_addr = INADDR_ANY;
   srv_addr.sin_port        = htons(DEFAULT_PORT);
   dsrv1.setServerAddr(srv_addr);
-  dsrv1.setHost(INADDR_ANY);
 
-  // dsrv2.setServerName("testsrv_4285");
-  // dsrv2.setPort(4285);
-  // dsrv2.setRoot("./www");
-  //
-  // memset(&srv_addr, 0, sizeof(srv_addr));
-  // srv_addr.sin_family      = AF_INET;
-  // srv_addr.sin_addr.s_addr = INADDR_ANY;
-  // srv_addr.sin_port        = htons(4285);
-  // dsrv2.setServerAddr(srv_addr);
-  // dsrv2.setHost(INADDR_ANY);
+  // VServer     dsrv2;
 
   _servers.push_back(dsrv1);
   // _servers.push_back(dsrv2);
