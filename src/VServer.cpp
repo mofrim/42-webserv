@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/03 12:51:23 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/20 15:07:23 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/20 15:08:34 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,6 @@
 #include "VServer.hpp"
 #include "utils.hpp"
 
-#include <cstring>
 #include <errno.h>
 #include <fcntl.h>
 #include <sys/epoll.h>

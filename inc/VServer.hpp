@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/03 12:50:36 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/20 13:49:26 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/20 15:10:36 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,11 +24,8 @@
 class VServer {
   private:
     std::set<u16> _ports;
-
-    std::string _server_name;
-    std::string _root;
-
-    // this will be a list/set/vector
+    std::string   _server_name;
+    std::string   _root;
     std::set<int> _listen_fds;
 
     std::map< str, std::set<u16> > _activeInterfaces;
