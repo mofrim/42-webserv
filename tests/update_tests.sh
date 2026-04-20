@@ -29,7 +29,9 @@ tf_func=""
 tf_fun_arr=()
 tmpf="$(mktemp)"
 
-for tf in $TEST_FILES_DIR/*.cpp; do
+# use `ls -cr` to list by ctime and show the newest one last. this will lead to
+# the newest test being the last one run \o/
+for tf in `ls -cr $TEST_FILES_DIR/*.cpp`; do
 	tf_func="$(basename -s .cpp $tf)"
 	echo -e "\t\t$(basename $tf) \\" >> $tmpf
 	echo "test found: $tf_func"

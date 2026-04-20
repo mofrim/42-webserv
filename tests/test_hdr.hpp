@@ -31,6 +31,7 @@ extern bool g_GlobalResult;
 #include "Config.hpp"
 #include "ConfigParser.hpp"
 #include "Epoll.hpp"
+#include "ErrPages.hpp"
 #include "Logger.hpp"
 #include "RequestHandler.hpp"
 #include "Request.hpp"

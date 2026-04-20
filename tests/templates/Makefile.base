@@ -96,6 +96,9 @@ fclean: clean proj-clean
 
 re: fclean $(NAME)
 
-.PHONY: all clean fclean re bear run debug debug-run proj-clean
+update:
+	./update_tests.sh
+
+.PHONY: all clean fclean re bear run debug debug-run proj-clean update
 
 #vim: ft=make

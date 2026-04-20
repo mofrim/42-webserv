@@ -6,9 +6,11 @@ int main()
 {
   test_server_init();
   nl();
+  test_VServerCfg();
+  nl();
   test_socket();
   nl();
-  test_VServerCfg();
+  test_ErrPages();
   nl();
   print_final_result();
   if (g_GlobalResult == OK)
