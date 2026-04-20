@@ -9,6 +9,8 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
+#define HOST "localhost"
+
 int main()
 {
   struct addrinfo  hints;
@@ -19,11 +21,11 @@ int main()
   hints.ai_canonname = NULL;
   hints.ai_addr      = NULL;
   hints.ai_next      = NULL;
-  hints.ai_family    = AF_UNSPEC;
+  hints.ai_family    = AF_INET;
   /* Allows IPv4 or IPv6 */
   hints.ai_socktype = SOCK_STREAM;
   hints.ai_flags    = AI_PASSIVE | AI_NUMERICSERV;
-  s                 = getaddrinfo("localhost", NULL, &hints, &result);
+  s                 = getaddrinfo(HOST, "1234", &hints, &result);
   if (s != 0) {
     std::cout << "getaddrinfo: " << gai_strerror(s) << std::endl;
     errno = ENOSYS;
@@ -52,12 +54,13 @@ that can be used to successfully connect a socket */
         exit(1);
       }
     }
-    std::cout << "trying to bind socket on '" << addrbuf << "'" << std::endl;
-    std::cout << "rp->ai_addr: '"
-              << ((struct sockaddr_in *)rp->ai_addr)->sin_addr.s_addr << "'\n"
-              << "port: "
-              << ntohs(((struct sockaddr_in *)rp->ai_addr)->sin_port)
-              << std::endl;
+    std::cout << "trying to bind socket on '" << HOST << "'" << std::endl;
+    std::cout
+        << "rp->ai_addr: '"
+        // << inet_ntop(((struct sockaddr_in *)rp->ai_addr)->sin_addr.s_addr)
+        << addrbuf << "'\n"
+        << "port: " << ntohs(((struct sockaddr_in *)rp->ai_addr)->sin_port)
+        << std::endl;
     std::cout << "rp->ai_canonname: " << rp->ai_canonname << std::endl;
     if (bind(sfd, rp->ai_addr, rp->ai_addrlen) != -1) {
       perror("bind");

@@ -25,6 +25,12 @@ this is some consequences... namely:
   Answer: any local address with the same port must have a different name.
   otherwise ignore the late-comer.
 
+
+### we will have per vserver scoped error_pages. Not per route!
+
+### route-paths won't be checked until requested! nginx is doing the same.
+
+
 ---
 
 ## the initial webserv data-flow

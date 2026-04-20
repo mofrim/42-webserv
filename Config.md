@@ -35,7 +35,7 @@ type: `BLOCK`
 
 scope: `GLOBAL`
 
-example:
+examples:
 
 ```
 vserver {
@@ -57,6 +57,8 @@ type: `KEYWORD`
 
 scope: `VSERVER`
 
+examples:
+
 ```
 server_name: moep.de
 # or:
@@ -74,6 +76,29 @@ server_name: miep.moep.de
 
 rules:
   - 
+
+### `listen`
+
+type: `KEYWORD`
+
+scope: `VSERVER`
+
+examples:
+
+  ```
+  # we always demand addr:port pairs!
+
+  listen: localhost:80
+  listen 10.0.0.1:4444
+
+
+
+  # not OK:
+
+  # listen: localhost
+  # listen: :80
+  # listen 10.0.0.1
+  ```
 
 
 
