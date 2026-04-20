@@ -10,9 +10,10 @@ tests/test-main.cpp
 
 # fine-grained control over everything in _play.
 # first ignore everything..
-_play/**
+_play/*
 # ..then unignore what we want in the repo
-!_play/echo_srv.cpp
 !_play/*.cpp
-!_play/nginx/**
+!_play/nginx/
+_play/nginx/*.log
+!_play/nginx/conf/*.conf
 
