@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/20 16:51:47 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/20 17:36:50 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/20 17:44:36 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,6 +60,7 @@ str ErrPages::_getTemplateWithErrStr(const str& s)
       "<body>\n"
       "<div class=\"msg\">\n"
       "<h1>\n";
+
   ret += s +
       "\n</h1>\n"
       "</div>\n"
@@ -67,13 +68,19 @@ str ErrPages::_getTemplateWithErrStr(const str& s)
       "<p>m0fr1m's webserv</p>\n"
       "</body>\n"
       "</html>\n";
+
   return ret;
 }
 
-str ErrPages::getDefaultErrPage(u16 code)
+// returns the corresponding HTML status-code string for a given status code.
+// also for usage in response generation
+str ErrPages::getErrStr(u16 code)
 {
   str errstr;
   switch (code) {
+  case 400:
+    errstr = "400 - Bad Request";
+    break;
   case 403:
     errstr = "403 - Forbidden";
     break;
@@ -101,5 +108,10 @@ str ErrPages::getDefaultErrPage(u16 code)
   default:
     errstr += int2str(code) + " - Unknown HTML Status Code!";
   }
-  return _getTemplateWithErrStr(errstr);
+  return errstr;
+}
+
+str ErrPages::getDefaultErrPage(u16 code)
+{
+  return _getTemplateWithErrStr(getErrStr(code));
 }

@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/20 16:51:10 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/20 16:55:01 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/20 17:42:03 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,4 +25,5 @@ class ErrPages {
 
   public:
     static str getDefaultErrPage(u16 code);
+    static str getErrStr(u16 code);
 };
