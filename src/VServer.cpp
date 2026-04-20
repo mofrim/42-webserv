@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/03 12:51:23 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/20 13:45:10 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/20 15:07:23 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,29 +25,26 @@ VServer::VServer(): _reqHandler(this)
 {
   _server_name = "";
   _root        = "";
-  _listen_fd   = -1;
   _setupFailed = false;
-  memset(&_server_addr, 0, sizeof(_server_addr));
 }
 
 VServer::VServer(const VServerCfg& srvcfg): _reqHandler(this)
 {
-  _listen_fd   = -1;
   _server_name = srvcfg.getServerName();
   _root        = srvcfg.getRoot();
-  _server_addr = srvcfg.getServerAddr();
   _cfg         = srvcfg;
   _setupFailed = false;
 }
 
+// FIXME: think about if assignment and stuff like this really make sense for my
+// vserver classes
 VServer::VServer(const VServer& o): _reqHandler(this)
 {
   if (this != &o) {
     _server_name = o._server_name;
     _root        = o._root;
-    _listen_fd   = o._listen_fd;
+    _listen_fds  = o._listen_fds;
 
-    _server_addr = o._server_addr;
     _setupFailed = o._setupFailed;
     _cfg         = o._cfg;
   }
@@ -60,9 +57,8 @@ VServer& VServer::operator=(const VServer& o)
   if (this != &o) {
     _server_name = o._server_name;
     _root        = o._root;
-    _listen_fd   = o._listen_fd;
+    _listen_fds  = o._listen_fds;
 
-    _server_addr = o._server_addr;
     _setupFailed = o._setupFailed;
     _cfg         = o._cfg;
     _clients     = o._clients;
@@ -122,30 +118,6 @@ VServer::~VServer()
 //
 //	- SOMAXCONN: 4096 on my system, maximum number of connections in the backlog
 //		of listen
-// TODO: use Socket-class here.
-
-// void VServer::_setupSocket()
-// {
-//   _listen_fd = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0);
-//   if (_listen_fd == -1)
-//     throw(ServerInitException("socket failed"));
-//
-//   int opt = 1;
-//   if (setsockopt(_listen_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) ==
-//   -1)
-//     throw(ServerInitException("setsockopt failed"));
-//
-//   if (bind(_listen_fd,
-//           (struct sockaddr *)&_server_addr,
-//           sizeof(_server_addr)) == -1)
-//     throw(ServerInitException("bind failed"));
-//
-//   if (listen(_listen_fd, SOMAXCONN) == -1)
-//     throw(ServerInitException("listen failed"));
-//
-//   Logger::log_srv(_server_name, "listening on fd " + int2str(_listen_fd));
-// }
-
 void VServer::_setupSockets()
 {
   std::map< str, std::set<u16> >::const_iterator it =
@@ -158,11 +130,13 @@ void VServer::_setupSockets()
     // without specified ports.
     // No! We demand that interfaces always come in the form addr:port!
     std::set<u16> ports = it->second;
+
     // better safe then sorry
     if (ports.size() == 0) {
       it++;
       continue;
     }
+
     std::pair<str, int> addrFd;
     for (std::set<u16>::iterator itp = ports.begin(); itp != ports.end(); itp++)
     {
@@ -189,6 +163,7 @@ void VServer::_setupSockets()
   if (_listen_fds.size() == 0)
     throw(ServerInitException("could not setup a single socket"));
 }
+
 // Init a server. If initialization fails after call to socket we would be left
 // with a open fd, so we need to close it for proper cleanup
 void VServer::init()

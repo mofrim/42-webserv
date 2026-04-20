@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/16 11:54:27 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/20 13:40:38 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/20 15:04:37 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,18 +64,10 @@ void Webserv::_addClientToClientFdServerMap(int fd, VServer *srv)
 // config wil have gone through parseCfg where all values will be set.
 void Webserv::_initDefaultCfg()
 {
-  VServer     dsrv;
-  sockaddr_in srv_addr;
+  VServer dsrv;
 
   dsrv.setServerName(DEFAULT_SRV_NAME);
   dsrv.setRoot("./www");
-
-  memset(&srv_addr, 0, sizeof(srv_addr));
-  srv_addr.sin_family      = AF_INET;
-  srv_addr.sin_addr.s_addr = INADDR_ANY;
-  srv_addr.sin_port        = htons(DEFAULT_PORT);
-  dsrv.setServerAddr(srv_addr);
-
   _numOfServers = 1;
 }
 
@@ -85,23 +77,12 @@ void Webserv::_initDefaultCfg()
 // bind to multiple interfaces.
 void Webserv::_initDefaultCfg2()
 {
-
-  sockaddr_in srv_addr;
-
   VServerCfg cfg1;
-
   cfg1.addInterface("127.0.0.1", 4284);
   cfg1.addInterface("10.0.0.1", 4284);
   cfg1.setServerName("Test_4284");
+  cfg1.setRoot("./www");
   VServer dsrv1(cfg1);
-  dsrv1.setServerName("testsrv_4284");
-  dsrv1.setRoot("./www");
-
-  memset(&srv_addr, 0, sizeof(srv_addr));
-  srv_addr.sin_family      = AF_INET;
-  srv_addr.sin_addr.s_addr = INADDR_ANY;
-  srv_addr.sin_port        = htons(DEFAULT_PORT);
-  dsrv1.setServerAddr(srv_addr);
 
   // VServer     dsrv2;
 

@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/16 12:11:11 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/20 13:39:48 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/20 13:50:09 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,16 +29,6 @@ std::string VServer::getRoot() const
   return (_root);
 }
 
-sockaddr_in VServer::getServerAddr() const
-{
-  return (_server_addr);
-}
-
-int VServer::getListenFd() const
-{
-  return (_listen_fd);
-}
-
 const VServerCfg *VServer::getCfg() const
 {
   return (&_cfg);
@@ -57,16 +47,6 @@ void VServer::setServerName(std::string name)
 void VServer::setRoot(std::string root)
 {
   _root = root;
-}
-
-void VServer::setServerAddr(sockaddr_in server_addr)
-{
-  this->_server_addr = server_addr;
-}
-
-void VServer::setListenFd(int listen_fd)
-{
-  _listen_fd = listen_fd;
 }
 
 void VServer::setSetupFailed()

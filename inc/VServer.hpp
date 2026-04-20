@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/03 12:50:36 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/20 13:31:47 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/20 13:49:26 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,11 +28,7 @@ class VServer {
     std::string _server_name;
     std::string _root;
 
-    // this will also be an array
-    struct sockaddr_in _server_addr;
-
     // this will be a list/set/vector
-    int           _listen_fd;
     std::set<int> _listen_fds;
 
     std::map< str, std::set<u16> > _activeInterfaces;
@@ -74,7 +70,6 @@ class VServer {
 
     void setServerName(std::string name);
     void setRoot(std::string root);
-    void setListenFd(int listen_fd);
     void setServerAddr(sockaddr_in server_addr);
     void setSetupFailed();
 
@@ -82,7 +77,6 @@ class VServer {
     void printClients();
     bool isValidClientFd(int fd);
 
-    int                  getListenFd() const;
     const std::set<int>& getListenFds() const;
     const std::set<u16>& getPorts() const;
 
