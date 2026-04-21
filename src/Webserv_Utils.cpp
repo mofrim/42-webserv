@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/16 11:54:27 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/21 13:23:41 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/21 16:34:32 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,19 +64,11 @@ void Webserv::_addClientToClientFdServerMap(int fd, VServer *srv)
 // config wil have gone through parseCfg where all values will be set.
 void Webserv::_initDefaultCfg()
 {
-  VServer dsrv;
-
-  dsrv.setServerName(DEFAULT_SRV_NAME);
-  _numOfServers = 1;
-}
-
-void Webserv::_initDefaultCfg2()
-{
   VServerCfg cfg1;
-  cfg1.addInterface("127.0.0.1", 4284);
-  cfg1.addInterface("10.0.0.1", 4285);
-  cfg1.addInterface("10.0.0.1", 4286);
+  Route      r;
   cfg1.setServerName("Test_4284");
+  cfg1.addInterface("127.0.0.1", 4284);
+  cfg1.addRoute(r);
   VServer dsrv1(cfg1);
 
   // VServer     dsrv2;

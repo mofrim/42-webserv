@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/09 16:42:51 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/20 20:35:29 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/21 16:35:22 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 
 Route::Route()
 {
+  _path         = "/";
   _root         = "html";
   _autoindex    = false;
   _default_file = "index.html";
@@ -24,6 +25,7 @@ Route::Route()
 Route::Route(const Route& o)
 {
   if (this != &o) {
+    _path         = o._path;
     _root         = o._root;
     _autoindex    = o._autoindex;
     _default_file = o._default_file;
@@ -33,6 +35,7 @@ Route::Route(const Route& o)
 Route& Route::operator=(const Route& o)
 {
   if (this != &o) {
+    _path         = o._path;
     _root         = o._root;
     _autoindex    = o._autoindex;
     _default_file = o._default_file;

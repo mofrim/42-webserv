@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:35:29 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/18 16:55:24 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/21 16:30:43 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,7 +63,6 @@ class Webserv {
     VServer *_getServerByClientFd(int fd);
     void     _addClientToClientFdServerMap(int fd, VServer *srv);
     void     _initDefaultCfg();
-    void     _initDefaultCfg2();
     void     _printSockname(int sock);
 
     // we do not use them, so keep em private

@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:36:43 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/21 13:19:51 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/21 16:30:31 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,7 +81,7 @@ void Webserv::getServersFromCfg(const std::string& cfgFilename)
 void Webserv::_setupServers()
 {
   if (_defaultCfg)
-    _initDefaultCfg2();
+    _initDefaultCfg();
 
   std::vector<VServer>::iterator it = _servers.begin();
   while (it != _servers.end()) {
