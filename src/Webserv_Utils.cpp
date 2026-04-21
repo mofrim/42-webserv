@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/16 11:54:27 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/20 22:39:54 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/21 13:23:41 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,10 +70,6 @@ void Webserv::_initDefaultCfg()
   _numOfServers = 1;
 }
 
-// TODO:
-// NEXT: refac this to play together with Socket::bindSocket
-// ...seemlingly everthing is tied to the problem that my server still cannot
-// bind to multiple interfaces.
 void Webserv::_initDefaultCfg2()
 {
   VServerCfg cfg1;

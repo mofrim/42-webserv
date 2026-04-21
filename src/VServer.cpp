@@ -78,6 +78,7 @@ VServer::~VServer()
     // _clients.clear();
     _removeAllClients();
   }
+  cleanup();
 }
 
 // settings up sockets per server.
