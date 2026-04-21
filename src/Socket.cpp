@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/28 07:26:35 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/20 22:56:47 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/21 13:26:19 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -216,10 +216,10 @@ std::pair<str, int> Socket::bindSocket(const str& addr, u16 port)
     return std::make_pair(addr, -1);
   }
 
-  freeaddrinfo(ai);
-
   str ipaddr = inAddrToStr(
       reinterpret_cast<struct sockaddr_in *>(ai->ai_addr)->sin_addr);
+
+  freeaddrinfo(ai);
 
   return std::make_pair(ipaddr, fd);
 }
