@@ -27,6 +27,8 @@ class VServer {
     std::string   _server_name;
     std::set<int> _listen_fds;
 
+    u32 _maxBodySize;
+
     std::map< str, std::set<u16> > _activeInterfaces;
     std::map< str, std::set<u16> > _activeAddrPortPairs;
 
@@ -74,6 +76,9 @@ class VServer {
 
     void                        setRoutes(const std::map<str, Route>& r);
     const std::map<str, Route>& getRoutes() const;
+
+    void setMaxBodySize(u32 mbs);
+    u32  getMaxBodySize() const;
 
     void cleanup();
 

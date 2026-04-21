@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/25 08:35:42 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/21 12:23:14 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/21 16:24:46 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,12 +24,14 @@
 VServerCfg::VServerCfg()
 {
   _server_name = "";
+  _maxBodySize = MAX_BODY_SIZE;
 }
 
 VServerCfg::VServerCfg(const VServerCfg& o)
 {
   _server_name = o._server_name;
   _interfaces  = o._interfaces;
+  _maxBodySize = o._maxBodySize;
   _routes      = o._routes;
 }
 
@@ -38,6 +40,7 @@ VServerCfg& VServerCfg::operator=(const VServerCfg& o)
   if (this != &o) {
     _server_name = o._server_name;
     _interfaces  = o._interfaces;
+    _maxBodySize = o._maxBodySize;
     _routes      = o._routes;
   }
   return (*this);
@@ -121,4 +124,14 @@ const std::map<str, Route>& VServerCfg::getRoutes() const
 void VServerCfg::addRoute(const Route& r)
 {
   _routes[r.getPath()] = r;
+}
+
+void VServerCfg::setMaxBodySize(u32 mbs)
+{
+  _maxBodySize = mbs;
+}
+
+u32 VServerCfg::getMaxBodySize() const
+{
+  return _maxBodySize;
 }

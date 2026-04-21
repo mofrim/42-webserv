@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/25 08:01:29 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/21 12:22:35 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/21 16:24:59 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,7 @@ class VServerCfg {
   private:
     std::string                   _server_name;
     std::map<str, std::set<u16> > _interfaces;
+    u32                           _maxBodySize;
 
     // keys for _routes should be the _path prop of a Route.
     std::map<str, Route> _routes;
@@ -36,6 +37,8 @@ class VServerCfg {
     VServerCfg& operator=(const VServerCfg& other);
     ~VServerCfg();
 
+    void printCfg() const;
+
     void        setServerName(std::string name);
     std::string getServerName() const;
 
@@ -46,9 +49,10 @@ class VServerCfg {
     int delPort(const str& interface, u16 port);
     int delInterface(const str& interface);
 
-    void printCfg() const;
-
     void                        setRoutes(const std::map<str, Route>& routes);
     const std::map<str, Route>& getRoutes() const;
     void                        addRoute(const Route& r);
+
+    void setMaxBodySize(u32 mbs);
+    u32  getMaxBodySize() const;
 };

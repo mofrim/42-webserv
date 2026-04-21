@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/03 12:51:23 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/21 13:16:03 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/21 16:27:06 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,6 +31,7 @@ VServer::VServer(const VServerCfg& cfg): _reqHandler(this)
   _server_name      = cfg.getServerName();
   _activeInterfaces = cfg.getInterfaces();
   _routes           = cfg.getRoutes();
+  _maxBodySize      = cfg.getMaxBodySize();
   _setupFailed      = false;
 }
 

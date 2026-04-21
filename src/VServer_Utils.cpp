@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/16 12:11:11 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/21 13:07:07 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/21 16:26:18 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -101,4 +101,14 @@ void VServer::printCfg() const
     Logger::log_msg(
         "     + autoindex = " + bool2str(it->second.getAutoindex()));
   }
+}
+
+void VServer::setMaxBodySize(u32 mbs)
+{
+  _maxBodySize = mbs;
+}
+
+u32 VServer::getMaxBodySize() const
+{
+  return _maxBodySize;
 }
