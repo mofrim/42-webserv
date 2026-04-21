@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:36:43 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/21 16:50:22 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/21 18:29:09 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,7 +68,7 @@ void Webserv::getServersFromCfg(const std::string& cfgFilename)
   _numOfServers = cfg.getCfgs().size();
 
   for (size_t i = 0; i < _numOfServers; i++) {
-    _servers.push_back(VServer(cfg.getCfgs()[i]));
+    _vservers.push_back(VServer(cfg.getCfgs()[i]));
   }
   _defaultCfg = false;
 }
@@ -83,11 +83,11 @@ void Webserv::_setupServers()
   if (_defaultCfg)
     _initDefaultCfg();
 
-  std::vector<VServer>::iterator it = _servers.begin();
-  while (it != _servers.end()) {
+  std::vector<VServer>::iterator it = _vservers.begin();
+  while (it != _vservers.end()) {
     _setupSingleServer(*it);
     if (it->getSetupFailed()) {
-      it = _servers.erase(it);
+      it = _vservers.erase(it);
       --_numOfServers;
     }
     else
@@ -118,7 +118,7 @@ void Webserv::_setupSingleServer(VServer& srv)
     for (std::set<int>::const_iterator it = srv.getListenFds().begin();
         it != srv.getListenFds().end();
         it++)
-      _serverFdMap.insert(std::pair<int, VServer *>(*it, &srv));
+      _vserverFdMap.insert(std::pair<int, VServer *>(*it, &srv));
   } catch (const VServer::ServerInitException& e) {
     Logger::log_err(
         "Caught exception while trying to init srv " + srv.getServerName());
@@ -150,7 +150,7 @@ void Webserv::_shutdownAllServers()
 void Webserv::run()
 {
   _setupServers();
-  _epoll.setup(_servers, _numOfServers);
+  _epoll.setup(_vservers, _numOfServers);
 
   // the main loop
   while (_shutdown_server == false) {

@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:35:29 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/21 16:41:07 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/21 18:32:21 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,11 +30,11 @@ class Webserv {
   private:
     bool                     _defaultCfg;
     bool                     _shutdown_server;
-    std::vector<VServer>     _servers;
-    std::map<int, VServer *> _serverFdMap;
+    std::vector<VServer>     _vservers;
+    std::map<int, VServer *> _vserverFdMap;
     std::map<int, VServer *> _clientFdServerMap;
     size_t                   _numOfServers;
-    uint16_t                 _numOfClients;
+    u16                      _numOfClients;
 
     Epoll _epoll;
 

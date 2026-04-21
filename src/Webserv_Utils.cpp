@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/16 11:54:27 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/21 16:34:32 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/21 18:29:09 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@
 
 bool Webserv::_isServerFd(int fd) const
 {
-  return (_serverFdMap.find(fd) != _serverFdMap.end());
+  return (_vserverFdMap.find(fd) != _vserverFdMap.end());
 }
 
 // TODO: refactor to return a list of possible servers, namely the servers
@@ -30,8 +30,8 @@ bool Webserv::_isServerFd(int fd) const
 VServer *Webserv::_getServerByFd(int fd)
 {
   std::map<int, VServer *>::iterator it;
-  it = _serverFdMap.find(fd);
-  if (it == _serverFdMap.end())
+  it = _vserverFdMap.find(fd);
+  if (it == _vserverFdMap.end())
     return (NULL);
   return (it->second);
 }
@@ -73,7 +73,7 @@ void Webserv::_initDefaultCfg()
 
   // VServer     dsrv2;
 
-  _servers.push_back(dsrv1);
+  _vservers.push_back(dsrv1);
   // _servers.push_back(dsrv2);
 
   // _numOfServers = 2;
