@@ -12,6 +12,8 @@ int main()
   nl();
   test_ErrPages();
   nl();
+  test_Routes();
+  nl();
   print_final_result();
   if (g_GlobalResult == OK)
     print_test_result(OK, "All tests passed 8)");

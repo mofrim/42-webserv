@@ -1,0 +1,89 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   test_Routes.cpp                                    :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/01/13 13:06:35 by fmaurer           #+#    #+#             */
+/*   Updated: 2026/04/21 13:13:54 by fmaurer          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "test_hdr.hpp"
+#include "test_utils.hpp"
+
+// test logic goes here, for any failure return (-1) or throw exception.
+// otherwise -> success
+int _test_Routes()
+{
+  print_test_topic("test_Routes", "moep");
+  {
+    Route r;
+
+    r.setAutoindex(true);
+    r.setDefaultFile("moep.html");
+    r.setPath("/miep");
+    r.setRoot("./WWW");
+
+    VServerCfg cfg;
+    cfg.addRoute(r);
+    cfg.setServerName("Moep.de");
+    cfg.addInterface("127.0.0.1", 2222);
+
+    VServer s(cfg);
+    s.init();
+    s.printCfg();
+  }
+
+  print_test_topic("test_Routes", "overwrite");
+  {
+    Route r;
+
+    r.setAutoindex(true);
+    r.setDefaultFile("moep.html");
+    r.setPath("/miep");
+    r.setRoot("./WWW");
+
+    Route r1;
+
+    r1.setAutoindex(true);
+    r1.setDefaultFile("ha, gotcha!");
+    r1.setPath("/miep");
+    r1.setRoot("./overwrite");
+
+    VServerCfg cfg;
+    cfg.addRoute(r);
+    cfg.addRoute(r1);
+    cfg.setServerName("Moep.de");
+    cfg.addInterface("127.0.0.1", 2222);
+
+    VServer s(cfg);
+    s.init();
+    s.printCfg();
+  }
+
+  return (0);
+}
+
+void test_Routes()
+{
+  int ret = 0;
+  print_test_section_header("BEGIN Routes");
+  try {
+    ret = _test_Routes();
+  } catch (const std::exception& e) {
+    print_test_result(false,
+        "Test \"test_Routes\" failed with following exception:\n" +
+            std::string(e.what()));
+    g_GlobalResult = KO;
+    return;
+  }
+  if (ret == -1) {
+    print_test_result(false, "Test \"test_Routes\" failed with -1");
+    g_GlobalResult = KO;
+    return;
+  }
+  print_test_section_header("END Routes");
+  print_test_result(true, "Test \"test_Routes\" succeeded =)");
+}
