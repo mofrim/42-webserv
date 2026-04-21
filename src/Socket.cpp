@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/28 07:26:35 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/21 13:26:19 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/21 14:02:11 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -175,7 +175,6 @@ void Socket::printAddrlist(const str& addr, u16 port)
 // @throws never throws exception
 //
 // TODO: document! especially SO_REUSEADDR
-// FIXME: remove code duplicattion with cleanup function
 std::pair<str, int> Socket::bindSocket(const str& addr, u16 port)
 {
   struct addrinfo *ai;
