@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:36:43 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/21 16:30:31 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/21 16:50:22 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -105,6 +105,11 @@ void Webserv::_setupServers()
 // which is only responsible for binding a socket to a port and start listening
 // on it. The rest of the server initialization is being done in... here too?!
 // TODO: handle possible exceptions!!!
+//
+// FIXME: refactor this to handle virtual servers only differing by serverName.
+// I.E.: The serverFdMap has to be a multimap! meaning: we can have multiple
+// servers per fd only differing by name. But this i will first have to
+// implement in VServer initialization.
 void Webserv::_setupSingleServer(VServer& srv)
 {
   Logger::log_msg("Setting up this server:");

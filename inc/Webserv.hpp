@@ -6,34 +6,20 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:35:29 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/21 16:30:43 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/21 16:41:07 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef WEBSERV_HPP
-#define WEBSERV_HPP
+#pragma once
 
 #include "Epoll.hpp"
 #include "VServer.hpp"
+#include "typesAndConstants.hpp"
 
 #include <map>
 #include <netinet/in.h>
-#include <set>
 #include <sys/epoll.h>
 #include <sys/socket.h>
-
-// default port for the default server
-#define DEFAULT_PORT 4284
-
-// default server name
-#define DEFAULT_SRV_NAME "localhost"
-
-// max num of clients.
-#define MAX_CLIENTS 1000
-
-// just for explicitness sake define the possible return values of the
-// requestHandler as constants here
-enum { REQ_READ = 0, REQ_WRITE = 1, REQ_ERR = -1 };
 
 // NOTE: Naming convention for private class-members / methods: underscore at
 // the beginning. In later use this enables us to omit the `this->`. This saves
@@ -87,5 +73,3 @@ class Webserv {
         WebservRunException(const std::string& msg);
     };
 };
-
-#endif
