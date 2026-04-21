@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/26 10:03:57 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/20 12:39:20 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/21 13:10:47 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,14 @@ str int2str(int n)
   std::ostringstream oss;
   oss << n;
   return (oss.str());
+}
+
+str bool2str(bool n)
+{
+  if (n)
+    return std::string("true");
+  else
+    return std::string("false");
 }
 
 // our own inet_ntoa function as by subject.pdf we figured that we shouldn't use

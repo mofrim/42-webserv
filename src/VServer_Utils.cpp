@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/16 12:11:11 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/20 22:59:52 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/21 13:07:07 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,18 +39,6 @@ void VServer::setSetupFailed()
   _setupFailed = true;
 }
 
-void VServer::printCfg() const
-{
-  Logger::log_msg("  server_name: \"" + _server_name + "\"");
-  Logger::log_msg("  listen_fds: " + getSetAsStr(_listen_fds));
-  Logger::log_msg("  active [ipaddr:port] listen interfaces:");
-  for (std::map< str, std::set<u16> >::const_iterator it =
-           _activeAddrPortPairs.begin();
-      it != _activeAddrPortPairs.end();
-      it++)
-    Logger::log_msg("    " + it->first + ":" + getSetAsStr(it->second));
-}
-
 void VServer::printClients()
 {
   Logger::log_srv(_server_name, "Printing Clients:");
@@ -80,4 +68,37 @@ const std::set<int>& VServer::getListenFds() const
 const std::set<u16>& VServer::getPorts() const
 {
   return _ports;
+}
+
+void VServer::setRoutes(const std::map<str, Route>& r)
+{
+  _routes = r;
+}
+
+const std::map<str, Route>& VServer::getRoutes() const
+{
+  return _routes;
+}
+
+void VServer::printCfg() const
+{
+  Logger::log_msg("  server_name: \"" + _server_name + "\"");
+  Logger::log_msg("  listen_fds: " + getSetAsStr(_listen_fds));
+  Logger::log_msg("  active listen interfaces:");
+  for (std::map< str, std::set<u16> >::const_iterator it =
+           _activeAddrPortPairs.begin();
+      it != _activeAddrPortPairs.end();
+      it++)
+    Logger::log_msg("    " + it->first + ":" + getSetAsStr(it->second));
+  Logger::log_msg("  routes:");
+  for (std::map<str, Route>::const_iterator it = _routes.begin();
+      it != _routes.end();
+      it++)
+  {
+    Logger::log_msg("   - \"" + it->first + "\": ");
+    Logger::log_msg("     + root = " + it->second.getRoot());
+    Logger::log_msg("     + defaultFile = " + it->second.getDefaultFile());
+    Logger::log_msg(
+        "     + autoindex = " + bool2str(it->second.getAutoindex()));
+  }
 }

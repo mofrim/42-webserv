@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/25 08:01:29 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/20 23:16:37 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/21 12:22:35 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,13 +20,14 @@
 #include <set>
 #include <string>
 #include <sys/socket.h>
-#include <vector>
 
 class VServerCfg {
   private:
     std::string                   _server_name;
     std::map<str, std::set<u16> > _interfaces;
-    std::vector<Route>            _routes;
+
+    // keys for _routes should be the _path prop of a Route.
+    std::map<str, Route> _routes;
 
   public:
     // OCF
@@ -46,4 +47,8 @@ class VServerCfg {
     int delInterface(const str& interface);
 
     void printCfg() const;
+
+    void                        setRoutes(const std::map<str, Route>& routes);
+    const std::map<str, Route>& getRoutes() const;
+    void                        addRoute(const Route& r);
 };

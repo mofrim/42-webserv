@@ -72,6 +72,9 @@ class VServer {
     const std::set<int>& getListenFds() const;
     const std::set<u16>& getPorts() const;
 
+    void                        setRoutes(const std::map<str, Route>& r);
+    const std::map<str, Route>& getRoutes() const;
+
     void cleanup();
 
     // TODO: think about the whole exception thing! Maybe there should be

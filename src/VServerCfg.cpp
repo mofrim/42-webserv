@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/25 08:35:42 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/20 23:16:14 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/21 12:23:14 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -105,4 +105,20 @@ int VServerCfg::delInterface(const str& interface)
   if (_interfaces.erase(interface) == 0)
     return -1;
   return 0;
+}
+
+void VServerCfg::setRoutes(const std::map<str, Route>& routes)
+{
+  _routes = routes;
+}
+
+const std::map<str, Route>& VServerCfg::getRoutes() const
+{
+  return _routes;
+}
+
+// add a route to _routes map. using the path (aka location) as key.
+void VServerCfg::addRoute(const Route& r)
+{
+  _routes[r.getPath()] = r;
 }

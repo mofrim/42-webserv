@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/03 11:26:23 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/20 22:49:02 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/21 13:00:54 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,9 @@
 #include <set>
 #include <sstream>
 
+str bool2str(bool n);
 str int2str(int n);
+
 str inAddrToStr(const struct in_addr& addr);
 str getAddrPortStr4(const struct sockaddr_in& addr);
 int setFdNonBlocking(int fd);
