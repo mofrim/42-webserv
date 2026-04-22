@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/03 12:51:23 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/21 16:27:06 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/22 02:57:42 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -225,15 +225,19 @@ Client *VServer::addClient(int fd)
     throw(ServerException("could not set new clients fd non-blocking"));
 
   std::string hostname(inAddrToStr(client_addr.sin_addr));
-  Client     *newCli = new Client(client_fd, hostname, client_addr.sin_port);
+  Client *newCli = new Client(client_fd, this, hostname, client_addr.sin_port);
 
-  std::pair<std::map<int, Client *>::iterator, bool> insertReturn =
-      _clients.insert(std::pair<int, Client *>(client_fd, newCli));
-  if (insertReturn.second == false)
-    throw(ServerException(
-        "could not insert new client into Server's _clients map"));
+  // FIXME: rewrite this more simply
+  // std::pair<std::map<int, Client *>::iterator, bool> insertReturn =
+  //     _clients.insert(std::pair<int, Client *>(client_fd, newCli));
+  // if (insertReturn.second == false)
+  //   throw(ServerException(
+  //       "could not insert new client into Server's _clients map"));
+  // return (insertReturn.first->second);
 
-  return (insertReturn.first->second);
+  // DONE: but is this really safe like this?
+  _clients[client_fd] = newCli;
+  return (newCli);
 }
 
 // remove all traces of a client from the Server _and_ close the socket. things

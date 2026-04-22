@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:35:29 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/21 18:32:21 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/22 03:41:26 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,7 @@
 #include <netinet/in.h>
 #include <sys/epoll.h>
 #include <sys/socket.h>
+#include <vector>
 
 // NOTE: Naming convention for private class-members / methods: underscore at
 // the beginning. In later use this enables us to omit the `this->`. This saves
@@ -28,13 +29,20 @@
 
 class Webserv {
   private:
-    bool                     _defaultCfg;
-    bool                     _shutdown_server;
-    std::vector<VServer>     _vservers;
-    std::map<int, VServer *> _vserverFdMap;
-    std::map<int, VServer *> _clientFdServerMap;
-    size_t                   _numOfServers;
-    u16                      _numOfClients;
+    bool                 _defaultCfg;
+    bool                 _shutdown_server;
+    std::vector<VServer> _vservers;
+
+    // this maps a server-socket fd to a list of vservers.
+    std::map< int, std::vector<VServer *> > _vserverFdMap;
+
+    // this maps the a client fd to a list of possible vservers. when the first
+    // request is send it will be decided which server is responsible for
+    // handling it by serverName
+    std::map< int, Client * > _fdClientMap;
+
+    size_t _numOfServers;
+    u16    _numOfClients;
 
     Epoll _epoll;
 
@@ -44,12 +52,13 @@ class Webserv {
     void _shutdownAllServers();
 
     // utils
-    bool     _isServerFd(int fd) const;
-    VServer *_getServerByFd(int fd);
-    VServer *_getServerByClientFd(int fd);
-    void     _addClientToClientFdServerMap(int fd, VServer *srv);
-    void     _initDefaultCfg();
-    void     _printSockname(int sock);
+    bool _isServerFd(int fd) const;
+
+    // QUESTION: maybe this can be const / or ref?
+    std::vector<VServer *> _getServerByFd(int fd);
+
+    void _initDefaultCfg();
+    void _printSockname(int sock);
 
     // we do not use them, so keep em private
     Webserv(const Webserv& other);

@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:36:43 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/21 18:29:09 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/22 03:39:31 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -118,7 +118,7 @@ void Webserv::_setupSingleServer(VServer& srv)
     for (std::set<int>::const_iterator it = srv.getListenFds().begin();
         it != srv.getListenFds().end();
         it++)
-      _vserverFdMap.insert(std::pair<int, VServer *>(*it, &srv));
+      _vserverFdMap[*it].push_back(&srv);
   } catch (const VServer::ServerInitException& e) {
     Logger::log_err(
         "Caught exception while trying to init srv " + srv.getServerName());
@@ -177,9 +177,33 @@ void Webserv::run()
       // listening on a fd the client is connected to. In the request handling
       // part we can then route the request to the correct vsrv.
       if (_isServerFd(currentFd) && _numOfClients < MAX_CLIENTS) {
-        VServer *srv = _getServerByFd(currentFd);
-        Client  *cli = srv->addClient(currentFd);
-        _addClientToClientFdServerMap(cli->getFd(), srv);
+        std::vector<VServer *> vsrvs = _getServerByFd(currentFd);
+
+        if (vsrvs.empty()) {
+          Logger::log_warn("Webserv::run: _getServerByFd returned no servers");
+          continue;
+        }
+
+        // FIXME: FROM HERE i will have to start refactoring:
+        //
+        // 1) Clients must be creatable on their own!
+        // 2) They also need to store which server(s) they belong to
+        // 3) Eventually, after their first processed request it will be clear
+        //    which exact server is theirs. Either achieve this by setting a
+        //    single server field or reducing servers-vector to one.
+
+        Client *cli;
+        if (vsrvs.size() == 1)
+          cli = vsrvs[0]->addClient(currentFd);
+        else {
+          if ((cli = Client::newCliServerless(currentFd)) == NULL) {
+            Logger::log_warn(
+                "Webserv::run: Client::newCliServerless returned NULL");
+            continue;
+          }
+          cli->setPotentialVsrvs(vsrvs);
+        }
+        _fdClientMap[cli->getFd()] = cli;
         _epoll.addClient(cli->getFd());
         _numOfClients++;
       }
@@ -190,19 +214,25 @@ void Webserv::run()
       // this!!! Also:
       // FIXME: clarify how we handle connection keepalive with clients
       else {
-        VServer *srv = _getServerByClientFd(currentFd);
-        if (srv == NULL)
-          throw(WebservRunException("could not find server by fd"));
-        if (LOGLEVEL == BRUTAL)
-          srv->printClients();
+        Client  *cli  = _fdClientMap[currentFd];
+        VServer *vsrv = cli->getVsrv();
+        int      evHandlerReturn;
 
-        int evHandlerReturn =
-            srv->handleEvent(_epoll.getEvent(eventIdx), currentFd);
+        if (vsrv == NULL) {
+          // handle serverName detection... somehow ?!??
+          evHandlerReturn = REQ_ERR;
+        }
+        else {
+          if (LOGLEVEL == BRUTAL)
+            vsrv->printClients();
+          evHandlerReturn =
+              vsrv->handleEvent(_epoll.getEvent(eventIdx), currentFd);
+        }
 
         if (evHandlerReturn == REQ_ERR) {
           _epoll.removeClient(currentFd);
-          srv->removeClient(currentFd);
-          _clientFdServerMap.erase(currentFd);
+          if (vsrv)
+            vsrv->removeClient(currentFd);
           _numOfClients--;
         }
         else if (evHandlerReturn == REQ_READ)
@@ -215,8 +245,7 @@ void Webserv::run()
   _epoll.closeEpollFd();
 }
 
-////////////////////////////////////////////////////////////////////////////////
-/// Exceptions
+// -----------------------------=[ Exceptions ]=----------------------------- //
 
 Webserv::WebservInitException::WebservInitException(const std::string& msg):
   std::runtime_error("WebservInitException: " + msg)

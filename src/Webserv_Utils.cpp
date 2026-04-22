@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/16 11:54:27 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/21 18:29:09 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/22 03:41:10 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,22 +27,12 @@ bool Webserv::_isServerFd(int fd) const
 // NOTE: std::map -> std::multimap
 // FIXME: This has to be refactor to handle multiple real VServers listening on
 // the same FD but differing bny server_name
-VServer *Webserv::_getServerByFd(int fd)
+std::vector<VServer *> Webserv::_getServerByFd(int fd)
 {
-  std::map<int, VServer *>::iterator it;
+  std::map< int, std::vector<VServer *> >::iterator it;
   it = _vserverFdMap.find(fd);
   if (it == _vserverFdMap.end())
-    return (NULL);
-  return (it->second);
-}
-
-VServer *Webserv::_getServerByClientFd(int fd)
-{
-  _printSockname(fd);
-  std::map<int, VServer *>::iterator it;
-  it = _clientFdServerMap.find(fd);
-  if (it == _clientFdServerMap.end())
-    return (NULL);
+    return std::vector<VServer *>();
   return (it->second);
 }
 
@@ -53,11 +43,6 @@ void Webserv::_printSockname(int sock)
   if (getsockname(sock, (struct sockaddr *)&addr, &addrlen) == -1)
     throw(WebservRunException("could not getsockname for fd " + int2str(sock)));
   Logger::log_dbg0("getsockname: " + getAddrPortStr4(addr));
-}
-
-void Webserv::_addClientToClientFdServerMap(int fd, VServer *srv)
-{
-  _clientFdServerMap.insert(std::pair<int, VServer *>(fd, srv));
 }
 
 // NOTE: this _only_ needs to be done for the default config. all non-default
