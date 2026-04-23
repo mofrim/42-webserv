@@ -30,6 +30,12 @@ this is some consequences... namely:
 
 ### route-paths won't be checked until requested! nginx is doing the same.
 
+### we will demand one route per server! otherwise server cfg is invalid!
+
+... or set default path to "/" and root = "html". yeah. i certainly will give
+the possibility to have default values here. But certainly at least one route
+has to be added to each VServer!
+
 
 ---
 
