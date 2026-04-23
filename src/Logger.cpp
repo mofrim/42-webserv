@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/24 20:52:55 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/23 13:36:17 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/23 21:31:10 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,7 @@ Logger& Logger::operator=(const Logger& other)
 Logger::~Logger()
 {}
 
-std::string Logger::_get_logtime()
+std::string Logger::getLogtime()
 {
   char       timestamp[101];
   time_t     current_time;
@@ -46,26 +46,26 @@ std::string Logger::_get_logtime()
 
 void Logger::log_err(const std::string& msg)
 {
-  std::string logtime = _get_logtime();
+  std::string logtime = getLogtime();
   std::cout << BRED << logtime << msg << RST << std::endl;
 }
 
 void Logger::log_msg(const std::string& msg)
 {
-  std::string logtime = _get_logtime();
+  std::string logtime = getLogtime();
   std::cout << BCYA << logtime << msg << RST << std::endl;
 }
 
 void Logger::log_warn(const std::string& msg)
 {
-  std::string logtime = _get_logtime();
+  std::string logtime = getLogtime();
   std::cout << BYLO << logtime << msg << RST << std::endl;
 }
 
 void Logger::log_dbg0(const std::string& msg)
 {
   if (LOGLEVEL >= INFO) {
-    std::string logtime = _get_logtime();
+    std::string logtime = getLogtime();
     std::cout << GRY << logtime << msg << RST << std::endl;
   }
 }
@@ -73,7 +73,7 @@ void Logger::log_dbg0(const std::string& msg)
 void Logger::log_dbg1(const std::string& msg)
 {
   if (LOGLEVEL >= DEBUG) {
-    std::string logtime = _get_logtime();
+    std::string logtime = getLogtime();
     std::cout << WHT << logtime << msg << RST << std::endl;
   }
 }
@@ -81,7 +81,7 @@ void Logger::log_dbg1(const std::string& msg)
 void Logger::log_dbg2(const std::string& msg)
 {
   if (LOGLEVEL >= BRUTAL) {
-    std::string logtime = _get_logtime();
+    std::string logtime = getLogtime();
     std::cout << BWHT << logtime << msg << RST << std::endl;
   }
 }
@@ -89,7 +89,7 @@ void Logger::log_dbg2(const std::string& msg)
 void Logger::log_srv(const std::string& srv_name, const std::string& msg)
 {
   if (LOGLEVEL >= INFO) {
-    std::string logtime = _get_logtime();
+    std::string logtime = getLogtime();
     std::cout << GRY << logtime << GRN << "(" << srv_name << ") " << GRY << msg
               << RST << std::endl;
   }
@@ -99,7 +99,7 @@ void Logger::log_srv(const std::string& srv_name, const std::string& msg)
 void Logger::log_reqres(const std::string& resreq, const std::string& data)
 {
   if (LOGLEVEL >= INFO) {
-    std::string logtime = _get_logtime();
+    std::string logtime = getLogtime();
     std::cout << WHT << logtime << resreq << ":\n---" << std::endl;
     std::cout << data;
     std::cout << "\n---" << RST << std::endl;

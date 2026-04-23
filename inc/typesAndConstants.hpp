@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/17 23:55:04 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/23 18:58:21 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/23 21:28:35 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,8 @@
 
 #include <stdint.h>
 #include <string>
+
+#define VERSION "v0.4"
 
 typedef std::string str;
 typedef uint16_t    u16;
@@ -52,14 +54,3 @@ typedef struct {
     str      target;
     str      httpVersion;
 } t_RequestLine;
-
-// supported Status codes
-
-enum {
-  HTTP_200 = 200,
-  HTTP_300 = 300,
-  HTTP_400 = 400,
-  HTTP_500 = 500,
-  HTTP_501 = 501,
-  HTTP_502 = 502,
-};

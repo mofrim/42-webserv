@@ -6,12 +6,13 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/24 20:49:55 by fmaurer           #+#    #+#             */
-/*   Updated: 2025/12/20 16:50:48 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/23 21:30:53 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef LOGGER_HPP
-#define LOGGER_HPP
+#pragma once
+
+#include "typesAndConstants.hpp"
 
 #include <string>
 
@@ -46,30 +47,27 @@ enum { INFO = 0, DEBUG = 1, BRUTAL = 2 };
 // is this even possible with this utility class?
 // ... gotta try this any time soon.
 class Logger {
-	private:
-		Logger();
-		Logger(const Logger& other);
-		Logger& operator=(const Logger& other);
-		~Logger();
+  private:
+    Logger();
+    Logger(const Logger& other);
+    Logger& operator=(const Logger& other);
+    ~Logger();
 
-		static std::string _get_logtime();
+  public:
+    static void log_err(const std::string& msg);
+    static void log_msg(const std::string& msg);
+    static void log_warn(const std::string& msg);
+    static void log_srv(const std::string& srv_name, const std::string& msg);
+    static void log_reqres(const std::string& resreq, const std::string& data);
 
-	public:
-		static void log_err(const std::string& msg);
-		static void log_msg(const std::string& msg);
-		static void log_warn(const std::string& msg);
-		static void log_srv(const std::string& srv_name, const std::string& msg);
-		static void log_reqres(const std::string& resreq, const std::string& data);
-
-		// The idead behind log_dbg{0,1,2} goes like this: at compile-time specify
-		// `-DLOGLEVEL={0,1,2}` and in the code use debug functions accordingly. so
-		// if you want to have the most brutally detailed level of debugging output
-		// compile with `-DLOGLEVEL=2`. Then even messages with log_dbg2() will be
-		// printed. In LOGLEVEL == DEBUG == 1 log_dbg1 and log_dbg0 will be printed,
-		// and in LOGLEVEL == INFO == 0 only log_dbg0 will be shown.
-		static void log_dbg0(const std::string& msg);
-		static void log_dbg1(const std::string& msg);
-		static void log_dbg2(const std::string& msg);
+    // The idead behind log_dbg{0,1,2} goes like this: at compile-time specify
+    // `-DLOGLEVEL={0,1,2}` and in the code use debug functions accordingly. so
+    // if you want to have the most brutally detailed level of debugging output
+    // compile with `-DLOGLEVEL=2`. Then even messages with log_dbg2() will be
+    // printed. In LOGLEVEL == DEBUG == 1 log_dbg1 and log_dbg0 will be printed,
+    // and in LOGLEVEL == INFO == 0 only log_dbg0 will be shown.
+    static void log_dbg0(const std::string& msg);
+    static void log_dbg1(const std::string& msg);
+    static void log_dbg2(const std::string& msg);
+    static str  getLogtime();
 };
-
-#endif

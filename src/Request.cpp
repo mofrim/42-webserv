@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 23:39:57 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/23 18:56:53 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/23 20:05:01 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,31 +64,41 @@ Request::Request(VServer *vsrv, Client *cli, const std::string& reqstr)
 // Important resource:
 //
 // 	https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status
+
+// void Request::_parseRequest()
+// {
+//   if (!_isTerminatedReq()) {
+//     _statusCode = 400;
+//     _response =
+//         "HTTP/1.1 400 Bad Request\r\n"
+//         "Server: m0fr1m-webserv\r\n"
+//         "Date: Mon, 05 Jan 2026 07:08:57 GMT\r\n"
+//         "Content-Type: text/html\r\n"
+//         "Content-Length: 157\r\n"
+//         "Connection: close\r\n"
+//         "\r\n" +
+//         HttpStatus::getDefaultErrPage(400);
+//   }
+//   else {
+//     ReqParse::parseReqLine(_reqline, _reqstr);
+//     _response =
+//         "HTTP/1.1 200 OK\r\nContent-Length: 29\r\nContent-Type: text/plain; "
+//         "charset=utf-8\r\n\r\nHello from m0fr1m's webserv!\n";
+//   }
+// }
+
 void Request::_parseRequest()
 {
-  if (!_isTerminatedReq()) {
-    _statusCode = 400;
-    _response =
-        "HTTP/1.1 400 Bad Request\r\n"
-        "Server: m0fr1m-webserv\r\n"
-        "Date: Mon, 05 Jan 2026 07:08:57 GMT\r\n"
-        "Content-Type: text/html\r\n"
-        "Content-Length: 157\r\n"
-        "Connection: close\r\n"
-        "\r\n" +
-        HttpStatus::getDefaultErrPage(400);
-  }
-  else {
-    ReqParse::parseReqLine(_reqline, _reqstr);
-    _response =
-        "HTTP/1.1 200 OK\r\nContent-Length: 29\r\nContent-Type: text/plain; "
-        "charset=utf-8\r\n\r\nHello from m0fr1m's webserv!\n";
-  }
+  if (!_isTerminatedReq())
+    _statusCode = HTTP_400;
+  else
+    _statusCode = ReqParse::parseReqLine(_reqline, _reqstr);
+  _Response.genResponse(*this);
 }
 
-std::string Request::getResponse() const
+str Request::getResponseStr() const
 {
-  return (_response);
+  return _Response.getStr();
 }
 
 // check if received request was terminated with '\r\n'
@@ -145,4 +155,29 @@ e_Method Request::getMethod() const
 const str& Request::getReqstr() const
 {
   return _reqstr;
+}
+
+Client *Request::getCli() const
+{
+  return _cli;
+}
+
+VServer *Request::getVsrv() const
+{
+  return _vsrv;
+}
+
+u16 Request::getStatusCode() const
+{
+  return _statusCode;
+}
+
+const t_RequestLine& Request::getReqline() const
+{
+  return _reqline;
+}
+
+const std::map<str, str>& Request::getHeaders() const
+{
+  return _headers;
 }

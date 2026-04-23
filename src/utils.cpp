@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/26 10:03:57 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/23 15:35:15 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/23 22:43:07 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@
 #include <cstring>
 #include <errno.h>
 #include <fcntl.h>
+#include <sys/stat.h>
 
 str int2str(int n)
 {
@@ -91,4 +92,17 @@ str method2str(e_Method m)
   if (m == M_DELETE)
     return "DELETE";
   return "UNKNOWN";
+}
+
+int isDir(const str& path)
+{
+  struct stat sb;
+
+  if (lstat(path.c_str(), &sb) == -1)
+    return -1;
+
+  if ((sb.st_mode & S_IFMT) == S_IFDIR)
+    return 1;
+
+  return 0;
 }

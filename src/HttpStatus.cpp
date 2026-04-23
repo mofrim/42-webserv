@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/20 16:51:47 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/23 18:56:18 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/23 22:19:28 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,35 +78,38 @@ str HttpStatus::getStatusStr(u16 code)
 {
   str errstr;
   switch (code) {
+  case 200:
+    errstr = "200 OK";
+    break;
   case 400:
-    errstr = "400 - Bad Request";
+    errstr = "400 Bad Request";
     break;
   case 403:
-    errstr = "403 - Forbidden";
+    errstr = "403 Forbidden";
     break;
   case 404:
-    errstr = "404 - Page Not Found";
+    errstr = "404 Page Not Found";
     break;
   case 405:
-    errstr = "404 - Method Not Allowed";
+    errstr = "404 Method Not Allowed";
     break;
   case 408:
-    errstr = "408 - Request Timeout";
+    errstr = "408 Request Timeout";
     break;
   case 413:
-    errstr = "413 - Content Too Large";
+    errstr = "413 Content Too Large";
     break;
   case 418:
-    errstr = "418 - I'm a teapot";
+    errstr = "418 I'm a teapot";
     break;
   case 500:
-    errstr = "500 - Internal Server Error";
+    errstr = "500 Internal Server Error";
     break;
   case 501:
-    errstr = "501 - Not Implemented";
+    errstr = "501 Not Implemented";
     break;
   case 502:
-    errstr = "502 - Bad Gateway";
+    errstr = "502 Bad Gateway";
     break;
   default:
     errstr += int2str(code) + " - Unknown HTML Status Code!";

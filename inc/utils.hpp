@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/03 11:26:23 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/23 15:35:32 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/23 22:41:42 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,7 @@ int      setFdNonBlocking(int fd);
 str      getErrStr();
 e_Method str2method(const str& m);
 str      method2str(e_Method m);
+int      isDir(const str& path);
 
 // -----------------------------=[ Templates ]=----------------------------- //
 

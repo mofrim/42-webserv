@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 19:13:35 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/23 15:00:42 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/23 19:56:43 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -85,6 +85,7 @@ int RequestHandler::readRequest(Client *cli)
     else
       Logger::log_err(
           "read failed, errno: " + int2str(errno) + " = " + getErrStr());
+
     return (REQ_ERR);
   }
 
@@ -120,7 +121,7 @@ int RequestHandler::writeResponse(Client *cli)
   if (_reqQueue.empty())
     throw(ReqHandlerException("Cannot write response! Ain't got no requests!"));
   Logger::log_msg("Writing our Response!");
-  std::string response = _reqQueue[cli].back().getResponse();
+  std::string response = _reqQueue[cli].back().getResponseStr();
   Logger::log_reqres("Response", response);
   ssize_t bytes_sent =
       send(cli->getFd(), response.c_str(), strlen(response.c_str()), 0);

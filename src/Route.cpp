@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/09 16:42:51 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/21 16:35:22 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/23 22:07:54 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@
 Route::Route()
 {
   _path         = "/";
-  _root         = "html";
+  _root         = "./html";
   _autoindex    = false;
   _default_file = "index.html";
 }
