@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 19:13:35 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/23 10:34:42 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/23 13:11:43 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,6 +99,7 @@ int RequestHandler::readRequest(Client *cli)
     _reqQueue[cli].push_front(newReq);
   }
   if (_reqQueue[cli].front().reqComplete()) {
+    Logger::log_reqres("Request", _reqQueue[cli].front().getReqstr());
     _reqQueue[cli].front().setFinished();
     return REQ_WRITE;
   }

@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/03 12:51:23 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/22 13:49:04 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/23 12:58:25 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -265,9 +265,12 @@ void VServer::_removeAllClients()
 }
 
 // INFO: this is another heart-piece of this webserv.
+//
+// In the unlikely case we would not get a EPOLLIN or EPOLLOUT keep reading from
+// the clients sock.
 int VServer::handleEvent(const struct epoll_event& ev, Client *cli)
 {
-  int return_value = 0;
+  int return_value = REQ_READ;
   if (ev.events & EPOLLIN)
     return_value = _reqHandler.readRequest(cli);
   if (ev.events & EPOLLOUT) {

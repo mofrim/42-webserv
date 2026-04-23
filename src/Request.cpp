@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 23:39:57 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/23 10:18:03 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/23 13:09:38 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,8 +53,6 @@ Request::Request(VServer *vsrv, Client *cli, const std::string& reqstr)
   _cli         = cli;
   _reqstr      = reqstr;
   _reqFinished = false;
-  Logger::log_reqres("Request", _reqstr);
-
   // FIXME: you don't belong here!
   _parseRequest();
 }
@@ -140,4 +138,9 @@ e_Method Request::getMethod() const
   if (hdrComplete())
     return _reqline.method;
   return M_UNKNOWN;
+}
+
+const str& Request::getReqstr() const
+{
+  return _reqstr;
 }

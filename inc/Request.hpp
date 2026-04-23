@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 23:39:07 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/23 10:16:23 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/23 13:09:46 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,7 +61,8 @@ class Request {
 
     void append(const str& s);
 
-    bool     hdrComplete() const;
-    bool     reqComplete();
-    e_Method getMethod() const;
+    bool       hdrComplete() const;
+    bool       reqComplete();
+    e_Method   getMethod() const;
+    const str& getReqstr() const;
 };
