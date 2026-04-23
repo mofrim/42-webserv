@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 23:39:57 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/23 13:09:38 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/23 13:32:44 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -93,7 +93,7 @@ std::string Request::getResponse() const
 // check if received request was terminated with '\r\n'
 bool Request::_isTerminatedReq()
 {
-  if (_reqstr.size() < 2)
+  if (_reqstr.size() < 4)
     return (false);
   if (_reqstr.compare(_reqstr.size() - 4, 4, "\r\n\r\n") == 0)
     return (true);
