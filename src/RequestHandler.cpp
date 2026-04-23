@@ -67,8 +67,8 @@ int RequestHandler::readRequest(Client *cli)
 
   Logger::log_srv(srv_name, "reading from socket" + int2str(fd));
 
-  char    buffer[READ_BUFSIZE] = {0};
-  ssize_t bytes_read           = read(fd, buffer, READ_BUFSIZE);
+  char    buffer[READ_BUFSIZE + 1] = {0};
+  ssize_t bytes_read               = read(fd, buffer, READ_BUFSIZE);
 
   Logger::log_srv(srv_name, "read " + int2str(bytes_read) + " bytes");
 
