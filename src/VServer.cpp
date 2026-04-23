@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/03 12:51:23 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/22 02:57:42 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/22 13:49:04 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -265,13 +265,15 @@ void VServer::_removeAllClients()
 }
 
 // INFO: this is another heart-piece of this webserv.
-int VServer::handleEvent(const struct epoll_event& ev, int client_fd)
+int VServer::handleEvent(const struct epoll_event& ev, Client *cli)
 {
   int return_value = 0;
   if (ev.events & EPOLLIN)
-    return_value = _reqHandler.readRequest(client_fd);
-  if (ev.events & EPOLLOUT)
-    return_value = _reqHandler.writeResponse(client_fd);
+    return_value = _reqHandler.readRequest(cli);
+  if (ev.events & EPOLLOUT) {
+    Logger::log_msg("Got EPOLLOUT!");
+    return_value = _reqHandler.writeResponse(cli);
+  }
   return (return_value);
 }
 

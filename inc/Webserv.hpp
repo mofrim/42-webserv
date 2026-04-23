@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:35:29 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/22 03:41:26 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/22 13:36:07 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,6 +32,11 @@ class Webserv {
     bool                 _defaultCfg;
     bool                 _shutdown_server;
     std::vector<VServer> _vservers;
+
+    // This is the mein Welcome VServer responsible for not yet routed Requests.
+    // I use this to catch Requests to fully virtual servers which only differ
+    // by serverName
+    VServer _Webserv;
 
     // this maps a server-socket fd to a list of vservers.
     std::map< int, std::vector<VServer *> > _vserverFdMap;
@@ -71,6 +76,8 @@ class Webserv {
     void run();
     void getServersFromCfg(const std::string& cfgFilename);
     void shutdownWebserv();
+
+    int handleEventServerless(const struct epoll_event& ev, Client *cli);
 
     class WebservInitException: public std::runtime_error {
       public:

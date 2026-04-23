@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/17 23:55:04 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/21 16:40:28 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/23 10:15:55 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,4 +32,13 @@ typedef uint32_t    u32;
 
 // just for explicitness sake define the possible return values of the
 // requestHandler as constants here
-enum { REQ_READ = 0, REQ_WRITE = 1, REQ_ERR = -1 };
+enum { REQ_READ = 0, REQ_WRITE = 1, REQ_ERR = -1, REQ_INC = 2, REQ_DONE = 3 };
+
+typedef enum { M_GET, M_POST, M_DELETE, M_UNKNOWN } e_Method;
+
+// the request-line
+typedef struct {
+    e_Method method;
+    str      target;
+    str      httpVersion;
+} t_RequestLine;

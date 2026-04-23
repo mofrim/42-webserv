@@ -54,7 +54,7 @@ class VServer {
     void    init();
     Client *addClient(int fd);
     void    removeClient(int fd);
-    int     handleEvent(const struct epoll_event& ev, int client_fd);
+    int     handleEvent(const struct epoll_event& ev, Client *cli);
 
     // utils, getters setters
     std::string       getServerName() const;

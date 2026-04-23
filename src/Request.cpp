@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 23:39:57 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/20 23:06:19 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/23 10:18:03 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,43 +14,48 @@
 #include "Logger.hpp"
 #include "Request.hpp"
 
-#include <iostream>
+// --------------------------------=[ OCF ]=-------------------------------- //
 
-// -- OCF --
-
-Request::Request(): _vsrv(NULL), _reqstr("")
+Request::Request(): _vsrv(NULL), _reqstr(""), _reqFinished(false)
 {}
 
-Request::Request(const Request& other)
+Request::Request(const Request& o)
 {
-  if (this != &other) {
-    _vsrv     = other._vsrv;
-    _reqstr   = other._reqstr;
-    _response = other._response;
+  if (this != &o) {
+    _vsrv        = o._vsrv;
+    _reqstr      = o._reqstr;
+    _response    = o._response;
+    _reqFinished = o._reqFinished;
   }
 }
 
-Request& Request::operator=(const Request& other)
+Request& Request::operator=(const Request& o)
 {
-  if (this != &other) {
-    _vsrv     = other._vsrv;
-    _reqstr   = other._reqstr;
-    _response = other._response;
+  if (this != &o) {
+    _vsrv        = o._vsrv;
+    _reqstr      = o._reqstr;
+    _response    = o._response;
+    _reqFinished = o._reqFinished;
   }
   return (*this);
 }
 
 Request::~Request()
 {}
-// -- OCF end --
+
+// ------------------------------=[ END OCF ]=------------------------------ //
 
 // the standard ctor we use for initializing a request _and_ parse the request
 // at the same time.
-Request::Request(const VServer *vsrv, const std::string& reqstr)
+Request::Request(VServer *vsrv, Client *cli, const std::string& reqstr)
 {
-  _vsrv   = vsrv;
-  _reqstr = reqstr;
+  _vsrv        = vsrv;
+  _cli         = cli;
+  _reqstr      = reqstr;
+  _reqFinished = false;
   Logger::log_reqres("Request", _reqstr);
+
+  // FIXME: you don't belong here!
   _parseRequest();
 }
 
@@ -87,12 +92,52 @@ std::string Request::getResponse() const
   return (_response);
 }
 
-// check if received request was erminated with '\r\n'
+// check if received request was terminated with '\r\n'
 bool Request::_isTerminatedReq()
 {
   if (_reqstr.size() < 2)
     return (false);
-  if (_reqstr.compare(_reqstr.size() - 2, 2, "\r\n") == 0)
+  if (_reqstr.compare(_reqstr.size() - 4, 4, "\r\n\r\n") == 0)
     return (true);
   return (false);
+}
+
+bool Request::isFinished() const
+{
+  return _reqFinished;
+}
+
+void Request::setFinished()
+{
+  _reqFinished = true;
+}
+
+void Request::append(const str& s)
+{
+  _reqstr += s;
+  Logger::log_reqres("Appending to req:", s);
+}
+
+bool Request::hdrComplete() const
+{
+  if (_reqstr.rfind("\r\n\r\n") != str::npos)
+    return true;
+  return false;
+}
+
+// for now we only look at the hdr
+bool Request::reqComplete()
+{
+  if (hdrComplete()) {
+    Logger::log_msg("Request::reqComplete: Request complete!");
+    return true;
+  }
+  return false;
+}
+
+e_Method Request::getMethod() const
+{
+  if (hdrComplete())
+    return _reqline.method;
+  return M_UNKNOWN;
 }

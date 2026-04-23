@@ -6,12 +6,13 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 23:39:07 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/20 23:09:08 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/23 10:16:23 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
+#include "Client.hpp"
 #include "typesAndConstants.hpp"
 
 #include <string>
@@ -31,22 +32,36 @@ class VServer;
 
 class Request {
   private:
-    const VServer *_vsrv;
-    std::string    _reqstr;
-    void           _parseRequest();
-    std::string    _response; // FIXME: leave this as a string ?! No! Can also
-                              // be a stream of bytes. Will be another class!
-    u16 _statusCode;
+    VServer *_vsrv;
+    Client  *_cli;
+
+    str _reqstr;
+    str _response; // FIXME: leave this as a string ?! No! Can also
+                   // be a stream of bytes. Will be another class!
+    u16  _statusCode;
+    bool _reqFinished;
+
+    t_RequestLine _reqline;
 
     bool _isTerminatedReq();
+    void _parseRequest();
 
   public:
     // TODO: decide which ctors we really use here!
     Request();
     Request(const Request& other);
-    Request(const VServer *srv, const std::string& rstr);
+    Request(VServer *srv, Client *cli, const std::string& rstr);
     Request& operator=(const Request& other);
     ~Request();
 
     std::string getResponse() const;
+
+    bool isFinished() const;
+    void setFinished();
+
+    void append(const str& s);
+
+    bool     hdrComplete() const;
+    bool     reqComplete();
+    e_Method getMethod() const;
 };

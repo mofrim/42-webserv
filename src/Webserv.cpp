@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:36:43 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/22 03:39:31 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/23 10:39:28 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,9 @@
 
 Webserv::Webserv():
   _defaultCfg(true), _shutdown_server(false), _numOfServers(0), _numOfClients(0)
-{}
+{
+  _Webserv.setServerName("Webserv");
+}
 
 Webserv::Webserv(const Webserv& other)
 {
@@ -225,24 +227,35 @@ void Webserv::run()
         else {
           if (LOGLEVEL == BRUTAL)
             vsrv->printClients();
-          evHandlerReturn =
-              vsrv->handleEvent(_epoll.getEvent(eventIdx), currentFd);
+          evHandlerReturn = vsrv->handleEvent(_epoll.getEvent(eventIdx), cli);
         }
 
-        if (evHandlerReturn == REQ_ERR) {
+        if (evHandlerReturn == REQ_ERR || evHandlerReturn == REQ_DONE) {
           _epoll.removeClient(currentFd);
           if (vsrv)
             vsrv->removeClient(currentFd);
           _numOfClients--;
         }
-        else if (evHandlerReturn == REQ_READ)
-          _epoll.modifyClient(currentFd, EPOLLIN | EPOLLOUT);
         else if (evHandlerReturn == REQ_WRITE)
+          _epoll.modifyClient(currentFd, EPOLLOUT);
+        else if (evHandlerReturn == REQ_INC || evHandlerReturn == REQ_READ)
           _epoll.modifyClient(currentFd, EPOLLIN);
       }
     }
   }
   _epoll.closeEpollFd();
+}
+
+// For serverless clients there can only be a EPOLLIN event bc it is the first
+// real request that is processed
+int Webserv::handleEventServerless(const struct epoll_event& ev, Client *cli)
+{
+  if (ev.events & EPOLLIN) {
+    RequestHandler reqHandler(NULL);
+    return reqHandler.readRequest(cli);
+  }
+  Logger::log_err("Webserv::handleEventServerless: srvless event not EPOLLIN!");
+  return REQ_ERR;
 }
 
 // -----------------------------=[ Exceptions ]=----------------------------- //

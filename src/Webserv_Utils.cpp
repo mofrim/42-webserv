@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/16 11:54:27 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/22 03:41:10 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/22 13:36:32 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,12 +55,6 @@ void Webserv::_initDefaultCfg()
   cfg1.addInterface("127.0.0.1", 4284);
   cfg1.addRoute(r);
   VServer dsrv1(cfg1);
-
-  // VServer     dsrv2;
-
   _vservers.push_back(dsrv1);
-  // _servers.push_back(dsrv2);
-
-  // _numOfServers = 2;
-  _numOfServers = 1;
+  ++_numOfServers;
 }

@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 19:13:35 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/20 23:09:54 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/23 10:34:42 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,10 +49,17 @@ RequestHandler::RequestHandler(VServer *srv): _srv(srv)
 
 // Handler for an EPOLLIN aka I/O read event aka a _Request_
 //
+// There are 2 possible ways a Request is being terminated:
+//
+//  1) The Length of the body reached the `Content-Length` Header field value
+//  2) The connection is closed by the client (read == 0)
+//
 // FIXME: move exception to ReqHandler class
-int RequestHandler::readRequest(int fd)
+//
+int RequestHandler::readRequest(Client *cli)
 {
-  std::string srv_name(_srv->getServerName());
+  str srv_name(_srv->getServerName());
+  int fd = cli->getFd();
 
   Logger::log_dbg2("Read request handler called!");
   if (_srv->isValidClientFd(fd) == false)
@@ -61,12 +68,19 @@ int RequestHandler::readRequest(int fd)
   Logger::log_srv(srv_name, "reading from socket" + int2str(fd));
 
   char    buffer[READ_BUFSIZE] = {0};
-  ssize_t bytes_read           = read(fd, buffer, READ_BUFSIZE - 1);
+  ssize_t bytes_read           = read(fd, buffer, READ_BUFSIZE);
+
+  Logger::log_srv(srv_name, "read " + int2str(bytes_read) + " bytes");
 
   if (bytes_read <= 0) {
+
+    // if client closes conn i will receive a EPOLLIN event with 0 bytes read.
+    // at this point the request reading should have already been finished in a
+    // previous read!
     if (bytes_read == 0) {
       Logger::log_srv(srv_name, "Client disconnected");
       Logger::log_srv(srv_name, "-> closing client conn on fd " + int2str(fd));
+      return (REQ_DONE);
     }
     else
       Logger::log_err(
@@ -77,34 +91,68 @@ int RequestHandler::readRequest(int fd)
   // we've read less or just enough bytes... let's process the Request!!!
   // add the new request _to the front_ of _requests vector bc we will send
   // response by FIFO principle using pop_back()
-  //
-  // FIXME: actually, we only have to save the response in the vector here. or
-  // do we need a vector here at all?!
-  Request newReq(_srv, buffer);
-  _requests.insert(_requests.begin(), newReq);
 
-  return (REQ_READ);
+  if (_cliHasUnfinishedRequest(cli))
+    _getUnfinishedReq(cli).append(buffer);
+  else {
+    Request newReq(_srv, cli, buffer);
+    _reqQueue[cli].push_front(newReq);
+  }
+  if (_reqQueue[cli].front().reqComplete()) {
+    _reqQueue[cli].front().setFinished();
+    return REQ_WRITE;
+  }
+  return REQ_INC;
 }
 
 // the main routine responsible for sending the response off to the cient!
 // taking the response from the back of the _requests vector as new requests
 // will be pushed to the front (see above)
-int RequestHandler::writeResponse(int fd)
+int RequestHandler::writeResponse(Client *cli)
 {
-  if (_requests.empty())
+  if (_reqQueue.empty())
     throw(ReqHandlerException("Cannot write response! Ain't got no requests!"));
   Logger::log_msg("Writing our Response!");
-  std::string response = _requests.back().getResponse();
+  std::string response = _reqQueue[cli].back().getResponse();
   Logger::log_reqres("Response", response);
-  ssize_t bytes_sent = send(fd, response.c_str(), strlen(response.c_str()), 0);
+  ssize_t bytes_sent =
+      send(cli->getFd(), response.c_str(), strlen(response.c_str()), 0);
   if (bytes_sent == -1) {
     Logger::log_err("couldn't send response!");
-    return (REQ_READ);
+    return (REQ_WRITE);
   }
-  _requests.pop_back();
-  return (REQ_WRITE);
+  _reqQueue[cli].pop_back();
+  if (_reqQueue[cli].empty())
+    _reqQueue.erase(cli);
+
+  return (REQ_READ);
 }
 
 RequestHandler::ReqHandlerException::ReqHandlerException(
     const std::string& msg): std::runtime_error("ReqHandlerException: " + msg)
 {}
+
+bool RequestHandler::_cliHasUnfinishedRequest(Client *cli)
+{
+  if (_reqQueue.find(cli) != _reqQueue.end()) {
+    Logger::log_msg("RequestHandler: found " + int2str(_reqQueue[cli].size()) +
+        " pending requests for cli");
+    for (std::deque<Request>::iterator it = _reqQueue[cli].begin();
+        it != _reqQueue[cli].end();
+        ++it)
+      if (!it->isFinished())
+        return true;
+  }
+  return false;
+}
+
+// FIXME: maybe i will only need this function and then check for
+// _reqQueue.end()
+Request& RequestHandler::_getUnfinishedReq(Client *cli)
+{
+  std::deque<Request>::iterator it = _reqQueue[cli].begin();
+  for (; it != _reqQueue[cli].end(); ++it)
+    if (!it->isFinished())
+      break;
+  return *it;
+}
