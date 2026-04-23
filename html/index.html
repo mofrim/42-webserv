@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" conten="width=device-width, initial-scale=1.0">
+    <title>Crazy!</title>
+    <style>
+    * {box-sizing: border-box;}
+    html, body {margin: 0; padding: 0; width: 100%; height: 100%; font-family: Arial, Helvetica, sans-serif;}
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 20% 20%, rgba(14,165,233,0.35), transparent 30%),
+        radial-gradient(circle at 80% 30%, rgba(168,85,247,0.30), transparent 30%),
+        radial-gradient(circle at 50% 80%, rgba(59, 130, 246, 0.25), transparent 35%),
+        linear-gradient(135deg, #020617 0%, #0f172a 40%, #111827 100%);
+      color: #fff;
+    }
+    .card {
+      z-index: 2;
+      position: relative;
+      width: min(920px, calc(100vw - 32px));
+      padding: 48px 32px;
+      text-align: center;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(16px);
+      border-radius: 28px;
+      box-shadow: 0 20px 80px rgba(0, 0, 0, 0.45);
+      margin: 50px;
+    }
+    .grid {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image:
+        linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+      background-size: 20px 20px;
+      pointer-events: none;
+      z-index: 1;
+    }
+    p {
+      margin: 20px auto 0;
+      max-width: 720px;
+      font-size: clamp(10px, 2.2vw, 26px);
+      line-height: 1.45;
+      color: rgba(255, 255, 255, 0.84);
+    }
+    .badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      background: rgba(14, 165, 233, 0.2);
+      border: 1px solid rgba(14, 165, 233, 0.4);
+      font-size: 1rem;
+      color: rgba(255, 255, 255, 0.6);
+      margin-bottom: 6px;
+      font-weight: bold;
+      /* text-transform: uppercase; */
+    }
+    .line {
+      width: 100px;
+      height: 4px;
+      background: linear-gradient(90deg, rgba(14, 165, 233, 0.8), rgba(168, 85, 247, 0.8));
+      border-radius: 2px;
+      margin: 20px auto;
+    }
+    .card h1 {
+      font-size: 3rem;
+    }
+    </style>
+  </head>
+  <body>
+    <div class="grid"></div>
+      <div class="card">
+      <div class="badge">
+        m0fr1m's webserv
+      </div>
+        <h1>Hello from m0fr1m's webserv!</h1>
+      <div class="line"></div>
+      <p>Cheers!</p>
+      </div>
+  </body>
+</html>
+
+
