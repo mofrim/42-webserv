@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/23 19:11:25 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/23 22:49:48 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/23 22:56:02 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -102,7 +102,7 @@ void Response::_getBody()
       path += (path[path.size() - 1] == '/' ? "" : "/") + r.getDefaultFile();
     std::ifstream target(path.c_str());
 
-    // FIXME: is this reallu not good if file could not be opened?
+    // FIXME: is this really not good if file could not be opened?
     if (!target) {
       _statusCode = HTTP_404;
       _body       = HttpStatus::getDefaultErrPage(HTTP_404);
@@ -114,6 +114,12 @@ void Response::_getBody()
     int length = target.tellg();
     target.seekg(0, target.beg);
 
+    if (length <= 0) {
+      _statusCode = HTTP_404;
+      _body       = HttpStatus::getDefaultErrPage(HTTP_404);
+      return;
+    }
+
     Logger::log_dbg1("Response::_getBody: length = " + int2str(length));
 
     // FIXME: check length
@@ -122,6 +128,7 @@ void Response::_getBody()
     target.read(buffer, length);
     if (target)
       _body = buffer;
+    delete[] buffer;
   }
   else
     _body = "";
