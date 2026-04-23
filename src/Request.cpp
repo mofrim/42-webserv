@@ -6,12 +6,13 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 23:39:57 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/23 13:32:44 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/23 18:56:53 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "ErrPages.hpp"
+#include "HttpStatus.hpp"
 #include "Logger.hpp"
+#include "ReqParse.hpp"
 #include "Request.hpp"
 
 // --------------------------------=[ OCF ]=-------------------------------- //
@@ -53,8 +54,6 @@ Request::Request(VServer *vsrv, Client *cli, const std::string& reqstr)
   _cli         = cli;
   _reqstr      = reqstr;
   _reqFinished = false;
-  // FIXME: you don't belong here!
-  _parseRequest();
 }
 
 // TODO: a. lot. of. work. to. be. done. in. here!
@@ -77,12 +76,14 @@ void Request::_parseRequest()
         "Content-Length: 157\r\n"
         "Connection: close\r\n"
         "\r\n" +
-        ErrPages::getDefaultErrPage(400);
+        HttpStatus::getDefaultErrPage(400);
   }
-  else
+  else {
+    ReqParse::parseReqLine(_reqline, _reqstr);
     _response =
         "HTTP/1.1 200 OK\r\nContent-Length: 29\r\nContent-Type: text/plain; "
         "charset=utf-8\r\n\r\nHello from m0fr1m's webserv!\n";
+  }
 }
 
 std::string Request::getResponse() const
@@ -108,6 +109,7 @@ bool Request::isFinished() const
 void Request::setFinished()
 {
   _reqFinished = true;
+  _parseRequest();
 }
 
 void Request::append(const str& s)

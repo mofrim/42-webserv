@@ -17,3 +17,4 @@ _play/*
 _play/nginx/*.log
 !_play/nginx/conf/*.conf
 
+_play/nginx/nginx.pid

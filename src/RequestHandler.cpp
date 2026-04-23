@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 19:13:35 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/23 13:11:43 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/23 15:00:42 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,9 +78,9 @@ int RequestHandler::readRequest(Client *cli)
     // at this point the request reading should have already been finished in a
     // previous read!
     if (bytes_read == 0) {
-      Logger::log_srv(srv_name, "Client disconnected");
-      Logger::log_srv(srv_name, "-> closing client conn on fd " + int2str(fd));
-      return (REQ_DONE);
+      Logger::log_srv(
+          srv_name, "Client disco -> closing client on fd " + int2str(fd));
+      return (REQ_DISCO);
     }
     else
       Logger::log_err(
@@ -88,16 +88,22 @@ int RequestHandler::readRequest(Client *cli)
     return (REQ_ERR);
   }
 
-  // we've read less or just enough bytes... let's process the Request!!!
-  // add the new request _to the front_ of _requests vector bc we will send
-  // response by FIFO principle using pop_back()
-
+  // FIXME:
+  // QUESTION: this is certainly not correctly organized here. how many
+  // simultaneous reqs from one client can we have? in theory we can have
+  // mutiple ongoing CGI reqs. but only one simple req at a time. i guess
+  // TODO: clarify!
+  //
+  // append the read to the first unfinished Req we find. If there is no
+  // unfinished Req add a new one to the queue.
   if (_cliHasUnfinishedRequest(cli))
     _getUnfinishedReq(cli).append(buffer);
   else {
+    Logger::log_srv(srv_name, "Adding new Req to queue");
     Request newReq(_srv, cli, buffer);
     _reqQueue[cli].push_front(newReq);
   }
+
   if (_reqQueue[cli].front().reqComplete()) {
     Logger::log_reqres("Request", _reqQueue[cli].front().getReqstr());
     _reqQueue[cli].front().setFinished();

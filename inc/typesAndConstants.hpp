@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/17 23:55:04 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/23 10:15:55 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/23 18:58:21 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,9 +30,19 @@ typedef uint32_t    u32;
 // max num of clients.
 #define MAX_CLIENTS 1000
 
+#ifndef OK
+#define OK 1
+#endif
+
+#ifndef KO
+#define KO 0
+#endif
+
+#define CRLF "\r\n"
+
 // just for explicitness sake define the possible return values of the
 // requestHandler as constants here
-enum { REQ_READ = 0, REQ_WRITE = 1, REQ_ERR = -1, REQ_INC = 2, REQ_DONE = 3 };
+enum { REQ_READ = 0, REQ_WRITE = 1, REQ_ERR = -1, REQ_INC = 2, REQ_DISCO = 3 };
 
 typedef enum { M_GET, M_POST, M_DELETE, M_UNKNOWN } e_Method;
 
@@ -42,3 +52,14 @@ typedef struct {
     str      target;
     str      httpVersion;
 } t_RequestLine;
+
+// supported Status codes
+
+enum {
+  HTTP_200 = 200,
+  HTTP_300 = 300,
+  HTTP_400 = 400,
+  HTTP_500 = 500,
+  HTTP_501 = 501,
+  HTTP_502 = 502,
+};

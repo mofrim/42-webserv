@@ -1,8 +1,8 @@
-#include "tests.hpp"
-#include "test_utils.hpp"
 #include "test_hdr.hpp"
+#include "test_utils.hpp"
+#include "tests.hpp"
 bool g_GlobalResult = OK;
-int main()
+int  main()
 {
   test_server_init();
   nl();
@@ -10,7 +10,7 @@ int main()
   nl();
   test_socket();
   nl();
-  test_ErrPages();
+  test_HttpStatus();
   nl();
   test_Routes();
   nl();

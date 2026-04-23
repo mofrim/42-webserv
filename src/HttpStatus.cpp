@@ -1,41 +1,41 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ErrPages.cpp                                       :+:      :+:    :+:   */
+/*   HttpStatus.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/20 16:51:47 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/20 17:44:36 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/23 18:56:18 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "ErrPages.hpp"
+#include "HttpStatus.hpp"
 #include "utils.hpp"
 
 // --------------------------------=[ OCF ]=-------------------------------- //
 
-ErrPages::ErrPages()
+HttpStatus::HttpStatus()
 {}
 
-ErrPages::ErrPages(const ErrPages& other)
+HttpStatus::HttpStatus(const HttpStatus& other)
 {
   (void)other;
 }
 
-ErrPages& ErrPages::operator=(const ErrPages& other)
+HttpStatus& HttpStatus::operator=(const HttpStatus& other)
 {
   (void)other;
   return (*this);
 }
 
-ErrPages::~ErrPages()
+HttpStatus::~HttpStatus()
 {}
 
 // ------------------------------=[ Methods ]=------------------------------ //
 //
 
-str ErrPages::_getTemplateWithErrStr(const str& s)
+str HttpStatus::_getTemplateWithErrStr(const str& s)
 {
   str ret =
       "<html>\n"
@@ -74,7 +74,7 @@ str ErrPages::_getTemplateWithErrStr(const str& s)
 
 // returns the corresponding HTML status-code string for a given status code.
 // also for usage in response generation
-str ErrPages::getErrStr(u16 code)
+str HttpStatus::getStatusStr(u16 code)
 {
   str errstr;
   switch (code) {
@@ -89,6 +89,9 @@ str ErrPages::getErrStr(u16 code)
     break;
   case 405:
     errstr = "404 - Method Not Allowed";
+    break;
+  case 408:
+    errstr = "408 - Request Timeout";
     break;
   case 413:
     errstr = "413 - Content Too Large";
@@ -111,7 +114,7 @@ str ErrPages::getErrStr(u16 code)
   return errstr;
 }
 
-str ErrPages::getDefaultErrPage(u16 code)
+str HttpStatus::getDefaultErrPage(u16 code)
 {
-  return _getTemplateWithErrStr(getErrStr(code));
+  return _getTemplateWithErrStr(getStatusStr(code));
 }

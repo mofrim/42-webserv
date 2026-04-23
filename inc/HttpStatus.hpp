@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ErrPages.hpp                                       :+:      :+:    :+:   */
+/*   HttpStatus.hpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/20 16:51:10 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/20 17:42:03 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/23 18:54:50 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,16 +14,16 @@
 
 #include "typesAndConstants.hpp"
 
-class ErrPages {
+class HttpStatus {
   private:
-    ErrPages();
-    ErrPages(const ErrPages& other);
-    ErrPages& operator=(const ErrPages& other);
-    ~ErrPages();
+    HttpStatus();
+    HttpStatus(const HttpStatus& other);
+    HttpStatus& operator=(const HttpStatus& other);
+    ~HttpStatus();
 
     static str _getTemplateWithErrStr(const str& s);
 
   public:
     static str getDefaultErrPage(u16 code);
-    static str getErrStr(u16 code);
+    static str getStatusStr(u16 code);
 };

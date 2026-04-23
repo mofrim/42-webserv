@@ -130,6 +130,7 @@ which is the `\r\n` for the last line and an empty line, i.e. just `\r\n`
 [DA ONE AND ONLY RFC](https://datatracker.ietf.org/doc/html/rfc9112)
 
 - [Request Line Format](https://datatracker.ietf.org/doc/html/rfc9112#name-request-line)
+
 - [A whole section on msg parsing](https://datatracker.ietf.org/doc/html/rfc9112#section-2.2)
 
 ## 2026-04-23

@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/26 10:03:57 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/21 13:10:47 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/23 15:35:15 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,4 +69,26 @@ str getAddrPortStr4(const struct sockaddr_in& addr)
 str getErrStr()
 {
   return str(strerror(errno));
+}
+
+e_Method str2method(const str& m)
+{
+  if (m == "GET")
+    return M_GET;
+  if (m == "POST")
+    return M_POST;
+  if (m == "DELETE")
+    return M_DELETE;
+  return M_UNKNOWN;
+}
+
+str method2str(e_Method m)
+{
+  if (m == M_GET)
+    return "GET";
+  if (m == M_POST)
+    return "POST";
+  if (m == M_DELETE)
+    return "DELETE";
+  return "UNKNOWN";
 }

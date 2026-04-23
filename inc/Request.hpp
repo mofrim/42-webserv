@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 23:39:07 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/23 13:09:46 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/23 13:26:35 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 #include "Client.hpp"
 #include "typesAndConstants.hpp"
 
+#include <map>
 #include <string>
 
 // The Request class.
@@ -41,7 +42,10 @@ class Request {
     u16  _statusCode;
     bool _reqFinished;
 
-    t_RequestLine _reqline;
+    // doing it exactly as proposed in:
+    // https://datatracker.ietf.org/doc/html/rfc9112#section-2.2
+    t_RequestLine      _reqline;
+    std::map<str, str> _headers;
 
     bool _isTerminatedReq();
     void _parseRequest();

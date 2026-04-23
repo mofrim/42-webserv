@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:36:43 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/23 10:39:28 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/23 15:05:14 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -161,7 +161,7 @@ void Webserv::run()
       throw(WebservRunException("epoll_wait failed"));
 
     for (int eventIdx = 0; eventIdx < nfds; ++eventIdx) {
-      Logger::log_dbg0("Got so many nfds for epoll: " + int2str(nfds));
+      Logger::log_dbg1("Num of nfds from epoll: " + int2str(nfds));
       int currentFd = _epoll.getEventFd(eventIdx);
 
       // 1) new connection
@@ -230,7 +230,7 @@ void Webserv::run()
           evHandlerReturn = vsrv->handleEvent(_epoll.getEvent(eventIdx), cli);
         }
 
-        if (evHandlerReturn == REQ_ERR || evHandlerReturn == REQ_DONE) {
+        if (evHandlerReturn == REQ_ERR || evHandlerReturn == REQ_DISCO) {
           _epoll.removeClient(currentFd);
           if (vsrv)
             vsrv->removeClient(currentFd);
