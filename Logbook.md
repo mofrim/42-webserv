@@ -143,9 +143,9 @@ from the RFC:
     read as a stream until an amount of octets equal to the message body length
     is read or the connection is closed.
 
-### 10:50
+### 10:50 - so amazed by bash once again!
 
-YESSSSS! F****ing YESSS!!! I already knew about bash network programming caps
+YESSSSS! F****ing YESSS!!! I already knew about `bash` network programming caps
 but this:
 
 - open a tcp connection to addr:port
@@ -168,3 +168,38 @@ but this:
 
 so now i can do very fine-grained testing of my connection and request
 handling - c'est fantastique!
+
+### 12:39
+
+So, it is time to stop think about the whole connection / request handling data
+flow.
+
+What is happening if a client sends a request to one vsrv (the easy case where
+is only one possible server responsible)
+
+1. Client connects in `Webserv::run` and via `cli = vsrvs[0]->addClient(currentFd);`
+  Note: this call adds the client to the vsrv's `std::map<int, Client *>
+  _clients` map AND also adds the corresponding vsrv to the Client as the one
+  and only `_vsrv`.
+
+2. the client's fd is added to epolls interest list and to
+   `Webserv::_fdClientMap`
+
+3. When the clients sends a req the `else`-branch is being run
+
+4. in the `else`-branch we determine the `Client` and `VServer` resonsible and
+   the vsrv starts the request handling.
+
+   **IMPORTANT NOTE**: the vsrv is determined via `cli->getVsrv()`! This might
+   already be a hint that we do not need to keep the aggregated clients info in
+   the `VServer` class.
+
+5. the vsrv launches `vsrv->handleEvent(_epoll.getEvent(eventIdx), cli)` from
+   then on the servers `RequestHandler` takes control
+
+What question that remains: Is it possible that a client has 2 independent
+pending requests? Meaning, 2 requests which have not yet been entirely received.
+
+### 13:20 - implementing some proper request parsing
+
+...
