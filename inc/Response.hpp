@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/23 19:11:06 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/23 21:38:30 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/24 09:55:33 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,9 +33,12 @@ class Response {
     // TODO: everything about body handling
     str _body;
 
+    str _mimeType;
+
     void _setFieldsFromReq(const Request& req);
     void _getBody();
     void _buildRespoHdrs();
+    str  _getMimeType(const str& p);
 
     str _respoStr;
 

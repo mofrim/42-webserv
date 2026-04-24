@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/23 19:11:25 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/23 22:56:02 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/24 10:28:38 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,11 +81,11 @@ void Response::genResponse(const Request& req)
       it != _respoHeaders.rend();
       it++)
     if (it->first == "Startline")
-      _respoStr += it->second + "\r\n";
+      _respoStr += it->second + CRLF;
     else
-      _respoStr += it->first + ": " + it->second + "\r\n";
+      _respoStr += it->first + ": " + it->second + CRLF;
 
-  _respoStr += "\r\n" + _body;
+  _respoStr += CRLF + _body;
 }
 
 void Response::_getBody()
@@ -100,7 +100,16 @@ void Response::_getBody()
     Logger::log_dbg1("Response::_getBody: trying to read from file: " + path);
     if (isDir(path))
       path += (path[path.size() - 1] == '/' ? "" : "/") + r.getDefaultFile();
-    std::ifstream target(path.c_str());
+
+    _mimeType = _getMimeType(path);
+
+    std::ifstream target;
+
+    // FIXME: mime types!!!
+    if (_mimeType != "text/html")
+      target.open(path.c_str(), std::ios_base::binary);
+    else
+      target.open(path.c_str());
 
     // FIXME: is this really not good if file could not be opened?
     if (!target) {
@@ -114,6 +123,8 @@ void Response::_getBody()
     int length = target.tellg();
     target.seekg(0, target.beg);
 
+    // FIXME: check length
+    // QUESTION: do we still need it here?
     if (length <= 0) {
       _statusCode = HTTP_404;
       _body       = HttpStatus::getDefaultErrPage(HTTP_404);
@@ -122,13 +133,12 @@ void Response::_getBody()
 
     Logger::log_dbg1("Response::_getBody: length = " + int2str(length));
 
-    // FIXME: check length
-
-    char *buffer = new char[length];
-    target.read(buffer, length);
+    // QUESTION: is this really the optimal solution?
+    // FIXME: what about binary data?
+    std::vector<char> buffer(length);
+    target.read(&buffer[0], length);
     if (target)
-      _body = buffer;
-    delete[] buffer;
+      _body.assign(buffer.begin(), buffer.end());
   }
   else
     _body = "";
@@ -143,9 +153,12 @@ void Response::_buildRespoHdrs()
   // FIXME: maybe use sth else here
   _respoHeaders["Date"] = Logger::getLogtime();
 
-  _respoHeaders["Content-Type"] = "text/html";
+  _respoHeaders["Content-Type"] =
+      (_statusCode == HTTP_200) ? _mimeType : "text/html";
 
   _respoHeaders["Content-Length"] = int2str(_body.size());
+
+  _respoHeaders["Connection"] = "close";
 
   // QUESTION: what is this about? Nginx does it.
   _respoHeaders["Accept-Ranges"] = "bytes";
@@ -154,4 +167,21 @@ void Response::_buildRespoHdrs()
 str Response::getStr() const
 {
   return _respoStr;
+}
+
+str Response::_getMimeType(const str& p)
+{
+  int i   = p.rfind(".") + 1;
+  str ext = p.substr(i);
+
+  if (ext == "html")
+    return "text/html";
+
+  if (ext == "jpg")
+    return "image/jpeg";
+
+  if (ext == "png")
+    return "image/png";
+
+  return "*/*";
 }

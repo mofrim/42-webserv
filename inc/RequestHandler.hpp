@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 19:12:58 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/22 15:03:47 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/24 09:45:49 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@
 #include <unistd.h>
 
 // FIXME: for now this is the read buffer size. definitely coud be higher.
-#define READ_BUFSIZE 12
+#define READ_BUFSIZE 4096
 
 class VServer;
 

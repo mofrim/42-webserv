@@ -6,7 +6,7 @@
 #    By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/12/01 11:45:58 by fmaurer           #+#    #+#              #
-#    Updated: 2026/04/23 22:28:53 by fmaurer          ###   ########.fr        #
+#    Updated: 2026/04/23 22:57:19 by fmaurer          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -87,7 +87,7 @@ debug-run: debug
 	./webserv
 
 val: $(NAME)
-	valgrind --track-fds=yes -- ./webserv
+	valgrind --track-fds=yes -s -- ./webserv
 
 tests:
 	@cd tests && ./update_tests.sh

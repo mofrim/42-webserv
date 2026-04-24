@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 19:13:35 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/23 19:56:43 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/24 10:35:50 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -123,8 +123,7 @@ int RequestHandler::writeResponse(Client *cli)
   Logger::log_msg("Writing our Response!");
   std::string response = _reqQueue[cli].back().getResponseStr();
   Logger::log_reqres("Response", response);
-  ssize_t bytes_sent =
-      send(cli->getFd(), response.c_str(), strlen(response.c_str()), 0);
+  ssize_t bytes_sent = send(cli->getFd(), response.data(), response.size(), 0);
   if (bytes_sent == -1) {
     Logger::log_err("couldn't send response!");
     return (REQ_WRITE);
