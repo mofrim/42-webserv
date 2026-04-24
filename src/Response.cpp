@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/23 19:11:25 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/24 10:28:38 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/24 17:17:21 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -138,6 +138,8 @@ void Response::_getBody()
     std::vector<char> buffer(length);
     target.read(&buffer[0], length);
     if (target)
+      // like this even NUL bytes and other weird binary-mode data is written to
+      // the std::string obj.
       _body.assign(buffer.begin(), buffer.end());
   }
   else
@@ -182,6 +184,9 @@ str Response::_getMimeType(const str& p)
 
   if (ext == "png")
     return "image/png";
+
+  if (ext == "js")
+    return "text/javascript";
 
   return "*/*";
 }

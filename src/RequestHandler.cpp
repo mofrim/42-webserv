@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 19:13:35 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/24 10:35:50 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/24 16:20:49 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,11 +14,9 @@
 #include "Request.hpp"
 #include "RequestHandler.hpp"
 #include "VServer.hpp"
-#include "Webserv.hpp"
 #include "utils.hpp"
 
 #include <errno.h>
-#include <string.h>
 #include <unistd.h>
 
 // -- OCF --
@@ -116,14 +114,24 @@ int RequestHandler::readRequest(Client *cli)
 // the main routine responsible for sending the response off to the cient!
 // taking the response from the back of the _requests vector as new requests
 // will be pushed to the front (see above)
+//
+// using the `response.data()` here to work in binary mode. this, very much like
+// `std::string::c_str()` returns a `const char` pointer to the data stored in
+// the string. Also using `std::string::size()` which returns the size in raw
+// bytes
 int RequestHandler::writeResponse(Client *cli)
 {
   if (_reqQueue.empty())
     throw(ReqHandlerException("Cannot write response! Ain't got no requests!"));
+
   Logger::log_msg("Writing our Response!");
+
   std::string response = _reqQueue[cli].back().getResponseStr();
+
   Logger::log_reqres("Response", response);
+
   ssize_t bytes_sent = send(cli->getFd(), response.data(), response.size(), 0);
+
   if (bytes_sent == -1) {
     Logger::log_err("couldn't send response!");
     return (REQ_WRITE);
