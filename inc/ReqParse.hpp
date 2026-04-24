@@ -6,13 +6,13 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/23 15:05:53 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/23 19:31:08 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/24 17:32:35 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
-#include "typesAndConstants.hpp"
+#include "WsrvLib.hpp"
 
 // https://datatracker.ietf.org/doc/html/rfc9112#section-3
 #define MAX_REQLINE_LEN 8000

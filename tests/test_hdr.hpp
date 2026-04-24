@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/01 16:00:31 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/23 18:57:15 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/24 17:32:23 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,7 @@ extern bool g_GlobalResult;
 #include "VServer.hpp"
 #include "VServerCfg.hpp"
 #include "Webserv.hpp"
-#include "typesAndConstants.hpp"
+#include "WsrvLib.hpp"
 #include "utils.hpp"
 
 #include <cassert>

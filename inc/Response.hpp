@@ -6,14 +6,14 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/23 19:11:06 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/24 09:55:33 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/24 17:31:35 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
 #include "Client.hpp"
-#include "typesAndConstants.hpp"
+#include "WsrvLib.hpp"
 
 #include <map>
 

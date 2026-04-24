@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/20 16:51:10 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/23 20:22:04 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/24 17:32:30 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include "typesAndConstants.hpp"
+#include "WsrvLib.hpp"
 
 // supported Status codes
 

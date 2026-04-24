@@ -6,13 +6,13 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/09 16:41:56 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/20 20:34:56 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/24 17:32:19 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
-#include "typesAndConstants.hpp"
+#include "WsrvLib.hpp"
 
 // A Route must be able to store data for a config like this
 

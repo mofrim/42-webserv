@@ -15,7 +15,7 @@
 #include "Client.hpp"
 #include "RequestHandler.hpp"
 #include "VServerCfg.hpp"
-#include "typesAndConstants.hpp"
+#include "WsrvLib.hpp"
 
 #include <map>
 #include <set>

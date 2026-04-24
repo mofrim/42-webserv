@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 23:39:07 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/23 20:04:53 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/24 17:32:37 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@
 
 #include "Client.hpp"
 #include "Response.hpp"
-#include "typesAndConstants.hpp"
+#include "WsrvLib.hpp"
 
 #include <map>
 #include <string>

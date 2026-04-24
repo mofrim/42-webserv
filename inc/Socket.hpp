@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/28 07:26:01 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/20 13:22:23 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/24 17:31:59 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 #ifndef ADDR_HPP
 #define ADDR_HPP
 
-#include "typesAndConstants.hpp"
+#include "WsrvLib.hpp"
 
 #include <netinet/in.h>
 #include <stdexcept>
