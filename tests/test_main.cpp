@@ -1,8 +1,8 @@
-#include "test_hdr.hpp"
-#include "test_utils.hpp"
 #include "tests.hpp"
+#include "test_utils.hpp"
+#include "test_hdr.hpp"
 bool g_GlobalResult = OK;
-int  main()
+int main()
 {
   test_server_init();
   nl();
@@ -10,9 +10,9 @@ int  main()
   nl();
   test_socket();
   nl();
-  test_HttpStatus();
-  nl();
   test_Routes();
+  nl();
+  test_WsrvLib();
   nl();
   print_final_result();
   if (g_GlobalResult == OK)

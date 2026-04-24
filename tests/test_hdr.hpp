@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   test_hdr.hpp                                       :+:      :+:    :+:   */
+/*   test_hdr-template.hpp                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/01 16:00:31 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/24 17:32:23 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/17 21:25:30 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,23 +23,24 @@
 // global result marker
 extern bool g_GlobalResult;
 
+#include <cassert>
+#include <iostream>
+#include <map>
+#include <stdexcept>
 #include "Client.hpp"
 #include "Config.hpp"
 #include "ConfigParser.hpp"
 #include "Epoll.hpp"
 #include "HttpStatus.hpp"
 #include "Logger.hpp"
-#include "Request.hpp"
+#include "ReqParse.hpp"
 #include "RequestHandler.hpp"
+#include "Request.hpp"
+#include "Response.hpp"
 #include "Route.hpp"
 #include "Socket.hpp"
-#include "VServer.hpp"
+#include "utils.hpp"
 #include "VServerCfg.hpp"
+#include "VServer.hpp"
 #include "Webserv.hpp"
 #include "WsrvLib.hpp"
-#include "utils.hpp"
-
-#include <cassert>
-#include <iostream>
-#include <map>
-#include <stdexcept>

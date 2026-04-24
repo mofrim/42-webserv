@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/20 16:51:10 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/24 17:32:30 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/24 17:35:33 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,16 +19,6 @@
 #include "WsrvLib.hpp"
 
 // supported Status codes
-
-enum {
-  HTTP_200 = 200,
-  HTTP_300 = 300,
-  HTTP_400 = 400,
-  HTTP_404 = 404,
-  HTTP_500 = 500,
-  HTTP_501 = 501,
-  HTTP_502 = 502,
-};
 
 class HttpStatus {
   private:

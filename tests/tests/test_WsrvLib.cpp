@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/13 13:06:35 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/23 18:59:24 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/24 17:44:02 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,33 +15,33 @@
 
 // test logic goes here, for any failure return (-1) or throw exception.
 // otherwise -> success
-int _test_HttpStatus()
+int _test_WsrvLib()
 {
-  print_test_topic("test_HttpStatus", "basic tests");
+  print_test_topic("test_WsrvLib", "basic tests");
 
-  str moep = HttpStatus::getDefaultErrPage(404);
+  str moep = WsrvLib::getDefaultErrPage(404);
   std::cout << moep << std::endl;
   return (0);
 }
 
-void test_HttpStatus()
+void test_WsrvLib()
 {
   int ret = 0;
-  print_test_section_header("BEGIN HttpStatus");
+  print_test_section_header("BEGIN WsrvLib");
   try {
-    ret = _test_HttpStatus();
+    ret = _test_WsrvLib();
   } catch (const std::exception& e) {
     print_test_result(false,
-        "Test \"test_HttpStatus\" failed with following exception:\n" +
+        "Test \"test_WsrvLib\" failed with following exception:\n" +
             std::string(e.what()));
     g_GlobalResult = KO;
     return;
   }
   if (ret == -1) {
-    print_test_result(false, "Test \"test_HttpStatus\" failed with -1");
+    print_test_result(false, "Test \"test_WsrvLib\" failed with -1");
     g_GlobalResult = KO;
     return;
   }
-  print_test_section_header("END HttpStatus");
-  print_test_result(true, "Test \"test_HttpStatus\" succeeded =)");
+  print_test_section_header("END WsrvLib");
+  print_test_result(true, "Test \"test_WsrvLib\" succeeded =)");
 }

@@ -6,13 +6,13 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/23 15:06:21 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/23 22:20:49 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/24 17:36:57 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "HttpStatus.hpp"
 #include "Logger.hpp"
 #include "ReqParse.hpp"
+#include "WsrvLib.hpp"
 #include "utils.hpp"
 
 // --------------------------------=[ OCF ]=-------------------------------- //

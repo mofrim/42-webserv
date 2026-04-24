@@ -6,16 +6,18 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/24 17:31:03 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/24 17:31:18 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/24 17:42:02 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
+
+// All the consts. All the (mime-)types. All in one place.
 
 #pragma once
 
 #include <stdint.h>
 #include <string>
 
-#define VERSION "v0.4"
+#define VERSION "v0.5"
 
 typedef std::string str;
 typedef uint16_t    u16;
@@ -54,3 +56,27 @@ typedef struct {
     str      target;
     str      httpVersion;
 } t_RequestLine;
+
+enum {
+  HTTP_200 = 200,
+  HTTP_300 = 300,
+  HTTP_400 = 400,
+  HTTP_404 = 404,
+  HTTP_500 = 500,
+  HTTP_501 = 501,
+  HTTP_502 = 502,
+};
+
+class WsrvLib {
+  private:
+    WsrvLib();
+    WsrvLib(const WsrvLib& other);
+    WsrvLib& operator=(const WsrvLib& other);
+    ~WsrvLib();
+
+    static str _getTemplateWithErrStr(const str& s);
+
+  public:
+    static str getDefaultErrPage(u16 code);
+    static str getStatusStr(u16 code);
+};
