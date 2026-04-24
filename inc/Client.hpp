@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/14 20:50:12 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/22 03:11:08 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/24 20:36:17 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,7 @@ class Client {
 
     std::vector<VServer *> _potentialVsrvs;
 
-    clock_t _last_access;
+    time_t _last_access;
 
   public:
     Client();
@@ -41,8 +41,8 @@ class Client {
     void setFd(int fd);
     int  getFd() const;
 
-    void    setLastAccess(clock_t t);
-    clock_t getLastAccess() const;
+    void   setLastAccess(time_t t);
+    time_t getLastAccess() const;
 
     void     setVsrv(VServer *v);
     VServer *getVsrv() const;

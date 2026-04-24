@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/23 19:11:25 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/24 18:24:18 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/24 20:50:42 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,7 +67,7 @@ void Response::_setFieldsFromReq(const Request& req)
   _vsrv       = req.getVsrv();
 }
 
-void Response::genResponse(const Request& req)
+u16 Response::genResponse(const Request& req)
 {
   _setFieldsFromReq(req);
 
@@ -86,6 +86,8 @@ void Response::genResponse(const Request& req)
       _respoStr += it->first + ": " + it->second + CRLF;
 
   _respoStr += CRLF + _body;
+
+  return _statusCode;
 }
 
 void Response::_getBody()

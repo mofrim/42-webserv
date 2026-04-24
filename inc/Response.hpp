@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/23 19:11:06 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/24 18:26:40 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/24 20:47:13 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,6 +42,6 @@ class Response {
     Response(const Request& req);
     ~Response();
 
-    void genResponse(const Request& req);
-    str  getStr() const;
+    u16 genResponse(const Request& req);
+    str getStr() const;
 };

@@ -203,4 +203,15 @@ pending requests? Meaning, 2 requests which have not yet been entirely received.
 
 ### 13:20 - implementing some proper request parsing
 
-...
+... kind of done!
+
+## 2026-04-24
+
+a possible sensible TODO for today would be to properly implement the connection
+closing and handling in case of certain statusCodes and regarding timeout.
+
+- maybe i should also have [send timeout](https://nginx.org/en/docs/http/ngx_http_core_module.html#send_timeout)
+
+- likewise important: [client body and header timeout](https://nginx.org/en/docs/http/ngx_http_core_module.html#client_body_timeout)
+  interesting about this: the timeout is only measured between 2 consecutive
+  reads from the client.

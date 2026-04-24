@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/24 17:31:03 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/24 18:51:34 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/24 20:32:13 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,7 @@
 
 #define VERSION "v0.5"
 
+// type abbreviations
 typedef std::string str;
 typedef uint16_t    u16;
 typedef uint32_t    u32;
@@ -37,6 +38,7 @@ typedef uint32_t    u32;
 // max num of clients.
 #define MAX_CLIENTS 1000
 
+// return value convenience
 #ifndef OK
 #define OK 1
 #endif

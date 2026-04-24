@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/14 20:51:06 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/22 03:18:00 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/24 20:36:04 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,7 +59,7 @@ int Client::getFd() const
   return (_client_fd);
 }
 
-void Client::setLastAccess(clock_t t)
+void Client::setLastAccess(time_t t)
 {
   _last_access = t;
 }

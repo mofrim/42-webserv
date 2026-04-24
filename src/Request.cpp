@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 23:39:57 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/24 17:36:48 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/24 20:47:21 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -93,7 +93,7 @@ void Request::_parseRequest()
     _statusCode = HTTP_400;
   else
     _statusCode = ReqParse::parseReqLine(_reqline, _reqstr);
-  _Response.genResponse(*this);
+  _statusCode = _Response.genResponse(*this);
 }
 
 str Request::getResponseStr() const

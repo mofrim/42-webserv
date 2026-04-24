@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 19:13:35 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/24 16:20:49 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/24 22:38:52 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -121,26 +121,32 @@ int RequestHandler::readRequest(Client *cli)
 // bytes
 int RequestHandler::writeResponse(Client *cli)
 {
+  int ret = REQ_READ;
+
   if (_reqQueue.empty())
     throw(ReqHandlerException("Cannot write response! Ain't got no requests!"));
 
-  Logger::log_msg("Writing our Response!");
+  Request *req = &_reqQueue[cli].back();
+
+  // if some error occurred -> disco.
+  if (req->getStatusCode() >= HTTP_400)
+    ret = REQ_DISCO;
 
   std::string response = _reqQueue[cli].back().getResponseStr();
 
-  Logger::log_reqres("Response", response);
+  Logger::log_reqres("webserv's response", response);
 
   ssize_t bytes_sent = send(cli->getFd(), response.data(), response.size(), 0);
 
   if (bytes_sent == -1) {
     Logger::log_err("couldn't send response!");
-    return (REQ_WRITE);
+    return REQ_WRITE;
   }
   _reqQueue[cli].pop_back();
   if (_reqQueue[cli].empty())
     _reqQueue.erase(cli);
 
-  return (REQ_READ);
+  return ret;
 }
 
 RequestHandler::ReqHandlerException::ReqHandlerException(
