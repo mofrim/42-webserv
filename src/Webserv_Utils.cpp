@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/16 11:54:27 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/22 13:36:32 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/24 18:25:40 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,8 +51,8 @@ void Webserv::_initDefaultCfg()
 {
   VServerCfg cfg1;
   Route      r;
-  cfg1.setServerName("Test_4284");
-  cfg1.addInterface("127.0.0.1", 4284);
+  cfg1.setServerName("Test_1111");
+  cfg1.addInterface("127.0.0.1", 1111);
   cfg1.addRoute(r);
   VServer dsrv1(cfg1);
   _vservers.push_back(dsrv1);

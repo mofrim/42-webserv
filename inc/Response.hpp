@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/23 19:11:06 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/24 17:31:35 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/24 18:26:40 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,23 +24,16 @@ class Response {
     u16                _statusCode;
     t_RequestLine      _reqline;
     std::map<str, str> _reqHeaders;
-
-    Client  *_cli;
-    VServer *_vsrv;
-
+    Client            *_cli;
+    VServer           *_vsrv;
     std::map<str, str> _respoHeaders;
-
-    // TODO: everything about body handling
-    str _body;
-
-    str _mimeType;
+    str                _body;
+    str                _mimeType;
+    str                _respoStr;
 
     void _setFieldsFromReq(const Request& req);
     void _getBody();
     void _buildRespoHdrs();
-    str  _getMimeType(const str& p);
-
-    str _respoStr;
 
   public:
     Response();

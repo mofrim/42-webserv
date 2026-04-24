@@ -6,14 +6,17 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/24 17:31:03 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/24 17:42:02 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/24 18:51:34 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 // All the consts. All the (mime-)types. All in one place.
+// This is the place for everything that has no specific place or would lead to
+// too small classes and too many files.
 
 #pragma once
 
+#include <map>
 #include <stdint.h>
 #include <string>
 
@@ -57,6 +60,7 @@ typedef struct {
     str      httpVersion;
 } t_RequestLine;
 
+// For expressiveness' sake declare them here
 enum {
   HTTP_200 = 200,
   HTTP_300 = 300,
@@ -76,7 +80,14 @@ class WsrvLib {
 
     static str _getTemplateWithErrStr(const str& s);
 
+    static const std::map<str, str> _mimeTypes;
+    static std::map<str, str>       _initMimeTypes();
+
+    static const std::map<u16, str> _statusCodes;
+    static std::map<u16, str>       _initStatusCodes();
+
   public:
     static str getDefaultErrPage(u16 code);
     static str getStatusStr(u16 code);
+    static str getMimeTypeFromPath(const str& p);
 };

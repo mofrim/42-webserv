@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   WrsvLib.cpp                                        :+:      :+:    :+:   */
+/*   WsrvLib.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/24 17:40:43 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/24 17:41:36 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/24 18:58:30 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,52 +72,99 @@ str WsrvLib::_getTemplateWithErrStr(const str& s)
   return ret;
 }
 
-// returns the corresponding HTML status-code string for a given status code.
-// also for usage in response generation
-str WsrvLib::getStatusStr(u16 code)
-{
-  str errstr;
-  switch (code) {
-  case 200:
-    errstr = "200 OK";
-    break;
-  case 400:
-    errstr = "400 Bad Request";
-    break;
-  case 403:
-    errstr = "403 Forbidden";
-    break;
-  case 404:
-    errstr = "404 Page Not Found";
-    break;
-  case 405:
-    errstr = "404 Method Not Allowed";
-    break;
-  case 408:
-    errstr = "408 Request Timeout";
-    break;
-  case 413:
-    errstr = "413 Content Too Large";
-    break;
-  case 418:
-    errstr = "418 I'm a teapot";
-    break;
-  case 500:
-    errstr = "500 Internal Server Error";
-    break;
-  case 501:
-    errstr = "501 Not Implemented";
-    break;
-  case 502:
-    errstr = "502 Bad Gateway";
-    break;
-  default:
-    errstr += int2str(code) + " - Unknown HTML Status Code!";
-  }
-  return errstr;
-}
-
 str WsrvLib::getDefaultErrPage(u16 code)
 {
   return _getTemplateWithErrStr(getStatusStr(code));
+}
+
+// -------------------=[ initialize relevant data maps ]=------------------- //
+
+// others might have put this into files...
+
+std::map<str, str> WsrvLib::_initMimeTypes()
+{
+  std::map<str, str> m;
+
+  m["bmp"]         = "image/bmp";
+  m["css"]         = "text/css";
+  m["csv"]         = "text/csv";
+  m["gif"]         = "image/gif";
+  m["html"]        = "text/html";
+  m["ico"]         = "image/png";
+  m["ics"]         = "text/calendar";
+  m["jpeg"]        = "image/jpeg";
+  m["jpg"]         = "image/jpeg";
+  m["js"]          = "text/javascript";
+  m["json"]        = "application/json";
+  m["mp3"]         = "audio/mpeg";
+  m["mp4"]         = "video/mp4";
+  m["ogg"]         = "audio/ogg";
+  m["otf"]         = "font/otf";
+  m["pdf"]         = "application/pdf";
+  m["png"]         = "image/png";
+  m["php"]         = "application/x-httpd-php";
+  m["svg"]         = "image/svg+xml";
+  m["ttf"]         = "font/ttf";
+  m["txt"]         = "text/plain";
+  m["wav"]         = "audio/wav";
+  m["woff"]        = "font/woff";
+  m["woff2"]       = "font/woff2";
+  m["webmanifest"] = "application/json";
+  m["xhtml"]       = "application/xhtml+xml";
+  m["xml"]         = "application/xml";
+
+  return m;
+}
+
+const std::map<str, str> WsrvLib::_mimeTypes = _initMimeTypes();
+
+// @brief Extracts the file-ext from the path-string and looks up the
+//        corresponding mimestr in mimetype database
+// @return The mimetype-string belonging to a file-extension. If ext not known
+//         returns "text/plain" bc this also what nginx does.
+str WsrvLib::getMimeTypeFromPath(const str& p)
+{
+  str ext = p.substr(p.rfind(".") + 1);
+
+  std::map<str, str>::const_iterator it = _mimeTypes.find(ext);
+  if (it != _mimeTypes.end())
+    return it->second;
+
+  return "text/plain";
+}
+
+std::map<u16, str> WsrvLib::_initStatusCodes()
+{
+  std::map<u16, str> s;
+  s[200] = "OK";
+  s[201] = "Created";
+  s[204] = "No Content";
+  s[301] = "Moved Permanently";
+  s[302] = "Found";
+  s[303] = "See Other";
+  s[307] = "Temporary Redirect";
+  s[308] = "Permanent Redirect";
+  s[400] = "Bad Request";
+  s[401] = "Unauthorized";
+  s[403] = "Forbidden";
+  s[404] = "Not Found";
+  s[405] = "Not Allowed";
+  s[413] = "Payload Too Large";
+  s[415] = "Unsupported Media Type";
+  s[500] = "Internal Server Error";
+  s[503] = "Service Unavailable";
+  s[504] = "Gateway Timeout";
+  s[505] = "HTTP Version Not Supported";
+
+  return s;
+}
+
+const std::map<u16, str> WsrvLib::_statusCodes = _initStatusCodes();
+
+str WsrvLib::getStatusStr(u16 code)
+{
+  std::map<u16, str>::const_iterator it = _statusCodes.find(code);
+  if (it != _statusCodes.end())
+    return int2str(code) + " " + it->second;
+  return int2str(code) + " Unknown HTTP Status Code!";
 }

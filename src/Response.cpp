@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/23 19:11:25 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/24 17:45:53 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/24 18:24:18 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,55 +21,65 @@
 
 // --------------------------------=[ OCF ]=-------------------------------- //
 
-Response::Response() {}
+Response::Response()
+{}
 
-Response::Response(const Response &o) {
+Response::Response(const Response& o)
+{
   if (this != &o) {
     _statusCode = o._statusCode;
-    _reqline = o._reqline;
+    _reqline    = o._reqline;
     _reqHeaders = o._reqHeaders;
-    _cli = o._cli;
-    _vsrv = o._vsrv;
+    _cli        = o._cli;
+    _vsrv       = o._vsrv;
   }
 }
 
-Response &Response::operator=(const Response &o) {
+Response& Response::operator=(const Response& o)
+{
   if (this != &o) {
     _statusCode = o._statusCode;
-    _reqline = o._reqline;
+    _reqline    = o._reqline;
     _reqHeaders = o._reqHeaders;
-    _cli = o._cli;
-    _vsrv = o._vsrv;
+    _cli        = o._cli;
+    _vsrv       = o._vsrv;
   }
   return (*this);
 }
 
-Response::~Response() {}
+Response::~Response()
+{}
 
 // ------------------------------=[ END OCF ]=------------------------------ //
 
 // FIXME: maybe i do not need this at all
-Response::Response(const Request &req) { _setFieldsFromReq(req); }
-
-void Response::_setFieldsFromReq(const Request &req) {
-  _statusCode = req.getStatusCode();
-  _reqline = req.getReqline();
-  _reqHeaders = req.getHeaders();
-  _cli = req.getCli();
-  _vsrv = req.getVsrv();
+Response::Response(const Request& req)
+{
+  _setFieldsFromReq(req);
 }
 
-void Response::genResponse(const Request &req) {
+void Response::_setFieldsFromReq(const Request& req)
+{
+  _statusCode = req.getStatusCode();
+  _reqline    = req.getReqline();
+  _reqHeaders = req.getHeaders();
+  _cli        = req.getCli();
+  _vsrv       = req.getVsrv();
+}
+
+void Response::genResponse(const Request& req)
+{
   _setFieldsFromReq(req);
 
-  Logger::log_dbg0("Response::genResponse: statusCode = " +
-                   int2str(_statusCode));
+  Logger::log_dbg0(
+      "Response::genResponse: statusCode = " + int2str(_statusCode));
   if (_statusCode == HTTP_200 && _reqline.method == M_GET)
     _getBody();
   _buildRespoHdrs();
 
   for (std::map<str, str>::reverse_iterator it = _respoHeaders.rbegin();
-       it != _respoHeaders.rend(); it++)
+      it != _respoHeaders.rend();
+      it++)
     if (it->first == "Startline")
       _respoStr += it->second + CRLF;
     else
@@ -78,9 +88,11 @@ void Response::genResponse(const Request &req) {
   _respoStr += CRLF + _body;
 }
 
-void Response::_getBody() {
+void Response::_getBody()
+{
   if (_vsrv->getRoutes().size() == 1 &&
-      _vsrv->getRoutes().begin()->first == "/") {
+      _vsrv->getRoutes().begin()->first == "/")
+  {
     Route r = _vsrv->getRoutes().begin()->second;
 
     str root = r.getRoot();
@@ -89,7 +101,7 @@ void Response::_getBody() {
     if (isDir(path))
       path += (path[path.size() - 1] == '/' ? "" : "/") + r.getDefaultFile();
 
-    _mimeType = _getMimeType(path);
+    _mimeType = WsrvLib::getMimeTypeFromPath(path);
 
     std::ifstream target;
 
@@ -102,7 +114,7 @@ void Response::_getBody() {
     // FIXME: is this really not good if file could not be opened?
     if (!target) {
       _statusCode = HTTP_404;
-      _body = WsrvLib::getDefaultErrPage(HTTP_404);
+      _body       = WsrvLib::getDefaultErrPage(HTTP_404);
       return;
     }
 
@@ -115,7 +127,7 @@ void Response::_getBody() {
     // QUESTION: do we still need it here?
     if (length <= 0) {
       _statusCode = HTTP_404;
-      _body = WsrvLib::getDefaultErrPage(HTTP_404);
+      _body       = WsrvLib::getDefaultErrPage(HTTP_404);
       return;
     }
 
@@ -129,13 +141,15 @@ void Response::_getBody() {
       // like this even NUL bytes and other weird binary-mode data is written to
       // the std::string obj.
       _body.assign(buffer.begin(), buffer.end());
-  } else
+  }
+  else
     _body = "";
 }
 
-void Response::_buildRespoHdrs() {
+void Response::_buildRespoHdrs()
+{
   _respoHeaders["Startline"] = "HTTP/1.1 " + WsrvLib::getStatusStr(_statusCode);
-  _respoHeaders["Server"] = "m0fr1m's webserv " VERSION;
+  _respoHeaders["Server"]    = "m0fr1m's webserv " VERSION;
 
   // FIXME: maybe use sth else here
   _respoHeaders["Date"] = Logger::getLogtime();
@@ -151,23 +165,7 @@ void Response::_buildRespoHdrs() {
   _respoHeaders["Accept-Ranges"] = "bytes";
 }
 
-str Response::getStr() const { return _respoStr; }
-
-str Response::_getMimeType(const str &p) {
-  int i = p.rfind(".") + 1;
-  str ext = p.substr(i);
-
-  if (ext == "html")
-    return "text/html";
-
-  if (ext == "jpg")
-    return "image/jpeg";
-
-  if (ext == "png")
-    return "image/png";
-
-  if (ext == "js")
-    return "text/javascript";
-
-  return "*/*";
+str Response::getStr() const
+{
+  return _respoStr;
 }
