@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/14 20:50:12 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/25 12:23:00 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/25 19:44:08 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,6 @@
 
 #include <ctime>
 #include <netinet/in.h>
-#include <string>
 #include <vector>
 
 class VServer;
@@ -27,15 +26,17 @@ class Client {
     str      _addr;
     u16      _port;
     VServer *_vsrv;
+    bool     _timeout;
 
     std::vector<VServer *> _potentialVsrvs;
 
     time_t _last_access;
 
-  public:
-    Client();
     Client(const Client& other);
     Client& operator=(const Client& other);
+
+  public:
+    Client();
     ~Client();
 
     Client(int fd, VServer *vsrv, const str& addr, in_port_t port);
@@ -48,6 +49,8 @@ class Client {
 
     str getAddr() const;
     u16 getPort() const;
+
+    void timeout();
 
     void     setVsrv(VServer *v);
     VServer *getVsrv() const;

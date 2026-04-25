@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:36:43 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/25 12:24:24 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/25 19:50:26 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -267,19 +267,23 @@ void Webserv::_timeoutClients()
 
   std::map< int, Client * >::iterator it = _fdClientMap.begin();
   while (it != _fdClientMap.end()) {
-    Client  *cli  = it->second;
-    VServer *vsrv = cli->getVsrv();
+    Client *cli = it->second;
+    // VServer *vsrv = cli->getVsrv();
     if (difftime(now, cli->getLastAccess()) > WsrvLib::WsrvSettings.reqTimeout)
     {
-      Logger::log_srv("Timeout",
-          "disconnecting cli " + cli->getAddr() + ":" +
-              int2str(cli->getPort()) + " due to timeout.");
-      _epoll.removeClient(it->first);
-      if (vsrv)
-        vsrv->deleteClient(it->first);
-      _numOfClients--;
-      it = eraseIt(_fdClientMap, it);
-      continue;
+      // Logger::log_srv("Timeout",
+      //     "disconnecting cli " + cli->getAddr() + ":" +
+      //         int2str(cli->getPort()) + " due to timeout.");
+      // _epoll.removeClient(it->first);
+      // if (vsrv)
+      //   vsrv->deleteClient(it->first);
+      // _numOfClients--;
+      // it = eraseIt(_fdClientMap, it);
+      // continue;
+
+      // set client timeout and prepare for write of error status before close
+      cli->timeout();
+      _epoll.modifyClient(it->first, EPOLLOUT);
     }
     it++;
   }

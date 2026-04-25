@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/14 23:12:17 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/18 17:36:39 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/25 19:45:21 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -107,8 +107,7 @@ void Epoll::modifyClient(int cfd, uint32_t events)
 // the other way round epoll_ctl fails.
 void Epoll::removeClient(int cfd)
 {
-  int epoll_del_return = epoll_ctl(_epoll_fd, EPOLL_CTL_DEL, cfd, 0);
-  if (epoll_del_return == -1)
+  if (epoll_ctl(_epoll_fd, EPOLL_CTL_DEL, cfd, 0) == -1)
     throw(EpollException("removing client from epoll failed"));
 }
 

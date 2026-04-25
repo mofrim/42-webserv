@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/14 20:51:06 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/25 12:23:30 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/25 19:44:27 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,35 +16,38 @@
 
 #include <unistd.h>
 
-// -- OCF --
-Client::Client(): _client_fd(-1)
+// --------------------------------=[ OCF ]=-------------------------------- //
+
+Client::Client(): _client_fd(-1), _timeout(false)
 {}
 
-Client::Client(const Client& other)
+Client::Client(const Client& o)
 {
-  if (this != &other) {
-    _client_fd   = other._client_fd;
-    _last_access = other._last_access;
+  if (this != &o) {
+    _client_fd   = o._client_fd;
+    _last_access = o._last_access;
   }
 }
 
 Client::Client(int fd, VServer *vsrv, const str& addr, in_port_t port):
-  _client_fd(fd), _addr(addr), _port(ntohs(port)), _vsrv(vsrv),
+  _client_fd(fd), _addr(addr), _port(ntohs(port)), _vsrv(vsrv), _timeout(false),
   _last_access(time(NULL))
 {}
 
-Client& Client::operator=(const Client& other)
+Client& Client::operator=(const Client& o)
 {
-  (void)other;
+  (void)o;
   return (*this);
 }
 
 Client::~Client()
 {
-  Logger::log_dbg0("Client closing fd " + int2str(_client_fd));
+  Logger::log_dbg0("Client " + _addr + ":" + int2str(_port) + " closing fd " +
+      int2str(_client_fd));
   close(_client_fd);
 }
-// -- OCF end --
+
+// ------------------------------=[ END OCF ]=------------------------------ //
 
 void Client::setFd(int fd)
 {
@@ -124,4 +127,9 @@ str Client::getAddr() const
 u16 Client::getPort() const
 {
   return _port;
+}
+
+void Client::timeout()
+{
+  _timeout = true;
 }
