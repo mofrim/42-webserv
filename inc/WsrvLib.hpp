@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/24 17:31:03 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/24 20:32:13 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/25 09:52:56 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,6 +73,12 @@ enum {
   HTTP_502 = 502,
 };
 
+typedef struct {
+    u16 maxClients;
+    u16 connKeepaliveTimeout;
+    u16 reqTimeout;
+} t_GlobalWsrvSettings;
+
 class WsrvLib {
   private:
     WsrvLib();
@@ -88,8 +94,11 @@ class WsrvLib {
     static const std::map<u16, str> _statusCodes;
     static std::map<u16, str>       _initStatusCodes();
 
+    static t_GlobalWsrvSettings _initWsrvSettings();
+
   public:
-    static str getDefaultErrPage(u16 code);
-    static str getStatusStr(u16 code);
-    static str getMimeTypeFromPath(const str& p);
+    static str                        getDefaultErrPage(u16 code);
+    static str                        getStatusStr(u16 code);
+    static str                        getMimeTypeFromPath(const str& p);
+    static const t_GlobalWsrvSettings WsrvSettings;
 };

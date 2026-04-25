@@ -4,13 +4,13 @@
 bool g_GlobalResult = OK;
 int main()
 {
-  test_server_init();
-  nl();
   test_VServerCfg();
   nl();
   test_socket();
   nl();
   test_Routes();
+  nl();
+  test_server_init();
   nl();
   test_WsrvLib();
   nl();

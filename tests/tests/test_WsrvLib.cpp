@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   test_HttpStatus.cpp                                :+:      :+:    :+:   */
+/*   test_WsrvLib.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/13 13:06:35 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/24 17:44:02 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/25 09:58:09 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,9 +18,20 @@
 int _test_WsrvLib()
 {
   print_test_topic("test_WsrvLib", "basic tests");
+  {
+    str moep = WsrvLib::getDefaultErrPage(404);
+    std::cout << moep << std::endl;
+  }
 
-  str moep = WsrvLib::getDefaultErrPage(404);
-  std::cout << moep << std::endl;
+  print_test_topic("test_WsrvLib", "WsrvSettings");
+  {
+    std::cout << "WsrvLib::WsrvSettings.connKeepaliveTimeout: "
+              << WsrvLib::WsrvSettings.connKeepaliveTimeout << std::endl;
+    std::cout << "WsrvLib::WsrvSettings.reqTimeout: "
+              << WsrvLib::WsrvSettings.reqTimeout << std::endl;
+    std::cout << "WsrvLib::WsrvSettings.maxClients: "
+              << WsrvLib::WsrvSettings.maxClients << std::endl;
+  }
   return (0);
 }
 
