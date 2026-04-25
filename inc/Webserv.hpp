@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:35:29 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/24 17:32:41 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/25 10:17:13 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,6 +69,10 @@ class Webserv {
     Webserv(const Webserv& other);
     Webserv& operator=(const Webserv& other);
 
+    int _handleEventServerless(const struct epoll_event& ev, Client *cli);
+
+    void _timeoutClients();
+
   public:
     Webserv();
     ~Webserv();
@@ -76,8 +80,6 @@ class Webserv {
     void run();
     void getServersFromCfg(const std::string& cfgFilename);
     void shutdownWebserv();
-
-    int handleEventServerless(const struct epoll_event& ev, Client *cli);
 
     class WebservInitException: public std::runtime_error {
       public:

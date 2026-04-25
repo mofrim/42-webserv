@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/03 12:51:23 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/23 12:58:25 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/25 10:27:43 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -246,7 +246,7 @@ Client *VServer::addClient(int fd)
 // 	1) remove from clients list
 // 	2) remove from pair from clientFdMap
 // 	3) close socket
-void VServer::removeClient(int fd)
+void VServer::deleteClient(int fd)
 {
   if (_clients.find(fd) == _clients.end())
     throw(
@@ -271,11 +271,14 @@ void VServer::_removeAllClients()
 int VServer::handleEvent(const struct epoll_event& ev, Client *cli)
 {
   int return_value = REQ_READ;
-  if (ev.events & EPOLLIN)
-    return_value = _reqHandler.readRequest(cli);
-  if (ev.events & EPOLLOUT) {
-    Logger::log_msg("Got EPOLLOUT!");
-    return_value = _reqHandler.writeResponse(cli);
+  if (ev.events & (EPOLLIN | EPOLLOUT)) {
+    cli->setLastAccess();
+    if (ev.events & EPOLLIN)
+      return_value = _reqHandler.readRequest(cli);
+    if (ev.events & EPOLLOUT) {
+      Logger::log_msg("Got EPOLLOUT!");
+      return_value = _reqHandler.writeResponse(cli);
+    }
   }
   return (return_value);
 }

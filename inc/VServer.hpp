@@ -53,7 +53,7 @@ class VServer {
 
     void    init();
     Client *addClient(int fd);
-    void    removeClient(int fd);
+    void    deleteClient(int fd);
     int     handleEvent(const struct epoll_event& ev, Client *cli);
 
     // utils, getters setters

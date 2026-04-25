@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/24 17:40:43 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/25 09:56:04 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/25 11:39:29 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -171,7 +171,7 @@ str WsrvLib::getStatusStr(u16 code)
 t_GlobalWsrvSettings WsrvLib::_initWsrvSettings()
 {
   t_GlobalWsrvSettings s = {
-      .maxClients = 1000, .connKeepaliveTimeout = 60, .reqTimeout = 60};
+      .maxClients = 1000, .connKeepaliveTimeout = 60, .reqTimeout = 5};
 
   return s;
 }

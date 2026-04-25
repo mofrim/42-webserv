@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/14 20:51:06 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/24 20:36:04 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/25 12:23:30 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,14 +28,10 @@ Client::Client(const Client& other)
   }
 }
 
-Client::Client(
-    int fd, VServer *vsrv, const std::string& hostname, in_port_t port):
-  _client_fd(fd), _hostname(hostname), _port(port), _vsrv(vsrv),
-  _last_access(clock())
-{
-  // FIXME: remove when _port is used somewhere
-  (void)_port;
-}
+Client::Client(int fd, VServer *vsrv, const str& addr, in_port_t port):
+  _client_fd(fd), _addr(addr), _port(ntohs(port)), _vsrv(vsrv),
+  _last_access(time(NULL))
+{}
 
 Client& Client::operator=(const Client& other)
 {
@@ -59,9 +55,9 @@ int Client::getFd() const
   return (_client_fd);
 }
 
-void Client::setLastAccess(time_t t)
+void Client::setLastAccess()
 {
-  _last_access = t;
+  _last_access = time(NULL);
 }
 
 clock_t Client::getLastAccess() const
@@ -118,4 +114,14 @@ Client *Client::newCliServerless(int listenFd)
   std::string hostname(inAddrToStr(client_addr.sin_addr));
   Client *newCli = new Client(client_fd, NULL, hostname, client_addr.sin_port);
   return newCli;
+}
+
+str Client::getAddr() const
+{
+  return _addr;
+}
+
+u16 Client::getPort() const
+{
+  return _port;
 }

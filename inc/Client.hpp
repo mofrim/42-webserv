@@ -6,11 +6,13 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/14 20:50:12 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/24 20:36:17 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/25 12:23:00 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
+
+#include "WsrvLib.hpp"
 
 #include <ctime>
 #include <netinet/in.h>
@@ -21,10 +23,10 @@ class VServer;
 
 class Client {
   private:
-    int         _client_fd;
-    std::string _hostname;
-    in_port_t   _port;
-    VServer    *_vsrv;
+    int      _client_fd;
+    str      _addr;
+    u16      _port;
+    VServer *_vsrv;
 
     std::vector<VServer *> _potentialVsrvs;
 
@@ -36,13 +38,16 @@ class Client {
     Client& operator=(const Client& other);
     ~Client();
 
-    Client(int fd, VServer *vsrv, const std::string& hostname, in_port_t port);
+    Client(int fd, VServer *vsrv, const str& addr, in_port_t port);
 
     void setFd(int fd);
     int  getFd() const;
 
-    void   setLastAccess(time_t t);
+    void   setLastAccess();
     time_t getLastAccess() const;
+
+    str getAddr() const;
+    u16 getPort() const;
 
     void     setVsrv(VServer *v);
     VServer *getVsrv() const;

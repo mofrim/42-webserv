@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/03 11:26:23 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/24 17:31:44 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/25 11:49:59 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,16 +56,24 @@ str getSetAsStr(const std::set<T>& s)
   return ret;
 }
 
-// well in C++11 std::map::erase and std::set::erase return an iterator to the
-// next elem after erasure. in C++98 they don't. that's why.
+// @brief Erase an element from the same container param it is currently
+//        iterating over.
 //
 // CAUTION: only use in while loops because otherwise itertor will be
 // overincremented!!!
+//
+// @param conti Container `it` is an iterator to
+// @param it Container::iterator
+//
+// well in C++11 std::map::erase and std::set::erase return an iterator to the
+// next elem after erasure. in C++98 they don't. that is a problem because like
+// that is kind of difficult to safely iterate over a container while possibly
+// deleting elems from it.
 template <typename T>
 typename T::iterator eraseIt(T& conti, typename T::iterator it)
 {
   typename T::iterator itBak = it;
-  it++;
+  ++it;
   conti.erase(itBak);
   return it;
 }

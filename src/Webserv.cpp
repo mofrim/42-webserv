@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:36:43 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/23 15:05:14 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/25 12:24:24 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -233,14 +233,16 @@ void Webserv::run()
         if (evHandlerReturn == REQ_ERR || evHandlerReturn == REQ_DISCO) {
           _epoll.removeClient(currentFd);
           if (vsrv)
-            vsrv->removeClient(currentFd);
+            vsrv->deleteClient(currentFd);
           _numOfClients--;
+          _fdClientMap.erase(currentFd);
         }
         else if (evHandlerReturn == REQ_WRITE)
           _epoll.modifyClient(currentFd, EPOLLOUT);
         else if (evHandlerReturn == REQ_INC || evHandlerReturn == REQ_READ)
           _epoll.modifyClient(currentFd, EPOLLIN);
       }
+      _timeoutClients();
     }
   }
   _epoll.closeEpollFd();
@@ -248,7 +250,7 @@ void Webserv::run()
 
 // For serverless clients there can only be a EPOLLIN event bc it is the first
 // real request that is processed
-int Webserv::handleEventServerless(const struct epoll_event& ev, Client *cli)
+int Webserv::_handleEventServerless(const struct epoll_event& ev, Client *cli)
 {
   if (ev.events & EPOLLIN) {
     RequestHandler reqHandler(NULL);
@@ -256,6 +258,31 @@ int Webserv::handleEventServerless(const struct epoll_event& ev, Client *cli)
   }
   Logger::log_err("Webserv::handleEventServerless: srvless event not EPOLLIN!");
   return REQ_ERR;
+}
+
+// TODO: add special treatment for CGI clients here
+void Webserv::_timeoutClients()
+{
+  time_t now = time(NULL);
+
+  std::map< int, Client * >::iterator it = _fdClientMap.begin();
+  while (it != _fdClientMap.end()) {
+    Client  *cli  = it->second;
+    VServer *vsrv = cli->getVsrv();
+    if (difftime(now, cli->getLastAccess()) > WsrvLib::WsrvSettings.reqTimeout)
+    {
+      Logger::log_srv("Timeout",
+          "disconnecting cli " + cli->getAddr() + ":" +
+              int2str(cli->getPort()) + " due to timeout.");
+      _epoll.removeClient(it->first);
+      if (vsrv)
+        vsrv->deleteClient(it->first);
+      _numOfClients--;
+      it = eraseIt(_fdClientMap, it);
+      continue;
+    }
+    it++;
+  }
 }
 
 // -----------------------------=[ Exceptions ]=----------------------------- //
