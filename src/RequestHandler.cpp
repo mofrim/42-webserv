@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 19:13:35 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/26 16:43:20 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/26 17:59:20 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,9 +50,6 @@ RequestHandler::RequestHandler(Client *cli):
 //
 //  1) The Length of the body reached the `Content-Length` Header field value
 //  2) The connection is closed by the client (read == 0)
-//
-// FIXME: move exception to ReqHandler class
-//
 void RequestHandler::readRequest()
 {
   int fd = _cli->getFd();
@@ -105,8 +102,19 @@ void RequestHandler::readRequest()
 // bytes
 void RequestHandler::writeResponse()
 {
-  _cli->setState(CLI_SEND);
-  str response = _cli->getReq().getResponseStr();
+  str response;
+  u16 statusCode;
+
+  if (_cli->isTimeout()) {
+    statusCode = HTTP_408;
+    Response r;
+    r.genErrResponse(HTTP_408);
+    response = r.getRespoStr();
+  }
+  else {
+    response   = _cli->getReq().getResponseStr();
+    statusCode = _cli->getReq().getStatusCode();
+  }
 
   Logger::log_srv(_cli->getVsrv()->getServerName(),
       "Sending our Response to " + _cli->getRemoteInterface());
@@ -123,14 +131,13 @@ void RequestHandler::writeResponse()
     return;
   }
 
-  _cli->resetReq();
-
   // if some error occurred -> disco.
-  if (_cli->getReq().getStatusCode() >= HTTP_400 &&
-      _cli->getReq().getStatusCode() != HTTP_404)
+  if (statusCode >= HTTP_400 && statusCode != HTTP_404)
     _cli->setState(CLI_DISCO);
   else
     _cli->setState(CLI_IDLE);
+
+  _cli->resetReq();
 }
 
 RequestHandler::ReqHandlerException::ReqHandlerException(

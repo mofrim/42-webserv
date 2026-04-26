@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:36:43 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/26 16:52:28 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/26 19:38:35 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -211,6 +211,7 @@ void Webserv::run()
         _fdClientMap[cli->getFd()] = cli;
         _epoll.addClient(cli->getFd());
         _numOfClients++;
+        Logger::drawCycleSep();
       }
 
       // 2) existing connection
@@ -239,7 +240,6 @@ void Webserv::run()
         }
 
         if (cli->isDisco()) {
-          Logger::log_err("removing client");
           _epoll.removeClient(currentFd);
           if (vsrv)
             vsrv->deleteClient(currentFd);
@@ -252,6 +252,7 @@ void Webserv::run()
           _epoll.modifyClient(currentFd, EPOLLIN);
       }
       _timeoutClients();
+      Logger::drawCycleSep();
     }
   }
   _epoll.closeEpollFd();
@@ -279,11 +280,12 @@ void Webserv::_timeoutClients()
   while (it != _fdClientMap.end()) {
     Client *cli = it->second;
     // VServer *vsrv = cli->getVsrv();
-    if (difftime(now, cli->getLastAccess()) > WsrvLib::WsrvSettings.reqTimeout)
+    if (difftime(now, cli->getLastActive()) > WsrvLib::WsrvSettings.reqTimeout)
     {
       // set client timeout and prepare for write of error status before close
       cli->timeout();
-      // _epoll.modifyClient(it->first, EPOLLOUT);
+      _epoll.modifyClient(cli->getFd(), EPOLLOUT);
+      cli->setState(CLI_SEND);
     }
     it++;
   }

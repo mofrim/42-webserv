@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/24 20:52:55 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/26 10:10:19 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/26 19:45:31 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -110,4 +110,11 @@ void Logger::log_reqres(const std::string& resreq, const std::string& data)
 void Logger::log_bug(const std::string& msg)
 {
   std::cout << BPUR << "[BUG] " << msg << RST << std::endl;
+}
+
+void Logger::drawCycleSep()
+{
+  std::cout << YLO
+            << "\n  --------------------- epoll cycle ---------------------\n\n"
+            << RST;
 }

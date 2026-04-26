@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/23 19:11:25 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/26 10:03:10 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/26 17:58:39 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,22 +27,30 @@ Response::Response()
 Response::Response(const Response& o)
 {
   if (this != &o) {
-    _statusCode = o._statusCode;
-    _reqline    = o._reqline;
-    _reqHeaders = o._reqHeaders;
-    _cli        = o._cli;
-    _vsrv       = o._vsrv;
+    _statusCode   = o._statusCode;
+    _reqline      = o._reqline;
+    _reqHeaders   = o._reqHeaders;
+    _cli          = o._cli;
+    _vsrv         = o._vsrv;
+    _respoHeaders = o._respoHeaders;
+    _body         = o._body;
+    _mimeType     = o._mimeType;
+    _respoStr     = o._respoStr;
   }
 }
 
 Response& Response::operator=(const Response& o)
 {
   if (this != &o) {
-    _statusCode = o._statusCode;
-    _reqline    = o._reqline;
-    _reqHeaders = o._reqHeaders;
-    _cli        = o._cli;
-    _vsrv       = o._vsrv;
+    _statusCode   = o._statusCode;
+    _reqline      = o._reqline;
+    _reqHeaders   = o._reqHeaders;
+    _cli          = o._cli;
+    _vsrv         = o._vsrv;
+    _respoHeaders = o._respoHeaders;
+    _body         = o._body;
+    _mimeType     = o._mimeType;
+    _respoStr     = o._respoStr;
   }
   return (*this);
 }
@@ -71,10 +79,20 @@ u16 Response::genResponse(const Request& req)
 {
   _setFieldsFromReq(req);
 
-  Logger::log_dbg0(
-      "Response::genResponse: statusCode = " + int2str(_statusCode));
   if (_statusCode == HTTP_200 && _reqline.method == M_GET)
     _getBody();
+
+  _genResponse();
+
+  return _statusCode;
+}
+
+// @brief This is the core function for generating the final respostr. Extracted
+// this in order to avoid codedup in genErrResponse().
+void Response::_genResponse()
+{
+  Logger::log_dbg0(
+      "Response::genResponse: statusCode = " + int2str(_statusCode));
   _buildRespoHdrs();
 
   for (std::map<str, str>::reverse_iterator it = _respoHeaders.rbegin();
@@ -86,8 +104,6 @@ u16 Response::genResponse(const Request& req)
       _respoStr += it->first + ": " + it->second + CRLF;
 
   _respoStr += CRLF + _body;
-
-  return _statusCode;
 }
 
 void Response::_getBody()
@@ -172,7 +188,7 @@ void Response::_buildRespoHdrs()
   _respoHeaders["Accept-Ranges"] = "bytes";
 }
 
-str Response::getStr() const
+str Response::getRespoStr() const
 {
   return _respoStr;
 }
@@ -189,4 +205,12 @@ void Response::reset()
   _body.clear();
   _mimeType.clear();
   _respoStr.clear();
+}
+
+void Response::genErrResponse(u16 errCode)
+{
+  _statusCode = errCode;
+  _buildRespoHdrs();
+  _body = WsrvLib::getDefaultErrPage(errCode);
+  _genResponse();
 }

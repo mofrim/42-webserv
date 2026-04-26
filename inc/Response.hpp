@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/23 19:11:06 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/25 22:04:06 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/26 17:58:39 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,6 +35,7 @@ class Response {
     void _setFieldsFromReq(const Request& req);
     void _getBody();
     void _buildRespoHdrs();
+    void _genResponse();
 
   public:
     Response();
@@ -44,7 +45,9 @@ class Response {
     ~Response();
 
     u16 genResponse(const Request& req);
-    str getStr() const;
+    str getRespoStr() const;
 
     void reset();
+
+    void genErrResponse(u16 errCode);
 };

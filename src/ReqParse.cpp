@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/23 15:06:21 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/24 17:36:57 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/26 19:47:30 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,7 @@ int ReqParse::parseReqLine(t_RequestLine& rl, const str& rlstr)
   int i = 0;
   while (i < 6 && !std::isspace(rlstr[i]))
     i++;
-  Logger::log_dbg0("ReqParse: found this method: '" + rlstr.substr(0, i) + "'");
+  Logger::log_dbg1("ReqParse: found this method: '" + rlstr.substr(0, i) + "'");
   if ((rl.method = str2method(rlstr.substr(0, i))) == M_UNKNOWN)
     return HTTP_400;
 
@@ -52,7 +52,7 @@ int ReqParse::parseReqLine(t_RequestLine& rl, const str& rlstr)
   i++;
   while (k <= MAX_TARGET_LEN && !std::isspace(rlstr[i + k]))
     k++;
-  Logger::log_dbg0(
+  Logger::log_dbg1(
       "ReqParse: found this target URL: '" + rlstr.substr(i, k) + "'");
   if (k > MAX_TARGET_LEN)
     return HTTP_400;
@@ -66,7 +66,7 @@ int ReqParse::parseReqLine(t_RequestLine& rl, const str& rlstr)
     k++;
   if (i + k > MAX_REQLINE_LEN)
     return HTTP_400;
-  Logger::log_dbg0(
+  Logger::log_dbg1(
       "ReqParse: found this httpVer: '" + rlstr.substr(i, k) + "'");
   rl.httpVersion = rlstr.substr(i, k);
   if (rlstr.compare(i + k, 2, CRLF) != 0)

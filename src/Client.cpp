@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/14 20:51:06 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/26 16:30:21 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/26 17:37:43 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,7 @@ Client::Client(const Client& o)
 
 Client::Client(int fd, VServer *vsrv, const str& addr, in_port_t port):
   _clientFd(fd), _addr(addr), _port(ntohs(port)), _timeout(false),
-  _last_access(time(NULL)), _vsrv(vsrv), _reqHandler(this), _state(CLI_IDLE)
+  _lastActive(time(NULL)), _vsrv(vsrv), _reqHandler(this), _state(CLI_IDLE)
 {
   _remoteInterface = addr + ":" + int2str(_port);
   _reqHandler.setVsrvname(vsrv->getServerName());
@@ -62,14 +62,14 @@ int Client::getFd() const
   return _clientFd;
 }
 
-void Client::setLastAccess()
+void Client::setLastActive()
 {
-  _last_access = time(NULL);
+  _lastActive = time(NULL);
 }
 
-clock_t Client::getLastAccess() const
+clock_t Client::getLastActive() const
 {
-  return (_last_access);
+  return (_lastActive);
 }
 
 void Client::setVsrv(VServer *v)
@@ -141,7 +141,7 @@ void Client::timeout()
 void Client::handleEvent(u32 ev)
 {
   if (ev & (EPOLLIN | EPOLLOUT)) {
-    this->setLastAccess();
+    this->setLastActive();
     if (ev & EPOLLIN) {
       Logger::log_msg("Got EPOLLIN!");
       _reqHandler.readRequest();
@@ -211,4 +211,9 @@ bool Client::isReqComplete() const
 void Client::setReqFinished()
 {
   _req.setFinished();
+}
+
+bool Client::isTimeout() const
+{
+  return _timeout;
 }

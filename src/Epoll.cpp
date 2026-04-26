@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/14 23:12:17 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/26 15:01:25 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/26 16:56:21 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -153,8 +153,7 @@ void Epoll::printReadylist() const
   }
 }
 
-////////////////////////////////////////////////////////////////////////////////
-/// Exceptions
+// -----------------------------=[ Exceptions ]=----------------------------- //
 
 Epoll::EpollException::EpollException(const str& msg):
   std::runtime_error("EpollException: " + msg)
