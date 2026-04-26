@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 19:13:35 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/25 11:38:40 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/26 15:18:04 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 #include "VServer.hpp"
 #include "utils.hpp"
 
+#include <cstring>
 #include <errno.h>
 #include <unistd.h>
 
@@ -29,12 +30,9 @@ RequestHandler::RequestHandler(const RequestHandler& other)
   (void)other;
 }
 
-RequestHandler& RequestHandler::operator=(const RequestHandler& other)
+RequestHandler& RequestHandler::operator=(const RequestHandler& o)
 {
-  if (this != &other) {
-    _srv      = other._srv;
-    _requests = other._requests;
-  }
+  (void)o;
   return (*this);
 }
 
@@ -42,7 +40,8 @@ RequestHandler::~RequestHandler()
 {}
 // -- OCF end --
 
-RequestHandler::RequestHandler(VServer *srv): _srv(srv)
+RequestHandler::RequestHandler(Client *cli):
+  _cli(cli), _vsrvName(cli->getVsrv()->getServerName())
 {}
 
 // Handler for an EPOLLIN aka I/O read event aka a _Request_
@@ -54,21 +53,17 @@ RequestHandler::RequestHandler(VServer *srv): _srv(srv)
 //
 // FIXME: move exception to ReqHandler class
 //
-int RequestHandler::readRequest(Client *cli)
+int RequestHandler::readRequest()
 {
-  str srv_name(_srv->getServerName());
-  int fd = cli->getFd();
+  int fd = _cli->getFd();
 
-  Logger::log_dbg2("Read request handler called!");
-  if (_srv->isValidClientFd(fd) == false)
-    throw(VServer::ServerException("fd in handleEvent() not found"));
+  Logger::log_srv(_vsrvName,
+      "reading from " + _cli->getRemoteInterface() + " aka fd " + int2str(fd));
 
-  Logger::log_srv(srv_name, "reading from socket" + int2str(fd));
+  memset(_buffer, 0, READ_BUFSIZE);
+  ssize_t bytes_read = read(fd, _buffer, READ_BUFSIZE);
 
-  char    buffer[READ_BUFSIZE + 1] = {0};
-  ssize_t bytes_read               = read(fd, buffer, READ_BUFSIZE);
-
-  Logger::log_srv(srv_name, "read " + int2str(bytes_read) + " bytes");
+  Logger::log_srv(_vsrvName, "read " + int2str(bytes_read) + " bytes");
 
   if (bytes_read <= 0) {
 
@@ -77,35 +72,32 @@ int RequestHandler::readRequest(Client *cli)
     // previous read!
     if (bytes_read == 0) {
       Logger::log_srv(
-          srv_name, "Client disco -> closing client on fd " + int2str(fd));
+          _vsrvName, "Client disco -> closing client on fd " + int2str(fd));
       return (REQ_DISCO);
     }
     else
       Logger::log_err(
-          "read failed, errno: " + int2str(errno) + " = " + getErrStr());
+          "Read failed, errno: " + int2str(errno) + " = " + getErrStr());
 
     return (REQ_ERR);
   }
 
-  // FIXME:
-  // QUESTION: this is certainly not correctly organized here. how many
-  // simultaneous reqs from one client can we have? in theory we can have
-  // mutiple ongoing CGI reqs. but only one simple req at a time. i guess
-  // TODO: clarify!
-  //
   // append the read to the first unfinished Req we find. If there is no
   // unfinished Req add a new one to the queue.
-  if (_cliHasUnfinishedRequest(cli))
-    _getUnfinishedReq(cli).append(buffer);
+
+  if (_hasUnfinishedRequest())
+    _cli->getReq().append(_buffer);
   else {
-    Logger::log_srv(srv_name, "Adding new Req to queue");
-    Request newReq(_srv, cli, buffer);
-    _reqQueue[cli].push_front(newReq);
+    Logger::log_srv(_vsrvName, "Starting new Req");
+    _cli->setReq(Request(_cli->getVsrv(), _cli, _buffer));
   }
 
-  if (_reqQueue[cli].front().reqComplete()) {
-    Logger::log_reqres("Request", _reqQueue[cli].front().getReqstr());
-    _reqQueue[cli].front().setFinished();
+  if (_cli->getReq().reqComplete()) {
+    Logger::log_reqres("Request", _cli->getReq().getReqstr());
+    {
+      _cli->getReq().setFinished();
+      _cli->setState(CLI_SEND);
+    }
     return REQ_WRITE;
   }
   return REQ_INC;
@@ -119,33 +111,33 @@ int RequestHandler::readRequest(Client *cli)
 // `std::string::c_str()` returns a `const char` pointer to the data stored in
 // the string. Also using `std::string::size()` which returns the size in raw
 // bytes
-int RequestHandler::writeResponse(Client *cli)
+int RequestHandler::writeResponse()
 {
   int ret = REQ_READ;
 
-  if (_reqQueue.empty())
-    throw(ReqHandlerException("Cannot write response! Ain't got no requests!"));
+  str response = _cli->getReq().getResponseStr();
 
-  Request *req = &_reqQueue[cli].back();
+  Logger::log_srv(_cli->getVsrv()->getServerName(),
+      "Sending our Response to " + _cli->getRemoteInterface());
+
+  if (response.empty())
+    throw(ReqHandlerException("Cannot write response! Nothing to write!"));
 
   // if some error occurred -> disco.
-  if (req->getStatusCode() >= HTTP_400)
+  if (_cli->getReq().getStatusCode() >= HTTP_400 &&
+      _cli->getReq().getStatusCode() != HTTP_404)
     ret = REQ_DISCO;
-
-  std::string response = _reqQueue[cli].back().getResponseStr();
 
   // Logger::log_reqres("webserv's response", response);
 
-  ssize_t bytes_sent = send(cli->getFd(), response.data(), response.size(), 0);
+  ssize_t bytes_sent = send(_cli->getFd(), response.data(), response.size(), 0);
 
   if (bytes_sent == -1) {
     Logger::log_err("couldn't send response!");
     return REQ_WRITE;
   }
-  _reqQueue[cli].pop_back();
-  if (_reqQueue[cli].empty())
-    _reqQueue.erase(cli);
-
+  _cli->resetReq();
+  _cli->setState(CLI_IDLE);
   return ret;
 }
 
@@ -153,27 +145,14 @@ RequestHandler::ReqHandlerException::ReqHandlerException(
     const std::string& msg): std::runtime_error("ReqHandlerException: " + msg)
 {}
 
-bool RequestHandler::_cliHasUnfinishedRequest(Client *cli)
+bool RequestHandler::_hasUnfinishedRequest()
 {
-  if (_reqQueue.find(cli) != _reqQueue.end()) {
-    Logger::log_msg("RequestHandler: found " + int2str(_reqQueue[cli].size()) +
-        " pending requests for cli");
-    for (std::deque<Request>::iterator it = _reqQueue[cli].begin();
-        it != _reqQueue[cli].end();
-        ++it)
-      if (!it->isFinished())
-        return true;
-  }
+  if (_cli->getReq().isFinished())
+    return true;
   return false;
 }
 
-// FIXME: maybe i will only need this function and then check for
-// _reqQueue.end()
-Request& RequestHandler::_getUnfinishedReq(Client *cli)
+void RequestHandler::setVsrvname(const str& n)
 {
-  std::deque<Request>::iterator it = _reqQueue[cli].begin();
-  for (; it != _reqQueue[cli].end(); ++it)
-    if (!it->isFinished())
-      break;
-  return *it;
+  _vsrvName = n;
 }

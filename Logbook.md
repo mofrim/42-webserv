@@ -215,3 +215,11 @@ closing and handling in case of certain statusCodes and regarding timeout.
 - likewise important: [client body and header timeout](https://nginx.org/en/docs/http/ngx_http_core_module.html#client_body_timeout)
   interesting about this: the timeout is only measured between 2 consecutive
   reads from the client.
+
+## 2026-04-25
+
+- implement timeouts
+
+## 2026-04-26
+
+maybe even implement a simple form of rate-limiting

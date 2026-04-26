@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/14 23:11:35 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/18 16:01:18 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/26 15:01:46 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,11 +44,11 @@ class Epoll {
     void removeClient(int cfd);
     void closeEpollFd();
 
-    int                       getEpollFd() const;
-    int                       getEventFd(int event_idx) const;
-    const struct epoll_event& getEvent(int event_idx) const;
+    int getEpollFd() const;
+    int getEventFd(int event_idx) const;
+    u32 getEvent(int event_idx) const;
 
-    void printEvents() const;
+    void printReadylist() const;
 
     class EpollException: public std::runtime_error {
       public:

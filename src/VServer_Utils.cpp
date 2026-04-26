@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/16 12:11:11 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/21 16:26:18 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/26 14:01:26 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@
 
 std::string VServer::getServerName() const
 {
-  return (_server_name);
+  return (_srvName);
 }
 
 bool VServer::getSetupFailed() const
@@ -31,7 +31,7 @@ bool VServer::getSetupFailed() const
 
 void VServer::setServerName(std::string name)
 {
-  _server_name = name;
+  _srvName = name;
 }
 
 void VServer::setSetupFailed()
@@ -41,7 +41,7 @@ void VServer::setSetupFailed()
 
 void VServer::printClients()
 {
-  Logger::log_srv(_server_name, "Printing Clients:");
+  Logger::log_srv(_srvName, "Printing Clients:");
   if (_clients.empty()) {
     Logger::log_msg("-> Server has got no clients");
     return;
@@ -82,7 +82,7 @@ const std::map<str, Route>& VServer::getRoutes() const
 
 void VServer::printCfg() const
 {
-  Logger::log_msg("  server_name: \"" + _server_name + "\"");
+  Logger::log_msg("  server_name: \"" + _srvName + "\"");
   Logger::log_msg("  listen_fds: " + getSetAsStr(_listen_fds));
   Logger::log_msg("  active listen interfaces:");
   for (std::map< str, std::set<u16> >::const_iterator it =

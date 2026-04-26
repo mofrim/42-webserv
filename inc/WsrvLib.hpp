@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/24 17:31:03 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/25 09:52:56 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/25 22:00:56 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,15 +28,10 @@ typedef uint16_t    u16;
 typedef uint32_t    u32;
 
 #define MAX_BODY_SIZE 1000000
-
-// default port for the default server
-#define DEFAULT_PORT 4284
-
-// default server name
-#define DEFAULT_SRV_NAME "localhost"
-
-// max num of clients.
+#define READ_BUFSIZE 4096
 #define MAX_CLIENTS 1000
+#define DEFAULT_SRV_NAME "localhost"
+#define DEFAULT_PORT 1111
 
 // return value convenience
 #ifndef OK
@@ -57,9 +52,9 @@ typedef enum { M_GET, M_POST, M_DELETE, M_UNKNOWN } e_Method;
 
 // the request-line
 typedef struct {
-    e_Method method;
     str      target;
     str      httpVersion;
+    e_Method method;
 } t_RequestLine;
 
 // For expressiveness' sake declare them here
@@ -74,9 +69,9 @@ enum {
 };
 
 typedef struct {
-    u16 maxClients;
-    u16 connKeepaliveTimeout;
-    u16 reqTimeout;
+    const u16 maxClients;
+    const u16 connKeepaliveTimeout;
+    const u16 reqTimeout;
 } t_GlobalWsrvSettings;
 
 class WsrvLib {

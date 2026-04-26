@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 23:39:57 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/24 20:47:21 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/26 15:14:38 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 #include "ReqParse.hpp"
 #include "Request.hpp"
 #include "WsrvLib.hpp"
+#include "utils.hpp"
 
 // --------------------------------=[ OCF ]=-------------------------------- //
 
@@ -24,8 +25,12 @@ Request::Request(const Request& o)
 {
   if (this != &o) {
     _vsrv        = o._vsrv;
+    _cli         = o._cli;
     _reqstr      = o._reqstr;
-    _response    = o._response;
+    _respo       = o._respo;
+    _statusCode  = o._statusCode;
+    _reqline     = o._reqline;
+    _headers     = o._headers;
     _reqFinished = o._reqFinished;
   }
 }
@@ -34,8 +39,12 @@ Request& Request::operator=(const Request& o)
 {
   if (this != &o) {
     _vsrv        = o._vsrv;
+    _cli         = o._cli;
     _reqstr      = o._reqstr;
-    _response    = o._response;
+    _respo       = o._respo;
+    _statusCode  = o._statusCode;
+    _reqline     = o._reqline;
+    _headers     = o._headers;
     _reqFinished = o._reqFinished;
   }
   return (*this);
@@ -93,12 +102,12 @@ void Request::_parseRequest()
     _statusCode = HTTP_400;
   else
     _statusCode = ReqParse::parseReqLine(_reqline, _reqstr);
-  _statusCode = _Response.genResponse(*this);
+  _statusCode = _respo.genResponse(*this);
 }
 
 str Request::getResponseStr() const
 {
-  return _Response.getStr();
+  return _respo.getStr();
 }
 
 // check if received request was terminated with '\r\n'
@@ -180,4 +189,16 @@ const t_RequestLine& Request::getReqline() const
 const std::map<str, str>& Request::getHeaders() const
 {
   return _headers;
+}
+
+void Request::reset()
+{
+  _reqstr.clear();
+  _statusCode  = 0;
+  _reqFinished = false;
+  _reqline.httpVersion.clear();
+  _reqline.target.clear();
+  _reqline.method = M_GET;
+  _headers.clear();
+  _respo.reset();
 }

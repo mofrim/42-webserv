@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/23 19:11:25 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/24 20:50:42 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/26 10:03:10 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,9 +99,9 @@ void Response::_getBody()
 
     str root = r.getRoot();
     str path = root + _reqline.target;
-    Logger::log_dbg1("Response::_getBody: trying to read from file: " + path);
     if (isDir(path))
       path += (path[path.size() - 1] == '/' ? "" : "/") + r.getDefaultFile();
+    Logger::log_dbg1("Response::_getBody: trying to read from file: " + path);
 
     _mimeType = WsrvLib::getMimeTypeFromPath(path);
 
@@ -161,7 +161,12 @@ void Response::_buildRespoHdrs()
 
   _respoHeaders["Content-Length"] = int2str(_body.size());
 
-  _respoHeaders["Connection"] = "close";
+  str conn;
+  if (_statusCode >= HTTP_400 && (_statusCode != HTTP_404))
+    conn = "close";
+  else
+    conn = "keep-alive";
+  _respoHeaders["Connection"] = conn;
 
   // QUESTION: what is this about? Nginx does it.
   _respoHeaders["Accept-Ranges"] = "bytes";
@@ -170,4 +175,18 @@ void Response::_buildRespoHdrs()
 str Response::getStr() const
 {
   return _respoStr;
+}
+
+// reset.
+void Response::reset()
+{
+  _statusCode = 0;
+  _reqline.httpVersion.clear();
+  _reqline.target.clear();
+  _reqline.method = M_GET;
+  _reqHeaders.clear();
+  _respoHeaders.clear();
+  _body.clear();
+  _mimeType.clear();
+  _respoStr.clear();
 }

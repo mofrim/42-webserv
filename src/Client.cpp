@@ -6,33 +6,37 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/14 20:51:06 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/25 19:44:27 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/26 15:13:54 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Client.hpp"
 #include "Logger.hpp"
+#include "VServer.hpp"
 #include "utils.hpp"
 
+#include <sys/epoll.h>
 #include <unistd.h>
 
 // --------------------------------=[ OCF ]=-------------------------------- //
 
-Client::Client(): _client_fd(-1), _timeout(false)
+Client::Client():
+  _clientFd(-1), _timeout(false), _vsrv(NULL), _reqHandler(this),
+  _state(CLI_IDLE)
 {}
 
 Client::Client(const Client& o)
 {
-  if (this != &o) {
-    _client_fd   = o._client_fd;
-    _last_access = o._last_access;
-  }
+  (void)o;
 }
 
 Client::Client(int fd, VServer *vsrv, const str& addr, in_port_t port):
-  _client_fd(fd), _addr(addr), _port(ntohs(port)), _vsrv(vsrv), _timeout(false),
-  _last_access(time(NULL))
-{}
+  _clientFd(fd), _addr(addr), _port(ntohs(port)), _timeout(false),
+  _last_access(time(NULL)), _vsrv(vsrv), _reqHandler(this), _state(CLI_IDLE)
+{
+  _remoteInterface = addr + ":" + int2str(_port);
+  _reqHandler.setVsrvname(vsrv->getServerName());
+}
 
 Client& Client::operator=(const Client& o)
 {
@@ -42,20 +46,20 @@ Client& Client::operator=(const Client& o)
 
 Client::~Client()
 {
-  Logger::log_dbg0("Client " + _addr + ":" + int2str(_port) + " closing fd " +
-      int2str(_client_fd));
-  close(_client_fd);
+  Logger::log_dbg0(
+      "Client " + _remoteInterface + " closing fd " + int2str(_clientFd));
+  close(_clientFd);
 }
 
 // ------------------------------=[ END OCF ]=------------------------------ //
 
 void Client::setFd(int fd)
 {
-  _client_fd = fd;
+  _clientFd = fd;
 }
 int Client::getFd() const
 {
-  return (_client_fd);
+  return _clientFd;
 }
 
 void Client::setLastAccess()
@@ -132,4 +136,68 @@ u16 Client::getPort() const
 void Client::timeout()
 {
   _timeout = true;
+}
+
+int Client::handleEvent(u32 ev)
+{
+  int return_value = REQ_READ;
+  if (ev & (EPOLLIN | EPOLLOUT)) {
+    this->setLastAccess();
+    if (ev & EPOLLIN) {
+      _state = CLI_READ;
+      Logger::log_msg("Got EPOLLIN!");
+      return_value = _reqHandler.readRequest();
+    }
+    if (ev & EPOLLOUT) {
+      _state = CLI_SEND;
+      Logger::log_msg("Got EPOLLOUT!");
+      return_value = _reqHandler.writeResponse();
+    }
+  }
+  return return_value;
+}
+
+Request& Client::getReq()
+{
+  return _req;
+}
+
+void Client::setReq(const Request& r)
+{
+  _req = r;
+}
+
+void Client::resetReq()
+{
+  _req.reset();
+}
+
+str Client::getRemoteInterface() const
+{
+  return _remoteInterface;
+}
+
+e_CliState Client::getState() const
+{
+  return _state;
+}
+
+void Client::setState(e_CliState s)
+{
+  _state = s;
+}
+
+bool Client::isIdling() const
+{
+  return _state == CLI_IDLE;
+}
+
+bool Client::isReading() const
+{
+  return _state == CLI_READ;
+}
+
+bool Client::isSending() const
+{
+  return _state == CLI_SEND;
 }

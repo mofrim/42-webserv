@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:36:43 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/25 19:50:26 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/26 15:11:50 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -160,8 +160,10 @@ void Webserv::run()
     if (nfds == -1 && errno != EINTR)
       throw(WebservRunException("epoll_wait failed"));
 
+    // will only be printed @ LOGLEVEL=1
+    _epoll.printReadylist();
+
     for (int eventIdx = 0; eventIdx < nfds; ++eventIdx) {
-      Logger::log_dbg1("Num of nfds from epoll: " + int2str(nfds));
       int currentFd = _epoll.getEventFd(eventIdx);
 
       // 1) new connection
@@ -198,6 +200,7 @@ void Webserv::run()
         if (vsrvs.size() == 1)
           cli = vsrvs[0]->addClient(currentFd);
         else {
+          Logger::log_err("MULTISERVER BRANCH FALSELY CALLED!!!");
           if ((cli = Client::newCliServerless(currentFd)) == NULL) {
             Logger::log_warn(
                 "Webserv::run: Client::newCliServerless returned NULL");
@@ -218,16 +221,23 @@ void Webserv::run()
       else {
         Client  *cli  = _fdClientMap[currentFd];
         VServer *vsrv = cli->getVsrv();
-        int      evHandlerReturn;
+        u32      ev   = _epoll.getEvent(eventIdx);
+
+        // skip cli if event is EPOLLOUT but the client has got nothing to send
+        // or is still reading a request
+        if ((cli->isIdling() || cli->isReading()) && (ev & EPOLLOUT))
+          continue;
+
+        int evHandlerReturn;
 
         if (vsrv == NULL) {
-          // handle serverName detection... somehow ?!??
+          // handle servrName detection... somehow ?!??
           evHandlerReturn = REQ_ERR;
         }
         else {
           if (LOGLEVEL == BRUTAL)
             vsrv->printClients();
-          evHandlerReturn = vsrv->handleEvent(_epoll.getEvent(eventIdx), cli);
+          evHandlerReturn = cli->handleEvent(ev);
         }
 
         if (evHandlerReturn == REQ_ERR || evHandlerReturn == REQ_DISCO) {
@@ -237,10 +247,16 @@ void Webserv::run()
           _numOfClients--;
           _fdClientMap.erase(currentFd);
         }
-        else if (evHandlerReturn == REQ_WRITE)
+        else if (evHandlerReturn == REQ_WRITE) {
           _epoll.modifyClient(currentFd, EPOLLOUT);
-        else if (evHandlerReturn == REQ_INC || evHandlerReturn == REQ_READ)
+          Logger::log_bug(
+              "Setting EPOLLOUT for cli " + cli->getRemoteInterface());
+        }
+        else if (evHandlerReturn == REQ_INC || evHandlerReturn == REQ_READ) {
           _epoll.modifyClient(currentFd, EPOLLIN);
+          Logger::log_bug(
+              "Setting EPOLLIN for cli " + cli->getRemoteInterface());
+        }
       }
       _timeoutClients();
     }
@@ -250,11 +266,12 @@ void Webserv::run()
 
 // For serverless clients there can only be a EPOLLIN event bc it is the first
 // real request that is processed
-int Webserv::_handleEventServerless(const struct epoll_event& ev, Client *cli)
+// TODO: implement this
+int Webserv::_handleEventServerless(u32 ev, Client *cli)
 {
-  if (ev.events & EPOLLIN) {
+  if (ev & EPOLLIN) {
     RequestHandler reqHandler(NULL);
-    return reqHandler.readRequest(cli);
+    return cli->handleEvent(ev);
   }
   Logger::log_err("Webserv::handleEventServerless: srvless event not EPOLLIN!");
   return REQ_ERR;
@@ -271,16 +288,6 @@ void Webserv::_timeoutClients()
     // VServer *vsrv = cli->getVsrv();
     if (difftime(now, cli->getLastAccess()) > WsrvLib::WsrvSettings.reqTimeout)
     {
-      // Logger::log_srv("Timeout",
-      //     "disconnecting cli " + cli->getAddr() + ":" +
-      //         int2str(cli->getPort()) + " due to timeout.");
-      // _epoll.removeClient(it->first);
-      // if (vsrv)
-      //   vsrv->deleteClient(it->first);
-      // _numOfClients--;
-      // it = eraseIt(_fdClientMap, it);
-      // continue;
-
       // set client timeout and prepare for write of error status before close
       cli->timeout();
       _epoll.modifyClient(it->first, EPOLLOUT);

@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/03 12:51:23 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/25 10:27:43 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/26 14:02:47 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,15 +20,15 @@
 #include <sys/epoll.h>
 #include <unistd.h>
 
-VServer::VServer(): _reqHandler(this)
+VServer::VServer()
 {
-  _server_name = "";
+  _srvName     = "";
   _setupFailed = false;
 }
 
-VServer::VServer(const VServerCfg& cfg): _reqHandler(this)
+VServer::VServer(const VServerCfg& cfg)
 {
-  _server_name      = cfg.getServerName();
+  _srvName          = cfg.getServerName();
   _activeInterfaces = cfg.getInterfaces();
   _routes           = cfg.getRoutes();
   _maxBodySize      = cfg.getMaxBodySize();
@@ -37,10 +37,10 @@ VServer::VServer(const VServerCfg& cfg): _reqHandler(this)
 
 // FIXME: think about if assignment and stuff like this really make sense for my
 // vserver classes
-VServer::VServer(const VServer& o): _reqHandler(this)
+VServer::VServer(const VServer& o)
 {
   if (this != &o) {
-    _server_name      = o._server_name;
+    _srvName          = o._srvName;
     _listen_fds       = o._listen_fds;
     _setupFailed      = o._setupFailed;
     _activeInterfaces = o._activeInterfaces;
@@ -53,13 +53,12 @@ VServer::VServer(const VServer& o): _reqHandler(this)
 VServer& VServer::operator=(const VServer& o)
 {
   if (this != &o) {
-    _server_name      = o._server_name;
+    _srvName          = o._srvName;
     _listen_fds       = o._listen_fds;
     _setupFailed      = o._setupFailed;
     _activeInterfaces = o._activeInterfaces;
     _routes           = o._routes;
     _clients          = o._clients;
-    _reqHandler       = RequestHandler(this);
   }
   return (*this);
 }
@@ -73,9 +72,9 @@ VServer& VServer::operator=(const VServer& o)
 VServer::~VServer()
 {
   if (!_listen_fds.empty())
-    Logger::log_srv(_server_name, "going out of scope");
+    Logger::log_srv(_srvName, "going out of scope");
   if (!_clients.empty()) {
-    Logger::log_srv(_server_name, "removing all clients");
+    Logger::log_srv(_srvName, "removing all clients");
     // _clients.clear();
     _removeAllClients();
   }
@@ -184,7 +183,7 @@ void VServer::init()
   } catch (const VServer::ServerInitException& e) {
     throw;
   }
-  Logger::log_srv(_server_name, "initialized!");
+  Logger::log_srv(_srvName, "initialized!");
 }
 
 // TODO: maybe design some more helper functions to make this more compact.
@@ -206,8 +205,6 @@ Client *VServer::addClient(int fd)
     throw(ServerException("server_fds = " + getSetAsStr(_listen_fds) +
         ", conn_fd = " + int2str(fd)));
 
-  Logger::log_srv(_server_name, "accepting new conn on fd " + int2str(fd));
-
   struct sockaddr_in client_addr;
   socklen_t          client_addr_len = sizeof(client_addr);
 
@@ -218,8 +215,9 @@ Client *VServer::addClient(int fd)
     else
       Logger::log_err("accept failed: " + getErrStr());
   }
-  Logger::log_srv(
-      _server_name, "Client connected from " + getAddrPortStr4(client_addr));
+  Logger::log_srv(_srvName,
+      "Client " + getAddrPortStr4(client_addr) + " connected on fd " +
+          int2str(client_fd));
 
   if (setFdNonBlocking(client_fd) == -1)
     throw(ServerException("could not set new clients fd non-blocking"));
@@ -262,25 +260,6 @@ void VServer::_removeAllClients()
       it++)
     delete it->second;
   _clients.clear();
-}
-
-// INFO: this is another heart-piece of this webserv.
-//
-// In the unlikely case we would not get a EPOLLIN or EPOLLOUT keep reading from
-// the clients sock.
-int VServer::handleEvent(const struct epoll_event& ev, Client *cli)
-{
-  int return_value = REQ_READ;
-  if (ev.events & (EPOLLIN | EPOLLOUT)) {
-    cli->setLastAccess();
-    if (ev.events & EPOLLIN)
-      return_value = _reqHandler.readRequest(cli);
-    if (ev.events & EPOLLOUT) {
-      Logger::log_msg("Got EPOLLOUT!");
-      return_value = _reqHandler.writeResponse(cli);
-    }
-  }
-  return (return_value);
 }
 
 // close all socket fds

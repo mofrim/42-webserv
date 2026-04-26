@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/14 23:12:17 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/25 19:45:21 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/26 15:01:25 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -128,19 +128,21 @@ int Epoll::getEventFd(int event_idx) const
   return (_events[event_idx].data.fd);
 }
 
-const struct epoll_event& Epoll::getEvent(int event_idx) const
+u32 Epoll::getEvent(int event_idx) const
 {
-  return (_events[event_idx]);
+  return (_events[event_idx].events);
 }
 
-std::string Epoll::_getEventStr(const uint32_t& ev) const
+str Epoll::_getEventStr(const uint32_t& ev) const
 {
   if (ev & EPOLLIN)
-    return (std::string("EPOLLIN"));
-  return (std::string("UNKNOWN EVENT"));
+    return str("EPOLLIN");
+  if (ev & EPOLLOUT)
+    return str("EPOLLOUT");
+  return str("UNKNOWN EVENT");
 }
 
-void Epoll::printEvents() const
+void Epoll::printReadylist() const
 {
   Logger::log_dbg1("epoll_wait returned nfds = " + int2str(_nfds));
   if (_nfds > 0) {
@@ -154,6 +156,6 @@ void Epoll::printEvents() const
 ////////////////////////////////////////////////////////////////////////////////
 /// Exceptions
 
-Epoll::EpollException::EpollException(const std::string& msg):
+Epoll::EpollException::EpollException(const str& msg):
   std::runtime_error("EpollException: " + msg)
 {}

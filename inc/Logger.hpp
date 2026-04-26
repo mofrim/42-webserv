@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/24 20:49:55 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/24 17:32:10 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/26 10:08:37 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,5 +69,6 @@ class Logger {
     static void log_dbg0(const std::string& msg);
     static void log_dbg1(const std::string& msg);
     static void log_dbg2(const std::string& msg);
+    static void log_bug(const std::string& msg);
     static str  getLogtime();
 };

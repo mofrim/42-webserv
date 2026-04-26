@@ -6,51 +6,45 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 19:12:58 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/24 09:45:49 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/25 22:40:30 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
-#include "Client.hpp"
 #include "Request.hpp"
 
-#include <deque>
-#include <map>
 #include <stdexcept>
 #include <unistd.h>
 
-// FIXME: for now this is the read buffer size. definitely coud be higher.
-#define READ_BUFSIZE 4096
-
 class VServer;
+class Client;
 
 class RequestHandler {
   private:
-    VServer *_srv;
+    Client *_cli;
+    str     _vsrvName;
 
-    // choosing a deque here as we are going to insert new request at the
-    // beginning
-    std::deque<Request> _requests;
-
-    std::map< Client *, std::deque<Request> > _reqQueue;
+    char _buffer[READ_BUFSIZE];
 
     // FIXME:
     // maybe move cli param to a seperate private field so i don't have to pass
     // it to every function
-    bool     _cliHasUnfinishedRequest(Client *cli);
-    Request& _getUnfinishedReq(Client *cli);
+    bool _hasUnfinishedRequest();
 
-    RequestHandler(const RequestHandler& other);
-    RequestHandler();
+    // unused
+    RequestHandler(const RequestHandler& o);
+    RequestHandler& operator=(const RequestHandler& o);
 
   public:
-    RequestHandler(VServer *srv);
-    RequestHandler& operator=(const RequestHandler& other);
+    RequestHandler();
+    RequestHandler(Client *cli);
     ~RequestHandler();
 
-    int readRequest(Client *cli);
-    int writeResponse(Client *cli);
+    int readRequest();
+    int writeResponse();
+
+    void setVsrvname(const str& n);
 
     class ReqHandlerException: public std::runtime_error {
       public:

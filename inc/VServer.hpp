@@ -24,7 +24,7 @@
 class VServer {
   private:
     std::set<u16> _ports;
-    std::string   _server_name;
+    std::string   _srvName;
     std::set<int> _listen_fds;
 
     u32 _maxBodySize;
@@ -37,8 +37,6 @@ class VServer {
     bool _setupFailed;
 
     std::map<int, Client *> _clients;
-
-    RequestHandler _reqHandler;
 
     void _setupSockets();
     void _removeAllClients();
@@ -54,7 +52,6 @@ class VServer {
     void    init();
     Client *addClient(int fd);
     void    deleteClient(int fd);
-    int     handleEvent(const struct epoll_event& ev, Client *cli);
 
     // utils, getters setters
     std::string       getServerName() const;
