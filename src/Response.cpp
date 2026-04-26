@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/23 19:11:25 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/26 17:58:39 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/26 20:00:25 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,8 +91,6 @@ u16 Response::genResponse(const Request& req)
 // this in order to avoid codedup in genErrResponse().
 void Response::_genResponse()
 {
-  Logger::log_dbg0(
-      "Response::genResponse: statusCode = " + int2str(_statusCode));
   _buildRespoHdrs();
 
   for (std::map<str, str>::reverse_iterator it = _respoHeaders.rbegin();

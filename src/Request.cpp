@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 23:39:57 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/26 17:58:39 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/26 20:24:33 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 #include "Logger.hpp"
 #include "ReqParse.hpp"
 #include "Request.hpp"
+#include "VServer.hpp"
 #include "WsrvLib.hpp"
 #include "utils.hpp"
 
@@ -108,7 +109,7 @@ void Request::setFinished()
 void Request::append(const str& s)
 {
   _reqstr += s;
-  Logger::log_reqres("Appending to req:", s);
+  Logger::log_reqres(_vsrv->getName(), "Appending to Req:", s);
 }
 
 bool Request::hdrComplete() const
@@ -119,10 +120,10 @@ bool Request::hdrComplete() const
 }
 
 // for now we only look at the hdr
+// TODO: we will also have to look for Content-Length!
 bool Request::reqComplete() const
 {
   if (hdrComplete()) {
-    Logger::log_msg("Request::reqComplete: Request complete!");
     return true;
   }
   return false;

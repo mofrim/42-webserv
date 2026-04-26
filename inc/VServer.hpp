@@ -54,7 +54,7 @@ class VServer {
     void    deleteClient(int fd);
 
     // utils, getters setters
-    std::string       getServerName() const;
+    std::string       getName() const;
     sockaddr_in       getServerAddr() const;
     const VServerCfg *getCfg() const;
     bool              getSetupFailed() const;

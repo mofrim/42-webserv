@@ -223,3 +223,12 @@ closing and handling in case of certain statusCodes and regarding timeout.
 ## 2026-04-26
 
 maybe even implement a simple form of rate-limiting
+
+### 20:05
+
+current possible TODOs:
+
+- [ ] implement real virtual servers (serverName base routing)
+- [ ] implement PUT req
+- [ ] impl DEL req
+- [ ] start with cfg parsing

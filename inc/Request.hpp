@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 23:39:07 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/26 15:42:40 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/26 20:14:16 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,6 @@
 #include "WsrvLib.hpp"
 
 #include <map>
-#include <string>
 
 // The Request class.
 

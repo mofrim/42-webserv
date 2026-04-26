@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 19:13:35 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/26 17:59:20 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/26 20:24:59 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,7 @@ RequestHandler::~RequestHandler()
 // -- OCF end --
 
 RequestHandler::RequestHandler(Client *cli):
-  _cli(cli), _vsrvName(cli->getVsrv()->getServerName())
+  _cli(cli), _vsrvName(cli->getVsrv()->getName())
 {}
 
 // Handler for an EPOLLIN aka I/O read event aka a _Request_
@@ -54,8 +54,7 @@ void RequestHandler::readRequest()
 {
   int fd = _cli->getFd();
 
-  Logger::log_srv(_vsrvName,
-      "reading from " + _cli->getRemoteInterface() + " aka fd " + int2str(fd));
+  Logger::log_srv(_vsrvName, "reading from " + _cli->getIfaceFdStr());
 
   memset(_buffer, 0, READ_BUFSIZE);
   ssize_t bytes_read = read(fd, _buffer, READ_BUFSIZE);
@@ -69,7 +68,7 @@ void RequestHandler::readRequest()
     // previous read!
     if (bytes_read == 0)
       Logger::log_srv(
-          _vsrvName, "Client disco -> closing client on fd " + int2str(fd));
+          _vsrvName, "Client disco -> closing client " + _cli->getIfaceFdStr());
     else
       Logger::log_err(
           "Read failed, errno: " + int2str(errno) + " = " + getErrStr());
@@ -86,7 +85,8 @@ void RequestHandler::readRequest()
   }
 
   if (_cli->isReqComplete()) {
-    Logger::log_reqres("Request", _cli->getReq().getReqstr());
+    Logger::log_reqres(
+        _vsrvName, "Request complete", _cli->getReq().getReqstr());
     _cli->setReqFinished();
     _cli->setState(CLI_SEND);
   }
@@ -116,18 +116,16 @@ void RequestHandler::writeResponse()
     statusCode = _cli->getReq().getStatusCode();
   }
 
-  Logger::log_srv(_cli->getVsrv()->getServerName(),
-      "Sending our Response to " + _cli->getRemoteInterface());
+  Logger::log_srv(_cli->getVsrv()->getName(),
+      "Sending our Response to " + _cli->getIfaceFdStr());
 
   if (response.empty())
     throw(ReqHandlerException("Cannot write response! Nothing to write!"));
 
-  // Logger::log_reqres("webserv's response", response);
-
   ssize_t bytes_sent = send(_cli->getFd(), response.data(), response.size(), 0);
 
   if (bytes_sent == -1) {
-    Logger::log_err("couldn't send response!");
+    Logger::log_err("Couldn't send response!");
     return;
   }
 
@@ -137,6 +135,7 @@ void RequestHandler::writeResponse()
   else
     _cli->setState(CLI_IDLE);
 
+  Logger::log_srv(_cli->getVsrv()->getName(), "Response successfully sent!");
   _cli->resetReq();
 }
 

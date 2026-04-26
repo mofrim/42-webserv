@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/16 12:11:11 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/26 14:01:26 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/26 20:14:17 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 /// Server methods of minor importance
 
-std::string VServer::getServerName() const
+std::string VServer::getName() const
 {
   return (_srvName);
 }

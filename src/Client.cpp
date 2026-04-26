@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/14 20:51:06 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/26 17:37:43 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/26 20:14:16 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,8 +34,8 @@ Client::Client(int fd, VServer *vsrv, const str& addr, in_port_t port):
   _clientFd(fd), _addr(addr), _port(ntohs(port)), _timeout(false),
   _lastActive(time(NULL)), _vsrv(vsrv), _reqHandler(this), _state(CLI_IDLE)
 {
-  _remoteInterface = addr + ":" + int2str(_port);
-  _reqHandler.setVsrvname(vsrv->getServerName());
+  _ifaceFdStr = addr + ":" + int2str(_port) + ":fd=" + int2str(fd);
+  _reqHandler.setVsrvname(vsrv->getName());
 }
 
 Client& Client::operator=(const Client& o)
@@ -46,8 +46,7 @@ Client& Client::operator=(const Client& o)
 
 Client::~Client()
 {
-  Logger::log_dbg0(
-      "Client " + _remoteInterface + " closing fd " + int2str(_clientFd));
+  Logger::log_dbg0("Client " + _ifaceFdStr);
   close(_clientFd);
 }
 
@@ -168,9 +167,9 @@ void Client::resetReq()
   _req.reset();
 }
 
-str Client::getRemoteInterface() const
+str Client::getIfaceFdStr() const
 {
-  return _remoteInterface;
+  return _ifaceFdStr;
 }
 
 e_CliState Client::getState() const

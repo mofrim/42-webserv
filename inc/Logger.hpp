@@ -6,15 +6,13 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/24 20:49:55 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/26 19:35:25 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/26 20:21:45 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
 #include "WsrvLib.hpp"
-
-#include <string>
 
 // shell colors
 #define RED "\e[31m"
@@ -54,22 +52,25 @@ class Logger {
     ~Logger();
 
   public:
-    static void log_err(const std::string& msg);
-    static void log_msg(const std::string& msg);
-    static void log_warn(const std::string& msg);
-    static void log_srv(const std::string& srv_name, const std::string& msg);
-    static void log_reqres(const std::string& resreq, const std::string& data);
+    static void log_err(const str& msg);
+    static void log_msg(const str& msg);
+    static void log_warn(const str& msg);
+    static void log_srv(const str& srv_name, const str& msg);
+    static void log_reqres(
+        const str& srvName, const str& resreq, const str& data);
 
-    // The idead behind log_dbg{0,1,2} goes like this: at compile-time specify
-    // `-DLOGLEVEL={0,1,2}` and in the code use debug functions accordingly. so
-    // if you want to have the most brutally detailed level of debugging output
-    // compile with `-DLOGLEVEL=2`. Then even messages with log_dbg2() will be
-    // printed. In LOGLEVEL == DEBUG == 1 log_dbg1 and log_dbg0 will be printed,
-    // and in LOGLEVEL == INFO == 0 only log_dbg0 will be shown.
-    static void log_dbg0(const std::string& msg);
-    static void log_dbg1(const std::string& msg);
-    static void log_dbg2(const std::string& msg);
-    static void log_bug(const std::string& msg);
+    // The idead behind log_dbg{0,1,2} goes like this: at compile-time
+    // specify
+    // `-DLOGLEVEL={0,1,2}` and in the code use debug functions accordingly.
+    // so if you want to have the most brutally detailed level of debugging
+    // output compile with `-DLOGLEVEL=2`. Then even messages with
+    // log_dbg2() will be printed. In LOGLEVEL == DEBUG == 1 log_dbg1 and
+    // log_dbg0 will be printed, and in LOGLEVEL == INFO == 0 only log_dbg0
+    // will be shown.
+    static void log_dbg0(const str& msg);
+    static void log_dbg1(const str& msg);
+    static void log_dbg2(const str& msg);
+    static void log_bug(const str& msg);
     static str  getLogtime();
 
     static void drawCycleSep();

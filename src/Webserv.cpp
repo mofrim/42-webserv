@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:36:43 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/26 19:38:35 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/26 20:14:16 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -123,7 +123,7 @@ void Webserv::_setupSingleServer(VServer& srv)
       _vserverFdMap[*it].push_back(&srv);
   } catch (const VServer::ServerInitException& e) {
     Logger::log_err(
-        "Caught exception while trying to init srv " + srv.getServerName());
+        "Caught exception while trying to init srv " + srv.getName());
     Logger::log_err(e.what());
     srv.setSetupFailed();
   }

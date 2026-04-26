@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/24 20:52:55 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/26 19:45:31 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/26 20:23:52 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,7 @@ Logger& Logger::operator=(const Logger& other)
 Logger::~Logger()
 {}
 
-std::string Logger::getLogtime()
+str Logger::getLogtime()
 {
   char       timestamp[101];
   time_t     current_time;
@@ -41,73 +41,74 @@ std::string Logger::getLogtime()
   time(&current_time);
   timeinfo = localtime(&current_time);
   strftime(timestamp, 1000, "[%F %H:%M:%S] ", timeinfo);
-  return (std::string(timestamp));
+  return (str(timestamp));
 }
 
-void Logger::log_err(const std::string& msg)
+void Logger::log_err(const str& msg)
 {
-  std::string logtime = getLogtime();
+  str logtime = getLogtime();
   std::cout << BRED << logtime << msg << RST << std::endl;
 }
 
-void Logger::log_msg(const std::string& msg)
+void Logger::log_msg(const str& msg)
 {
-  std::string logtime = getLogtime();
+  str logtime = getLogtime();
   std::cout << BCYA << logtime << msg << RST << std::endl;
 }
 
-void Logger::log_warn(const std::string& msg)
+void Logger::log_warn(const str& msg)
 {
-  std::string logtime = getLogtime();
-  std::cout << BYLO << logtime << msg << RST << std::endl;
+  str logtime = getLogtime();
+  std::cout << YLO << logtime << msg << RST << std::endl;
 }
 
-void Logger::log_dbg0(const std::string& msg)
+void Logger::log_dbg0(const str& msg)
 {
   if (LOGLEVEL >= INFO) {
-    std::string logtime = getLogtime();
+    str logtime = getLogtime();
     std::cout << GRY << logtime << msg << RST << std::endl;
   }
 }
 
-void Logger::log_dbg1(const std::string& msg)
+void Logger::log_dbg1(const str& msg)
 {
   if (LOGLEVEL >= DEBUG) {
-    std::string logtime = getLogtime();
+    str logtime = getLogtime();
     std::cout << WHT << logtime << msg << RST << std::endl;
   }
 }
 
-void Logger::log_dbg2(const std::string& msg)
+void Logger::log_dbg2(const str& msg)
 {
   if (LOGLEVEL >= BRUTAL) {
-    std::string logtime = getLogtime();
+    str logtime = getLogtime();
     std::cout << BWHT << logtime << msg << RST << std::endl;
   }
 }
 
-void Logger::log_srv(const std::string& srv_name, const std::string& msg)
+void Logger::log_srv(const str& srvName, const str& msg)
 {
   if (LOGLEVEL >= INFO) {
-    std::string logtime = getLogtime();
-    std::cout << GRY << logtime << GRN << "(" << srv_name << ") " << GRY << msg
+    str logtime = getLogtime();
+    std::cout << GRY << logtime << GRN << "(" << srvName << ") " << GRY << msg
               << RST << std::endl;
   }
 }
 
 // for logging response and requests
-void Logger::log_reqres(const std::string& resreq, const std::string& data)
+void Logger::log_reqres(const str& srvName, const str& resreq, const str& data)
 {
   if (LOGLEVEL >= INFO) {
-    std::string logtime = getLogtime();
-    std::cout << WHT << logtime << resreq << ":\n---" << std::endl;
+    str logtime = getLogtime();
+    std::cout << GRY << logtime << GRN << "(" << srvName << ") " << BGRY
+              << resreq << ":" << BGRY << "\n---" << std::endl;
     std::cout << data;
     std::cout << "\n---" << RST << std::endl;
   }
 }
 
 // use this for bug hunting
-void Logger::log_bug(const std::string& msg)
+void Logger::log_bug(const str& msg)
 {
   std::cout << BPUR << "[BUG] " << msg << RST << std::endl;
 }

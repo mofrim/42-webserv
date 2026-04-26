@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/14 20:50:12 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/26 17:47:40 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/26 19:58:14 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,7 @@ class Client {
     int    _clientFd;
     str    _addr;
     u16    _port;
-    str    _remoteInterface;
+    str    _ifaceFdStr;
     bool   _timeout;
     time_t _lastActive;
 
@@ -64,7 +64,7 @@ class Client {
     Request&   getReq();
     void       setReq(const Request& r);
     void       resetReq();
-    str        getRemoteInterface() const;
+    str        getIfaceFdStr() const;
     e_CliState getState() const;
     void       setState(e_CliState s);
     void       setReqFinished();
