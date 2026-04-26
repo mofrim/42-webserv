@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 19:12:58 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/25 22:40:30 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/26 16:36:43 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,11 +27,6 @@ class RequestHandler {
 
     char _buffer[READ_BUFSIZE];
 
-    // FIXME:
-    // maybe move cli param to a seperate private field so i don't have to pass
-    // it to every function
-    bool _hasUnfinishedRequest();
-
     // unused
     RequestHandler(const RequestHandler& o);
     RequestHandler& operator=(const RequestHandler& o);
@@ -41,8 +36,8 @@ class RequestHandler {
     RequestHandler(Client *cli);
     ~RequestHandler();
 
-    int readRequest();
-    int writeResponse();
+    void readRequest();
+    void writeResponse();
 
     void setVsrvname(const str& n);
 

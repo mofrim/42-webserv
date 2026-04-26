@@ -6,10 +6,11 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 23:39:57 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/26 15:14:38 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/26 15:42:27 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "Client.hpp"
 #include "Logger.hpp"
 #include "ReqParse.hpp"
 #include "Request.hpp"
@@ -57,9 +58,9 @@ Request::~Request()
 
 // the standard ctor we use for initializing a request _and_ parse the request
 // at the same time.
-Request::Request(VServer *vsrv, Client *cli, const std::string& reqstr)
+Request::Request(Client *cli, const std::string& reqstr)
 {
-  _vsrv        = vsrv;
+  _vsrv        = cli->getVsrv();
   _cli         = cli;
   _reqstr      = reqstr;
   _reqFinished = false;
@@ -145,7 +146,7 @@ bool Request::hdrComplete() const
 }
 
 // for now we only look at the hdr
-bool Request::reqComplete()
+bool Request::reqComplete() const
 {
   if (hdrComplete()) {
     Logger::log_msg("Request::reqComplete: Request complete!");

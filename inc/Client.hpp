@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/14 20:50:12 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/26 15:07:25 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/26 16:25:20 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@
 class VServer;
 
 // the states of the client machine
-typedef enum { CLI_READ, CLI_SEND, CLI_IDLE } e_CliState;
+typedef enum { CLI_READ, CLI_SEND, CLI_IDLE, CLI_DISCO } e_CliState;
 
 class Client {
   private:
@@ -67,15 +67,19 @@ class Client {
     str        getRemoteInterface() const;
     e_CliState getState() const;
     void       setState(e_CliState s);
+    void       setReqFinished();
+
+    bool isReqComplete() const;
 
     bool isIdling() const;
     bool isReading() const;
     bool isSending() const;
+    bool isDisco() const;
 
     void                    setPotentialVsrvs(std::vector<VServer *> vv);
     std::vector<VServer *>& getPotentialVsrvs();
 
     static Client *newCliServerless(int listenFd);
 
-    int handleEvent(u32 ev);
+    void handleEvent(u32 ev);
 };

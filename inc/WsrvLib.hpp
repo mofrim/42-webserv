@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/24 17:31:03 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/25 22:00:56 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/26 16:54:07 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,10 +43,6 @@ typedef uint32_t    u32;
 #endif
 
 #define CRLF "\r\n"
-
-// just for explicitness sake define the possible return values of the
-// requestHandler as constants here
-enum { REQ_READ = 0, REQ_WRITE = 1, REQ_ERR = -1, REQ_INC = 2, REQ_DISCO = 3 };
 
 typedef enum { M_GET, M_POST, M_DELETE, M_UNKNOWN } e_Method;
 

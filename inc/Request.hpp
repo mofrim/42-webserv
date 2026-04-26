@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 23:39:07 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/26 10:04:03 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/26 15:42:40 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,11 +49,11 @@ class Request {
     // TODO: decide which ctors we really use here & privatize unused
     Request();
     Request(const Request& other);
-    Request(VServer *srv, Client *cli, const std::string& rstr);
+    Request(Client *cli, const str& rstr);
     Request& operator=(const Request& other);
     ~Request();
 
-    std::string getResponseStr() const;
+    str getResponseStr() const;
 
     bool isFinished() const;
     void setFinished();
@@ -61,7 +61,7 @@ class Request {
     void append(const str& s);
 
     bool hdrComplete() const;
-    bool reqComplete();
+    bool reqComplete() const;
 
     e_Method   getMethod() const;
     const str& getReqstr() const;

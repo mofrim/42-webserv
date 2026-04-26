@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 19:13:35 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/26 15:18:04 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/26 16:43:20 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,7 +53,7 @@ RequestHandler::RequestHandler(Client *cli):
 //
 // FIXME: move exception to ReqHandler class
 //
-int RequestHandler::readRequest()
+void RequestHandler::readRequest()
 {
   int fd = _cli->getFd();
 
@@ -70,37 +70,29 @@ int RequestHandler::readRequest()
     // if client closes conn i will receive a EPOLLIN event with 0 bytes read.
     // at this point the request reading should have already been finished in a
     // previous read!
-    if (bytes_read == 0) {
+    if (bytes_read == 0)
       Logger::log_srv(
           _vsrvName, "Client disco -> closing client on fd " + int2str(fd));
-      return (REQ_DISCO);
-    }
     else
       Logger::log_err(
           "Read failed, errno: " + int2str(errno) + " = " + getErrStr());
-
-    return (REQ_ERR);
+    _cli->setState(CLI_DISCO);
+    return;
   }
 
-  // append the read to the first unfinished Req we find. If there is no
-  // unfinished Req add a new one to the queue.
-
-  if (_hasUnfinishedRequest())
+  if (_cli->isReading())
     _cli->getReq().append(_buffer);
   else {
     Logger::log_srv(_vsrvName, "Starting new Req");
-    _cli->setReq(Request(_cli->getVsrv(), _cli, _buffer));
+    _cli->setReq(Request(_cli, _buffer));
+    _cli->setState(CLI_READ);
   }
 
-  if (_cli->getReq().reqComplete()) {
+  if (_cli->isReqComplete()) {
     Logger::log_reqres("Request", _cli->getReq().getReqstr());
-    {
-      _cli->getReq().setFinished();
-      _cli->setState(CLI_SEND);
-    }
-    return REQ_WRITE;
+    _cli->setReqFinished();
+    _cli->setState(CLI_SEND);
   }
-  return REQ_INC;
 }
 
 // the main routine responsible for sending the response off to the cient!
@@ -111,10 +103,9 @@ int RequestHandler::readRequest()
 // `std::string::c_str()` returns a `const char` pointer to the data stored in
 // the string. Also using `std::string::size()` which returns the size in raw
 // bytes
-int RequestHandler::writeResponse()
+void RequestHandler::writeResponse()
 {
-  int ret = REQ_READ;
-
+  _cli->setState(CLI_SEND);
   str response = _cli->getReq().getResponseStr();
 
   Logger::log_srv(_cli->getVsrv()->getServerName(),
@@ -123,34 +114,28 @@ int RequestHandler::writeResponse()
   if (response.empty())
     throw(ReqHandlerException("Cannot write response! Nothing to write!"));
 
-  // if some error occurred -> disco.
-  if (_cli->getReq().getStatusCode() >= HTTP_400 &&
-      _cli->getReq().getStatusCode() != HTTP_404)
-    ret = REQ_DISCO;
-
   // Logger::log_reqres("webserv's response", response);
 
   ssize_t bytes_sent = send(_cli->getFd(), response.data(), response.size(), 0);
 
   if (bytes_sent == -1) {
     Logger::log_err("couldn't send response!");
-    return REQ_WRITE;
+    return;
   }
+
   _cli->resetReq();
-  _cli->setState(CLI_IDLE);
-  return ret;
+
+  // if some error occurred -> disco.
+  if (_cli->getReq().getStatusCode() >= HTTP_400 &&
+      _cli->getReq().getStatusCode() != HTTP_404)
+    _cli->setState(CLI_DISCO);
+  else
+    _cli->setState(CLI_IDLE);
 }
 
 RequestHandler::ReqHandlerException::ReqHandlerException(
     const std::string& msg): std::runtime_error("ReqHandlerException: " + msg)
 {}
-
-bool RequestHandler::_hasUnfinishedRequest()
-{
-  if (_cli->getReq().isFinished())
-    return true;
-  return false;
-}
 
 void RequestHandler::setVsrvname(const str& n)
 {

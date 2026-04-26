@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:36:43 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/26 15:11:50 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/26 16:52:28 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -228,35 +228,28 @@ void Webserv::run()
         if ((cli->isIdling() || cli->isReading()) && (ev & EPOLLOUT))
           continue;
 
-        int evHandlerReturn;
-
         if (vsrv == NULL) {
           // handle servrName detection... somehow ?!??
-          evHandlerReturn = REQ_ERR;
+          cli->setState(CLI_DISCO);
         }
         else {
           if (LOGLEVEL == BRUTAL)
             vsrv->printClients();
-          evHandlerReturn = cli->handleEvent(ev);
+          cli->handleEvent(ev);
         }
 
-        if (evHandlerReturn == REQ_ERR || evHandlerReturn == REQ_DISCO) {
+        if (cli->isDisco()) {
+          Logger::log_err("removing client");
           _epoll.removeClient(currentFd);
           if (vsrv)
             vsrv->deleteClient(currentFd);
           _numOfClients--;
           _fdClientMap.erase(currentFd);
         }
-        else if (evHandlerReturn == REQ_WRITE) {
+        else if (cli->isSending())
           _epoll.modifyClient(currentFd, EPOLLOUT);
-          Logger::log_bug(
-              "Setting EPOLLOUT for cli " + cli->getRemoteInterface());
-        }
-        else if (evHandlerReturn == REQ_INC || evHandlerReturn == REQ_READ) {
+        else if (cli->isReading() || cli->isIdling())
           _epoll.modifyClient(currentFd, EPOLLIN);
-          Logger::log_bug(
-              "Setting EPOLLIN for cli " + cli->getRemoteInterface());
-        }
       }
       _timeoutClients();
     }
@@ -267,14 +260,14 @@ void Webserv::run()
 // For serverless clients there can only be a EPOLLIN event bc it is the first
 // real request that is processed
 // TODO: implement this
-int Webserv::_handleEventServerless(u32 ev, Client *cli)
+void Webserv::_handleEventServerless(u32 ev, Client *cli)
 {
   if (ev & EPOLLIN) {
     RequestHandler reqHandler(NULL);
     return cli->handleEvent(ev);
   }
   Logger::log_err("Webserv::handleEventServerless: srvless event not EPOLLIN!");
-  return REQ_ERR;
+  cli->setState(CLI_DISCO);
 }
 
 // TODO: add special treatment for CGI clients here
@@ -290,7 +283,7 @@ void Webserv::_timeoutClients()
     {
       // set client timeout and prepare for write of error status before close
       cli->timeout();
-      _epoll.modifyClient(it->first, EPOLLOUT);
+      // _epoll.modifyClient(it->first, EPOLLOUT);
     }
     it++;
   }

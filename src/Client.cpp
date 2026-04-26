@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/14 20:51:06 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/26 15:13:54 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/26 16:30:21 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -138,23 +138,19 @@ void Client::timeout()
   _timeout = true;
 }
 
-int Client::handleEvent(u32 ev)
+void Client::handleEvent(u32 ev)
 {
-  int return_value = REQ_READ;
   if (ev & (EPOLLIN | EPOLLOUT)) {
     this->setLastAccess();
     if (ev & EPOLLIN) {
-      _state = CLI_READ;
       Logger::log_msg("Got EPOLLIN!");
-      return_value = _reqHandler.readRequest();
+      _reqHandler.readRequest();
     }
     if (ev & EPOLLOUT) {
-      _state = CLI_SEND;
       Logger::log_msg("Got EPOLLOUT!");
-      return_value = _reqHandler.writeResponse();
+      _reqHandler.writeResponse();
     }
   }
-  return return_value;
 }
 
 Request& Client::getReq()
@@ -200,4 +196,19 @@ bool Client::isReading() const
 bool Client::isSending() const
 {
   return _state == CLI_SEND;
+}
+
+bool Client::isDisco() const
+{
+  return _state == CLI_DISCO;
+}
+
+bool Client::isReqComplete() const
+{
+  return _req.reqComplete();
+}
+
+void Client::setReqFinished()
+{
+  _req.setFinished();
 }
