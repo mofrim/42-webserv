@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:36:43 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/27 16:58:33 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/27 20:27:57 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,8 +21,7 @@
 #include <unistd.h>
 #include <utils.hpp>
 
-Webserv::Webserv():
-  _defaultCfg(true), _shutdown_server(false), _numOfServers(0), _numOfClients(0)
+Webserv::Webserv(): _defaultCfg(true), _shutdown_server(false), _numOfClients(0)
 {
   _Webserv.setServerName("Webserv");
 }
@@ -68,8 +67,6 @@ void Webserv::getServersFromCfg(const std::string& cfgFilename)
     throw(e);
   }
 
-  _numOfServers = cfg.getCfgs().size();
-
   for (size_t i = 0;; ++i) {
     _vservers.push_back(VServer(cfg.getCfgs()[i]));
   }
@@ -94,16 +91,14 @@ void Webserv::_setupServers()
   std::vector<VServer>::iterator it = _vservers.begin();
   while (it != _vservers.end()) {
     _setupSingleServer(it);
-    if (it->getSetupFailed()) {
+    if (it->getSetupFailed())
       it = _vservers.erase(it);
-      --_numOfServers;
-    }
     else
       ++it;
   }
   Logger::log_dbg2("Number of not-failed Servers left after cleanup: " +
-      int2str(_numOfServers));
-  if (_numOfServers == 0) {
+      int2str(_vservers.size()));
+  if (_vservers.size() == 0) {
     Logger::log_err("Could not setup any Server!");
     shutdownWebserv();
   }
@@ -159,7 +154,7 @@ void Webserv::_shutdownAllServers()
 void Webserv::run()
 {
   _setupServers();
-  _epoll.setup(_vservers, _numOfServers);
+  _epoll.setup(_vservers);
 
   // the main loop
   while (_shutdown_server == false) {
@@ -208,7 +203,7 @@ void Webserv::run()
           cli = vsrvs[0]->addClient(currentFd);
         else {
           Logger::log_err("MULTISERVER BRANCH CALLED!!!");
-          if ((cli = Client::newCliServerless(currentFd)) == NULL) {
+          if ((cli = Client::newVirtualCli(currentFd)) == NULL) {
             Logger::log_warn(
                 "Webserv::run: Client::newCliServerless returned NULL");
             continue;

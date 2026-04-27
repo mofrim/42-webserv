@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/14 20:51:06 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/27 17:01:09 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/27 19:24:07 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,9 +36,9 @@ Client::Client(int fd, VServer *vsrv, const str& addr, in_port_t port):
 {
   _ifaceFdStr = addr + ":" + int2str(_port) + ":fd=" + int2str(fd);
   if (vsrv)
-    _reqHandler.setVsrvname(vsrv->getName());
+    _reqHandler.setVsrvName(vsrv->getName());
   else
-    _reqHandler.setVsrvname("__VIRTUAL__");
+    _reqHandler.setVsrvName("__VIRTUAL__");
 }
 
 Client& Client::operator=(const Client& o)
@@ -100,7 +100,7 @@ std::vector<VServer *>& Client::getPotentialVsrvs()
 // door of pure virtual servers
 //
 // FIXME: avoid this codedup with VServer::addClient
-Client *Client::newCliServerless(int listenFd)
+Client *Client::newVirtualCli(int listenFd)
 {
   struct sockaddr_in client_addr;
   socklen_t          client_addr_len = sizeof(client_addr);

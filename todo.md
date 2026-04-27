@@ -4,9 +4,9 @@
 
 - [ ] GET THE CONFIG FORMAT STRAIGHT!!!
   - [ ] which config options will i support???
-- [ ] redesign logging to support logging to file
-- [ ] clarify how to initialize the interfaces for a server!!!
-- [ ] implement multiple servers on the same port handling.
+- [ ] `GET /../bla.md HTTP/1.1` should not be working?!
+- [ ] finish virtual servers by making server listening on localhost:1111 and
+      127.0.0.1:1111 with the same srvName distinguishable... **or let it be!**
 - [ ] implement tokenization
 - [ ] at least think about CGI
 - [ ] support uploading file to the server using POST method, 

@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 19:12:58 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/26 23:59:48 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/27 19:33:39 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,6 +31,8 @@ class RequestHandler {
     RequestHandler(const RequestHandler& o);
     RequestHandler& operator=(const RequestHandler& o);
 
+    void _setVirtualServerFromHeader();
+
   public:
     RequestHandler();
     RequestHandler(Client *cli);
@@ -40,7 +42,7 @@ class RequestHandler {
     void readRequestServerless();
     void writeResponse();
 
-    void setVsrvname(const str& n);
+    void setVsrvName(const str& n);
 
     class ReqHandlerException: public std::runtime_error {
       public:

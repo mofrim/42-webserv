@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/14 23:12:17 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/26 23:28:43 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/27 20:28:16 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,8 +41,7 @@ Epoll::~Epoll()
 // setup epoll to watch all server FDs
 //
 // we first need to count fds, because every vserver can listen on multiple FDs
-void Epoll::setup(
-    const std::vector<VServer>& vservers, const size_t& numOfServers)
+void Epoll::setup(const std::vector<VServer>& vservers)
 {
   std::set<int> listenFds;
 
@@ -51,7 +50,7 @@ void Epoll::setup(
   if (_epoll_fd == -1)
     throw(EpollException("epoll_create failed"));
 
-  for (size_t k = 0; k < numOfServers; k++) {
+  for (size_t k = 0; k < vservers.size(); k++) {
     listenFds = vservers[k].getListenFds();
     for (std::set<int>::iterator itListen = listenFds.begin();
         itListen != listenFds.end();

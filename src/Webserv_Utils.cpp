@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/16 11:54:27 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/27 16:52:21 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/27 20:29:12 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,29 +45,19 @@ void Webserv::_printSockname(int sock)
 
 void Webserv::_initDefaultCfg()
 {
-  // VServerCfg cfg1;
-  // Route      r;
-  // cfg1.setServerName("Test_1111");
-  // cfg1.addInterface("127.0.0.1", 1111);
-  // cfg1.addRoute(r);
-  // VServer dsrv1(cfg1);
-  // _vservers.push_back(dsrv1);
-  // ++_numOfServers;
-
   VServerCfg cfg1;
   Route      r;
   cfg1.setServerName("virtual1");
   cfg1.addInterface("127.0.0.1", 1111);
   cfg1.addRoute(r);
   VServer dsrv1(cfg1);
-  _vservers.push_back(dsrv1);
-  ++_numOfServers;
 
   VServerCfg cfg2;
-  cfg2.setServerName("virtual2");
-  cfg2.addInterface("127.0.0.1", 1111);
+  cfg2.setServerName("virtual1");
+  cfg2.addInterface("localhost", 1111);
   cfg2.addRoute(r);
   VServer dsrv2(cfg2);
+
+  _vservers.push_back(dsrv1);
   _vservers.push_back(dsrv2);
-  ++_numOfServers;
 }

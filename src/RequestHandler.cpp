@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 19:13:35 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/27 17:05:52 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/27 19:54:21 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,16 +54,15 @@ RequestHandler::RequestHandler(Client *cli): _cli(cli)
 //
 //  1) The Length of the body reached the `Content-Length` Header field value
 //  2) The connection is closed by the client (read == 0)
+//
+//  NOTE: lgtm
 void RequestHandler::readRequest()
 {
-  int fd = _cli->getFd();
-
-  Logger::log_srv(_vsrvName, "reading from " + _cli->getIfaceFdStr());
-
   memset(_buffer, 0, READ_BUFSIZE);
-  ssize_t bytes_read = read(fd, _buffer, READ_BUFSIZE);
+  ssize_t bytes_read = read(_cli->getFd(), _buffer, READ_BUFSIZE);
 
-  Logger::log_srv(_vsrvName, "read " + int2str(bytes_read) + " bytes");
+  Logger::log_srv(_vsrvName,
+      "read " + int2str(bytes_read) + " bytes from " + _cli->getIfaceFdStr());
 
   if (bytes_read <= 0) {
 
@@ -96,34 +95,10 @@ void RequestHandler::readRequest()
   if (_cli->getReq().hdrComplete()) {
     int status = _cli->getReq().parseHeaders();
     if (status != HTTP_200) {
-      Logger::log_bug("dunno why exiting here");
       _cli->setState(CLI_DISCO);
       return;
     }
-  }
-
-  if (_vsrvName == "__VIRTUAL__") {
-    str host = _cli->getReq().getHeaders().at("Host");
-
-    for (std::vector<VServer *>::iterator it =
-             _cli->getPotentialVsrvs().begin();
-        it != _cli->getPotentialVsrvs().end();
-        it++)
-    {
-      Logger::log_bug("checking this potential server: " + (*it)->getName());
-      if ((*it)->getName() == host) {
-        Logger::log_bug("Found matching VServer for host = " + host);
-        _cli->setVsrv(*it);
-        (*it)->addClient(_cli);
-        _vsrvName = host;
-      }
-    }
-
-    if (_vsrvName == "__VIRTUAL__") {
-      Logger::log_err("No matching VServer found for client");
-      _cli->setState(CLI_DISCO);
-      return;
-    }
+    _setVirtualServerFromHeader();
   }
 
   if (_cli->isReqComplete()) {
@@ -134,10 +109,6 @@ void RequestHandler::readRequest()
   }
 }
 
-// the main routine responsible for sending the response off to the cient!
-// taking the response from the back of the _requests vector as new requests
-// will be pushed to the front (see above)
-//
 // using the `response.data()` here to work in binary mode. this, very much like
 // `std::string::c_str()` returns a `const char` pointer to the data stored in
 // the string. Also using `std::string::size()` which returns the size in raw
@@ -159,7 +130,7 @@ void RequestHandler::writeResponse()
   }
 
   Logger::log_srv(_cli->getVsrv()->getName(),
-      "Sending our Response to " + _cli->getIfaceFdStr());
+      "Sending Response to " + _cli->getIfaceFdStr());
 
   if (response.empty())
     throw(ReqHandlerException("Cannot write response! Nothing to write!"));
@@ -185,7 +156,42 @@ RequestHandler::ReqHandlerException::ReqHandlerException(
     const std::string& msg): std::runtime_error("ReqHandlerException: " + msg)
 {}
 
-void RequestHandler::setVsrvname(const str& n)
+void RequestHandler::setVsrvName(const str& n)
 {
   _vsrvName = n;
+}
+
+// FIXME: maybe change logging to dbg1 for prod
+void RequestHandler::_setVirtualServerFromHeader()
+{
+  if (_vsrvName == "__VIRTUAL__") {
+
+    const std::map<str, str>& hdrs = _cli->getReq().getHeaders();
+
+    if (hdrs.find("Host") != hdrs.end()) {
+      str host = hdrs.at("Host");
+
+      for (std::vector<VServer *>::iterator it =
+               _cli->getPotentialVsrvs().begin();
+          it != _cli->getPotentialVsrvs().end();
+          it++)
+      {
+        Logger::log_dbg0("checking this potential server: " + (*it)->getName());
+        if ((*it)->getName() == host) {
+          Logger::log_dbg0("Found matching VServer for host = " + host);
+          _cli->setVsrv(*it);
+          (*it)->addClient(_cli);
+          _vsrvName = host;
+          return;
+        }
+      }
+    }
+
+    Logger::log_warn("No matching vSrv found. Moving Req to default vSrv.");
+
+    VServer *srv = _cli->getPotentialVsrvs()[0];
+    _cli->setVsrv(srv);
+    srv->addClient(_cli);
+    _vsrvName = srv->getName();
+  }
 }

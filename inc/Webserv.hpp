@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:35:29 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/27 16:51:50 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/27 20:26:43 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,8 +46,7 @@ class Webserv {
     // handling it by serverName
     std::map< int, Client * > _fdClientMap;
 
-    size_t _numOfServers;
-    u16    _numOfClients;
+    u16 _numOfClients;
 
     Epoll _epoll;
 
