@@ -232,3 +232,22 @@ current possible TODOs:
 - [ ] implement PUT req
 - [ ] impl DEL req
 - [ ] start with cfg parsing
+
+## 2026-04-27
+
+### 22:16
+
+tomorrow:
+
+- fix hanging cfg.
+- fix `GET /../bla.md` problem test with nginx before
+- make servernames and headers (except requline) case-insensitive!!! check that
+  with RFC before again
+- do further tests for real virtual server cfgs
+- if v.s. feels lgtm bump version continue with other methods
+  + `POST`
+  + check what nginx does with GET-requests that have a body. or a
+    Content-Length header and no body and so on.
+
+- make up some kind of testing framework for requests and so on.
+- is it possible to dump a `webser.pid` file to the working dir?

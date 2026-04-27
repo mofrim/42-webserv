@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:36:43 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/27 20:27:57 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/27 20:32:11 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -169,19 +169,6 @@ void Webserv::run()
       int currentFd = _epoll.getEventFd(eventIdx);
 
       // 1) new connection
-      //
-      // FIXME: it is possible for us to have servers with different server
-      // names listening on the same hostname:port connection. will this work
-      // for them too?
-      // ANSWER: Yes! But the selection process will become a little more
-      // difficult. Meaning: _getServerByFd will return a list of servers. and
-      // the request will have to be parsed here in order to find out the
-      // server_name
-      // There is 1 event for the connect. And another one, EPOLLIN, which is
-      // the write/send which contains the request. So in order to handle
-      // Virtual Servers we only have to return the list of all Servers
-      // listening on a fd the client is connected to. In the request handling
-      // part we can then route the request to the correct vsrv.
       if (_isServerFd(currentFd) && _numOfClients < MAX_CLIENTS) {
         std::vector<VServer *> vsrvs = _getServersByFd(currentFd);
 
@@ -189,14 +176,6 @@ void Webserv::run()
           Logger::log_warn("Webserv::run: _getServerByFd returned no servers");
           continue;
         }
-
-        // FIXME: FROM HERE i will have to start refactoring:
-        //
-        // 1) Clients must be creatable on their own!
-        // 2) They also need to store which server(s) they belong to
-        // 3) Eventually, after their first processed request it will be clear
-        //    which exact server is theirs. Either achieve this by setting a
-        //    single server field or reducing servers-vector to one.
 
         Client *cli;
         if (vsrvs.size() == 1)

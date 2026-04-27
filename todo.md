@@ -2,6 +2,29 @@
 
 ## current TODOs
 
+- [ ] fix hanging cfg:
+
+  ```cpp
+  void Webserv::_initDefaultCfg()
+  {
+    VServerCfg cfg1;
+    Route      r;
+    cfg1.setServerName("virtual1");
+    cfg1.addInterface("127.0.0.1", 1111);
+    cfg1.addRoute(r);
+    VServer dsrv1(cfg1);
+
+    VServerCfg cfg2;
+    cfg2.setServerName("virtual1");
+    cfg2.addInterface("localhost", 1111);
+    cfg2.addRoute(r);
+    VServer dsrv2(cfg2);
+
+    _vservers.push_back(dsrv1);
+    _vservers.push_back(dsrv2);
+  }
+  ```
+
 - [ ] GET THE CONFIG FORMAT STRAIGHT!!!
   - [ ] which config options will i support???
 - [ ] `GET /../bla.md HTTP/1.1` should not be working?!
