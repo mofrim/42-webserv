@@ -6,11 +6,18 @@
 #    By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/12/01 11:45:58 by fmaurer           #+#    #+#              #
-#    Updated: 2026/04/26 19:49:34 by fmaurer          ###   ########.fr        #
+#    Updated: 2026/04/26 22:20:18 by fmaurer          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 NAME 		= webserv
+
+# OMG! Make can do parallel builds out of the box! Normally the param is `-j
+# [N]` where `N` is the number of CPUs to use for build. Without the N it simply
+# uses the maximum available number of CPUs
+#
+# ... sadly causes problems with multi-step recipes like `re`
+MAKEFLAGS += -j $(shell echo "`grep -c processor /proc/cpuinfo` / 2" | bc)
 
 # The directories..
 #
@@ -66,6 +73,7 @@ $(OBJDIR):
 # functioning without any meaningful error msg !!
 $(OBJDIR)/%.o: %.cpp $(HDRS) | $(OBJDIR)
 	$(CPP) $(IFLAGS) $(CFLAGS) -c $< -o $@
+
 
 $(NAME): $(OBJS)
 	$(CPP) $(IFLAGS) $(CFLAGS) -o $@ $^

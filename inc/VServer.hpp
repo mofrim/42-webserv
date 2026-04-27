@@ -26,11 +26,14 @@ class VServer {
     std::set<u16> _ports;
     std::string   _srvName;
     std::set<int> _listen_fds;
+    std::set<int> _virtualFds;
 
     u32 _maxBodySize;
 
     std::map< str, std::set<u16> > _activeInterfaces;
     std::map< str, std::set<u16> > _activeAddrPortPairs;
+
+    std::map< int, std::pair<str, u16> > _fdIfaceMap;
 
     std::map<str, Route> _routes;
 
@@ -38,8 +41,17 @@ class VServer {
 
     std::map<int, Client *> _clients;
 
-    void _setupSockets();
+    void _setupSockets(std::vector<VServer>::iterator begin,
+        std::vector<VServer>::iterator                cur);
+
     void _removeAllClients();
+
+    int _findVirtualBuddy(std::vector<VServer>::iterator begin,
+        std::vector<VServer>::iterator                   cur,
+        const str&                                       addr,
+        u16                                              port);
+
+    int _isActiveIface(const str& addr, u16 port) const;
 
   public:
     // OCF
@@ -49,9 +61,13 @@ class VServer {
     VServer& operator=(const VServer& other);
     ~VServer();
 
-    void    init();
+    void init(std::vector<VServer>::iterator begin,
+        std::vector<VServer>::iterator       cur);
+
     Client *addClient(int fd);
-    void    deleteClient(int fd);
+    void    addClient(Client *cli);
+
+    void deleteClient(int fd);
 
     // utils, getters setters
     std::string       getName() const;
@@ -61,12 +77,12 @@ class VServer {
     u16               getNumOfListenFds() const;
 
     void setServerName(std::string name);
-    void setServerAddr(sockaddr_in server_addr);
     void setSetupFailed();
 
     void printCfg() const;
     void printClients();
     bool isValidClientFd(int fd);
+    bool isVirtualFd(int fd) const;
 
     const std::set<int>& getListenFds() const;
     const std::set<u16>& getPorts() const;

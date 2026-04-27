@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:35:29 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/26 16:31:45 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/27 16:51:50 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,7 +52,7 @@ class Webserv {
     Epoll _epoll;
 
     void _setupServers();
-    void _setupSingleServer(VServer& srv);
+    void _setupSingleServer(std::vector<VServer>::iterator srvIt);
     void _setupEpoll();
     void _shutdownAllServers();
 
@@ -60,7 +60,7 @@ class Webserv {
     bool _isServerFd(int fd) const;
 
     // QUESTION: maybe this can be const / or ref?
-    std::vector<VServer *> _getServerByFd(int fd);
+    std::vector<VServer *> _getServersByFd(int fd);
 
     void _initDefaultCfg();
     void _printSockname(int sock);

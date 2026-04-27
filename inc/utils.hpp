@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/03 11:26:23 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/25 11:49:59 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/27 15:07:35 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,17 +15,20 @@
 #include <netinet/in.h>
 #include <set>
 #include <sstream>
+#include <vector>
 
 str bool2str(bool n);
 str int2str(int n);
 
-str      inAddrToStr(const struct in_addr& addr);
-str      getAddrPortStr4(const struct sockaddr_in& addr);
-int      setFdNonBlocking(int fd);
-str      getErrStr();
-e_Method str2method(const str& m);
-str      method2str(e_Method m);
-int      isDir(const str& path);
+str              inAddrToStr(const struct in_addr& addr);
+str              getAddrPortStr4(const struct sockaddr_in& addr);
+int              setFdNonBlocking(int fd);
+str              getErrStr();
+e_Method         str2method(const str& m);
+str              method2str(e_Method m);
+int              isDir(const str& path);
+std::vector<str> splitString(const str& sstr, const str& delim);
+str              strip(str str);
 
 // -----------------------------=[ Templates ]=----------------------------- //
 

@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/14 20:51:06 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/26 20:14:16 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/27 17:01:09 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,9 +15,9 @@
 #include "VServer.hpp"
 #include "utils.hpp"
 
+#include <iostream>
 #include <sys/epoll.h>
 #include <unistd.h>
-
 // --------------------------------=[ OCF ]=-------------------------------- //
 
 Client::Client():
@@ -35,7 +35,10 @@ Client::Client(int fd, VServer *vsrv, const str& addr, in_port_t port):
   _lastActive(time(NULL)), _vsrv(vsrv), _reqHandler(this), _state(CLI_IDLE)
 {
   _ifaceFdStr = addr + ":" + int2str(_port) + ":fd=" + int2str(fd);
-  _reqHandler.setVsrvname(vsrv->getName());
+  if (vsrv)
+    _reqHandler.setVsrvname(vsrv->getName());
+  else
+    _reqHandler.setVsrvname("__VIRTUAL__");
 }
 
 Client& Client::operator=(const Client& o)
@@ -46,7 +49,7 @@ Client& Client::operator=(const Client& o)
 
 Client::~Client()
 {
-  Logger::log_dbg0("Client " + _ifaceFdStr);
+  Logger::log_dbg0("Destroying client " + _ifaceFdStr);
   close(_clientFd);
 }
 
@@ -74,6 +77,7 @@ clock_t Client::getLastActive() const
 void Client::setVsrv(VServer *v)
 {
   _vsrv = v;
+  _req.setVsrv(v);
 }
 
 VServer *Client::getVsrv() const
@@ -109,16 +113,18 @@ Client *Client::newCliServerless(int listenFd)
     else
       Logger::log_err("accept failed: " + getErrStr());
   }
-  Logger::log_srv(
-      "ServerLess", "Client connected from " + getAddrPortStr4(client_addr));
 
   if (setFdNonBlocking(client_fd) == -1) {
     close(client_fd);
     return NULL;
   }
 
-  std::string hostname(inAddrToStr(client_addr.sin_addr));
+  str     hostname(inAddrToStr(client_addr.sin_addr));
   Client *newCli = new Client(client_fd, NULL, hostname, client_addr.sin_port);
+
+  Logger::log_srv(
+      "ServerLess", "Client connected from " + newCli->getIfaceFdStr());
+
   return newCli;
 }
 
@@ -149,6 +155,14 @@ void Client::handleEvent(u32 ev)
       Logger::log_msg("Got EPOLLOUT!");
       _reqHandler.writeResponse();
     }
+  }
+}
+
+void Client::handleEventServerless(u32 ev)
+{
+  if (ev & EPOLLIN) {
+    this->setLastActive();
+    _reqHandler.readRequest();
   }
 }
 
@@ -215,4 +229,9 @@ void Client::setReqFinished()
 bool Client::isTimeout() const
 {
   return _timeout;
+}
+
+bool Client::reqHasHostHeader()
+{
+  return _req.getHeaders().find("Host") != _req.getHeaders().end();
 }

@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/16 12:11:11 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/26 20:14:17 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/27 17:03:43 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -111,4 +111,11 @@ void VServer::setMaxBodySize(u32 mbs)
 u32 VServer::getMaxBodySize() const
 {
   return _maxBodySize;
+}
+
+// @return true, if the given fd is a virtual fd, meaning, the fd will be added
+// to epoll interest-list by the first server who also bound it.
+bool VServer::isVirtualFd(int fd) const
+{
+  return _virtualFds.find(fd) != _virtualFds.end();
 }

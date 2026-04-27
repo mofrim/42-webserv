@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/03 12:51:23 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/26 14:02:47 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/27 17:05:01 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,19 +20,12 @@
 #include <sys/epoll.h>
 #include <unistd.h>
 
+// --------------------------------=[ OCF ]=-------------------------------- //
+
 VServer::VServer()
 {
   _srvName     = "";
   _setupFailed = false;
-}
-
-VServer::VServer(const VServerCfg& cfg)
-{
-  _srvName          = cfg.getServerName();
-  _activeInterfaces = cfg.getInterfaces();
-  _routes           = cfg.getRoutes();
-  _maxBodySize      = cfg.getMaxBodySize();
-  _setupFailed      = false;
 }
 
 // FIXME: think about if assignment and stuff like this really make sense for my
@@ -81,6 +74,32 @@ VServer::~VServer()
   cleanup();
 }
 
+// -----------------------------=[ Extra CTOR ]=----------------------------- //
+
+VServer::VServer(const VServerCfg& cfg)
+{
+  _srvName          = cfg.getServerName();
+  _activeInterfaces = cfg.getInterfaces();
+  _routes           = cfg.getRoutes();
+  _maxBodySize      = cfg.getMaxBodySize();
+  _setupFailed      = false;
+}
+
+// ---------------------------=[ Other routines ]=--------------------------- //
+
+// Init a server. If initialization fails after call to socket we would be left
+// with a open fd, so we need to close it for proper cleanup
+void VServer::init(
+    std::vector<VServer>::iterator begin, std::vector<VServer>::iterator cur)
+{
+  try {
+    _setupSockets(begin, cur);
+  } catch (const VServer::ServerInitException& e) {
+    throw;
+  }
+  Logger::log_srv(_srvName, "initialized!");
+}
+
 // settings up sockets per server.
 //
 // the canonical workflow here is
@@ -115,12 +134,10 @@ VServer::~VServer()
 //
 //	- SOMAXCONN: 4096 on my system, maximum number of connections in the backlog
 //		of listen
-
-// NEXT:
-// FIXME:
-// TODO: refac to use _activeInterfaces and erase failed things from it.
-void VServer::_setupSockets()
+void VServer::_setupSockets(
+    std::vector<VServer>::iterator begin, std::vector<VServer>::iterator cur)
 {
+
   std::map< str, std::set<u16> >::iterator it = _activeInterfaces.begin();
   while (it != _activeInterfaces.end()) {
     str addr = it->first;
@@ -141,18 +158,32 @@ void VServer::_setupSockets()
     std::pair<str, int>     addrFd;
     std::set<u16>::iterator itp = ports.begin();
     while (itp != ports.end()) {
-      addrFd     = Socket::bindSocket(addr, *itp);
-      int sockFd = addrFd.second;
-
-      if (sockFd == -1) {
+      int sockFd = -1;
+      if ((sockFd = _findVirtualBuddy(begin, cur, addr, *itp)) >= 0) {
+        Logger::log_msg("Found real virtual server: " + _srvName + " - " +
+            addr + ":" + int2str(*itp));
+        _virtualFds.insert(sockFd);
+      }
+      // the _srvName did match
+      else if (sockFd == -42) {
+        Logger::log_err("Same interface AND srvName");
         itp = eraseIt(ports, itp);
         continue;
       }
+      else {
+        addrFd = Socket::bindSocket(addr, *itp);
+        sockFd = addrFd.second;
 
-      if (listen(sockFd, SOMAXCONN) == -1) {
-        close(sockFd);
-        itp = eraseIt(ports, itp);
-        continue;
+        if (sockFd == -1) {
+          itp = eraseIt(ports, itp);
+          continue;
+        }
+
+        if (listen(sockFd, SOMAXCONN) == -1) {
+          close(sockFd);
+          itp = eraseIt(ports, itp);
+          continue;
+        }
       }
 
       _listen_fds.insert(sockFd);
@@ -162,6 +193,11 @@ void VServer::_setupSockets()
 
       // store IP and port
       _activeAddrPortPairs[addrFd.first].insert(*itp);
+
+      // store fd and iface:port mapping for use in virtual server
+      // identification
+      _fdIfaceMap[sockFd] = std::make_pair(addr, *itp);
+
       itp++;
     }
     if (ports.size() == 0) {
@@ -174,16 +210,32 @@ void VServer::_setupSockets()
     throw(ServerInitException("Could not setup a single socket!"));
 }
 
-// Init a server. If initialization fails after call to socket we would be left
-// with a open fd, so we need to close it for proper cleanup
-void VServer::init()
+int VServer::_findVirtualBuddy(std::vector<VServer>::iterator begin,
+    std::vector<VServer>::iterator                            cur,
+    const str&                                                addr,
+    u16                                                       port)
 {
-  try {
-    _setupSockets();
-  } catch (const VServer::ServerInitException& e) {
-    throw;
+  int vfd = -1;
+
+  for (std::vector<VServer>::iterator it = begin; it != cur; it++)
+    if ((vfd = it->_isActiveIface(addr, port)) != -1) {
+      if (it->_srvName == _srvName)
+        return -42;
+      return vfd;
+    }
+  return vfd;
+}
+
+// lookup the given addr:port in the _fdIfaceMap of a VServer. if it is found
+// return the corresponding fd.
+int VServer::_isActiveIface(const str& addr, u16 port) const
+{
+  std::map< int, std::pair<str, u16> >::const_iterator it = _fdIfaceMap.begin();
+  while (it != _fdIfaceMap.end()) {
+    if (it->second.first == addr && it->second.second == port)
+      return it->first;
   }
-  Logger::log_srv(_srvName, "initialized!");
+  return -1;
 }
 
 // TODO: maybe design some more helper functions to make this more compact.
@@ -238,6 +290,11 @@ Client *VServer::addClient(int fd)
   return (newCli);
 }
 
+void VServer::addClient(Client *cli)
+{
+  _clients[cli->getFd()] = cli;
+}
+
 // remove all traces of a client from the Server _and_ close the socket. things
 // to be cleaned up:
 //
@@ -271,9 +328,12 @@ void VServer::cleanup()
   for (std::set<int>::iterator it = _listen_fds.begin();
       it != _listen_fds.end();
       it++)
-    if (*it != -1 && close(*it) == -1)
-      Logger::log_warn("VServer::cleanup: failed to close fd " + int2str(*it) +
-          " with error: " + getErrStr());
+  {
+    if (*it != -1 && !isVirtualFd(*it))
+      if (close(*it) == -1)
+        Logger::log_warn("VServer::cleanup: failed to close fd " +
+            int2str(*it) + " with error: " + getErrStr());
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////

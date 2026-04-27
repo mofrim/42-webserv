@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/23 15:06:21 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/26 19:47:30 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/27 16:39:11 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,6 +72,46 @@ int ReqParse::parseReqLine(t_RequestLine& rl, const str& rlstr)
   if (rlstr.compare(i + k, 2, CRLF) != 0)
     return HTTP_400;
 
+  return HTTP_200;
+}
+
+// TODO: add more validity checks here
+std::vector< std::pair<str, str> > ReqParse::splitHdr(const str& hstr)
+{
+  std::vector< std::pair<str, str> > ret;
+
+  // isolate headers from body
+  str              onlyHdrs = hstr.substr(0, hstr.find(CRLFX2) + 2);
+  std::vector<str> hdrLines = splitString(onlyHdrs, CRLF);
+
+  for (std::vector<str>::iterator it = hdrLines.begin(); it != hdrLines.end();
+      it++)
+  {
+    size_t colonPos = it->find(":");
+    if (colonPos == str::npos)
+      throw std::runtime_error("ReqParse::spliHdr: ivalid header field");
+    str fieldName  = it->substr(0, colonPos);
+    str fieldValue = strip(it->substr(colonPos + 1, str::npos));
+    ret.push_back(std::make_pair(fieldName, fieldValue));
+  }
+  return ret;
+}
+
+int ReqParse::parseHeaders(std::map<str, str>& _headers, const str& reqstr)
+{
+  str              onlyHdrs = reqstr.substr(0, reqstr.find(CRLFX2) + 2);
+  std::vector<str> hdrLines = splitString(onlyHdrs, CRLF);
+
+  // skipping the requline
+  std::vector<str>::iterator it = hdrLines.begin() + 1;
+  for (; it != hdrLines.end(); it++) {
+    size_t colonPos = it->find(":");
+    if (colonPos == str::npos)
+      return HTTP_400;
+    str fieldName       = it->substr(0, colonPos);
+    str fieldValue      = strip(it->substr(colonPos + 1, str::npos));
+    _headers[fieldName] = fieldValue;
+  }
   return HTTP_200;
 }
 

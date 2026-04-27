@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 19:12:58 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/26 16:36:43 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/26 23:59:48 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,6 +37,7 @@ class RequestHandler {
     ~RequestHandler();
 
     void readRequest();
+    void readRequestServerless();
     void writeResponse();
 
     void setVsrvname(const str& n);

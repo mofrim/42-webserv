@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 23:39:57 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/26 20:24:33 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/27 16:46:25 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -114,9 +114,7 @@ void Request::append(const str& s)
 
 bool Request::hdrComplete() const
 {
-  if (_reqstr.rfind("\r\n\r\n") != str::npos)
-    return true;
-  return false;
+  return _reqstr.rfind("\r\n\r\n") != str::npos;
 }
 
 // for now we only look at the hdr
@@ -176,4 +174,22 @@ void Request::reset()
   _reqline.method = M_GET;
   _headers.clear();
   _respo.reset();
+}
+
+u16 Request::parseHeaders()
+{
+  if ((_statusCode = ReqParse::parseReqLine(_reqline, _reqstr)) != HTTP_200) {
+    Logger::log_bug("reqline failed");
+    return _statusCode;
+  }
+  if ((_statusCode = ReqParse::parseHeaders(_headers, _reqstr)) != HTTP_200) {
+    Logger::log_bug("parse headers failed");
+    return _statusCode;
+  }
+  return HTTP_200;
+}
+
+void Request::setVsrv(VServer *v)
+{
+  _vsrv = v;
 }

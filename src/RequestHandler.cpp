@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 19:13:35 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/26 20:24:59 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/27 17:05:52 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,9 +40,13 @@ RequestHandler::~RequestHandler()
 {}
 // -- OCF end --
 
-RequestHandler::RequestHandler(Client *cli):
-  _cli(cli), _vsrvName(cli->getVsrv()->getName())
-{}
+RequestHandler::RequestHandler(Client *cli): _cli(cli)
+{
+  if (cli->getVsrv())
+    _vsrvName = cli->getVsrv()->getName();
+  else
+    _vsrvName = "__VIRTUAL__";
+}
 
 // Handler for an EPOLLIN aka I/O read event aka a _Request_
 //
@@ -82,6 +86,44 @@ void RequestHandler::readRequest()
     Logger::log_srv(_vsrvName, "Starting new Req");
     _cli->setReq(Request(_cli, _buffer));
     _cli->setState(CLI_READ);
+  }
+
+  // if we have got the full header - terminated by 2x CRLF - we will
+  // immediately parse that in order to get
+  //
+  //  a) a possible Content-Length field
+  //  b) a possible Host header for Virtual Server routing
+  if (_cli->getReq().hdrComplete()) {
+    int status = _cli->getReq().parseHeaders();
+    if (status != HTTP_200) {
+      Logger::log_bug("dunno why exiting here");
+      _cli->setState(CLI_DISCO);
+      return;
+    }
+  }
+
+  if (_vsrvName == "__VIRTUAL__") {
+    str host = _cli->getReq().getHeaders().at("Host");
+
+    for (std::vector<VServer *>::iterator it =
+             _cli->getPotentialVsrvs().begin();
+        it != _cli->getPotentialVsrvs().end();
+        it++)
+    {
+      Logger::log_bug("checking this potential server: " + (*it)->getName());
+      if ((*it)->getName() == host) {
+        Logger::log_bug("Found matching VServer for host = " + host);
+        _cli->setVsrv(*it);
+        (*it)->addClient(_cli);
+        _vsrvName = host;
+      }
+    }
+
+    if (_vsrvName == "__VIRTUAL__") {
+      Logger::log_err("No matching VServer found for client");
+      _cli->setState(CLI_DISCO);
+      return;
+    }
   }
 
   if (_cli->isReqComplete()) {

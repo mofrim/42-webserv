@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/16 11:54:27 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/24 18:25:40 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/27 16:52:21 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,12 +22,7 @@ bool Webserv::_isServerFd(int fd) const
   return (_vserverFdMap.find(fd) != _vserverFdMap.end());
 }
 
-// TODO: refactor to return a list of possible servers, namely the servers
-// listening on this specific fd.
-// NOTE: std::map -> std::multimap
-// FIXME: This has to be refactor to handle multiple real VServers listening on
-// the same FD but differing bny server_name
-std::vector<VServer *> Webserv::_getServerByFd(int fd)
+std::vector<VServer *> Webserv::_getServersByFd(int fd)
 {
   std::map< int, std::vector<VServer *> >::iterator it;
   it = _vserverFdMap.find(fd);
@@ -47,14 +42,32 @@ void Webserv::_printSockname(int sock)
 
 // NOTE: this _only_ needs to be done for the default config. all non-default
 // config wil have gone through parseCfg where all values will be set.
+
 void Webserv::_initDefaultCfg()
 {
+  // VServerCfg cfg1;
+  // Route      r;
+  // cfg1.setServerName("Test_1111");
+  // cfg1.addInterface("127.0.0.1", 1111);
+  // cfg1.addRoute(r);
+  // VServer dsrv1(cfg1);
+  // _vservers.push_back(dsrv1);
+  // ++_numOfServers;
+
   VServerCfg cfg1;
   Route      r;
-  cfg1.setServerName("Test_1111");
+  cfg1.setServerName("virtual1");
   cfg1.addInterface("127.0.0.1", 1111);
   cfg1.addRoute(r);
   VServer dsrv1(cfg1);
   _vservers.push_back(dsrv1);
+  ++_numOfServers;
+
+  VServerCfg cfg2;
+  cfg2.setServerName("virtual2");
+  cfg2.addInterface("127.0.0.1", 1111);
+  cfg2.addRoute(r);
+  VServer dsrv2(cfg2);
+  _vservers.push_back(dsrv2);
   ++_numOfServers;
 }

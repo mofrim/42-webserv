@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/14 20:50:12 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/26 19:58:14 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/27 00:11:28 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,10 +77,13 @@ class Client {
     bool isSending() const;
     bool isDisco() const;
 
+    bool reqHasHostHeader();
+
     void                    setPotentialVsrvs(std::vector<VServer *> vv);
     std::vector<VServer *>& getPotentialVsrvs();
 
     static Client *newCliServerless(int listenFd);
 
     void handleEvent(u32 ev);
+    void handleEventServerless(u32 ev);
 };

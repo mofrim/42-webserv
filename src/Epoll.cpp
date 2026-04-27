@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/14 23:12:17 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/26 16:56:21 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/26 23:28:43 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,6 +57,8 @@ void Epoll::setup(
         itListen != listenFds.end();
         itListen++)
     {
+      if (vservers[k].isVirtualFd(*itListen))
+        continue;
       struct epoll_event e = {.events = EPOLLIN, .data = {.fd = *itListen}};
       _ev.push_back(e);
 

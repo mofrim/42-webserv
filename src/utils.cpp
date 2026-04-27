@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/26 10:03:57 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/23 22:43:07 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/27 15:07:17 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@
 #include <cstring>
 #include <errno.h>
 #include <fcntl.h>
+#include <iostream>
 #include <sys/stat.h>
 
 str int2str(int n)
@@ -105,4 +106,63 @@ int isDir(const str& path)
     return 1;
 
   return 0;
+}
+
+// @brief Split string by another delim string.
+// @return  an std::vector filled with the split strings. if there is no delim
+//          in sstr or any param is empty, returs vector with sstr as only elem
+std::vector<str> splitString(const str& sstr, const str& delim)
+{
+  std::vector<str> ret;
+  size_t           i = 0;
+  size_t           k = 0;
+
+  if (sstr.empty() || delim.empty()) {
+    ret.push_back(sstr);
+    return ret;
+  }
+
+  while (i < sstr.size() && k != str::npos) {
+    k = sstr.find(delim, i);
+    str sub;
+    if (k == str::npos)
+      sub = sstr.substr(i, str::npos);
+    else
+      sub = sstr.substr(i, k - i);
+    if (!sub.empty())
+      ret.push_back(sub);
+    i = k + delim.size();
+  }
+  return ret;
+}
+
+// @brief remove leading and trailing whitespace chars from string
+str strip(str s)
+{
+  if (s.length() == 0)
+    return s;
+  std::string::iterator it0 = s.begin();
+  while (isspace(*it0) && it0 != s.end())
+    it0++;
+  std::string::iterator it1 = s.end();
+
+  // annoyingly have to take a step backwards because str.end() is one past the
+  // end and migth actually be no ws char.
+  --it1;
+
+  while (isspace(*it1) && it1 != s.begin())
+    --it1;
+
+  // yep. and again, the range-ctor is excluding the end. this is not what we
+  // want, so we need to increment.
+  //
+  // NOTE: this can fail with std::length_error exception when the string, we
+  // are trying to create here is longer than std::string::max_size(). this is
+  // why we wrap it.
+  try {
+    s = std::string(it0, ++it1);
+  } catch (const std::length_error& e) {
+    std::cout << "strip: std::length_error: " << e.what() << std::endl;
+  }
+  return s;
 }

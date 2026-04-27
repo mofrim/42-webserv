@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:36:43 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/26 20:14:16 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/27 16:58:33 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@
 
 // FIXME: remove cause sleep is not an allowed function!
 #include <errno.h>
+#include <iostream>
 #include <unistd.h>
 #include <utils.hpp>
 
@@ -69,25 +70,30 @@ void Webserv::getServersFromCfg(const std::string& cfgFilename)
 
   _numOfServers = cfg.getCfgs().size();
 
-  for (size_t i = 0; i < _numOfServers; i++) {
+  for (size_t i = 0;; ++i) {
     _vservers.push_back(VServer(cfg.getCfgs()[i]));
   }
   _defaultCfg = false;
 }
 
 // The main routine for setting up the servers listed in the Config.
-//
-// In the default case there is only one server with default values (like
-// serving from the current dir any index.html or whatever,
-// server_name="localhost", port="4284" etc...)
 void Webserv::_setupServers()
 {
   if (_defaultCfg)
     _initDefaultCfg();
 
+  // NEXT: i will have to pass to _setupSingleServer and subsequentially to
+  // VServer::init 2 iterators: _vservers.begin and the current one. this will
+  // be for being able to search through the so-far-initialized vsrvs if one has
+  // already been bound to the interface and then check if at least the names
+  // differ. if not -> fail. if they do -> skip interface binding and add 2nd /
+  // 3rd ... srv to _vserverFdMap!
+  //
+  // Hell, wait! This i only need to pass the current not-dereferenced it to
+  // _setupSingleServer!
   std::vector<VServer>::iterator it = _vservers.begin();
   while (it != _vservers.end()) {
-    _setupSingleServer(*it);
+    _setupSingleServer(it);
     if (it->getSetupFailed()) {
       it = _vservers.erase(it);
       --_numOfServers;
@@ -112,22 +118,23 @@ void Webserv::_setupServers()
 // I.E.: The serverFdMap has to be a multimap! meaning: we can have multiple
 // servers per fd only differing by name. But this i will first have to
 // implement in VServer initialization.
-void Webserv::_setupSingleServer(VServer& srv)
+void Webserv::_setupSingleServer(std::vector<VServer>::iterator srvIt)
 {
   Logger::log_msg("Setting up this server:");
   try {
-    srv.init();
-    for (std::set<int>::const_iterator it = srv.getListenFds().begin();
-        it != srv.getListenFds().end();
+    // init() needs the _vservers.begin and srvIt
+    srvIt->init(_vservers.begin(), srvIt);
+    for (std::set<int>::const_iterator it = srvIt->getListenFds().begin();
+        it != srvIt->getListenFds().end();
         it++)
-      _vserverFdMap[*it].push_back(&srv);
+      _vserverFdMap[*it].push_back(&*srvIt);
   } catch (const VServer::ServerInitException& e) {
     Logger::log_err(
-        "Caught exception while trying to init srv " + srv.getName());
+        "Caught exception while trying to init srv " + srvIt->getName());
     Logger::log_err(e.what());
-    srv.setSetupFailed();
+    srvIt->setSetupFailed();
   }
-  srv.printCfg();
+  srvIt->printCfg();
 }
 
 // nothing to do here so far...
@@ -181,7 +188,7 @@ void Webserv::run()
       // listening on a fd the client is connected to. In the request handling
       // part we can then route the request to the correct vsrv.
       if (_isServerFd(currentFd) && _numOfClients < MAX_CLIENTS) {
-        std::vector<VServer *> vsrvs = _getServerByFd(currentFd);
+        std::vector<VServer *> vsrvs = _getServersByFd(currentFd);
 
         if (vsrvs.empty()) {
           Logger::log_warn("Webserv::run: _getServerByFd returned no servers");
@@ -200,7 +207,7 @@ void Webserv::run()
         if (vsrvs.size() == 1)
           cli = vsrvs[0]->addClient(currentFd);
         else {
-          Logger::log_err("MULTISERVER BRANCH FALSELY CALLED!!!");
+          Logger::log_err("MULTISERVER BRANCH CALLED!!!");
           if ((cli = Client::newCliServerless(currentFd)) == NULL) {
             Logger::log_warn(
                 "Webserv::run: Client::newCliServerless returned NULL");
@@ -229,20 +236,14 @@ void Webserv::run()
         if ((cli->isIdling() || cli->isReading()) && (ev & EPOLLOUT))
           continue;
 
-        if (vsrv == NULL) {
-          // handle servrName detection... somehow ?!??
-          cli->setState(CLI_DISCO);
-        }
-        else {
-          if (LOGLEVEL == BRUTAL)
-            vsrv->printClients();
-          cli->handleEvent(ev);
-        }
+        cli->handleEvent(ev);
 
         if (cli->isDisco()) {
           _epoll.removeClient(currentFd);
           if (vsrv)
             vsrv->deleteClient(currentFd);
+          else
+            delete cli;
           _numOfClients--;
           _fdClientMap.erase(currentFd);
         }
@@ -264,7 +265,6 @@ void Webserv::run()
 void Webserv::_handleEventServerless(u32 ev, Client *cli)
 {
   if (ev & EPOLLIN) {
-    RequestHandler reqHandler(NULL);
     return cli->handleEvent(ev);
   }
   Logger::log_err("Webserv::handleEventServerless: srvless event not EPOLLIN!");
@@ -279,10 +279,8 @@ void Webserv::_timeoutClients()
   std::map< int, Client * >::iterator it = _fdClientMap.begin();
   while (it != _fdClientMap.end()) {
     Client *cli = it->second;
-    // VServer *vsrv = cli->getVsrv();
     if (difftime(now, cli->getLastActive()) > WsrvLib::WsrvSettings.reqTimeout)
     {
-      // set client timeout and prepare for write of error status before close
       cli->timeout();
       _epoll.modifyClient(cli->getFd(), EPOLLOUT);
       cli->setState(CLI_SEND);

@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 23:39:07 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/26 20:14:16 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/27 16:45:55 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,6 +66,7 @@ class Request {
     const str& getReqstr() const;
     Client    *getCli() const;
     VServer   *getVsrv() const;
+    void       setVsrv(VServer *v);
     u16        getStatusCode() const;
 
     void reset();
@@ -73,4 +74,6 @@ class Request {
     // FIXME: maybe refs are okay here
     const t_RequestLine&      getReqline() const;
     const std::map<str, str>& getHeaders() const;
+
+    u16 parseHeaders();
 };

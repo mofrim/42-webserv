@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/24 17:31:03 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/26 17:28:26 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/27 14:42:12 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,6 +43,7 @@ typedef uint32_t    u32;
 #endif
 
 #define CRLF "\r\n"
+#define CRLFX2 "\r\n\r\n"
 
 typedef enum { M_GET, M_POST, M_DELETE, M_UNKNOWN } e_Method;
 
