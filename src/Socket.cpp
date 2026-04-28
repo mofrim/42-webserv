@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/28 07:26:35 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/28 14:00:40 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/28 15:06:58 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -227,7 +227,7 @@ std::pair<str, int> Socket::bindSocket(const str& addr, u16 port)
 //
 // @return  if addr could not be resolved, returns empty string. the IPv4 addr
 //          as a std::string otherwise.
-str Socket::resolveIP(const str& addr)
+str Socket::resolveAddr(const str& addr)
 {
   struct addrinfo  hints;
   struct addrinfo *result;
