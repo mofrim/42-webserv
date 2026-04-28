@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/03 12:51:23 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/27 17:05:01 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/28 08:45:57 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -217,12 +217,13 @@ int VServer::_findVirtualBuddy(std::vector<VServer>::iterator begin,
 {
   int vfd = -1;
 
-  for (std::vector<VServer>::iterator it = begin; it != cur; it++)
+  for (std::vector<VServer>::iterator it = begin; it != cur; ++it) {
     if ((vfd = it->_isActiveIface(addr, port)) != -1) {
       if (it->_srvName == _srvName)
         return -42;
       return vfd;
     }
+  }
   return vfd;
 }
 
@@ -234,6 +235,7 @@ int VServer::_isActiveIface(const str& addr, u16 port) const
   while (it != _fdIfaceMap.end()) {
     if (it->second.first == addr && it->second.second == port)
       return it->first;
+    ++it;
   }
   return -1;
 }
