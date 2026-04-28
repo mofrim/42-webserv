@@ -6,7 +6,7 @@
 #    By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/12/01 11:45:58 by fmaurer           #+#    #+#              #
-#    Updated: 2026/04/26 22:20:18 by fmaurer          ###   ########.fr        #
+#    Updated: 2026/04/28 14:57:47 by fmaurer          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -104,10 +104,15 @@ val: $(NAME)
 tests:
 	@cd tests && ./update_tests.sh
 	@make -C tests
-	@tests/webserv_tests
+
+tests-run: tests
+	@cd tests && ./run_tests
 
 tests-clean:
 	@make -C tests fclean
+
+tests-bear:
+	@bear -- make -C tests
 
 fclean: clean
 	rm -f $(NAME)
