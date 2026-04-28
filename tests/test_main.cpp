@@ -6,13 +6,13 @@ int main()
 {
   test_VServerCfg();
   nl();
-  test_socket();
-  nl();
-  test_Routes();
-  nl();
   test_server_init();
   nl();
   test_WsrvLib();
+  nl();
+  test_Routes();
+  nl();
+  test_Socket();
   nl();
   print_final_result();
   if (g_GlobalResult == OK)

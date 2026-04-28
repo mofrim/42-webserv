@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/13 13:06:35 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/21 13:13:54 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/28 12:03:39 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@
 // otherwise -> success
 int _test_Routes()
 {
+  std::vector<VServer> dummy;
   print_test_topic("test_Routes", "moep");
   {
     Route r;
@@ -32,7 +33,7 @@ int _test_Routes()
     cfg.addInterface("127.0.0.1", 2222);
 
     VServer s(cfg);
-    s.init();
+    s.init(dummy.begin(), dummy.begin());
     s.printCfg();
   }
 
@@ -59,7 +60,7 @@ int _test_Routes()
     cfg.addInterface("127.0.0.1", 2222);
 
     VServer s(cfg);
-    s.init();
+    s.init(dummy.begin(), dummy.begin());
     s.printCfg();
   }
 

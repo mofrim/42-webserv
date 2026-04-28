@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/28 07:26:35 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/21 14:02:11 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/28 14:00:40 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -221,6 +221,31 @@ std::pair<str, int> Socket::bindSocket(const str& addr, u16 port)
   freeaddrinfo(ai);
 
   return std::make_pair(ipaddr, fd);
+}
+
+// @brief resolv the IPv4-addr for `addr` and return it as a string.
+//
+// @return  if addr could not be resolved, returns empty string. the IPv4 addr
+//          as a std::string otherwise.
+str Socket::resolveIP(const str& addr)
+{
+  struct addrinfo  hints;
+  struct addrinfo *result;
+  int              ret;
+
+  memset(&hints, 0, sizeof(struct addrinfo));
+
+  hints.ai_canonname = NULL;
+  hints.ai_addr      = NULL;
+  hints.ai_next      = NULL;
+  hints.ai_family    = AF_INET;
+  hints.ai_socktype  = SOCK_STREAM;
+  hints.ai_flags     = AI_NUMERICSERV;
+
+  ret = getaddrinfo(addr.c_str(), 0, &hints, &result);
+  if (ret != 0)
+    return "";
+  return inAddrToStr(((struct sockaddr_in *)result->ai_addr)->sin_addr);
 }
 
 Socket::AddrInfoException::AddrInfoException(const std::string& msg):
