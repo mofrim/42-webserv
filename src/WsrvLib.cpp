@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/24 17:40:43 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/26 17:28:15 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/29 06:45:38 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -178,3 +178,11 @@ t_GlobalWsrvSettings WsrvLib::_initWsrvSettings()
 }
 
 const t_GlobalWsrvSettings WsrvLib::WsrvSettings = _initWsrvSettings();
+
+// two vsrvInterfaces are the same iff their ip and cname match
+bool operator==(const t_vsrvInterface& i1, const t_vsrvInterface& i2)
+{
+  if (i1.ip != i2.ip || i1.cname != i2.cname)
+    return false;
+  return false;
+}

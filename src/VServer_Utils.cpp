@@ -6,11 +6,12 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/16 12:11:11 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/27 17:03:43 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/29 16:56:51 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Logger.hpp"
+#include "Socket.hpp"
 #include "VServer.hpp"
 #include "utils.hpp"
 
@@ -24,7 +25,7 @@ std::string VServer::getName() const
   return (_srvName);
 }
 
-bool VServer::getSetupFailed() const
+bool VServer::isInitFailed() const
 {
   return (_setupFailed);
 }
@@ -62,7 +63,7 @@ bool VServer::isValidClientFd(int fd)
 
 const std::set<int>& VServer::getListenFds() const
 {
-  return _listen_fds;
+  return _listenFds;
 }
 
 const std::set<u16>& VServer::getPorts() const
@@ -83,13 +84,14 @@ const std::map<str, Route>& VServer::getRoutes() const
 void VServer::printCfg() const
 {
   Logger::log_msg("  server_name: \"" + _srvName + "\"");
-  Logger::log_msg("  listen_fds: " + getSetAsStr(_listen_fds));
+  Logger::log_msg("  listen_fds: " + getSetAsStr(_listenFds));
   Logger::log_msg("  active listen interfaces:");
-  for (std::map< str, std::set<u16> >::const_iterator it =
-           _activeAddrPortPairs.begin();
-      it != _activeAddrPortPairs.end();
+  for (std::vector<t_vsrvInterface>::const_iterator it =
+           _activeInterfaces.begin();
+      it != _activeInterfaces.end();
       it++)
-    Logger::log_msg("    " + it->first + ":" + getSetAsStr(it->second));
+    Logger::log_msg(
+        "    " + it->ip + "(" + it->cname + "):" + getSetAsStr(it->portFd));
   Logger::log_msg("  routes:");
   for (std::map<str, Route>::const_iterator it = _routes.begin();
       it != _routes.end();
@@ -118,4 +120,24 @@ u32 VServer::getMaxBodySize() const
 bool VServer::isVirtualFd(int fd) const
 {
   return _virtualFds.find(fd) != _virtualFds.end();
+}
+
+// add an iface to _activeInterfaces list
+void VServer::_addActiveIface(t_AddrinfoReturn ar, u16 port)
+{
+  t_vsrvInterface vif = {
+      .ip     = ar.ip,
+      .cname  = ar.cname,
+      .portFd = std::set< std::pair<u16, int> >()};
+  vif.portFd.insert(std::make_pair(port, ar.fd));
+
+  std::vector<t_vsrvInterface>::iterator it = _activeInterfaces.begin();
+  while (it != _activeInterfaces.end()) {
+    if (*it == vif) {
+      it->portFd.insert(*vif.portFd.begin());
+      return;
+    }
+    ++it;
+  }
+  _activeInterfaces.push_back(vif);
 }

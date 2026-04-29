@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/03 11:26:23 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/27 15:07:35 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/29 16:48:28 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,6 +56,22 @@ str getSetAsStr(const std::set<T>& s)
   ret += "{";
   for (typename std::set<T>::iterator it = s.begin(); it != s.end();)
     ret += int2str(*it) + (++it != s.end() ? ", " : "}");
+  return ret;
+}
+
+// getSetAsStr in a version that supports printing sets of pairs like i use in
+// VServer::_activeInterfaces and specifially there in t_vservInterface.portFd
+template <typename T1, typename T2>
+str getSetAsStr(const std::set< std::pair<T1, T2> >& s)
+{
+  str ret("");
+  if (s.size() == 0)
+    return ret;
+  ret += "{";
+  for (typename std::set< std::pair<T1, T2> >::iterator it = s.begin();
+      it != s.end();)
+    ret += "[" + int2str(it->first) + "/fd=" + int2str(it->second) + "]" +
+        (++it != s.end() ? ", " : "}");
   return ret;
 }
 

@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/28 07:26:35 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/28 15:06:58 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/29 17:07:43 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,6 @@
 
 #include <arpa/inet.h>
 #include <cstring>
-#include <errno.h>
 #include <iostream>
 #include <netdb.h>
 #include <unistd.h>
@@ -174,8 +173,39 @@ void Socket::printAddrlist(const str& addr, u16 port)
 // -> -1
 // @throws never throws exception
 //
-// TODO: document! especially SO_REUSEADDR
-std::pair<str, int> Socket::bindSocket(const str& addr, u16 port)
+// the canonical workflow here is
+//
+//	 1) socket
+//	 2) bind
+//	 3) listen
+//
+// ... and accept, for the server, or connect for the client.
+//
+// socket() explained:
+//
+//	 - AF_INET:       socket for communication via IPv4
+//	 - SOCK_STREAM:   we want a reliable, bidirectional, byte-stream communi-
+//										cation channel
+//	 - SOCK_NONBLOCK: save a call to fcntl
+//	 - 0:             use default protocol
+//
+//	 NOTE: maybe we also want SOCK_CLOEXEC here as we maybe do not want our
+//	 sockets to be open in child processes.
+//
+// setsockopt() explained:
+//
+// 	- SOL_SOCKET: this is the level the sockopt will be applied to. SOL_SOCKET
+// 		is the sockets API level, another level would be SOL_IP.
+// 	- SO_REUSEADDR: avoid EADDRINUSE if webserv (or one of the servers) is being
+// 		restarted.
+// 	- SO_REUSEPORT (not used): only useful for multi-threaded servers. allows
+// 		binding socket to the same src_addr:port pair
+//
+// listen() explained:
+//
+//	- SOMAXCONN: 4096 on my system, maximum number of connections in the backlog
+//		of listen
+t_AddrinfoReturn Socket::bindSocket(const str& addr, u16 port)
 {
   struct addrinfo *ai;
   int              fd;
@@ -187,7 +217,7 @@ std::pair<str, int> Socket::bindSocket(const str& addr, u16 port)
   }
 
   if (ai == NULL)
-    return std::make_pair(addr, -1);
+    return (t_AddrinfoReturn){"0", addr, -1};
 
   if ((fd = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, ai->ai_protocol)) ==
       -1)
@@ -195,7 +225,7 @@ std::pair<str, int> Socket::bindSocket(const str& addr, u16 port)
     Logger::log_err("bindSocket: socket failed for (" + addr + ":" +
         int2str(port) + ") with: " + getErrStr());
     freeaddrinfo(ai);
-    return std::make_pair(addr, -1);
+    return (t_AddrinfoReturn){"0", addr, -1};
   }
 
   int opt = 1;
@@ -204,7 +234,7 @@ std::pair<str, int> Socket::bindSocket(const str& addr, u16 port)
         int2str(port) + ") with: " + getErrStr());
     close(fd);
     freeaddrinfo(ai);
-    return std::make_pair(addr, -1);
+    return (t_AddrinfoReturn){"0", addr, -1};
   }
 
   if (bind(fd, ai->ai_addr, ai->ai_addrlen) == -1) {
@@ -212,15 +242,16 @@ std::pair<str, int> Socket::bindSocket(const str& addr, u16 port)
         int2str(port) + ") with: " + getErrStr());
     close(fd);
     freeaddrinfo(ai);
-    return std::make_pair(addr, -1);
+    return (t_AddrinfoReturn){"0", addr, -1};
   }
 
   str ipaddr = inAddrToStr(
       reinterpret_cast<struct sockaddr_in *>(ai->ai_addr)->sin_addr);
+  str cname(ai->ai_canonname);
 
   freeaddrinfo(ai);
 
-  return std::make_pair(ipaddr, fd);
+  return (t_AddrinfoReturn){ipaddr, cname, fd};
 }
 
 // @brief resolv the IPv4-addr for `addr` and return it as a string.
@@ -243,9 +274,15 @@ str Socket::resolveAddr(const str& addr)
   hints.ai_flags     = AI_NUMERICSERV;
 
   ret = getaddrinfo(addr.c_str(), 0, &hints, &result);
+
   if (ret != 0)
     return "";
-  return inAddrToStr(((struct sockaddr_in *)result->ai_addr)->sin_addr);
+
+  str addrStr = inAddrToStr(((struct sockaddr_in *)result->ai_addr)->sin_addr);
+
+  freeaddrinfo(result);
+
+  return addrStr;
 }
 
 Socket::AddrInfoException::AddrInfoException(const std::string& msg):

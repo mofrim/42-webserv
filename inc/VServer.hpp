@@ -25,13 +25,13 @@ class VServer {
   private:
     std::set<u16> _ports;
     std::string   _srvName;
-    std::set<int> _listen_fds;
+    std::set<int> _listenFds;
     std::set<int> _virtualFds;
 
     u32 _maxBodySize;
 
-    std::map< str, std::set<u16> > _activeInterfaces;
-    std::map< str, std::set<u16> > _activeAddrPortPairs;
+    std::map< str, std::set<u16> > _cfgInterfaces;
+    std::vector<t_vsrvInterface>   _activeInterfaces;
 
     std::map< int, std::pair<str, u16> > _fdIfaceMap;
 
@@ -51,7 +51,8 @@ class VServer {
         const str&                                       addr,
         u16                                              port);
 
-    int _isActiveIface(const str& addr, u16 port) const;
+    int  _isActiveIface(const str& addr, u16 port) const;
+    void _addActiveIface(t_AddrinfoReturn ar, u16 port);
 
   public:
     // OCF
@@ -73,7 +74,7 @@ class VServer {
     std::string       getName() const;
     sockaddr_in       getServerAddr() const;
     const VServerCfg *getCfg() const;
-    bool              getSetupFailed() const;
+    bool              isInitFailed() const;
     u16               getNumOfListenFds() const;
 
     void setServerName(std::string name);

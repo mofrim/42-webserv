@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/13 13:06:35 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/28 15:06:58 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/28 22:30:04 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,6 +46,12 @@ int _test_Socket()
     ip   = Socket::resolveAddr(host);
     std::cout << host << ": " << ip << std::endl;
     host = "surbelkarg";
+    ip   = Socket::resolveAddr(host);
+    std::cout << host << ": " << ip << std::endl;
+    host = "10.0.0.1";
+    ip   = Socket::resolveAddr(host);
+    std::cout << host << ": " << ip << std::endl;
+    host = "127.0.0.1";
     ip   = Socket::resolveAddr(host);
     std::cout << host << ": " << ip << std::endl;
   }

@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:36:43 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/27 20:32:11 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/29 17:02:58 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,7 +91,7 @@ void Webserv::_setupServers()
   std::vector<VServer>::iterator it = _vservers.begin();
   while (it != _vservers.end()) {
     _setupSingleServer(it);
-    if (it->getSetupFailed())
+    if (it->isInitFailed())
       it = _vservers.erase(it);
     else
       ++it;
@@ -115,7 +115,7 @@ void Webserv::_setupServers()
 // implement in VServer initialization.
 void Webserv::_setupSingleServer(std::vector<VServer>::iterator srvIt)
 {
-  Logger::log_msg("Setting up this server:");
+  Logger::log_msg("Trying to setup server '" + srvIt->getName() + "':");
   try {
     // init() needs the _vservers.begin and srvIt
     srvIt->init(_vservers.begin(), srvIt);
@@ -124,12 +124,12 @@ void Webserv::_setupSingleServer(std::vector<VServer>::iterator srvIt)
         it++)
       _vserverFdMap[*it].push_back(&*srvIt);
   } catch (const VServer::ServerInitException& e) {
-    Logger::log_err(
-        "Caught exception while trying to init srv " + srvIt->getName());
-    Logger::log_err(e.what());
+    Logger::log_warn(
+        "Setting up server " + srvIt->getName() + " failed: " + e.what());
     srvIt->setSetupFailed();
   }
-  srvIt->printCfg();
+  if (!srvIt->isInitFailed())
+    srvIt->printCfg();
 }
 
 // nothing to do here so far...

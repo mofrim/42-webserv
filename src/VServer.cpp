@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/03 12:51:23 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/28 08:45:57 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/29 17:01:09 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,11 +33,11 @@ VServer::VServer()
 VServer::VServer(const VServer& o)
 {
   if (this != &o) {
-    _srvName          = o._srvName;
-    _listen_fds       = o._listen_fds;
-    _setupFailed      = o._setupFailed;
-    _activeInterfaces = o._activeInterfaces;
-    _routes           = o._routes;
+    _srvName       = o._srvName;
+    _listenFds     = o._listenFds;
+    _setupFailed   = o._setupFailed;
+    _cfgInterfaces = o._cfgInterfaces;
+    _routes        = o._routes;
   }
 }
 
@@ -46,12 +46,12 @@ VServer::VServer(const VServer& o)
 VServer& VServer::operator=(const VServer& o)
 {
   if (this != &o) {
-    _srvName          = o._srvName;
-    _listen_fds       = o._listen_fds;
-    _setupFailed      = o._setupFailed;
-    _activeInterfaces = o._activeInterfaces;
-    _routes           = o._routes;
-    _clients          = o._clients;
+    _srvName       = o._srvName;
+    _listenFds     = o._listenFds;
+    _setupFailed   = o._setupFailed;
+    _cfgInterfaces = o._cfgInterfaces;
+    _routes        = o._routes;
+    _clients       = o._clients;
   }
   return (*this);
 }
@@ -64,7 +64,7 @@ VServer& VServer::operator=(const VServer& o)
 // technically the cline-server relation is one-to-one, no?
 VServer::~VServer()
 {
-  if (!_listen_fds.empty())
+  if (!_listenFds.empty())
     Logger::log_srv(_srvName, "going out of scope");
   if (!_clients.empty()) {
     Logger::log_srv(_srvName, "removing all clients");
@@ -78,11 +78,11 @@ VServer::~VServer()
 
 VServer::VServer(const VServerCfg& cfg)
 {
-  _srvName          = cfg.getServerName();
-  _activeInterfaces = cfg.getInterfaces();
-  _routes           = cfg.getRoutes();
-  _maxBodySize      = cfg.getMaxBodySize();
-  _setupFailed      = false;
+  _srvName       = cfg.getServerName();
+  _cfgInterfaces = cfg.getInterfaces();
+  _routes        = cfg.getRoutes();
+  _maxBodySize   = cfg.getMaxBodySize();
+  _setupFailed   = false;
 }
 
 // ---------------------------=[ Other routines ]=--------------------------- //
@@ -101,46 +101,20 @@ void VServer::init(
 }
 
 // settings up sockets per server.
-//
-// the canonical workflow here is
-//
-//	 1) socket
-//	 2) bind
-//	 3) listen
-//
-// ... and accept, for the server, or connect for the client.
-//
-// socket() explained:
-//
-//	 - AF_INET:       socket for communication via IPv4
-//	 - SOCK_STREAM:   we want a reliable, bidirectional, byte-stream communi-
-//										cation channel
-//	 - SOCK_NONBLOCK: save a call to fcntl
-//	 - 0:             use default protocol
-//
-//	 NOTE: maybe we also want SOCK_CLOEXEC here as we maybe do not want our
-//	 sockets to be open in child processes.
-//
-// setsockopt() explained:
-//
-// 	- SOL_SOCKET: this is the level the sockopt will be applied to. SOL_SOCKET
-// 		is the sockets API level, another level would be SOL_IP.
-// 	- SO_REUSEADDR: avoid EADDRINUSE if webserv (or one of the servers) is being
-// 		restarted.
-// 	- SO_REUSEPORT (not used): only useful for multi-threaded servers. allows
-// 		binding socket to the same src_addr:port pair
-//
-// listen() explained:
-//
-//	- SOMAXCONN: 4096 on my system, maximum number of connections in the backlog
-//		of listen
 void VServer::_setupSockets(
     std::vector<VServer>::iterator begin, std::vector<VServer>::iterator cur)
 {
 
-  std::map< str, std::set<u16> >::iterator it = _activeInterfaces.begin();
-  while (it != _activeInterfaces.end()) {
-    str addr = it->first;
+  std::map< str, std::set<u16> >::iterator it = _cfgInterfaces.begin();
+  while (it != _cfgInterfaces.end()) {
+
+    // resolving possible host-/domain-name to ip addr here for better
+    // comparability
+    str addr = Socket::resolveAddr(it->first);
+    if (addr.empty()) {
+      it = eraseIt(_cfgInterfaces, it);
+      continue;
+    }
 
     // NOTE: when we get here there must be a port for every interface. so in
     // some earlier parsing step we will have to add port 80 for interfaces
@@ -151,13 +125,16 @@ void VServer::_setupSockets(
 
     // better safe then sorry
     if (ports.size() == 0) {
-      it = eraseIt(_activeInterfaces, it);
+      it = eraseIt(_cfgInterfaces, it);
       continue;
     }
 
-    std::pair<str, int>     addrFd;
+    t_AddrinfoReturn        ipCnameFd;
     std::set<u16>::iterator itp = ports.begin();
+
+    // THIS MUST BE A WHILE LOOP because of eraseIt + continue being used in it
     while (itp != ports.end()) {
+
       int sockFd = -1;
       if ((sockFd = _findVirtualBuddy(begin, cur, addr, *itp)) >= 0) {
         Logger::log_msg("Found real virtual server: " + _srvName + " - " +
@@ -166,13 +143,15 @@ void VServer::_setupSockets(
       }
       // the _srvName did match
       else if (sockFd == -42) {
-        Logger::log_err("Same interface AND srvName");
+        Logger::log_warn(
+            "Same interface AND srvName! Dropping duplicate iface for " + addr +
+            ":" + int2str(*itp));
         itp = eraseIt(ports, itp);
         continue;
       }
       else {
-        addrFd = Socket::bindSocket(addr, *itp);
-        sockFd = addrFd.second;
+        ipCnameFd = Socket::bindSocket(addr, *itp);
+        sockFd    = ipCnameFd.fd;
 
         if (sockFd == -1) {
           itp = eraseIt(ports, itp);
@@ -186,13 +165,14 @@ void VServer::_setupSockets(
         }
       }
 
-      _listen_fds.insert(sockFd);
+      _listenFds.insert(sockFd);
       _ports.insert(*itp);
 
       // FIXME: maybe later refactor to only use one of these
 
       // store IP and port
-      _activeAddrPortPairs[addrFd.first].insert(*itp);
+      // _activeInterfaces[ipCnameFd.ip].insert(*itp);
+      _addActiveIface(ipCnameFd, *itp);
 
       // store fd and iface:port mapping for use in virtual server
       // identification
@@ -200,14 +180,15 @@ void VServer::_setupSockets(
 
       itp++;
     }
+
     if (ports.size() == 0) {
-      it = eraseIt(_activeInterfaces, it);
+      it = eraseIt(_cfgInterfaces, it);
       continue;
     }
     it++;
   }
-  if (_listen_fds.size() == 0)
-    throw(ServerInitException("Could not setup a single socket!"));
+  if (_listenFds.size() == 0)
+    throw(ServerInitException("Could not init any interface!"));
 }
 
 int VServer::_findVirtualBuddy(std::vector<VServer>::iterator begin,
@@ -255,8 +236,8 @@ int VServer::_isActiveIface(const str& addr, u16 port) const
 // inserted.
 Client *VServer::addClient(int fd)
 {
-  if (_listen_fds.find(fd) == _listen_fds.end())
-    throw(ServerException("server_fds = " + getSetAsStr(_listen_fds) +
+  if (_listenFds.find(fd) == _listenFds.end())
+    throw(ServerException("server_fds = " + getSetAsStr(_listenFds) +
         ", conn_fd = " + int2str(fd)));
 
   struct sockaddr_in client_addr;
@@ -327,8 +308,7 @@ void VServer::_removeAllClients()
 // TODO: in principle i could try and have small retry loop here
 void VServer::cleanup()
 {
-  for (std::set<int>::iterator it = _listen_fds.begin();
-      it != _listen_fds.end();
+  for (std::set<int>::iterator it = _listenFds.begin(); it != _listenFds.end();
       it++)
   {
     if (*it != -1 && !isVirtualFd(*it))

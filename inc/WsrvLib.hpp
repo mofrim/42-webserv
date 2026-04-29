@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/24 17:31:03 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/27 14:42:12 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/29 16:41:13 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@
 #pragma once
 
 #include <map>
+#include <set>
 #include <stdint.h>
 #include <string>
 
@@ -46,6 +47,24 @@ typedef uint32_t    u32;
 #define CRLFX2 "\r\n\r\n"
 
 typedef enum { M_GET, M_POST, M_DELETE, M_UNKNOWN } e_Method;
+
+// use this struct to transport the values returned from Socket::bindSocket
+typedef struct {
+    str ip;
+    str cname;
+    int fd;
+} t_AddrinfoReturn;
+
+// will use this struct for storing ip, cname and port, i.e. all relevant info
+// for one interface.
+typedef struct {
+    str                             ip;
+    str                             cname;
+    std::set< std::pair<u16, int> > portFd;
+} t_vsrvInterface;
+
+// ... and the comparison operator for that type
+bool operator==(const t_vsrvInterface& i1, const t_vsrvInterface& i2);
 
 // the request-line
 typedef struct {

@@ -251,3 +251,23 @@ tomorrow:
 
 - make up some kind of testing framework for requests and so on.
 - is it possible to dump a `webser.pid` file to the working dir?
+
+## 2026-04-28
+
+### 08:48
+
+Fixed a bug in `VServer::_findVirtualBuddy()`.Turns out i need another function
+in `Socket` class to resolve server addrs alone. with that i can fill the
+`_activeAddrPortPairs` map with the real IP. Actually... i only need this AND
+the server name, as the `addr` specified in the Cfg in a `listen` directive is
+only worth what it resolves to!
+
+So... i need to refac VServer class again to only use `_activeAddrPortPairs`
+after init.
+
+## 2026-04-29
+
+### 17:08
+
+**Alrighty!** would say the above refac is done and virtual srvs is lgtm! but,
+it definitely needs more testing! That is, try to construct weird server setups
