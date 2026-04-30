@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/24 20:52:55 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/26 20:23:52 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/30 16:13:34 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,7 +64,7 @@ void Logger::log_warn(const str& msg)
 
 void Logger::log_dbg0(const str& msg)
 {
-  if (LOGLEVEL >= INFO) {
+  if (LOGLEVEL >= LOG_INFO) {
     str logtime = getLogtime();
     std::cout << GRY << logtime << msg << RST << std::endl;
   }
@@ -72,7 +72,7 @@ void Logger::log_dbg0(const str& msg)
 
 void Logger::log_dbg1(const str& msg)
 {
-  if (LOGLEVEL >= DEBUG) {
+  if (LOGLEVEL >= LOG_DEBUG) {
     str logtime = getLogtime();
     std::cout << WHT << logtime << msg << RST << std::endl;
   }
@@ -80,25 +80,26 @@ void Logger::log_dbg1(const str& msg)
 
 void Logger::log_dbg2(const str& msg)
 {
-  if (LOGLEVEL >= BRUTAL) {
+  if (LOGLEVEL >= LOG_BRUTAL) {
     str logtime = getLogtime();
     std::cout << BWHT << logtime << msg << RST << std::endl;
   }
 }
 
-void Logger::log_srv(const str& srvName, const str& msg)
+void Logger::log_srv(const str& srvName, const str& msg, e_LogType logtype)
 {
-  if (LOGLEVEL >= INFO) {
+  if (LOGLEVEL >= LOG_INFO) {
+    str txtcolr = (logtype == INFO ? GRY : YLO);
     str logtime = getLogtime();
-    std::cout << GRY << logtime << GRN << "(" << srvName << ") " << GRY << msg
-              << RST << std::endl;
+    std::cout << GRY << logtime << GRN << "(" << srvName << ") " << txtcolr
+              << msg << RST << std::endl;
   }
 }
 
 // for logging response and requests
 void Logger::log_reqres(const str& srvName, const str& resreq, const str& data)
 {
-  if (LOGLEVEL >= INFO) {
+  if (LOGLEVEL >= LOG_INFO) {
     str logtime = getLogtime();
     std::cout << GRY << logtime << GRN << "(" << srvName << ") " << BGRY
               << resreq << ":" << BGRY << "\n---" << std::endl;

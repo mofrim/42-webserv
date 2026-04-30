@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 19:13:35 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/27 19:54:21 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/30 16:22:29 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,12 +79,21 @@ void RequestHandler::readRequest()
     return;
   }
 
+  Request& req = _cli->getReq();
+
   if (_cli->isReading())
-    _cli->getReq().append(_buffer);
+    req.append(_buffer);
   else {
     Logger::log_srv(_vsrvName, "Starting new Req");
     _cli->setReq(Request(_cli, _buffer));
     _cli->setState(CLI_READ);
+  }
+
+  if (req.hdrTooBig()) {
+    Logger::log_srv(_vsrvName, "Header too big!", WARN);
+    req.setStatusCode(HTTP_400);
+    _cli->setState(CLI_SEND);
+    return;
   }
 
   // if we have got the full header - terminated by 2x CRLF - we will
@@ -92,8 +101,8 @@ void RequestHandler::readRequest()
   //
   //  a) a possible Content-Length field
   //  b) a possible Host header for Virtual Server routing
-  if (_cli->getReq().hdrComplete()) {
-    int status = _cli->getReq().parseHeaders();
+  if (req.hdrComplete()) {
+    int status = req.parseHeaders();
     if (status != HTTP_200) {
       _cli->setState(CLI_DISCO);
       return;
@@ -102,8 +111,8 @@ void RequestHandler::readRequest()
   }
 
   if (_cli->isReqComplete()) {
-    Logger::log_reqres(
-        _vsrvName, "Request complete", _cli->getReq().getReqstr());
+    // Logger::log_reqres(
+    // _vsrvName, "Request complete", _cli->getReq().getReqstr());
     _cli->setReqFinished();
     _cli->setState(CLI_SEND);
   }
@@ -113,6 +122,17 @@ void RequestHandler::readRequest()
 // `std::string::c_str()` returns a `const char` pointer to the data stored in
 // the string. Also using `std::string::size()` which returns the size in raw
 // bytes
+//
+// When this function is called there are 2 possibilities:
+//
+//    1) The Request was completed normally and Client::setReqFinished
+//       has been called. Then als Request::_parseRequest was called and we will
+//       have a generated Response stored in Request::_respo which we can send.
+//
+//    2) The Request was not completely received due to timeout or header
+//       errors. Then we will not yet have a generated response to send, so we
+//       need to do that.
+//
 void RequestHandler::writeResponse()
 {
   str response;
@@ -121,7 +141,13 @@ void RequestHandler::writeResponse()
   if (_cli->isTimeout()) {
     statusCode = HTTP_408;
     Response r;
-    r.genErrResponse(HTTP_408);
+    r.genErrResponse(statusCode);
+    response = r.getRespoStr();
+  }
+  else if (_cli->getReq().reqError()) {
+    statusCode = _cli->getReq().getStatusCode();
+    Response r;
+    r.genErrResponse(statusCode);
     response = r.getRespoStr();
   }
   else {
@@ -130,7 +156,8 @@ void RequestHandler::writeResponse()
   }
 
   Logger::log_srv(_cli->getVsrv()->getName(),
-      "Sending Response to " + _cli->getIfaceFdStr());
+      "Sending Response (" + int2str(statusCode) + ") to " +
+          _cli->getIfaceFdStr());
 
   if (response.empty())
     throw(ReqHandlerException("Cannot write response! Nothing to write!"));
@@ -149,6 +176,7 @@ void RequestHandler::writeResponse()
     _cli->setState(CLI_IDLE);
 
   Logger::log_srv(_cli->getVsrv()->getName(), "Response successfully sent!");
+
   _cli->resetReq();
 }
 

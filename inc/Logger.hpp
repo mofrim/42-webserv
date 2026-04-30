@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/24 20:49:55 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/26 20:21:45 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/30 16:10:47 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,10 @@
 #define BGRY "\e[1;97m"
 #define BWHT "\e[1;98m"
 
-enum { INFO = 0, DEBUG = 1, BRUTAL = 2 };
+enum { LOG_INFO = 0, LOG_DEBUG = 1, LOG_BRUTAL = 2 };
+
+// additional covenience constants
+typedef enum { INFO, WARN, ERROR } e_LogType;
 
 #ifndef LOGLEVEL
 #define LOGLEVEL INFO
@@ -55,7 +58,8 @@ class Logger {
     static void log_err(const str& msg);
     static void log_msg(const str& msg);
     static void log_warn(const str& msg);
-    static void log_srv(const str& srv_name, const str& msg);
+    static void log_srv(
+        const str& srv_name, const str& msg, e_LogType logtype = INFO);
     static void log_reqres(
         const str& srvName, const str& resreq, const str& data);
 

@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/14 20:51:06 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/27 19:24:07 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/30 16:18:05 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -221,6 +221,8 @@ bool Client::isReqComplete() const
   return _req.reqComplete();
 }
 
+// sets a fully received Req to finished which also runs
+// Request::_parseRequest()
 void Client::setReqFinished()
 {
   _req.setFinished();

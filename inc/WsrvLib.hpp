@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/24 17:31:03 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/29 16:41:13 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/30 09:06:50 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,9 @@ typedef std::string str;
 typedef uint16_t    u16;
 typedef uint32_t    u32;
 
+// maximum number of headers. nginx has this set to 1000 per default. above that
+// -> HTTP_400
+#define MAX_HEADER_LINES 500
 #define MAX_BODY_SIZE 1000000
 #define READ_BUFSIZE 4096
 #define MAX_CLIENTS 1000

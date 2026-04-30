@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 23:39:57 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/29 16:57:38 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/30 15:50:32 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@
 
 // --------------------------------=[ OCF ]=-------------------------------- //
 
-Request::Request(): _vsrv(NULL), _reqstr(""), _reqFinished(false)
+Request::Request(): _vsrv(NULL), _reqstr(""), _reqFinished(false), _hdrLines(0)
 {}
 
 Request::Request(const Request& o)
@@ -34,6 +34,7 @@ Request::Request(const Request& o)
     _reqline     = o._reqline;
     _headers     = o._headers;
     _reqFinished = o._reqFinished;
+    _hdrLines    = o._hdrLines;
   }
 }
 
@@ -48,8 +49,9 @@ Request& Request::operator=(const Request& o)
     _reqline     = o._reqline;
     _headers     = o._headers;
     _reqFinished = o._reqFinished;
+    _hdrLines    = o._hdrLines;
   }
-  return (*this);
+  return *this;
 }
 
 Request::~Request()
@@ -65,6 +67,7 @@ Request::Request(Client *cli, const std::string& reqstr)
   _cli         = cli;
   _reqstr      = reqstr;
   _reqFinished = false;
+  _hdrLines    = _countReqLines(reqstr);
 }
 
 // Important resource:
@@ -73,6 +76,7 @@ Request::Request(Client *cli, const std::string& reqstr)
 
 void Request::_parseRequest()
 {
+  // FIXME: this is not valid procedure for requests with a body!
   if (!_isTerminatedReq())
     _statusCode = HTTP_400;
   else
@@ -109,12 +113,15 @@ void Request::setFinished()
 void Request::append(const str& s)
 {
   _reqstr += s;
+  _hdrLines += _countReqLines(s);
   Logger::log_reqres(_vsrv->getName(), "Appending to Req:", s);
 }
 
+// @brief Simply checks if `CRLFCRLF` is found somewhere in the reqstr. for
+// obvious efficiency reasons starts from the back of _reqstr.
 bool Request::hdrComplete() const
 {
-  return _reqstr.rfind("\r\n\r\n") != str::npos;
+  return _reqstr.rfind(CRLFX2) != str::npos;
 }
 
 // for now we only look at the hdr
@@ -168,6 +175,7 @@ void Request::reset()
 {
   _reqstr.clear();
   _statusCode  = 0;
+  _hdrLines    = 0;
   _reqFinished = false;
   _reqline.httpVersion.clear();
   _reqline.target.clear();
@@ -190,4 +198,44 @@ u16 Request::parseHeaders()
 void Request::setVsrv(VServer *v)
 {
   _vsrv = v;
+}
+
+// READ_BUFSIZE is set to 4096 bytes so half of this is in theory the max num of
+// CRLFs in a string that can be checked -> u16 is enough.
+// NOTE: empty lines are also counted
+u16 Request::_countReqLines(const str& s)
+{
+  u16 lineNum = 0;
+
+  size_t i     = 0;
+  size_t ssize = s.size();
+
+  while (i < ssize) {
+    i = s.find(CRLF, i);
+    if (i == str::npos)
+      break;
+    if ((i != str::npos && i + 3 < ssize && s.compare(i, 4, CRLFX2) == 0)) {
+      lineNum += 2;
+      break;
+    }
+    lineNum++;
+    i += 2;
+  }
+  return lineNum;
+}
+
+bool Request::hdrTooBig() const
+{
+  Logger::log_bug("hdrlines: " + int2str(_hdrLines));
+  return _hdrLines > MAX_HEADER_LINES;
+}
+
+void Request::setStatusCode(u16 code)
+{
+  _statusCode = code;
+}
+
+bool Request::reqError() const
+{
+  return _statusCode >= HTTP_400;
 }

@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 23:39:07 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/27 16:45:55 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/04/30 13:51:06 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,6 +35,7 @@ class Request {
 
     u16  _statusCode;
     bool _reqFinished;
+    u16  _hdrLines;
 
     // doing it exactly as proposed in:
     // https://datatracker.ietf.org/doc/html/rfc9112#section-2.2
@@ -43,6 +44,7 @@ class Request {
 
     bool _isTerminatedReq();
     void _parseRequest();
+    u16  _countReqLines(const str& nstr);
 
   public:
     // TODO: decide which ctors we really use here & privatize unused
@@ -68,6 +70,10 @@ class Request {
     VServer   *getVsrv() const;
     void       setVsrv(VServer *v);
     u16        getStatusCode() const;
+    void       setStatusCode(u16 code);
+    bool       hdrTooBig() const;
+
+    bool reqError() const;
 
     void reset();
 
