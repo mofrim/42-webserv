@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/23 19:11:06 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/26 17:58:39 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/01 09:50:06 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@ class VServer;
 
 class Response {
   private:
-    u16                _statusCode;
+    e_HTTPStatus       _statusCode;
     t_RequestLine      _reqline;
     std::map<str, str> _reqHeaders;
     Client            *_cli;
@@ -37,6 +37,8 @@ class Response {
     void _buildRespoHdrs();
     void _genResponse();
 
+    static std::map<str, str> _buildErrRespoHdrs(u16 status);
+
   public:
     Response();
     Response(const Response& other);
@@ -44,10 +46,10 @@ class Response {
     Response(const Request& req);
     ~Response();
 
-    u16 genResponse(const Request& req);
-    str getRespoStr() const;
+    e_HTTPStatus genResponse(const Request& req);
+    str          getRespoStr() const;
 
     void reset();
 
-    void genErrResponse(u16 errCode);
+    static str genErrResponse(u16 errCode);
 };

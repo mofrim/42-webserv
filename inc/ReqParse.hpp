@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/23 15:05:53 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/27 15:09:30 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/01 09:48:56 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,10 +27,12 @@ class ReqParse {
     ReqParse& operator=(const ReqParse& other);
     ~ReqParse();
 
-    static std::vector< std::pair<str, str> > splitHdr(const str& hstr);
+    static std::vector< std::pair<str, str> > _splitHdr(const str& hstr);
+    static e_HTTPStatus _readReqline(t_RequestLine& rl, const str& r);
 
   public:
-    static int parseReqLine(t_RequestLine& rl, const str& rlstr);
-    static int parseHeaders(std::map<str, str>& _headers, const str& reqstr);
+    static e_HTTPStatus parseReqLine(t_RequestLine& rl, const str& rlstr);
+    static e_HTTPStatus parseHeaders(
+        std::map<str, str>& _headers, const str& reqstr);
     static int validateUrl(const str& u);
 };

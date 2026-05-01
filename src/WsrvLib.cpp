@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/24 17:40:43 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/29 06:45:38 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/01 09:37:31 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -186,3 +186,7 @@ bool operator==(const t_vsrvInterface& i1, const t_vsrvInterface& i2)
     return false;
   return false;
 }
+
+// const u16 HTTPVersion::GET    = 0;
+// const u16 HTTPVersion::POST   = 1;
+// const u16 HTTPVersion::DELETE = 2;

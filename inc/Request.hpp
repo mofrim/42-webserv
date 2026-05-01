@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 23:39:07 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/30 13:51:06 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/01 09:49:21 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,9 +33,9 @@ class Request {
     str      _reqstr;
     Response _respo;
 
-    u16  _statusCode;
-    bool _reqFinished;
-    u16  _hdrLines;
+    e_HTTPStatus _statusCode;
+    bool         _reqFinished;
+    u16          _hdrLines;
 
     // doing it exactly as proposed in:
     // https://datatracker.ietf.org/doc/html/rfc9112#section-2.2
@@ -64,14 +64,14 @@ class Request {
     bool hdrComplete() const;
     bool reqComplete() const;
 
-    e_Method   getMethod() const;
-    const str& getReqstr() const;
-    Client    *getCli() const;
-    VServer   *getVsrv() const;
-    void       setVsrv(VServer *v);
-    u16        getStatusCode() const;
-    void       setStatusCode(u16 code);
-    bool       hdrTooBig() const;
+    e_Method     getMethod() const;
+    const str&   getReqstr() const;
+    Client      *getCli() const;
+    VServer     *getVsrv() const;
+    void         setVsrv(VServer *v);
+    e_HTTPStatus getStatusCode() const;
+    void         setStatusCode(e_HTTPStatus code);
+    bool         hdrTooBig() const;
 
     bool reqError() const;
 
@@ -81,5 +81,5 @@ class Request {
     const t_RequestLine&      getReqline() const;
     const std::map<str, str>& getHeaders() const;
 
-    u16 parseHeaders();
+    e_HTTPStatus parseHeaders();
 };

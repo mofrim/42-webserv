@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 19:13:35 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/30 16:22:29 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/01 09:46:17 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -102,7 +102,7 @@ void RequestHandler::readRequest()
   //  a) a possible Content-Length field
   //  b) a possible Host header for Virtual Server routing
   if (req.hdrComplete()) {
-    int status = req.parseHeaders();
+    e_HTTPStatus status = req.parseHeaders();
     if (status != HTTP_200) {
       _cli->setState(CLI_DISCO);
       return;
@@ -138,21 +138,22 @@ void RequestHandler::writeResponse()
   str response;
   u16 statusCode;
 
-  if (_cli->isTimeout()) {
-    statusCode = HTTP_408;
-    Response r;
-    r.genErrResponse(statusCode);
-    response = r.getRespoStr();
-  }
-  else if (_cli->getReq().reqError()) {
-    statusCode = _cli->getReq().getStatusCode();
-    Response r;
-    r.genErrResponse(statusCode);
-    response = r.getRespoStr();
+  Request& req = _cli->getReq();
+
+  if (req.isFinished() == false) {
+    // FIXME: maybe tiemout can also happen with finished rquests?!?!
+    if (_cli->isTimeout())
+      statusCode = HTTP_408;
+    else if (req.reqError())
+      statusCode = _cli->getReq().getStatusCode();
+    else
+      statusCode = HTTP_400;
+
+    response = Response::genErrResponse(statusCode);
   }
   else {
-    response   = _cli->getReq().getResponseStr();
-    statusCode = _cli->getReq().getStatusCode();
+    statusCode = req.getStatusCode();
+    response   = req.getResponseStr();
   }
 
   Logger::log_srv(_cli->getVsrv()->getName(),

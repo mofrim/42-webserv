@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 23:39:57 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/30 15:50:32 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/01 09:49:31 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -156,7 +156,7 @@ VServer *Request::getVsrv() const
   return _vsrv;
 }
 
-u16 Request::getStatusCode() const
+e_HTTPStatus Request::getStatusCode() const
 {
   return _statusCode;
 }
@@ -174,7 +174,7 @@ const std::map<str, str>& Request::getHeaders() const
 void Request::reset()
 {
   _reqstr.clear();
-  _statusCode  = 0;
+  _statusCode  = HTTP_200;
   _hdrLines    = 0;
   _reqFinished = false;
   _reqline.httpVersion.clear();
@@ -184,7 +184,7 @@ void Request::reset()
   _respo.reset();
 }
 
-u16 Request::parseHeaders()
+e_HTTPStatus Request::parseHeaders()
 {
   if ((_statusCode = ReqParse::parseReqLine(_reqline, _reqstr)) != HTTP_200) {
     return _statusCode;
@@ -226,11 +226,10 @@ u16 Request::_countReqLines(const str& s)
 
 bool Request::hdrTooBig() const
 {
-  Logger::log_bug("hdrlines: " + int2str(_hdrLines));
   return _hdrLines > MAX_HEADER_LINES;
 }
 
-void Request::setStatusCode(u16 code)
+void Request::setStatusCode(e_HTTPStatus code)
 {
   _statusCode = code;
 }

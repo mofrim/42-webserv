@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/23 15:06:21 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/27 16:39:11 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/01 09:48:27 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,47 +36,56 @@ ReqParse::~ReqParse()
 
 // ------------------------------=[ END OCF ]=------------------------------ //
 
-int ReqParse::parseReqLine(t_RequestLine& rl, const str& rlstr)
+e_HTTPStatus ReqParse::_readReqline(t_RequestLine& rl, const str& r)
 {
-  if (rlstr.size() > MAX_REQLINE_LEN)
-    return KO;
+  if (r.size() > MAX_REQLINE_LEN)
+    return HTTP_400;
 
   int i = 0;
-  while (i < 6 && !std::isspace(rlstr[i]))
+  while (i < 6 && !std::isspace(r[i]))
     i++;
-  Logger::log_dbg1("ReqParse: found this method: '" + rlstr.substr(0, i) + "'");
-  if ((rl.method = str2method(rlstr.substr(0, i))) == M_UNKNOWN)
+  Logger::log_dbg1("ReqParse: found this method: '" + r.substr(0, i) + "'");
+  if ((rl.method = str2method(r.substr(0, i))) == M_UNKNOWN)
     return HTTP_400;
 
   int k = 0;
   i++;
-  while (k <= MAX_TARGET_LEN && !std::isspace(rlstr[i + k]))
+  while (k <= MAX_TARGET_LEN && !std::isspace(r[i + k]))
     k++;
-  Logger::log_dbg1(
-      "ReqParse: found this target URL: '" + rlstr.substr(i, k) + "'");
+  Logger::log_dbg1("ReqParse: found this target URL: '" + r.substr(i, k) + "'");
   if (k > MAX_TARGET_LEN)
     return HTTP_400;
-  rl.target = rlstr.substr(i, k);
+  rl.target = r.substr(i, k);
   if (validateUrl(rl.target) == KO)
     return HTTP_400;
 
   i = i + k + 1;
   k = 0;
-  while (i + k <= MAX_REQLINE_LEN && !std::isspace(rlstr[i + k]))
+  while (i + k <= MAX_REQLINE_LEN && !std::isspace(r[i + k]))
     k++;
   if (i + k > MAX_REQLINE_LEN)
     return HTTP_400;
-  Logger::log_dbg1(
-      "ReqParse: found this httpVer: '" + rlstr.substr(i, k) + "'");
-  rl.httpVersion = rlstr.substr(i, k);
-  if (rlstr.compare(i + k, 2, CRLF) != 0)
+  Logger::log_dbg1("ReqParse: found this httpVer: '" + r.substr(i, k) + "'");
+  rl.httpVersion = r.substr(i, k);
+  if (r.compare(i + k, 2, CRLF) != 0)
     return HTTP_400;
 
   return HTTP_200;
 }
 
+e_HTTPStatus ReqParse::parseReqLine(t_RequestLine& rl, const str& r)
+{
+  e_HTTPStatus status = HTTP_200;
+  if ((status = _readReqline(rl, r)) >= HTTP_400)
+    return status;
+  // if ((status = validateUrl(rl.target)) >= HTTP_400)
+  //   return status;
+
+  return status;
+}
+
 // TODO: add more validity checks here
-std::vector< std::pair<str, str> > ReqParse::splitHdr(const str& hstr)
+std::vector< std::pair<str, str> > ReqParse::_splitHdr(const str& hstr)
 {
   std::vector< std::pair<str, str> > ret;
 
@@ -97,7 +106,8 @@ std::vector< std::pair<str, str> > ReqParse::splitHdr(const str& hstr)
   return ret;
 }
 
-int ReqParse::parseHeaders(std::map<str, str>& _headers, const str& reqstr)
+e_HTTPStatus ReqParse::parseHeaders(
+    std::map<str, str>& _headers, const str& reqstr)
 {
   str              onlyHdrs = reqstr.substr(0, reqstr.find(CRLFX2) + 2);
   std::vector<str> hdrLines = splitString(onlyHdrs, CRLF);

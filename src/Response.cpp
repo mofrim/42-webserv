@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/23 19:11:25 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/26 20:00:25 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/01 09:50:15 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,7 +75,7 @@ void Response::_setFieldsFromReq(const Request& req)
   _vsrv       = req.getVsrv();
 }
 
-u16 Response::genResponse(const Request& req)
+e_HTTPStatus Response::genResponse(const Request& req)
 {
   _setFieldsFromReq(req);
 
@@ -182,8 +182,7 @@ void Response::_buildRespoHdrs()
     conn = "keep-alive";
   _respoHeaders["Connection"] = conn;
 
-  // QUESTION: what is this about? Nginx does it.
-  _respoHeaders["Accept-Ranges"] = "bytes";
+  _respoHeaders["Accept-Ranges"] = "none";
 }
 
 str Response::getRespoStr() const
@@ -194,7 +193,7 @@ str Response::getRespoStr() const
 // reset.
 void Response::reset()
 {
-  _statusCode = 0;
+  _statusCode = HTTP_200;
   _reqline.httpVersion.clear();
   _reqline.target.clear();
   _reqline.method = M_GET;
@@ -205,10 +204,41 @@ void Response::reset()
   _respoStr.clear();
 }
 
-void Response::genErrResponse(u16 errCode)
+// helper function for generating the response for a failes Req.
+std::map<str, str> Response::_buildErrRespoHdrs(u16 status)
 {
-  _statusCode = errCode;
-  _buildRespoHdrs();
-  _body = WsrvLib::getDefaultErrPage(errCode);
-  _genResponse();
+  std::map<str, str> hdrs;
+  hdrs["Startline"]      = "HTTP/1.1 " + WsrvLib::getStatusStr(status);
+  hdrs["Server"]         = "m0fr1m's webserv " VERSION;
+  hdrs["Date"]           = Logger::getLogtime();
+  hdrs["Content-Type"]   = "text/html";
+  hdrs["Content-Length"] = "0";
+
+  str conn;
+  if (status >= HTTP_400 && (status != HTTP_404))
+    conn = "close";
+  else
+    conn = "keep-alive";
+  hdrs["Connection"] = conn;
+  return hdrs;
+}
+
+// Returns the response string to a given error status code.
+str Response::genErrResponse(u16 errCode)
+{
+  str respostr;
+
+  std::map<str, str> hdrs = _buildErrRespoHdrs(errCode);
+
+  str body = WsrvLib::getDefaultErrPage(errCode);
+
+  for (std::map<str, str>::reverse_iterator it = hdrs.rbegin();
+      it != hdrs.rend();
+      it++)
+    if (it->first == "Startline")
+      respostr += it->second + CRLF;
+    else
+      respostr += it->first + ": " + it->second + CRLF;
+  respostr += CRLF + body;
+  return respostr;
 }

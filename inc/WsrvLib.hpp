@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/24 17:31:03 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/30 09:06:50 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/01 09:46:09 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,7 +49,10 @@ typedef uint32_t    u32;
 #define CRLF "\r\n"
 #define CRLFX2 "\r\n\r\n"
 
-typedef enum { M_GET, M_POST, M_DELETE, M_UNKNOWN } e_Method;
+// using C++ enum def syntax. this equivalent to `typedef enum ...`
+// C++11 would have scoped enums `enum class HTTPVersion { } ` which can then be
+// accessed via f.ex. HTTPVersion::M_GET
+enum e_Method { M_GET, M_POST, M_DELETE, M_UNKNOWN };
 
 // use this struct to transport the values returned from Socket::bindSocket
 typedef struct {
@@ -76,8 +79,18 @@ typedef struct {
     e_Method method;
 } t_RequestLine;
 
+// Wow! This is actually a desired use-case for `namespace`. It allows to scope
+// enums! Now they can be accessed via HTTPVersion::HHTP_1_0 and so on.
+//
+// namespace HTTPVersion {
+// enum { HTTP_1_0, HTTP_1_1, UNKNOWN };
+// };
+//
+// But i prefer having a type here...
+enum e_HTTPVersion { HTTP_1_0, HTTP_1_1, UNKNOWN };
+
 // For expressiveness' sake declare them here
-enum {
+enum e_HTTPStatus {
   HTTP_200 = 200,
   HTTP_300 = 300,
   HTTP_400 = 400,
@@ -117,3 +130,14 @@ class WsrvLib {
     static str                        getMimeTypeFromPath(const str& p);
     static const t_GlobalWsrvSettings WsrvSettings;
 };
+
+// class HTTPVersion {
+//   private:
+//     HTTPVersion();
+//     ~HTTPVersion();
+//
+//   public:
+//     const static u16 GET;
+//     const static u16 POST;
+//     const static u16 DELETE;
+// };
