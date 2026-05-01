@@ -271,3 +271,33 @@ after init.
 
 **Alrighty!** would say the above refac is done and virtual srvs is lgtm! but,
 it definitely needs more testing! That is, try to construct weird server setups
+
+What's next?
+
+- [ ] fix the problem with URL / target path parsing -> should not be possible
+  to access `../anything`!
+
+- [ ] implement `POST`
+
+Again some important citations from RFC:
+
+      A client MUST send a Host header field (Section 7.2 of [HTTP]) in all
+      HTTP/1.1 request messages.
+
+=> so i have to check for `HTTP/1.1` and if Host is not send -> 400
+
+
+- [ ] according to [this
+  sectio](https://datatracker.ietf.org/doc/html/rfc9112#name-field-syntax) all
+  field-names are case-insensitive!
+
+
+## 2026-04-30
+
+### 22:10
+
+the main resource for everything about headers and methods is: [RFC
+9110](https://datatracker.ietf.org/doc/html/rfc9110)
+
+For example i just learned that my server won't support range-requests so we
+should include `Accept-ranges:` none in our Responses to a GET

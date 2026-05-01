@@ -15,6 +15,15 @@
 
 # webserv Learnings
 
+## The Main RFCs
+
+- [RFC 9112 - HTTP/1.1](https://datatracker.ietf.org/doc/html/rfc9112)
+
+- [RFC 9110 - HTTP Semantics](https://datatracker.ietf.org/doc/html/rfc9110)
+
+- [RFC 3986 - URI](https://datatracker.ietf.org/doc/html/rfc3986)
+
+
 ## Resources
 
 - [Actually a multithreaded webserv but my entry-point to the epoll vs. poll
