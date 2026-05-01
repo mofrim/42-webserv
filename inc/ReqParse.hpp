@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/23 15:05:53 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/01 09:48:56 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/01 17:29:10 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,5 +34,7 @@ class ReqParse {
     static e_HTTPStatus parseReqLine(t_RequestLine& rl, const str& rlstr);
     static e_HTTPStatus parseHeaders(
         std::map<str, str>& _headers, const str& reqstr);
+    static e_HTTPStatus checkHeaders(
+        const t_RequestLine& rl, const std::map<str, str>& _headers);
     static int validateUrl(const str& u);
 };

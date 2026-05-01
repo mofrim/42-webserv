@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 23:39:57 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/01 09:49:31 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/01 18:24:47 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,9 @@
 
 // --------------------------------=[ OCF ]=-------------------------------- //
 
-Request::Request(): _vsrv(NULL), _reqstr(""), _reqFinished(false), _hdrLines(0)
+Request::Request():
+  _vsrv(NULL), _reqstr(""), _hdrLines(0), _reqFinished(false),
+  _hdrComplete(false)
 {}
 
 Request::Request(const Request& o)
@@ -34,6 +36,7 @@ Request::Request(const Request& o)
     _reqline     = o._reqline;
     _headers     = o._headers;
     _reqFinished = o._reqFinished;
+    _hdrComplete = o._hdrComplete;
     _hdrLines    = o._hdrLines;
   }
 }
@@ -49,6 +52,7 @@ Request& Request::operator=(const Request& o)
     _reqline     = o._reqline;
     _headers     = o._headers;
     _reqFinished = o._reqFinished;
+    _hdrComplete = o._hdrComplete;
     _hdrLines    = o._hdrLines;
   }
   return *this;
@@ -119,26 +123,43 @@ void Request::append(const str& s)
 
 // @brief Simply checks if `CRLFCRLF` is found somewhere in the reqstr. for
 // obvious efficiency reasons starts from the back of _reqstr.
-bool Request::hdrComplete() const
+bool Request::hdrComplete()
 {
-  return _reqstr.rfind(CRLFX2) != str::npos;
+  if (_hdrComplete)
+    return true;
+  _hdrComplete = _reqstr.rfind(CRLFX2) != str::npos;
+  return _hdrComplete;
 }
 
 // for now we only look at the hdr
 // TODO: we will also have to look for Content-Length!
-bool Request::reqComplete() const
+bool Request::reqComplete()
 {
-  if (hdrComplete()) {
+  if (_hdrComplete) {
     return true;
   }
   return false;
 }
 
-e_Method Request::getMethod() const
+e_Method Request::getMethod()
 {
   if (hdrComplete())
     return _reqline.method;
   return M_UNKNOWN;
+}
+
+str Request::getMethodStr() const
+{
+  switch (_reqline.method) {
+  case M_GET:
+    return "GET";
+  case M_POST:
+    return "POST";
+  case M_DELETE:
+    return "DELETE";
+  default:
+    return "UNKNOWN";
+  }
 }
 
 const str& Request::getReqstr() const
@@ -174,10 +195,10 @@ const std::map<str, str>& Request::getHeaders() const
 void Request::reset()
 {
   _reqstr.clear();
-  _statusCode  = HTTP_200;
-  _hdrLines    = 0;
-  _reqFinished = false;
-  _reqline.httpVersion.clear();
+  _statusCode          = HTTP_200;
+  _hdrLines            = 0;
+  _reqFinished         = false;
+  _reqline.httpVersion = HTTPVER_UNKNOWN;
   _reqline.target.clear();
   _reqline.method = M_GET;
   _headers.clear();

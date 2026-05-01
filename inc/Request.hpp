@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 23:39:07 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/01 09:49:21 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/01 17:15:57 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,8 +34,9 @@ class Request {
     Response _respo;
 
     e_HTTPStatus _statusCode;
-    bool         _reqFinished;
     u16          _hdrLines;
+    bool         _reqFinished;
+    bool         _hdrComplete;
 
     // doing it exactly as proposed in:
     // https://datatracker.ietf.org/doc/html/rfc9112#section-2.2
@@ -61,10 +62,10 @@ class Request {
 
     void append(const str& s);
 
-    bool hdrComplete() const;
-    bool reqComplete() const;
+    bool hdrComplete();
+    bool reqComplete();
 
-    e_Method     getMethod() const;
+    e_Method     getMethod();
     const str&   getReqstr() const;
     Client      *getCli() const;
     VServer     *getVsrv() const;
@@ -72,6 +73,7 @@ class Request {
     e_HTTPStatus getStatusCode() const;
     void         setStatusCode(e_HTTPStatus code);
     bool         hdrTooBig() const;
+    str          getMethodStr() const;
 
     bool reqError() const;
 

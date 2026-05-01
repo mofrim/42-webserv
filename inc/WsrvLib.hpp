@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/24 17:31:03 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/01 10:03:41 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/01 18:26:04 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,6 +54,16 @@ typedef uint32_t    u32;
 // accessed via f.ex. HTTPVersion::M_GET
 enum e_Method { M_GET, M_POST, M_DELETE, M_UNKNOWN };
 
+// Wow! This is actually a desired use-case for `namespace`. It allows to scope
+// enums! Now they can be accessed via HTTPVersion::HHTP_1_0 and so on.
+//
+// namespace HTTPVersion {
+// enum { HTTP_1_0, HTTP_1_1, UNKNOWN };
+// };
+//
+// But i prefer having a type here...
+enum e_HTTPVersion { HTTPVER_1_0, HTTPVER_1_1, HTTPVER_UNKNOWN };
+
 // use this struct to transport the values returned from Socket::bindSocket
 typedef struct {
     str ip;
@@ -74,20 +84,10 @@ bool operator==(const t_vsrvInterface& i1, const t_vsrvInterface& i2);
 
 // the request-line
 typedef struct {
-    str      target;
-    str      httpVersion;
-    e_Method method;
+    str           target;
+    e_HTTPVersion httpVersion;
+    e_Method      method;
 } t_RequestLine;
-
-// Wow! This is actually a desired use-case for `namespace`. It allows to scope
-// enums! Now they can be accessed via HTTPVersion::HHTP_1_0 and so on.
-//
-// namespace HTTPVersion {
-// enum { HTTP_1_0, HTTP_1_1, UNKNOWN };
-// };
-//
-// But i prefer having a type here...
-enum e_HTTPVersion { HTTP_1_0, HTTP_1_1, UNKNOWN };
 
 // For expressiveness' sake declare them here
 enum e_HTTPStatus {
@@ -129,5 +129,6 @@ class WsrvLib {
     static str                        getDefaultErrPage(e_HTTPStatus code);
     static str                        getStatusStr(e_HTTPStatus code);
     static str                        getMimeTypeFromPath(const str& p);
+    static e_HTTPVersion              str2HTTPVer(const str& s);
     static const t_GlobalWsrvSettings WsrvSettings;
 };

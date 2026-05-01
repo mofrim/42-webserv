@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/24 17:40:43 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/01 10:03:48 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/01 18:27:33 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -185,4 +185,13 @@ bool operator==(const t_vsrvInterface& i1, const t_vsrvInterface& i2)
   if (i1.ip != i2.ip || i1.cname != i2.cname)
     return false;
   return false;
+}
+
+e_HTTPVersion WsrvLib::str2HTTPVer(const str& s)
+{
+  if (s == "HTTP/1.1")
+    return HTTPVER_1_1;
+  if (s == "HTTP/1.0")
+    return HTTPVER_1_0;
+  return HTTPVER_UNKNOWN;
 }

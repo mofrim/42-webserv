@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/23 19:11:25 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/01 10:17:51 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/01 18:38:50 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -206,8 +206,8 @@ str Response::getRespoStr() const
 // reset.
 void Response::reset()
 {
-  _statusCode = HTTP_200;
-  _reqline.httpVersion.clear();
+  _statusCode          = HTTP_200;
+  _reqline.httpVersion = HTTPVER_UNKNOWN;
   _reqline.target.clear();
   _reqline.method = M_GET;
   _reqHeaders.clear();

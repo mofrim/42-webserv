@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/14 20:50:12 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/27 19:15:59 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/01 17:13:53 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,7 +69,7 @@ class Client {
     void       setState(e_CliState s);
     void       setReqFinished();
 
-    bool isReqComplete() const;
+    bool isReqComplete();
     bool isTimeout() const;
 
     bool isIdling() const;

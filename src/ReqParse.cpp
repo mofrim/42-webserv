@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/23 15:06:21 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/01 09:48:27 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/01 18:28:17 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,7 +66,7 @@ e_HTTPStatus ReqParse::_readReqline(t_RequestLine& rl, const str& r)
   if (i + k > MAX_REQLINE_LEN)
     return HTTP_400;
   Logger::log_dbg1("ReqParse: found this httpVer: '" + r.substr(i, k) + "'");
-  rl.httpVersion = r.substr(i, k);
+  rl.httpVersion = WsrvLib::str2HTTPVer(r.substr(i, k));
   if (r.compare(i + k, 2, CRLF) != 0)
     return HTTP_400;
 
@@ -121,6 +121,18 @@ e_HTTPStatus ReqParse::parseHeaders(
     str fieldName       = it->substr(0, colonPos);
     str fieldValue      = strip(it->substr(colonPos + 1, str::npos));
     _headers[fieldName] = fieldValue;
+  }
+  return HTTP_200;
+}
+
+e_HTTPStatus ReqParse::checkHeaders(
+    const t_RequestLine& rl, const std::map<str, str>& hdrs)
+{
+  if (rl.httpVersion == HTTPVER_1_1) {
+    if (rl.method == M_GET) {
+      if (hdrs.find("Host") == hdrs.end())
+        return HTTP_400;
+    }
   }
   return HTTP_200;
 }

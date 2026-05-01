@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/24 20:52:55 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/01 09:13:03 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/01 15:53:12 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -98,6 +98,9 @@ void Logger::log_srv(const str& srvName, const str& msg, e_LogType logtype)
 
 // for logging response and requests
 // is being from level LOG_DEBUG (== 1) on
+//
+// FIXME: refac to take Client as first param. and maybe even whole response bc
+// we might want to print the headers seperate from the body
 void Logger::log_reqres(const str& srvName, const str& resreq, const str& data)
 {
   if (LOGLEVEL >= LOG_DEBUG) {

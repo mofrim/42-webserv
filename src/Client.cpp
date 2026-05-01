@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/14 20:51:06 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/30 16:18:05 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/01 17:13:44 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -216,7 +216,7 @@ bool Client::isDisco() const
   return _state == CLI_DISCO;
 }
 
-bool Client::isReqComplete() const
+bool Client::isReqComplete()
 {
   return _req.reqComplete();
 }

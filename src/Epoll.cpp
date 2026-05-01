@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/14 23:12:17 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/27 20:28:16 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/01 15:42:53 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -145,11 +145,11 @@ str Epoll::_getEventStr(const uint32_t& ev) const
 
 void Epoll::printReadylist() const
 {
-  Logger::log_dbg1("epoll_wait returned nfds = " + int2str(_nfds));
+  Logger::log_dbg2("epoll_wait returned nfds = " + int2str(_nfds));
   if (_nfds > 0) {
-    Logger::log_dbg1("Printing Events in the epoll-ready-list:");
+    Logger::log_dbg2("Printing Events in the epoll-ready-list:");
     for (int i = 0; i < _nfds; i++)
-      Logger::log_dbg1("  fd: " + int2str(_events[i].data.fd) +
+      Logger::log_dbg2("  fd: " + int2str(_events[i].data.fd) +
           ", event: " + _getEventStr(_events[i].events));
   }
 }
