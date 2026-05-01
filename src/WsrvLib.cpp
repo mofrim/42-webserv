@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/24 17:40:43 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/01 09:55:27 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/01 10:03:48 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,7 +71,7 @@ str WsrvLib::_getTemplateWithErrStr(const str& s)
   return ret;
 }
 
-str WsrvLib::getDefaultErrPage(u16 code)
+str WsrvLib::getDefaultErrPage(e_HTTPStatus code)
 {
   return _getTemplateWithErrStr(getStatusStr(code));
 }
@@ -161,7 +161,7 @@ std::map<u16, str> WsrvLib::_initStatusCodes()
 
 const std::map<u16, str> WsrvLib::_statusCodes = _initStatusCodes();
 
-str WsrvLib::getStatusStr(u16 code)
+str WsrvLib::getStatusStr(e_HTTPStatus code)
 {
   std::map<u16, str>::const_iterator it = _statusCodes.find(code);
   if (it != _statusCodes.end())

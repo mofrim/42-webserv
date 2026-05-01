@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 19:13:35 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/01 09:46:17 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/01 10:05:02 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -135,8 +135,8 @@ void RequestHandler::readRequest()
 //
 void RequestHandler::writeResponse()
 {
-  str response;
-  u16 statusCode;
+  str          response;
+  e_HTTPStatus statusCode;
 
   Request& req = _cli->getReq();
 

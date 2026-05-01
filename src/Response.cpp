@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/23 19:11:25 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/01 09:50:15 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/01 10:17:51 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -218,7 +218,7 @@ void Response::reset()
 }
 
 // helper function for generating the response for a failes Req.
-std::map<str, str> Response::_buildErrRespoHdrs(u16 status)
+std::map<str, str> Response::_buildErrRespoHdrs(e_HTTPStatus status)
 {
   std::map<str, str> hdrs;
   hdrs["Startline"]      = "HTTP/1.1 " + WsrvLib::getStatusStr(status);
@@ -237,7 +237,7 @@ std::map<str, str> Response::_buildErrRespoHdrs(u16 status)
 }
 
 // Returns the response string to a given error status code.
-str Response::genErrResponse(u16 errCode)
+str Response::genErrResponse(e_HTTPStatus errCode)
 {
   str respostr;
 
