@@ -143,7 +143,7 @@ void Response::_getBody()
     // QUESTION: do we still need it here?
     if (length <= 0) {
       _statusCode = HTTP_404;
-      _body       = WsrvLib::getDefaultErrPage(HTTP_404);
+      _body       = WsrvLib::getDefaultErrPage(_statusCode);
       return;
     }
 
@@ -152,11 +152,24 @@ void Response::_getBody()
     // QUESTION: is this really the optimal solution?
     // FIXME: what about binary data?
     std::vector<char> buffer(length);
+
+    // good2know: does not throw but sets the badbit
     target.read(&buffer[0], length);
+
     if (target)
       // like this even NUL bytes and other weird binary-mode data is written to
       // the std::string obj.
-      _body.assign(buffer.begin(), buffer.end());
+      //
+      // Furthermore std::string::assign might throw exceptions if the assigned
+      // data is too large. So we catch it here
+      try {
+        _body.assign(buffer.begin(), buffer.end());
+      } catch (const std::exception& e) {
+        Logger::log_err("In Response::_getBody: read body too large!");
+        _statusCode = HTTP_413;
+        _body       = WsrvLib::getDefaultErrPage(_statusCode);
+        return;
+      }
   }
   else
     _body = "";
