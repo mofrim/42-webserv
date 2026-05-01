@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/24 17:31:03 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/01 09:46:09 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/01 09:55:16 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -130,14 +130,3 @@ class WsrvLib {
     static str                        getMimeTypeFromPath(const str& p);
     static const t_GlobalWsrvSettings WsrvSettings;
 };
-
-// class HTTPVersion {
-//   private:
-//     HTTPVersion();
-//     ~HTTPVersion();
-//
-//   public:
-//     const static u16 GET;
-//     const static u16 POST;
-//     const static u16 DELETE;
-// };
