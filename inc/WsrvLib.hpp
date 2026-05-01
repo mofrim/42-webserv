@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/24 17:31:03 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/01 18:26:04 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/01 18:48:54 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,6 +32,11 @@ typedef uint32_t    u32;
 // -> HTTP_400
 #define MAX_HEADER_LINES 500
 #define MAX_BODY_SIZE 1000000
+
+// https://datatracker.ietf.org/doc/html/rfc9112#section-3
+#define MAX_REQLINE_LEN 8000
+#define MAX_TARGET_LEN 7886
+
 #define READ_BUFSIZE 4096
 #define MAX_CLIENTS 1000
 #define DEFAULT_SRV_NAME "localhost"

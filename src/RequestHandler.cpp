@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 19:13:35 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/01 15:47:21 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/01 19:05:05 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -104,7 +104,7 @@ void RequestHandler::readRequest()
   if (req.hdrComplete()) {
     e_HTTPStatus status = req.parseHeaders();
     if (status != HTTP_200) {
-      _cli->setState(CLI_DISCO);
+      _cli->setState(CLI_SEND);
       return;
     }
     _setVirtualServerFromHeader();

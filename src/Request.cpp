@@ -6,13 +6,12 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 23:39:57 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/01 18:24:47 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/01 19:02:54 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Client.hpp"
 #include "Logger.hpp"
-#include "ReqParse.hpp"
 #include "Request.hpp"
 #include "VServer.hpp"
 #include "WsrvLib.hpp"
@@ -84,7 +83,7 @@ void Request::_parseRequest()
   if (!_isTerminatedReq())
     _statusCode = HTTP_400;
   else
-    _statusCode = ReqParse::parseReqLine(_reqline, _reqstr);
+    _statusCode = parseReqLine();
   _statusCode = _respo.genResponse(*this);
 }
 
@@ -207,10 +206,13 @@ void Request::reset()
 
 e_HTTPStatus Request::parseHeaders()
 {
-  if ((_statusCode = ReqParse::parseReqLine(_reqline, _reqstr)) != HTTP_200) {
+  if ((_statusCode = parseReqLine()) != HTTP_200) {
     return _statusCode;
   }
-  if ((_statusCode = ReqParse::parseHeaders(_headers, _reqstr)) != HTTP_200) {
+  if ((_statusCode = _parseHeaders()) != HTTP_200) {
+    return _statusCode;
+  }
+  if ((_statusCode = checkHeaders()) != HTTP_200) {
     return _statusCode;
   }
   return HTTP_200;

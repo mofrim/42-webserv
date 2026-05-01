@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 23:39:07 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/01 17:15:57 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/01 19:00:01 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,7 @@
 #include "WsrvLib.hpp"
 
 #include <map>
+#include <vector>
 
 // The Request class.
 
@@ -46,6 +47,11 @@ class Request {
     bool _isTerminatedReq();
     void _parseRequest();
     u16  _countReqLines(const str& nstr);
+
+    // Parsing related
+    std::vector< std::pair<str, str> > _splitHdr();
+    e_HTTPStatus                       _readReqline();
+    e_HTTPStatus                       _parseHeaders();
 
   public:
     // TODO: decide which ctors we really use here & privatize unused
@@ -83,5 +89,11 @@ class Request {
     const t_RequestLine&      getReqline() const;
     const std::map<str, str>& getHeaders() const;
 
+    // parsing
+    // FIXME: which function should i expose here?
+
     e_HTTPStatus parseHeaders();
+    e_HTTPStatus parseReqLine();
+    e_HTTPStatus checkHeaders();
+    int          validateUrl(const str& u);
 };

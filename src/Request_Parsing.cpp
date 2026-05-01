@@ -1,82 +1,65 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ReqParse.cpp                                       :+:      :+:    :+:   */
+/*   Request_Parsing.cpp                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/04/23 15:06:21 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/01 18:28:17 by fmaurer          ###   ########.fr       */
+/*   Created: 2026/05/01 18:46:40 by fmaurer           #+#    #+#             */
+/*   Updated: 2026/05/01 19:02:00 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Logger.hpp"
-#include "ReqParse.hpp"
+#include "Request.hpp"
+#include "VServer.hpp"
 #include "WsrvLib.hpp"
 #include "utils.hpp"
 
-// --------------------------------=[ OCF ]=-------------------------------- //
-
-ReqParse::ReqParse()
-{}
-
-ReqParse::ReqParse(const ReqParse& other)
+e_HTTPStatus Request::_readReqline()
 {
-  (void)other;
-}
-
-ReqParse& ReqParse::operator=(const ReqParse& other)
-{
-  (void)other;
-  return (*this);
-}
-
-ReqParse::~ReqParse()
-{}
-
-// ------------------------------=[ END OCF ]=------------------------------ //
-
-e_HTTPStatus ReqParse::_readReqline(t_RequestLine& rl, const str& r)
-{
-  if (r.size() > MAX_REQLINE_LEN)
+  if (_reqstr.size() > MAX_REQLINE_LEN)
     return HTTP_400;
 
   int i = 0;
-  while (i < 6 && !std::isspace(r[i]))
+  while (i < 6 && !std::isspace(_reqstr[i]))
     i++;
-  Logger::log_dbg1("ReqParse: found this method: '" + r.substr(0, i) + "'");
-  if ((rl.method = str2method(r.substr(0, i))) == M_UNKNOWN)
+  Logger::log_dbg1(
+      "Request: found this method: '" + _reqstr.substr(0, i) + "'");
+  if ((_reqline.method = str2method(_reqstr.substr(0, i))) == M_UNKNOWN)
     return HTTP_400;
 
   int k = 0;
   i++;
-  while (k <= MAX_TARGET_LEN && !std::isspace(r[i + k]))
+  while (k <= MAX_TARGET_LEN && !std::isspace(_reqstr[i + k]))
     k++;
-  Logger::log_dbg1("ReqParse: found this target URL: '" + r.substr(i, k) + "'");
+  Logger::log_dbg1(
+      "Request: found this target URL: '" + _reqstr.substr(i, k) + "'");
   if (k > MAX_TARGET_LEN)
     return HTTP_400;
-  rl.target = r.substr(i, k);
-  if (validateUrl(rl.target) == KO)
+  _reqline.target = _reqstr.substr(i, k);
+  if (validateUrl(_reqline.target) == KO)
     return HTTP_400;
 
   i = i + k + 1;
   k = 0;
-  while (i + k <= MAX_REQLINE_LEN && !std::isspace(r[i + k]))
+  while (i + k <= MAX_REQLINE_LEN && !std::isspace(_reqstr[i + k]))
     k++;
   if (i + k > MAX_REQLINE_LEN)
     return HTTP_400;
-  Logger::log_dbg1("ReqParse: found this httpVer: '" + r.substr(i, k) + "'");
-  rl.httpVersion = WsrvLib::str2HTTPVer(r.substr(i, k));
-  if (r.compare(i + k, 2, CRLF) != 0)
+  Logger::log_dbg1(
+      "Request: found this httpVer: '" + _reqstr.substr(i, k) + "'");
+  _reqline.httpVersion = WsrvLib::str2HTTPVer(_reqstr.substr(i, k));
+  if (_reqstr.compare(i + k, 2, CRLF) != 0)
     return HTTP_400;
 
   return HTTP_200;
 }
 
-e_HTTPStatus ReqParse::parseReqLine(t_RequestLine& rl, const str& r)
+e_HTTPStatus Request::parseReqLine()
 {
   e_HTTPStatus status = HTTP_200;
-  if ((status = _readReqline(rl, r)) >= HTTP_400)
+  if ((status = _readReqline()) >= HTTP_400)
     return status;
   // if ((status = validateUrl(rl.target)) >= HTTP_400)
   //   return status;
@@ -85,12 +68,12 @@ e_HTTPStatus ReqParse::parseReqLine(t_RequestLine& rl, const str& r)
 }
 
 // TODO: add more validity checks here
-std::vector< std::pair<str, str> > ReqParse::_splitHdr(const str& hstr)
+std::vector< std::pair<str, str> > Request::_splitHdr()
 {
   std::vector< std::pair<str, str> > ret;
 
   // isolate headers from body
-  str              onlyHdrs = hstr.substr(0, hstr.find(CRLFX2) + 2);
+  str              onlyHdrs = _reqstr.substr(0, _reqstr.find(CRLFX2) + 2);
   std::vector<str> hdrLines = splitString(onlyHdrs, CRLF);
 
   for (std::vector<str>::iterator it = hdrLines.begin(); it != hdrLines.end();
@@ -98,7 +81,7 @@ std::vector< std::pair<str, str> > ReqParse::_splitHdr(const str& hstr)
   {
     size_t colonPos = it->find(":");
     if (colonPos == str::npos)
-      throw std::runtime_error("ReqParse::spliHdr: ivalid header field");
+      throw std::runtime_error("Request::spliHdr: ivalid header field");
     str fieldName  = it->substr(0, colonPos);
     str fieldValue = strip(it->substr(colonPos + 1, str::npos));
     ret.push_back(std::make_pair(fieldName, fieldValue));
@@ -106,10 +89,9 @@ std::vector< std::pair<str, str> > ReqParse::_splitHdr(const str& hstr)
   return ret;
 }
 
-e_HTTPStatus ReqParse::parseHeaders(
-    std::map<str, str>& _headers, const str& reqstr)
+e_HTTPStatus Request::_parseHeaders()
 {
-  str              onlyHdrs = reqstr.substr(0, reqstr.find(CRLFX2) + 2);
+  str              onlyHdrs = _reqstr.substr(0, _reqstr.find(CRLFX2) + 2);
   std::vector<str> hdrLines = splitString(onlyHdrs, CRLF);
 
   // skipping the requline
@@ -125,20 +107,20 @@ e_HTTPStatus ReqParse::parseHeaders(
   return HTTP_200;
 }
 
-e_HTTPStatus ReqParse::checkHeaders(
-    const t_RequestLine& rl, const std::map<str, str>& hdrs)
+e_HTTPStatus Request::checkHeaders()
 {
-  if (rl.httpVersion == HTTPVER_1_1) {
-    if (rl.method == M_GET) {
-      if (hdrs.find("Host") == hdrs.end())
-        return HTTP_400;
+  if (_reqline.httpVersion == HTTPVER_1_1) {
+    if (_reqline.method == M_GET) {
+      if (_headers.find("Host") == _headers.end())
+        Logger::log_srv(_vsrv->getName(), "GET Req without Host header", WARN);
+      return HTTP_400;
     }
   }
   return HTTP_200;
 }
 
 // TODO: implement
-int ReqParse::validateUrl(const str& u)
+int Request::validateUrl(const str& u)
 {
   (void)u;
   return OK;
