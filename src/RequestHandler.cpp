@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 19:13:35 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/01 19:05:05 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/01 21:59:25 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -145,7 +145,7 @@ void RequestHandler::writeResponse()
     if (_cli->isTimeout())
       statusCode = HTTP_408;
     else if (req.reqError())
-      statusCode = _cli->getReq().getStatusCode();
+      statusCode = req.getStatusCode();
     else
       statusCode = HTTP_400;
 
