@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 23:39:57 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/01 19:02:54 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/03 21:26:55 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -207,12 +207,15 @@ void Request::reset()
 e_HTTPStatus Request::parseHeaders()
 {
   if ((_statusCode = parseReqLine()) != HTTP_200) {
+    Logger::log_dbg1("Request::parseReqline: >=400");
     return _statusCode;
   }
   if ((_statusCode = _parseHeaders()) != HTTP_200) {
+    Logger::log_dbg1("Request::_parseHeaders: >=400");
     return _statusCode;
   }
   if ((_statusCode = checkHeaders()) != HTTP_200) {
+    Logger::log_dbg1("Request::checkHeaders: >=400");
     return _statusCode;
   }
   return HTTP_200;

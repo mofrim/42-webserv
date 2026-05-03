@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 19:13:35 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/01 21:59:25 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/03 21:19:15 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -104,6 +104,7 @@ void RequestHandler::readRequest()
   if (req.hdrComplete()) {
     e_HTTPStatus status = req.parseHeaders();
     if (status != HTTP_200) {
+      Logger::log_dbg1("RequestHandler: 400 due to header parsing");
       _cli->setState(CLI_SEND);
       return;
     }
@@ -142,12 +143,16 @@ void RequestHandler::writeResponse()
 
   if (req.isFinished() == false) {
     // FIXME: maybe tiemout can also happen with finished rquests?!?!
-    if (_cli->isTimeout())
+    if (_cli->isTimeout()) {
+      Logger::log_dbg1("RequestHandler: 408 due to timeout");
       statusCode = HTTP_408;
+    }
     else if (req.reqError())
       statusCode = req.getStatusCode();
-    else
+    else {
+      Logger::log_dbg1("RequestHandler: 400 due to unfinished req");
       statusCode = HTTP_400;
+    }
 
     response = Response::genErrResponse(statusCode);
   }
