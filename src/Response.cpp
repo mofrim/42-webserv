@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/23 19:11:25 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/01 18:38:50 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/03 21:14:40 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -218,14 +218,15 @@ void Response::reset()
 }
 
 // helper function for generating the response for a failes Req.
-std::map<str, str> Response::_buildErrRespoHdrs(e_HTTPStatus status)
+std::map<str, str> Response::_buildErrRespoHdrs(
+    e_HTTPStatus status, const str& body)
 {
   std::map<str, str> hdrs;
   hdrs["Startline"]      = "HTTP/1.1 " + WsrvLib::getStatusStr(status);
   hdrs["Server"]         = "m0fr1m's webserv " VERSION;
   hdrs["Date"]           = Logger::getLogtime();
   hdrs["Content-Type"]   = "text/html";
-  hdrs["Content-Length"] = "0";
+  hdrs["Content-Length"] = int2str(body.length());
 
   str conn;
   if (status >= HTTP_400 && (status != HTTP_404))
@@ -241,9 +242,9 @@ str Response::genErrResponse(e_HTTPStatus errCode)
 {
   str respostr;
 
-  std::map<str, str> hdrs = _buildErrRespoHdrs(errCode);
-
   str body = WsrvLib::getDefaultErrPage(errCode);
+
+  std::map<str, str> hdrs = _buildErrRespoHdrs(errCode, body);
 
   for (std::map<str, str>::reverse_iterator it = hdrs.rbegin();
       it != hdrs.rend();
