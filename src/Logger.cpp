@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/24 20:52:55 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/01 15:53:12 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/03 21:38:27 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,7 +74,7 @@ void Logger::log_dbg1(const str& msg)
 {
   if (LOGLEVEL >= LOG_DEBUG) {
     str logtime = getLogtime();
-    std::cout << WHT << logtime << msg << RST << std::endl;
+    std::cout << PNK << logtime << msg << RST << std::endl;
   }
 }
 
