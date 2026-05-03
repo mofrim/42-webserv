@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/01 18:46:40 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/01 19:02:00 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/03 21:32:21 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -111,9 +111,10 @@ e_HTTPStatus Request::checkHeaders()
 {
   if (_reqline.httpVersion == HTTPVER_1_1) {
     if (_reqline.method == M_GET) {
-      if (_headers.find("Host") == _headers.end())
+      if (_headers.find("Host") == _headers.end()) {
         Logger::log_srv(_vsrv->getName(), "GET Req without Host header", WARN);
-      return HTTP_400;
+        return HTTP_400;
+      }
     }
   }
   return HTTP_200;
