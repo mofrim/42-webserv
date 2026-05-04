@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/14 20:51:06 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/01 17:13:44 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/04 11:19:43 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,10 +25,7 @@ Client::Client():
   _state(CLI_IDLE)
 {}
 
-Client::Client(const Client& o)
-{
-  (void)o;
-}
+Client::Client(const Client& o) { (void)o; }
 
 Client::Client(int fd, VServer *vsrv, const str& addr, in_port_t port):
   _clientFd(fd), _addr(addr), _port(ntohs(port)), _timeout(false),
@@ -55,24 +52,13 @@ Client::~Client()
 
 // ------------------------------=[ END OCF ]=------------------------------ //
 
-void Client::setFd(int fd)
-{
-  _clientFd = fd;
-}
-int Client::getFd() const
-{
-  return _clientFd;
-}
+void Client::setFd(int fd) { _clientFd = fd; }
 
-void Client::setLastActive()
-{
-  _lastActive = time(NULL);
-}
+int Client::getFd() const { return _clientFd; }
 
-clock_t Client::getLastActive() const
-{
-  return (_lastActive);
-}
+void Client::setLastActive() { _lastActive = time(NULL); }
+
+clock_t Client::getLastActive() const { return (_lastActive); }
 
 void Client::setVsrv(VServer *v)
 {
@@ -80,20 +66,14 @@ void Client::setVsrv(VServer *v)
   _req.setVsrv(v);
 }
 
-VServer *Client::getVsrv() const
-{
-  return _vsrv;
-}
+VServer *Client::getVsrv() const { return _vsrv; }
 
 void Client::setPotentialVsrvs(std::vector<VServer *> vv)
 {
   _potentialVsrvs = vv;
 }
 
-std::vector<VServer *>& Client::getPotentialVsrvs()
-{
-  return _potentialVsrvs;
-}
+std::vector<VServer *>& Client::getPotentialVsrvs() { return _potentialVsrvs; }
 
 // This function only exists for generating new Client instances that have not
 // yet been assigned to a server, which is the case for clients knocking on the
@@ -128,20 +108,11 @@ Client *Client::newVirtualCli(int listenFd)
   return newCli;
 }
 
-str Client::getAddr() const
-{
-  return _addr;
-}
+str Client::getAddr() const { return _addr; }
 
-u16 Client::getPort() const
-{
-  return _port;
-}
+u16 Client::getPort() const { return _port; }
 
-void Client::timeout()
-{
-  _timeout = true;
-}
+void Client::timeout() { _timeout = true; }
 
 void Client::handleEvent(u32 ev)
 {
@@ -166,72 +137,33 @@ void Client::handleEventServerless(u32 ev)
   }
 }
 
-Request& Client::getReq()
-{
-  return _req;
-}
+Request& Client::getReq() { return _req; }
 
-void Client::setReq(const Request& r)
-{
-  _req = r;
-}
+void Client::setReq(const Request& r) { _req = r; }
 
-void Client::resetReq()
-{
-  _req.reset();
-}
+void Client::resetReq() { _req.reset(); }
 
-str Client::getIfaceFdStr() const
-{
-  return _ifaceFdStr;
-}
+str Client::getIfaceFdStr() const { return _ifaceFdStr; }
 
-e_CliState Client::getState() const
-{
-  return _state;
-}
+e_CliState Client::getState() const { return _state; }
 
-void Client::setState(e_CliState s)
-{
-  _state = s;
-}
+void Client::setState(e_CliState s) { _state = s; }
 
-bool Client::isIdling() const
-{
-  return _state == CLI_IDLE;
-}
+bool Client::isIdling() const { return _state == CLI_IDLE; }
 
-bool Client::isReading() const
-{
-  return _state == CLI_READ;
-}
+bool Client::isReading() const { return _state == CLI_READ; }
 
-bool Client::isSending() const
-{
-  return _state == CLI_SEND;
-}
+bool Client::isSending() const { return _state == CLI_SEND; }
 
-bool Client::isDisco() const
-{
-  return _state == CLI_DISCO;
-}
+bool Client::isDisco() const { return _state == CLI_DISCO; }
 
-bool Client::isReqComplete()
-{
-  return _req.reqComplete();
-}
+bool Client::isReqComplete() { return _req.reqComplete(); }
 
 // sets a fully received Req to finished which also runs
 // Request::_parseRequest()
-void Client::setReqFinished()
-{
-  _req.setFinished();
-}
+void Client::setReqFinished() { _req.setFinished(); }
 
-bool Client::isTimeout() const
-{
-  return _timeout;
-}
+bool Client::isTimeout() const { return _timeout; }
 
 bool Client::reqHasHostHeader()
 {
