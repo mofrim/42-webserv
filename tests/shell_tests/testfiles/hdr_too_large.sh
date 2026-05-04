@@ -12,8 +12,7 @@ for ((i=0;i<499;i++)); do
 	echo -en "Dummy: header$CRLF" >&3
 done
 echo -en "$CRLF" >&3
-# RESPONSE="$(head -n 20 <&3 |grep 400)"
-# echo "Response: $RESPONSE"
+RESPONSE="$(head -n 20 <&3 |grep 400)"
 cat <&3
 exec 3<&-
 

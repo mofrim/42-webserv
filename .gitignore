@@ -19,3 +19,4 @@ _play/nginx/*.log
 
 _play/nginx/nginx.pid
 tests/shell_tests/hugefile
+tests/shell_tests/testfiles/hugefile
