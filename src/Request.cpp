@@ -196,6 +196,7 @@ void Request::reset()
   _reqstr.clear();
   _statusCode          = HTTP_200;
   _hdrLines            = 0;
+  _hdrComplete         = false;
   _reqFinished         = false;
   _reqline.httpVersion = HTTPVER_UNKNOWN;
   _reqline.target.clear();
