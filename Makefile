@@ -6,7 +6,7 @@
 #    By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/12/01 11:45:58 by fmaurer           #+#    #+#              #
-#    Updated: 2026/05/01 18:58:38 by fmaurer          ###   ########.fr        #
+#    Updated: 2026/05/04 19:06:19 by fmaurer          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -90,6 +90,10 @@ run1: fclean
 	make DBG=1
 	./$(NAME)
 
+run2: fclean
+	make DBG=2
+	./$(NAME)
+
 debug: CFLAGS += -DLOGLEVEL=2
 debug: $(SRCS)
 	$(CPP) $(IFLAGS) $(CFLAGS) -o $(NAME) $^
@@ -124,4 +128,4 @@ re: fclean $(NAME)
 re-run: re run
 
 .PHONY: all clean fclean re bear run tests tests-clean debug debug-run run1 \
-	re-run
+	re-run run2

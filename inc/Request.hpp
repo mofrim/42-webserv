@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 23:39:07 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/04 10:57:30 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/04 19:11:06 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,6 +51,7 @@ class Request {
 
     // Parsing related
     std::vector< std::pair<str, str> > _splitHdr();
+    size_t                             _skipEmptyHdrLine() const;
     e_HTTPStatus                       _readReqline();
     e_HTTPStatus                       _parseHeaders();
 

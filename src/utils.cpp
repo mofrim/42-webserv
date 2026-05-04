@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/26 10:03:57 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/03 23:18:17 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/04 18:48:37 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,10 +68,7 @@ str getAddrPortStr4(const struct sockaddr_in& addr)
 }
 
 // wrapper for getting the error string for current errno
-str getErrStr()
-{
-  return str(strerror(errno));
-}
+str getErrStr() { return str(strerror(errno)); }
 
 e_Method str2method(const str& m)
 {
@@ -109,9 +106,10 @@ int isDir(const str& path)
 }
 
 // @brief Split string by another delim string.
+// @param keepEmpty set this to true for keeping empty lines after split
 // @return  an std::vector filled with the split strings. if there is no delim
 //          in sstr or any param is empty, returs vector with sstr as only elem
-std::vector<str> splitString(const str& sstr, const str& delim)
+std::vector<str> splitString(const str& sstr, const str& delim, bool keepEmpty)
 {
   std::vector<str> ret;
   size_t           i = 0;
@@ -129,7 +127,7 @@ std::vector<str> splitString(const str& sstr, const str& delim)
       sub = sstr.substr(i, str::npos);
     else
       sub = sstr.substr(i, k - i);
-    if (!sub.empty())
+    if (!sub.empty() || keepEmpty)
       ret.push_back(sub);
     i = k + delim.size();
   }

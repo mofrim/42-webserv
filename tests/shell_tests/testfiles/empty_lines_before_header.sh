@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-# template
+# RFC demands we SHOULD support at least one empty line before hdr starts. so we
+# do it!
 
 if [ $# -ne 2 ]; then
 	echo "need 2 args: addr port"
@@ -19,16 +20,10 @@ set -u
 exec 3<>/dev/tcp/"$1"/"$2"
 
 sendHdrField "" 3
-sendHdrField "" 3
-sendHdrField "" 3
 sendHdrField "GET / HTTP/1.1" 3
 sendHdrField "Host: miep" 3
 finishReq 3
-RESPONSE="$(timeout 5s cat <&3)"
-echo "Response:"
-echo
-echo "${RESPONSE[@]}"
-
+RESPONSE="$(timeout 1s cat <&3 | grep 200)"
 exec 3<&-
 
 if [ -z "$RESPONSE" ]; then

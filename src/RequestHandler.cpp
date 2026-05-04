@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 19:13:35 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/03 21:19:15 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/04 17:49:36 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,13 +22,9 @@
 
 // -- OCF --
 
-RequestHandler::RequestHandler()
-{}
+RequestHandler::RequestHandler() {}
 
-RequestHandler::RequestHandler(const RequestHandler& other)
-{
-  (void)other;
-}
+RequestHandler::RequestHandler(const RequestHandler& other) { (void)other; }
 
 RequestHandler& RequestHandler::operator=(const RequestHandler& o)
 {
@@ -36,8 +32,7 @@ RequestHandler& RequestHandler::operator=(const RequestHandler& o)
   return (*this);
 }
 
-RequestHandler::~RequestHandler()
-{}
+RequestHandler::~RequestHandler() {}
 // -- OCF end --
 
 RequestHandler::RequestHandler(Client *cli): _cli(cli)
@@ -104,7 +99,7 @@ void RequestHandler::readRequest()
   if (req.hdrComplete()) {
     e_HTTPStatus status = req.parseHeaders();
     if (status != HTTP_200) {
-      Logger::log_dbg1("RequestHandler: 400 due to header parsing");
+      Logger::log_dbg1("RequestHandler: 400 from header parsing");
       _cli->setState(CLI_SEND);
       return;
     }
@@ -140,7 +135,6 @@ void RequestHandler::writeResponse()
   e_HTTPStatus statusCode;
 
   Request& req = _cli->getReq();
-
   if (req.isFinished() == false) {
     // FIXME: maybe tiemout can also happen with finished rquests?!?!
     if (_cli->isTimeout()) {
@@ -191,10 +185,7 @@ RequestHandler::ReqHandlerException::ReqHandlerException(
     const std::string& msg): std::runtime_error("ReqHandlerException: " + msg)
 {}
 
-void RequestHandler::setVsrvName(const str& n)
-{
-  _vsrvName = n;
-}
+void RequestHandler::setVsrvName(const str& n) { _vsrvName = n; }
 
 // FIXME: maybe change logging to dbg1 for prod
 void RequestHandler::_setVirtualServerFromHeader()

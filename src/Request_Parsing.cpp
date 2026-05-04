@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/01 18:46:40 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/04 11:12:25 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/04 19:17:33 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,16 +23,17 @@ e_HTTPStatus Request::_readReqline()
   if (_reqstr.size() > MAX_REQLINE_LEN)
     return HTTP_400;
 
-  int i = 0;
-  while (i < 6 && !std::isspace(_reqstr[i]))
-    i++;
+  int i = _skipEmptyHdrLine();
+  int k = 0;
+  while (k < 6 && !std::isspace(_reqstr[i + k]))
+    k++;
   Logger::log_dbg1(
-      "Request: found this method: '" + _reqstr.substr(0, i) + "'");
-  if ((_reqline.method = str2method(_reqstr.substr(0, i))) == M_UNKNOWN)
+      "Request: found this method: '" + _reqstr.substr(i, k) + "'");
+  if ((_reqline.method = str2method(_reqstr.substr(i, k))) == M_UNKNOWN)
     return HTTP_400;
 
-  int k = 0;
-  i++;
+  i = i + k + 1;
+  k = 0;
   while (k <= MAX_TARGET_LEN && !std::isspace(_reqstr[i + k]))
     k++;
   Logger::log_dbg1(
@@ -124,7 +125,6 @@ e_HTTPStatus Request::checkHeaders()
         Logger::log_srv(_vsrv->getName(), "GET Req without Host header", WARN);
         return HTTP_400;
       }
-
       if (_headers.count("connection") > 0 && _headers["connection"] == "close")
         _closeConn = true;
     }
@@ -139,6 +139,15 @@ e_HTTPStatus Request::checkHeaders()
       _closeConn = true;
     }
   }
+
+  if (_reqline.method != M_POST && _headers.count("content-length") > 0 &&
+      _headers["content-length"] != "0")
+  {
+    Logger::log_srv(_vsrv->getName(),
+        "Webserv only accepts req bodies with POST reqs",
+        WARN);
+    return HTTP_400;
+  }
   return HTTP_200;
 }
 
@@ -147,4 +156,13 @@ int Request::validateUrl(const str& u)
 {
   (void)u;
   return OK;
+}
+
+// we skip exactly one empty line prior to startline as RFC friendly asks from
+// us.
+size_t Request::_skipEmptyHdrLine() const
+{
+  if (_reqstr.size() >= 2 && !_reqstr.compare(0, 2, CRLF))
+    return 2;
+  return 0;
 }
