@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/24 20:52:55 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/03 21:38:27 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/03 23:31:53 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -103,7 +103,7 @@ void Logger::log_srv(const str& srvName, const str& msg, e_LogType logtype)
 // we might want to print the headers seperate from the body
 void Logger::log_reqres(const str& srvName, const str& resreq, const str& data)
 {
-  if (LOGLEVEL >= LOG_DEBUG) {
+  if (LOGLEVEL >= LOG_BRUTAL) {
     str logtime = getLogtime();
     std::cout << GRY << logtime << GRN << "(" << srvName << ") " << BGRY
               << resreq << ":" << BGRY << "\n---" << std::endl;
