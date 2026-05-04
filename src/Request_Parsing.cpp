@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/01 18:46:40 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/03 21:32:21 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/03 23:35:47 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,8 @@
 #include "WsrvLib.hpp"
 #include "utils.hpp"
 
+// Parse the reuqest-line. I.e. the uppercase method, then a target URI and then
+// the HTTP-version. The URI is already converted to to lowercase
 e_HTTPStatus Request::_readReqline()
 {
   if (_reqstr.size() > MAX_REQLINE_LEN)
@@ -38,6 +40,7 @@ e_HTTPStatus Request::_readReqline()
   if (k > MAX_TARGET_LEN)
     return HTTP_400;
   _reqline.target = _reqstr.substr(i, k);
+  tolower(_reqline.target);
   if (validateUrl(_reqline.target) == KO)
     return HTTP_400;
 
@@ -89,6 +92,8 @@ std::vector< std::pair<str, str> > Request::_splitHdr()
   return ret;
 }
 
+// Parse all hdrs lowercasing the field names because we are case-insensitive by
+// RFC. Also we strip any leading or trailing whitespaces from names and values.
 e_HTTPStatus Request::_parseHeaders()
 {
   str              onlyHdrs = _reqstr.substr(0, _reqstr.find(CRLFX2) + 2);
@@ -100,8 +105,9 @@ e_HTTPStatus Request::_parseHeaders()
     size_t colonPos = it->find(":");
     if (colonPos == str::npos)
       return HTTP_400;
-    str fieldName       = it->substr(0, colonPos);
-    str fieldValue      = strip(it->substr(colonPos + 1, str::npos));
+    str fieldName  = strip(it->substr(0, colonPos));
+    str fieldValue = strip(it->substr(colonPos + 1, str::npos));
+    tolower(fieldName);
     _headers[fieldName] = fieldValue;
   }
   return HTTP_200;
@@ -111,7 +117,7 @@ e_HTTPStatus Request::checkHeaders()
 {
   if (_reqline.httpVersion == HTTPVER_1_1) {
     if (_reqline.method == M_GET) {
-      if (_headers.find("Host") == _headers.end()) {
+      if (_headers.find("host") == _headers.end()) {
         Logger::log_srv(_vsrv->getName(), "GET Req without Host header", WARN);
         return HTTP_400;
       }
