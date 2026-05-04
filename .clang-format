@@ -8,7 +8,7 @@ BraceWrapping:
   AfterControlStatement: MultiLine
   BeforeElse: true # wow! but this is what i want.
   SplitEmptyFunction: false
-AllowShortFunctionsOnASingleLine: false # found this to be anoying during editing
+AllowShortFunctionsOnASingleLine: true # found this to be anoying during editing
 SpaceBeforeCtorInitializerColon: false
 
 # BreakConstructorInitializers: BeforeComma
