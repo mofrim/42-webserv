@@ -30,13 +30,13 @@ do
 			echo -e "  \e[31mKO\e[0m: test '$i' failed!"
 			allgood=0
 		else
-			echo -e "  \e[32mKO\e[0m: test '$i' passed!"
+			echo -e "  \e[32mOK\e[0m: test '$i' passed!"
 		fi
 	fi
 done
 
 if [ $allgood -eq 1 ]; then 
-	echo -e "\n-----=[ \e[32mOK\e[36m, all tests passed \o/\e[0m ]=-----\n"
+	echo -e "\n-----=[ \e[1;32mOK\e[36m, all tests passed \o/\e[0m ]=-----\n"
 else
-	echo -e "\n-----=[ \e[31mKO\e[36m, some tests failed ;(\e[0m ]=-----\n"
+	echo -e "\n-----=[ \e[1;31mKO\e[36m, some tests failed ;(\e[0m ]=-----\n"
 fi
