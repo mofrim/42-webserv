@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 23:39:57 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/04 11:22:09 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/04 16:00:21 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,15 +63,17 @@ Request::~Request() {}
 
 // ------------------------------=[ END OCF ]=------------------------------ //
 
-// the standard ctor we use for initializing a request _and_ parse the request
-// at the same time.
+// the standard ctor we use for initializing a request in
+// RequestHandler::read_request
 Request::Request(Client *cli, const std::string& reqstr)
 {
   _vsrv        = cli->getVsrv();
   _cli         = cli;
   _reqstr      = reqstr;
   _reqFinished = false;
+  _hdrComplete = false;
   _hdrLines    = _countReqLines(reqstr);
+  _closeConn   = false;
 }
 
 // When we hit this function, which is only done at the bottom of
@@ -150,6 +152,7 @@ str Request::getMethodStr() const
   }
 }
 
+// FIXME: make sure this is bullet-proof and nothing is missed-out!
 void Request::reset()
 {
   _reqstr.clear();
