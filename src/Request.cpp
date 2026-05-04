@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 23:39:57 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/04 10:58:08 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/04 11:22:09 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,8 +59,7 @@ Request& Request::operator=(const Request& o)
   return *this;
 }
 
-Request::~Request()
-{}
+Request::~Request() {}
 
 // ------------------------------=[ END OCF ]=------------------------------ //
 
@@ -87,11 +86,6 @@ void Request::_parseRequest()
     _statusCode = _respo.genResponse(*this);
 }
 
-str Request::getResponseStr() const
-{
-  return _respo.getRespoStr();
-}
-
 // check if received request was terminated with '\r\n'
 bool Request::_isTerminatedReq()
 {
@@ -100,11 +94,6 @@ bool Request::_isTerminatedReq()
   if (_reqstr.compare(_reqstr.size() - 4, 4, "\r\n\r\n") == 0)
     return (true);
   return (false);
-}
-
-bool Request::isFinished() const
-{
-  return _reqFinished;
 }
 
 void Request::setFinished()
@@ -161,36 +150,6 @@ str Request::getMethodStr() const
   }
 }
 
-const str& Request::getReqstr() const
-{
-  return _reqstr;
-}
-
-Client *Request::getCli() const
-{
-  return _cli;
-}
-
-VServer *Request::getVsrv() const
-{
-  return _vsrv;
-}
-
-e_HTTPStatus Request::getStatusCode() const
-{
-  return _statusCode;
-}
-
-const t_RequestLine& Request::getReqline() const
-{
-  return _reqline;
-}
-
-const std::map<str, str>& Request::getHeaders() const
-{
-  return _headers;
-}
-
 void Request::reset()
 {
   _reqstr.clear();
@@ -222,11 +181,6 @@ e_HTTPStatus Request::parseHeaders()
   return HTTP_200;
 }
 
-void Request::setVsrv(VServer *v)
-{
-  _vsrv = v;
-}
-
 // READ_BUFSIZE is set to 4096 bytes so half of this is in theory the max num of
 // CRLFs in a string that can be checked -> u16 is enough.
 // NOTE: empty lines are also counted
@@ -251,23 +205,29 @@ u16 Request::_countReqLines(const str& s)
   return lineNum;
 }
 
-bool Request::hdrTooBig() const
-{
-  return _hdrLines > MAX_HEADER_LINES;
-}
+void Request::setVsrv(VServer *v) { _vsrv = v; }
 
-void Request::setStatusCode(e_HTTPStatus code)
-{
-  _statusCode = code;
-}
+bool Request::hdrTooBig() const { return _hdrLines > MAX_HEADER_LINES; }
 
-bool Request::reqError() const
-{
-  return _statusCode >= HTTP_400;
-}
+void Request::setStatusCode(e_HTTPStatus code) { _statusCode = code; }
+
+bool Request::reqError() const { return _statusCode >= HTTP_400; }
 
 // should connection be closed?
-bool Request::closeConn() const
-{
-  return _closeConn;
-}
+bool Request::closeConn() const { return _closeConn; }
+
+const str& Request::getReqstr() const { return _reqstr; }
+
+Client *Request::getCli() const { return _cli; }
+
+VServer *Request::getVsrv() const { return _vsrv; }
+
+e_HTTPStatus Request::getStatusCode() const { return _statusCode; }
+
+const t_RequestLine& Request::getReqline() const { return _reqline; }
+
+const std::map<str, str>& Request::getHeaders() const { return _headers; }
+
+str Request::getResponseStr() const { return _respo.getRespoStr(); }
+
+bool Request::isFinished() const { return _reqFinished; }
