@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/23 19:11:06 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/03 21:14:58 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/04 11:04:05 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,11 +22,15 @@ class VServer;
 
 class Response {
   private:
+    // FIXME: Set them as pointers from Request for convenient access in here.
+    // Or do something more elegant than just copying them over.
     e_HTTPStatus       _statusCode;
     t_RequestLine      _reqline;
     std::map<str, str> _reqHeaders;
     Client            *_cli;
     VServer           *_vsrv;
+    bool               _closeConn;
+
     std::map<str, str> _respoHeaders;
     str                _body;
     str                _mimeType;
@@ -44,7 +48,6 @@ class Response {
     Response();
     Response(const Response& other);
     Response& operator=(const Response& other);
-    Response(const Request& req);
     ~Response();
 
     e_HTTPStatus genResponse(const Request& req);

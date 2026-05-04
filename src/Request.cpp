@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 23:39:57 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/03 21:26:55 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/04 10:58:08 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@
 
 Request::Request():
   _vsrv(NULL), _reqstr(""), _hdrLines(0), _reqFinished(false),
-  _hdrComplete(false)
+  _hdrComplete(false), _closeConn(false)
 {}
 
 Request::Request(const Request& o)
@@ -37,6 +37,7 @@ Request::Request(const Request& o)
     _reqFinished = o._reqFinished;
     _hdrComplete = o._hdrComplete;
     _hdrLines    = o._hdrLines;
+    _closeConn   = o._closeConn;
   }
 }
 
@@ -53,6 +54,7 @@ Request& Request::operator=(const Request& o)
     _reqFinished = o._reqFinished;
     _hdrComplete = o._hdrComplete;
     _hdrLines    = o._hdrLines;
+    _closeConn   = o._closeConn;
   }
   return *this;
 }
@@ -73,18 +75,16 @@ Request::Request(Client *cli, const std::string& reqstr)
   _hdrLines    = _countReqLines(reqstr);
 }
 
-// Important resource:
-//
-// 	https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status
-
+// When we hit this function, which is only done at the bottom of
+// RquestHandler::read_request, the header will already be parsed and found to
+// be ok. That's we here only have to deal with response-generation?!
 void Request::_parseRequest()
 {
   // FIXME: this is not valid procedure for requests with a body!
   if (!_isTerminatedReq())
     _statusCode = HTTP_400;
   else
-    _statusCode = parseReqLine();
-  _statusCode = _respo.genResponse(*this);
+    _statusCode = _respo.genResponse(*this);
 }
 
 str Request::getResponseStr() const
@@ -264,4 +264,10 @@ void Request::setStatusCode(e_HTTPStatus code)
 bool Request::reqError() const
 {
   return _statusCode >= HTTP_400;
+}
+
+// should connection be closed?
+bool Request::closeConn() const
+{
+  return _closeConn;
 }

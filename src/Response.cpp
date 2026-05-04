@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/23 19:11:25 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/03 21:14:40 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/04 11:05:53 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,6 +36,7 @@ Response::Response(const Response& o)
     _body         = o._body;
     _mimeType     = o._mimeType;
     _respoStr     = o._respoStr;
+    _closeConn    = o._closeConn;
   }
 }
 
@@ -51,6 +52,7 @@ Response& Response::operator=(const Response& o)
     _body         = o._body;
     _mimeType     = o._mimeType;
     _respoStr     = o._respoStr;
+    _closeConn    = o._closeConn;
   }
   return (*this);
 }
@@ -60,12 +62,6 @@ Response::~Response()
 
 // ------------------------------=[ END OCF ]=------------------------------ //
 
-// FIXME: maybe i do not need this at all
-Response::Response(const Request& req)
-{
-  _setFieldsFromReq(req);
-}
-
 void Response::_setFieldsFromReq(const Request& req)
 {
   _statusCode = req.getStatusCode();
@@ -73,6 +69,7 @@ void Response::_setFieldsFromReq(const Request& req)
   _reqHeaders = req.getHeaders();
   _cli        = req.getCli();
   _vsrv       = req.getVsrv();
+  _closeConn  = req.closeConn();
 }
 
 e_HTTPStatus Response::genResponse(const Request& req)
@@ -82,6 +79,7 @@ e_HTTPStatus Response::genResponse(const Request& req)
   if (_statusCode == HTTP_200 && _reqline.method == M_GET)
     _getBody();
 
+  _buildRespoHdrs();
   _genResponse();
 
   return _statusCode;
@@ -91,8 +89,6 @@ e_HTTPStatus Response::genResponse(const Request& req)
 // this in order to avoid codedup in genErrResponse().
 void Response::_genResponse()
 {
-  _buildRespoHdrs();
-
   for (std::map<str, str>::reverse_iterator it = _respoHeaders.rbegin();
       it != _respoHeaders.rend();
       it++)
@@ -189,7 +185,7 @@ void Response::_buildRespoHdrs()
   _respoHeaders["Content-Length"] = int2str(_body.size());
 
   str conn;
-  if (_statusCode >= HTTP_400 && (_statusCode != HTTP_404))
+  if ((_statusCode >= HTTP_400 && (_statusCode != HTTP_404)) || _closeConn)
     conn = "close";
   else
     conn = "keep-alive";

@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/01 18:46:40 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/03 23:35:47 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/04 11:12:25 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,6 +56,7 @@ e_HTTPStatus Request::_readReqline()
   if (_reqstr.compare(i + k, 2, CRLF) != 0)
     return HTTP_400;
 
+  // FIXME: add here or somwhere else a NGINX like logmsg
   return HTTP_200;
 }
 
@@ -113,14 +114,29 @@ e_HTTPStatus Request::_parseHeaders()
   return HTTP_200;
 }
 
+// There is a little more to be done in here!
 e_HTTPStatus Request::checkHeaders()
 {
   if (_reqline.httpVersion == HTTPVER_1_1) {
     if (_reqline.method == M_GET) {
-      if (_headers.find("host") == _headers.end()) {
+
+      if (_headers.count("host") == 0) {
         Logger::log_srv(_vsrv->getName(), "GET Req without Host header", WARN);
         return HTTP_400;
       }
+
+      if (_headers.count("connection") > 0 && _headers["connection"] == "close")
+        _closeConn = true;
+    }
+  }
+  else {
+    if (!(_headers.count("connection") > 0 &&
+            _headers["connection"] == "keep-alive"))
+    {
+      Logger::log_dbg1(
+          "Request::checkHeaders: closing conn per default, reason: HTTP <= "
+          "1.0");
+      _closeConn = true;
     }
   }
   return HTTP_200;

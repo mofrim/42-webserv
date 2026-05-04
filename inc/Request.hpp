@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 23:39:07 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/01 19:00:01 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/04 10:57:30 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,6 +38,7 @@ class Request {
     u16          _hdrLines;
     bool         _reqFinished;
     bool         _hdrComplete;
+    bool         _closeConn;
 
     // doing it exactly as proposed in:
     // https://datatracker.ietf.org/doc/html/rfc9112#section-2.2
@@ -80,6 +81,7 @@ class Request {
     void         setStatusCode(e_HTTPStatus code);
     bool         hdrTooBig() const;
     str          getMethodStr() const;
+    bool         closeConn() const;
 
     bool reqError() const;
 
