@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/03 11:26:23 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/29 16:48:28 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/03 23:18:48 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,6 +29,7 @@ str              method2str(e_Method m);
 int              isDir(const str& path);
 std::vector<str> splitString(const str& sstr, const str& delim);
 str              strip(str str);
+void             tolower(str& s);
 
 // -----------------------------=[ Templates ]=----------------------------- //
 

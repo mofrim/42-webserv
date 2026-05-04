@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/26 10:03:57 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/27 15:07:17 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/03 23:18:17 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -165,4 +165,12 @@ str strip(str s)
     std::cout << "strip: std::length_error: " << e.what() << std::endl;
   }
   return s;
+}
+
+// an in-place tolower function because internally we will work case-insensitive
+// with header fields
+void tolower(str& s)
+{
+  for (size_t i = 0; i < s.size(); i++)
+    s[i] = std::tolower(s[i]);
 }
