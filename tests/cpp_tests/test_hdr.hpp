@@ -33,7 +33,6 @@ extern bool g_GlobalResult;
 #include "Epoll.hpp"
 #include "HttpStatus.hpp"
 #include "Logger.hpp"
-#include "ReqParse.hpp"
 #include "RequestHandler.hpp"
 #include "Request.hpp"
 #include "Response.hpp"

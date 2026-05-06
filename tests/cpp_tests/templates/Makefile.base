@@ -17,12 +17,12 @@ NAME 		= run_tests
 # the header files. This also applies to change-detection!
 # TL;DR: it makes things pretty easy ;)
 VPATH		= ./ ./tests
-VPATH		+= ../src ../inc
+VPATH		+= PROJ_SRCS_DIR_HERE PROJ_HDRS_DIR_HERE
 
 OBJDIR			= obj
-PROJ_OBJDIR	= ../obj
+PROJ_OBJDIR	= PROJ_OBJ_DIR_HERE
 
-INC 			= ../inc
+INC 			= PROJ_HDRS_DIR_HERE
 
 # The files..
 PROJ_SRCS_HERE
@@ -83,7 +83,7 @@ clean: proj-clean
 	rm -rf $(OBJDIR)
 
 proj-clean:
-	make -C .. clean
+	make -C PROJ_DIR_HERE clean
 
 bear: fclean
 	bear -- make

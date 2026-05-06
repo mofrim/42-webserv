@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/13 13:06:35 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/25 09:58:09 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/06 19:45:39 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@ int _test_WsrvLib()
 {
   print_test_topic("test_WsrvLib", "basic tests");
   {
-    str moep = WsrvLib::getDefaultErrPage(404);
+    str moep = WsrvLib::getDefaultErrPage(HTTP_404);
     std::cout << moep << std::endl;
   }
 

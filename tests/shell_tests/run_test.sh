@@ -13,6 +13,11 @@ else
 	source ./_test_utils.sh
 fi
 
+if ! pidof webserv &> /dev/null; then
+	echo -e "\e[31meeehm... webserv must be running for this!\e[0m"
+	exit 1
+fi
+
 # for skipping tests add their basename here
 skip_tests=(
 	"get_with_huge_body.sh"

@@ -1,0 +1,109 @@
+# **************************************************************************** #
+#                                                                              #
+#                                                         :::      ::::::::    #
+#    Makefile.base                                      :+:      :+:    :+:    # +:+ +:+         +:+      # By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+         # +#+#+#+#+#+   +#+            #
+#    Created: 2024/12/01 11:45:58 by fmaurer           #+#    #+#              #
+#    Updated: 2026/04/01 16:16:18 by fmaurer          ###   ########.fr        #
+#                                                                              #
+# **************************************************************************** #
+
+NAME 		= run_tests
+
+# The directories..
+#
+# the magic vpath... by using this we will not have to specify in which
+# sub-directory a source file is located. the '%.o' and '%.cpp' wildcards will
+# find any file in any directory listed in the VPATH. The same holds true for
+# the header files. This also applies to change-detection!
+# TL;DR: it makes things pretty easy ;)
+VPATH		= ./ ./tests
+VPATH		+= ../../src ../../inc
+
+OBJDIR			= obj
+PROJ_OBJDIR	= ../../obj
+
+INC 			= ../../inc
+
+# The files..
+PROJ_SRCS = Client.cpp  Config.cpp  ConfigParser.cpp  Epoll.cpp  Logger.cpp    Request.cpp  RequestHandler.cpp  Request_Parsing.cpp  Response.cpp  Route.cpp  Socket.cpp  utils.cpp  VServerCfg.cpp  VServer.cpp  VServer_Utils.cpp  Webserv.cpp  Webserv_Utils.cpp  WsrvLib.cpp
+PROJ_HDRS = Client.hpp  Config.hpp  ConfigParser.hpp  Epoll.hpp  HttpStatus.hpp  Logger.hpp  RequestHandler.hpp  Request.hpp  Response.hpp  Route.hpp  Socket.hpp  utils.hpp  VServerCfg.hpp  VServer.hpp  Webserv.hpp  WsrvLib.hpp
+
+TEST_SRCS			= test_main.cpp \
+								test_utils.cpp \
+		test_VServerCfg.cpp \
+		test_server_init.cpp \
+		test_WsrvLib.cpp \
+		test_Routes.cpp \
+		test_Socket.cpp 
+
+TEST_HDRS			= test_utils.hpp
+
+OBJS				= $(patsubst %.cpp,$(OBJDIR)/%.o,$(TEST_SRCS))
+PROJ_OBJS		= $(patsubst %.cpp,$(PROJ_OBJDIR)/%.o,$(PROJ_SRCS))
+
+CPP			= c++
+
+# compiler flags
+CFLAGS	= -Wall -Werror -Wextra -std=c++98
+
+# if command line var 'DBG=yes' is set activate debug options
+ifeq ($(DBG),yes)
+	CFLAGS	+= -g -DLOGLEVEL=1
+endif
+
+IFLAGS	= -I$(INC) -I.
+
+all: $(NAME)
+
+$(OBJDIR):
+	mkdir -p $(OBJDIR)
+
+$(PROJ_OBJDIR):
+	mkdir -p $(PROJ_OBJDIR)
+
+# will never try to compile HDR or any other prequesite specified after `%.cpp`.
+# this is because the `%.o` and matched against all .c-files in the current dir.
+# !! Attention: Any misspelled filename in HDRS or SRCS will lead to `make` not
+# functioning without any meaningful error msg !!
+$(OBJDIR)/%.o: %.cpp $(TEST_HDRS) | $(OBJDIR)
+	$(CPP) $(IFLAGS) $(CFLAGS) -c $< -o $@
+
+# TODO: understand why order-only prereq is not obeyed here! Must have
+# something to do with files being in a parent dir...
+$(PROJ_OBJDIR)/%.o: %.cpp $(PROJ_HDRS) | $(PROJ_OBJDIR)
+	@mkdir -p $(PROJ_OBJDIR)
+	$(CPP) $(IFLAGS) $(CFLAGS) -c $< -o $@
+
+$(NAME): $(OBJS) $(PROJ_OBJS)
+	$(CPP) $(IFLAGS) $(CFLAGS) -o $@ $^
+
+debug: fclean proj-clean
+	make -C .. clean
+	make DBG=yes
+
+debug-run: debug
+	./$(NAME)
+
+clean: proj-clean
+	rm -rf $(OBJDIR)
+
+proj-clean:
+	make -C ../.. clean
+
+bear: fclean
+	bear -- make
+
+run: $(NAME)
+	./$(NAME)
+
+fclean: clean proj-clean
+	rm -f $(NAME)
+
+re: fclean $(NAME)
+
+update:
+	./update_tests.sh
+
+.PHONY: all clean fclean re bear run debug debug-run proj-clean update
+
+#vim: ft=make

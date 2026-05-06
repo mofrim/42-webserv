@@ -11,12 +11,20 @@ set -euo pipefail
 # -------------------------=[ configurable things ]=------------------------- #
 
 TEST_FILES_DIR=tests
-PROJ_MAKEFILE="../Makefile"
+PROJ_MAKEFILE="../../Makefile"
 TEST_MAIN="test_main.cpp"
 TEST_HDR="tests.hpp"
-PROJ_SRCS_DIR=../src
-PROJ_HDRS_DIR=../inc
+PROJ_DIR="../.."
+PROJ_SRCS_DIR=../../src
+PROJ_HDRS_DIR=../../inc
+PROJ_OBJ_DIR=../../obj
 TEMPLATE_DIR=templates
+
+# -----------------------------=[ helper funcs ]=----------------------------- #
+
+sanitizePath() {
+	echo $1 | sed -e 's/\./\\\./g' -e 's/\//\\\//g'
+}
 
 # -------------------------------=[ the rest ]=------------------------------- #
 
@@ -97,6 +105,10 @@ hpp_files=$(ls -x -w 0 ${PROJ_HDRS_DIR})
 proj_hdrs=$(echo "PROJ_HDRS = $hpp_files")
 sed -i "s/PROJ_SRCS_HERE/$proj_srcs/" Makefile
 sed -i "s/PROJ_HDRS_HERE/$proj_hdrs/" Makefile
+sed -i "s/PROJ_HDRS_DIR_HERE/$(sanitizePath $PROJ_HDRS_DIR)/" Makefile
+sed -i "s/PROJ_SRCS_DIR_HERE/$(sanitizePath $PROJ_SRCS_DIR)/" Makefile
+sed -i "s/PROJ_OBJ_DIR_HERE/$(sanitizePath $PROJ_OBJ_DIR)/" Makefile
+sed -i "s/PROJ_DIR_HERE/$(sanitizePath $PROJ_DIR)/" Makefile
 
 # populate proj_hdrs.hpp
 cp $TEMPLATE_DIR/test_hdr-template.hpp test_hdr.hpp

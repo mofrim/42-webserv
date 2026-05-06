@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/13 13:06:35 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/28 22:30:04 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/06 19:43:32 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,7 @@ int _test_Socket()
   {
     int r = -1;
     try {
-      r = Socket::bindSocket("", 1234).second;
+      r = Socket::bindSocket("", 1234).fd;
       r = -42;
     } catch (const Socket::AddrInfoException& e) {
       std::cout << "caught exception: " << e.what() << std::endl;

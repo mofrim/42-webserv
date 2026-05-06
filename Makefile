@@ -6,7 +6,7 @@
 #    By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/12/01 11:45:58 by fmaurer           #+#    #+#              #
-#    Updated: 2026/05/04 19:06:19 by fmaurer          ###   ########.fr        #
+#    Updated: 2026/05/06 19:50:07 by fmaurer          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -107,18 +107,21 @@ val: $(NAME)
 valfull: $(NAME)
 	valgrind --track-fds=yes -s --leak-check=full -- ./webserv
 
-tests:
-	@cd tests && ./update_tests.sh
-	@make -C tests
+cpptests:
+	@cd tests/cpp_tests && ./update_tests.sh
+	@make -C tests/cpp_tests
 
-tests-run: tests
-	@cd tests && ./run_tests
+cpptests-run: tests
+	@cd tests/cpp_tests && ./run_tests
 
-tests-clean:
-	@make -C tests fclean
+cpptests-clean:
+	@make -C tests/cpp_tests fclean
 
-tests-bear:
-	@bear -- make -C tests
+cpptests-bear:
+	@bear -- make -C tests/cpp_tests
+
+shelltests:
+	@cd tests/shell_tests && ./run_test.sh
 
 fclean: clean
 	rm -f $(NAME)
@@ -127,5 +130,5 @@ re: fclean $(NAME)
 
 re-run: re run
 
-.PHONY: all clean fclean re bear run tests tests-clean debug debug-run run1 \
-	re-run run2
+.PHONY: all clean fclean re bear run cpptests cpptests-run cpptests-clean \
+	cpptests-bear shelltests debug debug-run run1 re-run run2
