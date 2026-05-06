@@ -6,19 +6,23 @@ allgood=1
 addr="localhost"
 port="1111"
 
+# i need my utils!
 if [ ! -e ./_test_utils.sh ]; then
-	echo "./_test_utils.sh not found!"
+	echo -e "\e[31m./_test_utils.sh not found!\e[0m"
 	exit 1
 else
 	source ./_test_utils.sh
 fi
 
+# check if webserv is running, otherwise running these tests does not make much
+# sense
 if ! pidof webserv &> /dev/null; then
 	echo -e "\e[31meeehm... webserv must be running for this!\e[0m"
 	exit 1
 fi
 
-# for skipping tests add their basename here
+# for skipping tests add their basename here. this is for especially for those
+# who would take too long
 skip_tests=(
 	"get_with_huge_body.sh"
 )
