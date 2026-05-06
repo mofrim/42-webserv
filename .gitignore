@@ -22,3 +22,8 @@ tests/shell_tests/hugefile
 tests/shell_tests/testfiles/hugefile
 _res/*
 
+tests/cpp_tests/tests.hpp
+tests/cpp_tests/test_main.cpp
+tests/cpp_tests/test_hdr.hpp
+tests/cpp_tests/run_tests
+tests/cpp_tests/Makefile
