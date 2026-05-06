@@ -2,7 +2,7 @@
 
 ## current TODOs
 
-- [ ] according to [this
+- [x] according to [this
   sectio](https://datatracker.ietf.org/doc/html/rfc9112#name-field-syntax) all
   field-names are case-insensitive! So, i should convert them to lower and then
   the rest follows.
@@ -19,7 +19,7 @@
       replace each bare CR with SP before processing the element or forwarding
       the message.
 
-- [ ] and this:
+- [x] and this:
 
       In the interest of robustness, a server that is expecting to receive and
       parse a request-line SHOULD ignore at least one empty line (CRLF) received
@@ -50,6 +50,9 @@
     created), 
   + [ ] or with query component (POST /upload?blabla.csv ... -> file is uploaded
     and stored as `upload-dir/blabla.csv`)
+
+- [ ] add `isatty` based detection to `Logger` class in order to decide on
+  colored output
 
 ## DONEs
 
