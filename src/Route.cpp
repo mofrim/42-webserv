@@ -6,10 +6,11 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/09 16:42:51 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/23 22:07:54 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/07 13:16:12 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "Logger.hpp"
 #include "Route.hpp"
 
 // --------------------------------=[ OCF ]=-------------------------------- //
@@ -43,47 +44,44 @@ Route& Route::operator=(const Route& o)
   return (*this);
 }
 
-Route::~Route()
-{}
+Route::~Route() {}
 
 // ------------------------------=[ Methods ]=------------------------------ //
-//
-void Route::setPath(str p)
-{
-  _path = p;
-}
 
-str Route::getPath() const
-{
-  return _path;
-}
+void Route::setPath(str p) { _path = p; }
 
-void Route::setAutoindex(bool a)
-{
-  _autoindex = a;
-}
+str Route::getPath() const { return _path; }
 
-bool Route::getAutoindex() const
-{
-  return _autoindex;
-}
+void Route::setAutoindex(bool a) { _autoindex = a; }
 
+bool Route::getAutoindex() const { return _autoindex; }
+
+// we only set the default file if it does not contain any slashes which might
+// lead to root folder escaping
 void Route::setDefaultFile(const str& s)
 {
-  _default_file = s;
+  if (s.find('/') == str::npos)
+    _default_file = s;
 }
 
-str Route::getDefaultFile() const
-{
-  return _default_file;
-}
+str Route::getDefaultFile() const { return _default_file; }
 
+// Sanitizing the input string a little bit, as we don't want any trailing
+// slashes as the path URL we append will start with a slash.
+// Things like '///moep' will still be valid roots until a request is made.
 void Route::setRoot(str root)
 {
-  _root = root;
+  if (root.empty())
+    return;
+  if (root[root.size() - 1] != '/')
+    _root = root;
+  else {
+    Logger::log_warn(
+        "Route::setRoot", "removing trailing slash from root '" + root + "'");
+    str withoutTrailingSlash = root.substr(0, root.find('/'));
+    if (!withoutTrailingSlash.empty())
+      _root = withoutTrailingSlash;
+  }
 }
 
-str Route::getRoot() const
-{
-  return _root;
-}
+str Route::getRoot() const { return _root; }

@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/13 13:06:35 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/28 12:03:39 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/07 13:11:14 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,6 +62,26 @@ int _test_Routes()
     VServer s(cfg);
     s.init(dummy.begin(), dummy.begin());
     s.printCfg();
+  }
+
+  print_test_topic("test_Routes", "root");
+  {
+    Route r;
+    r.setRoot("////");
+    if (r.getRoot() != "./html")
+      return -1;
+    r.setRoot("moep/");
+    if (r.getRoot() != "moep")
+      return -1;
+    r.setRoot("moep///");
+    if (r.getRoot() != "moep")
+      return -1;
+    r.setRoot("/moep");
+    if (r.getRoot() != "/moep")
+      return -1;
+    r.setRoot("///moep");
+    if (r.getRoot() != "///moep")
+      return -1;
   }
 
   return (0);

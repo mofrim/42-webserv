@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/16 11:54:27 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/29 17:12:48 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/07 12:50:12 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,25 +63,40 @@ void Webserv::_printSockname(int sock)
 //   _vservers.push_back(dsrv2);
 // }
 
+// void Webserv::_initDefaultCfg()
+// {
+//   VServerCfg cfg1;
+//   Route      r;
+//   cfg1.setServerName("virtual1");
+//   cfg1.addInterface("127.0.0.1", 1);
+//   cfg1.addInterface("127.0.0.1", 2);
+//   cfg1.addInterface("127.0.0.1", 2234);
+//   cfg1.addInterface("127.0.0.1", 2);
+//   cfg1.addRoute(r);
+//   VServer dsrv1(cfg1);
+//
+//   VServerCfg cfg2;
+//   cfg2.setServerName("virtual1");
+//   cfg2.addInterface("localhost", 1111);
+//   cfg2.addInterface("10.0.0.1", 1111);
+//   cfg2.addRoute(r);
+//   VServer dsrv2(cfg2);
+//
+//   _vservers.push_back(dsrv1);
+//   _vservers.push_back(dsrv2);
+// }
+
 void Webserv::_initDefaultCfg()
 {
   VServerCfg cfg1;
-  Route      r;
-  cfg1.setServerName("virtual1");
-  cfg1.addInterface("127.0.0.1", 1);
-  cfg1.addInterface("127.0.0.1", 2);
-  cfg1.addInterface("127.0.0.1", 2234);
-  cfg1.addInterface("127.0.0.1", 2);
+  cfg1.setServerName("webserv");
+  cfg1.addInterface("localhost", 1111);
+
+  Route r;
+  r.setAutoindex(true);
   cfg1.addRoute(r);
+
   VServer dsrv1(cfg1);
 
-  VServerCfg cfg2;
-  cfg2.setServerName("virtual1");
-  cfg2.addInterface("localhost", 1111);
-  cfg2.addInterface("10.0.0.1", 1111);
-  cfg2.addRoute(r);
-  VServer dsrv2(cfg2);
-
   _vservers.push_back(dsrv1);
-  _vservers.push_back(dsrv2);
 }
