@@ -36,6 +36,10 @@ this is some consequences... namely:
 the possibility to have default values here. But certainly at least one route
 has to be added to each VServer!
 
+### i will only support `origin-form` as request target
+
+i.e., targets have to start with a "/", otherwise `400`!
+
 
 ---
 

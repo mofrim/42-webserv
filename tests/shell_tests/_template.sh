@@ -20,9 +20,9 @@ exec 3<>/dev/tcp/"$1"/"$2"
 
 sendHdrField "GET / HTTP/1.1" 3
 sendHdrField "Host: miep" 3
-sendHdrField "Connection: klshjdasjdalsjd" 3
 finishReq 3
-RESPONSE="$(timeout 5s cat <&3)"
+
+RESPONSE="$(timeout 0.1s cat <&3)"
 echo "Response:"
 echo
 echo "${RESPONSE[@]}"

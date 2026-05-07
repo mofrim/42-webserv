@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/23 19:11:25 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/04 11:05:53 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/07 11:42:45 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,8 +21,7 @@
 
 // --------------------------------=[ OCF ]=-------------------------------- //
 
-Response::Response()
-{}
+Response::Response() {}
 
 Response::Response(const Response& o)
 {
@@ -57,8 +56,7 @@ Response& Response::operator=(const Response& o)
   return (*this);
 }
 
-Response::~Response()
-{}
+Response::~Response() {}
 
 // ------------------------------=[ END OCF ]=------------------------------ //
 
@@ -100,6 +98,9 @@ void Response::_genResponse()
   _respoStr += CRLF + _body;
 }
 
+// FIXME: this is not at done yet!
+// TODO: we need to handle real routing in here.
+// FIXME: `root` fields in config should never end in a '/'
 void Response::_getBody()
 {
   if (_vsrv->getRoutes().size() == 1 &&
@@ -108,7 +109,7 @@ void Response::_getBody()
     Route r = _vsrv->getRoutes().begin()->second;
 
     str root = r.getRoot();
-    str path = root + _reqline.target;
+    str path = root + _reqline.target.getPath();
     if (isDir(path))
       path += (path[path.size() - 1] == '/' ? "" : "/") + r.getDefaultFile();
     Logger::log_dbg1("Response::_getBody: trying to read from file: " + path);
@@ -194,10 +195,7 @@ void Response::_buildRespoHdrs()
   _respoHeaders["Accept-Ranges"] = "none";
 }
 
-str Response::getRespoStr() const
-{
-  return _respoStr;
-}
+str Response::getRespoStr() const { return _respoStr; }
 
 // reset.
 void Response::reset()

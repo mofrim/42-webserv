@@ -6,7 +6,7 @@
 #    By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/12/01 11:45:58 by fmaurer           #+#    #+#              #
-#    Updated: 2026/05/07 06:40:46 by fmaurer          ###   ########.fr        #
+#    Updated: 2026/05/07 11:30:08 by fmaurer          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -35,11 +35,11 @@ SRCS			= main.cpp Webserv.cpp Logger.cpp VServerCfg.cpp Config.cpp \
 						ConfigParser.cpp utils.cpp VServer.cpp Client.cpp Epoll.cpp \
 						Webserv_Utils.cpp VServer_Utils.cpp RequestHandler.cpp \
 						Request.cpp Socket.cpp Route.cpp Request_Parsing.cpp Response.cpp \
-						WsrvLib.cpp 
+						WsrvLib.cpp URL.cpp
 
 HDRS			= Webserv.hpp Logger.hpp VServerCfg.hpp Config.hpp ConfigParser.hpp \
 						utils.hpp VServer.hpp Client.hpp Epoll.hpp RequestHandler.hpp \
-						Request.hpp Socket.hpp Route.hpp Response.hpp WsrvLib.hpp
+						Request.hpp Socket.hpp Route.hpp Response.hpp WsrvLib.hpp URL.hpp
 
 OBJS		= $(patsubst %.cpp,$(OBJDIR)/%.o,$(SRCS))
 

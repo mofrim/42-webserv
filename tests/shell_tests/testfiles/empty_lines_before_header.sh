@@ -23,7 +23,7 @@ sendHdrField "" 3
 sendHdrField "GET / HTTP/1.1" 3
 sendHdrField "Host: miep" 3
 finishReq 3
-RESPONSE="$(timeout 1s cat <&3 | grep 200)"
+RESPONSE="$(timeout 0.1s cat <&3 | grep 200)"
 exec 3<&-
 
 if [ -z "$RESPONSE" ]; then

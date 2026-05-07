@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/01 18:46:40 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/04 19:17:33 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/07 11:41:40 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,9 +40,8 @@ e_HTTPStatus Request::_readReqline()
       "Request: found this target URL: '" + _reqstr.substr(i, k) + "'");
   if (k > MAX_TARGET_LEN)
     return HTTP_400;
-  _reqline.target = _reqstr.substr(i, k);
-  tolower(_reqline.target);
-  if (validateUrl(_reqline.target) == KO)
+  _reqline.target.parseTargetURL(_reqstr.substr(i, k));
+  if (_reqline.target.bad())
     return HTTP_400;
 
   i = i + k + 1;

@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/06 22:32:39 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/07 11:11:24 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/07 11:21:47 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -157,9 +157,7 @@ static str rebuildQueryStr(const std::map<str, str>& params)
 // is no point in supporting fragments but it does not hurt to filter them out.
 str URL::parseTargetURL(const str& target)
 {
-  _path.clear();
-  _query.clear();
-  _fragment.clear();
+  this->clear();
 
   if (target.empty())
     return "/";
@@ -271,3 +269,12 @@ bool               URL::bad() const { return _bad; }
 bool               URL::empty() const { return _empty; }
 str                URL::getPath() const { return _path; }
 std::map<str, str> URL::getQuery() const { return _query; }
+
+void URL::clear()
+{
+  _path.clear();
+  _query.clear();
+  _fragment.clear();
+  _empty = true;
+  _bad   = false;
+}

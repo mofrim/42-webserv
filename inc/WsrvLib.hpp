@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/24 17:31:03 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/01 18:48:54 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/07 11:18:36 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,12 +16,14 @@
 
 #pragma once
 
+#include "URL.hpp"
+
 #include <map>
 #include <set>
 #include <stdint.h>
 #include <string>
 
-#define VERSION "v0.5"
+#define VERSION "v0.6"
 
 // type abbreviations
 typedef std::string str;
@@ -89,7 +91,7 @@ bool operator==(const t_vsrvInterface& i1, const t_vsrvInterface& i2);
 
 // the request-line
 typedef struct {
-    str           target;
+    URL           target;
     e_HTTPVersion httpVersion;
     e_Method      method;
 } t_RequestLine;
