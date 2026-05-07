@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/24 20:52:55 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/03 23:31:53 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/07 13:05:07 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,13 +15,9 @@
 #include <ctime>
 #include <iostream>
 
-Logger::Logger()
-{}
+Logger::Logger() {}
 
-Logger::Logger(const Logger& other)
-{
-  (void)other;
-}
+Logger::Logger(const Logger& other) { (void)other; }
 
 Logger& Logger::operator=(const Logger& other)
 {
@@ -29,8 +25,7 @@ Logger& Logger::operator=(const Logger& other)
   return (*this);
 }
 
-Logger::~Logger()
-{}
+Logger::~Logger() {}
 
 str Logger::getLogtime()
 {
@@ -60,6 +55,13 @@ void Logger::log_warn(const str& msg)
 {
   str logtime = getLogtime();
   std::cout << YLO << logtime << msg << RST << std::endl;
+}
+
+void Logger::log_warn(const str& pre, const str& msg)
+{
+  str logtime = getLogtime();
+  std::cout << YLO << logtime << BYLO << " (" << pre << ") " << RST << YLO
+            << msg << RST << std::endl;
 }
 
 void Logger::log_dbg0(const str& msg)
