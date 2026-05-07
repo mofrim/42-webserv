@@ -6,19 +6,20 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/06 22:32:39 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/07 08:29:57 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/07 11:11:24 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "Logger.hpp"
 #include "URL.hpp"
+#include "utils.hpp"
 
+#include <iostream>
 #include <sstream>
 #include <vector>
 
 // --------------------------------=[ OCF ]=-------------------------------- //
 
-URL::URL(): _bad(false) {}
+URL::URL(): _bad(false), _empty(true) {}
 
 URL::URL(const URL& o)
 {
@@ -27,6 +28,7 @@ URL::URL(const URL& o)
     _query    = o._query;
     _fragment = o._fragment;
     _bad      = o._bad;
+    _empty    = o._empty;
   }
 }
 
@@ -37,18 +39,21 @@ URL& URL::operator=(const URL& o)
     _query    = o._query;
     _fragment = o._fragment;
     _bad      = o._bad;
+    _empty    = o._empty;
   }
   return (*this);
 }
 
 URL::~URL() {}
 
-URL::URL(const str& u) { (void)u; }
+// ------------------------------=[ END OCF ]=------------------------------ //
 
-// ----------------------------=[ URL Parsing ]=---------------------------- //
+URL::URL(const str& u) { parseTargetURL(u); }
+
+// ---------------------=[ URL parsing static helpers ]=--------------------- //
 
 // Helper function to decode percent-encoded characters
-str percentDecode(const str& str)
+static str percentDecode(const str& str)
 {
   std::ostringstream decoded;
   for (size_t i = 0; i < str.size(); ++i) {
@@ -72,24 +77,24 @@ str percentDecode(const str& str)
   return decoded.str();
 }
 
-// Helper function to check for bad characters (null bytes, control chars, etc.)
-bool containsBadCharacters(const str& s)
+// helper function to check for bad characters (null bytes, control chars, etc.)
+static bool hasBadChars(const str& s)
 {
-  for (std::string::const_iterator it = s.begin(); it != s.end(); it++)
+  for (str::const_iterator it = s.begin(); it != s.end(); it++)
     if (*it == '\0' || std::iscntrl(static_cast<unsigned char>(*it)))
       return true;
   return false;
 }
 
-// Helper function to split query parameters into key-value pairs
-std::vector<std::pair<str, str> > parseQueryParameters(const str& query)
+// helper function to split query parameters into key-value pairs
+static std::map<str, str> parseQueryParams(const str& query)
 {
-  std::vector<std::pair<str, str> > params;
+  std::map<str, str> params;
   if (query.empty() || query[0] != '?') {
     return params;
   }
 
-  str                query_str = query.substr(1); // Remove the leading '?'
+  str                query_str = query.substr(1);
   std::istringstream iss(query_str);
   str                param;
 
@@ -106,18 +111,17 @@ std::vector<std::pair<str, str> > parseQueryParameters(const str& query)
       value = "";
     }
 
-    // Decode percent-encoded characters in key and value
     key   = percentDecode(key);
     value = percentDecode(value);
 
-    params.push_back(std::make_pair(key, value));
+    params.insert(std::make_pair(key, value));
   }
 
   return params;
 }
 
 // Helper function to reconstruct the query string from parsed parameters
-str reconstructQueryString(const std::vector<std::pair<str, str> >& params)
+static str rebuildQueryStr(const std::map<str, str>& params)
 {
   if (params.empty()) {
     return "";
@@ -126,109 +130,144 @@ str reconstructQueryString(const std::vector<std::pair<str, str> >& params)
   std::ostringstream query;
   query << "?";
 
-  for (size_t i = 0; i < params.size(); ++i) {
-    if (i > 0) {
+  for (std::map<str, str>::const_iterator it = params.begin();
+      it != params.end();
+      ++it)
+  {
+    if (it != params.begin())
       query << "&";
-    }
-    query << params[i].first;
-    if (!params[i].second.empty()) {
-      query << "=" << params[i].second;
-    }
+    query << it->first;
+    if (!it->second.empty())
+      query << "=" << it->second;
   }
 
   return query.str();
 }
 
-str URL::sanitizeTargetURL(const str& target)
+// ----------------------=[ The mai URL parsing func ]=---------------------- //
+
+// the main target-path/url parsing function
+//
+// i only support origin-form target URLs, so anything not starting with "/" is
+// a bad URL.
+//
+// Returns either an empty string on failure (also sets bad-bool in this case)
+// or the fully sanitized URL string. As side-effects sets all the corresponding
+// fields of the object: _path, _query and _fragment. As we are a server there
+// is no point in supporting fragments but it does not hurt to filter them out.
+str URL::parseTargetURL(const str& target)
 {
-  if (target.empty()) {
+  _path.clear();
+  _query.clear();
+  _fragment.clear();
+
+  if (target.empty())
     return "/";
+
+  if (target[0] != '/') {
+    _bad = true;
+    return "";
   }
 
   size_t queryPos    = target.find('?');
   size_t fragmentPos = target.find('#');
 
-  str path;
   str query;
-  str fragment;
 
   if (fragmentPos != str::npos) {
-    fragment = target.substr(fragmentPos);
+    _fragment = target.substr(fragmentPos);
     if (queryPos != str::npos && queryPos < fragmentPos) {
-      path  = target.substr(0, queryPos);
+      _path = target.substr(0, queryPos);
       query = target.substr(queryPos, fragmentPos - queryPos);
     }
-    else {
-      path = target.substr(0, fragmentPos);
-    }
+    else
+      _path = target.substr(0, fragmentPos);
   }
   else if (queryPos != str::npos) {
-    path  = target.substr(0, queryPos);
+    _path = target.substr(0, queryPos);
     query = target.substr(queryPos);
-    Logger::log_bug("query: " + query);
   }
   else {
-    path = target;
+    _path = target;
   }
 
-  str decoded_path = percentDecode(path);
+  // no more plain slashes allowed in query or fragment strings
+  if (_fragment.find('/') != str::npos || query.find('/') != str::npos) {
+    _bad = true;
+    return "";
+  }
 
-  if (containsBadCharacters(decoded_path))
-    throw std::invalid_argument("URL contains invalid characters");
+  str decodedPath = percentDecode(_path);
 
-  std::vector<str>   segments;
-  std::istringstream iss(decoded_path);
-  str                segment;
+  if (hasBadChars(decodedPath)) {
+    _bad = true;
+    return "";
+  }
 
-  while (std::getline(iss, segment, '/'))
-    if (!segment.empty())
-      segments.push_back(segment);
+  std::vector<str> segments = splitString(decodedPath, "/");
 
-  std::vector<str> resolved_segments;
+  std::vector<str> resolvedSegments;
   for (std::vector<str>::iterator it = segments.begin(); it != segments.end();
       ++it)
   {
     if (*it == ".")
-      resolved_segments.push_back("");
+      continue;
     else if (*it == "..") {
-      if (!resolved_segments.empty())
-        resolved_segments.pop_back();
+      if (!resolvedSegments.empty())
+        resolvedSegments.pop_back();
     }
     else
-      resolved_segments.push_back(*it);
+      resolvedSegments.push_back(*it);
   }
 
   // building sanitized_path here filtering out possible double slashes
-  str sanitized_path;
-  for (std::vector<str>::iterator it = resolved_segments.begin();
-      it != resolved_segments.end();
+  str sanitizedPath;
+  for (std::vector<str>::iterator it = resolvedSegments.begin();
+      it != resolvedSegments.end();
       ++it)
   {
-    if (!sanitized_path.empty() &&
-        sanitized_path[sanitized_path.size() - 1] != '/')
-      sanitized_path += "/" + *it;
+    if (!sanitizedPath.empty() &&
+        sanitizedPath[sanitizedPath.size() - 1] != '/')
+      sanitizedPath += "/" + *it;
     else
-      sanitized_path += *it;
+      sanitizedPath += *it;
   }
 
-  if (sanitized_path.empty())
-    sanitized_path = "/";
+  // ensuring origin-form here again
+  if (sanitizedPath.empty())
+    sanitizedPath = "/";
 
-  str sanitizedQuery = query;
+  if (sanitizedPath[0] != '/')
+    sanitizedPath = "/" + sanitizedPath;
+
+  char lastTargetChar = target[target.size() - 1];
+  if ((lastTargetChar == '/' || lastTargetChar == '.') && sanitizedPath != "/")
+    sanitizedPath = sanitizedPath + "/";
+
+  _path = sanitizedPath;
+
+  str sanitizedQueryStr = query;
   if (!query.empty()) {
-    std::vector<std::pair<str, str> > params = parseQueryParameters(query);
-    if (params.empty())
-      sanitizedQuery = "";
+    _query = parseQueryParams(query);
+    if (_query.empty())
+      sanitizedQueryStr = "";
     else
-      sanitizedQuery = reconstructQueryString(params);
+      sanitizedQueryStr = rebuildQueryStr(_query);
   }
 
-  str sanitized = sanitized_path + sanitizedQuery + fragment;
+  str saniURL = sanitizedPath + sanitizedQueryStr + _fragment;
 
-  // Step 8: Ensure the path is absolute
-  if (sanitized[0] != '/') {
-    sanitized = "/" + sanitized;
-  }
+  // we will emit
 
-  return sanitized;
+  _bad   = false;
+  _empty = false;
+
+  return saniURL;
 }
+
+// ------------------------=[ The usual one-liners ]=------------------------ //
+
+bool               URL::bad() const { return _bad; }
+bool               URL::empty() const { return _empty; }
+str                URL::getPath() const { return _path; }
+std::map<str, str> URL::getQuery() const { return _query; }
