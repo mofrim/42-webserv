@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:36:43 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/07 15:26:59 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/07 15:37:47 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,9 +49,8 @@ void Webserv::shutdownWebserv()
 }
 
 // the Idea is: keep the existence of the Config object limited to this method.
-// After this method there should be only the vector<Server> which then holds
-// all the data. Additionally there can be some global config options which can
-// be saved in Webserv class or also in Server class.
+// After this method there should be only the vector<VServer> which then holds
+// all the data.
 void Webserv::readConfig(const str& cfgFilename)
 {
   ConfigParser parsy(cfgFilename);
@@ -62,7 +61,7 @@ void Webserv::readConfig(const str& cfgFilename)
   try {
     parsy.parse();
   } catch (const std::exception& e) {
-    throw(e);
+    throw e;
   }
   const std::vector<VServerCfg>&          cfgs = parsy.getCfgs();
   std::vector<VServerCfg>::const_iterator it   = cfgs.begin();

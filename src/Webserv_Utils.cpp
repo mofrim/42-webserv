@@ -6,16 +6,13 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/16 11:54:27 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/07 12:50:12 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/07 15:36:35 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Logger.hpp"
 #include "Webserv.hpp"
 #include "utils.hpp"
-
-// for memset
-#include <cstring>
 
 bool Webserv::_isServerFd(int fd) const
 {

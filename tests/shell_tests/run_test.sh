@@ -16,8 +16,8 @@ fi
 
 # check if webserv is running, otherwise running these tests does not make much
 # sense
-if ! pidof webserv &> /dev/null; then
-	echo -e "\e[31meeehm... webserv must be running for this!\e[0m"
+if [ ! pidof webserv &> /dev/null ] && [ ! pidof valgrind &>/dev/null ]; then
+	echo -e "\n\e[31meeehm... webserv must be running for this!\e[0m\n"
 	exit 1
 fi
 
