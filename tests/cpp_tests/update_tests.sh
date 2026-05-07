@@ -65,11 +65,11 @@ for func in ${tf_fun_arr[@]}; do
 	echo -e "  nl();" >> $TEST_MAIN
 done 
 cat <<EOF >> $TEST_MAIN
-  print_final_result();
+  print_final_result_header();
   if (g_GlobalResult == OK)
-    print_test_result(OK, "All tests passed 8)");
+    print_final_result(OK, "All tests passed 8)");
   else
-    print_test_result(KO, "At least one test failed :/");
+    print_final_result(KO, "At least one test failed :/");
   return 0;
 }
 EOF

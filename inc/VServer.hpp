@@ -55,7 +55,6 @@ class VServer {
     void _addActiveIface(t_AddrinfoReturn ar, u16 port);
 
   public:
-    // OCF
     VServer();
     VServer(const VServerCfg& srvcfg);
     VServer(const VServer& other);

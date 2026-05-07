@@ -1,23 +1,31 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   test_utils.hpp                                     :+:      :+:    :+:   */
+/*   URL.hpp                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/07/15 12:38:44 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/07 07:55:19 by fmaurer          ###   ########.fr       */
+/*   Created: 2026/05/06 22:32:20 by fmaurer           #+#    #+#             */
+/*   Updated: 2026/05/06 23:00:18 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#pragma once
+#include "WsrvLib.hpp"
 
-#include <string>
+class URL {
+  private:
+    str _path;
+    str _query;
+    str _fragment;
 
-void        nl();
-std::string toString(long num);
-void        print_test_section_header(const std::string& title);
-void        print_test_topic(const std::string& sec, const std::string& what);
-void        print_test_result(bool res, const std::string& msg);
-void        print_final_result_header();
-void        print_final_result(bool res, const std::string& msg);
+    bool _bad;
+
+  public:
+    URL();
+    URL(const URL& other);
+    URL& operator=(const URL& other);
+    ~URL();
+    URL(const str& u);
+
+    str sanitizeTargetURL(const str& target);
+};

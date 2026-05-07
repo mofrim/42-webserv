@@ -6,7 +6,7 @@
 #    By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/12/01 11:45:58 by fmaurer           #+#    #+#              #
-#    Updated: 2026/05/06 19:50:07 by fmaurer          ###   ########.fr        #
+#    Updated: 2026/05/07 06:40:46 by fmaurer          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -112,7 +112,8 @@ cpptests:
 	@make -C tests/cpp_tests
 
 cpptests-run: tests
-	@cd tests/cpp_tests && ./run_tests
+	@cd tests/cpp_tests && ./update_tests.sh
+	@make -C tests/cpp_tests run
 
 cpptests-clean:
 	@make -C tests/cpp_tests fclean
