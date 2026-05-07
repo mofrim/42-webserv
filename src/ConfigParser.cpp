@@ -6,19 +6,15 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/26 09:14:47 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/18 15:52:51 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/07 15:15:04 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ConfigParser.hpp"
 
-ConfigParser::ConfigParser()
-{}
+ConfigParser::ConfigParser() {}
 
-ConfigParser::ConfigParser(const ConfigParser& other)
-{
-  (void)other;
-}
+ConfigParser::ConfigParser(const ConfigParser& other) { (void)other; }
 
 ConfigParser& ConfigParser::operator=(const ConfigParser& other)
 {
@@ -26,18 +22,16 @@ ConfigParser& ConfigParser::operator=(const ConfigParser& other)
   return (*this);
 }
 
-ConfigParser::~ConfigParser()
-{}
+ConfigParser::~ConfigParser() {}
 
-// TODO: implement
-void ConfigParser::openCfg(const std::string& fname)
+ConfigParser::ConfigParser(const str& cfgFname): _bad(false)
 {
-  (void)fname;
+  _cfgfile.open(cfgFname.c_str(), std::ios_base::in);
 }
 
+bool ConfigParser::bad() const { return _cfgfile.bad() || _bad; }
+
+const std::vector<VServerCfg>& ConfigParser::getCfgs() const { return _vcfgs; }
+
 // TODO: implement
-std::vector<VServerCfg> ConfigParser::parse()
-{
-  std::vector<VServerCfg> stub;
-  return (stub);
-}
+void ConfigParser::parse() { std::vector<VServerCfg> stub; }

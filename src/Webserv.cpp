@@ -6,11 +6,11 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:36:43 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/29 17:02:58 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/07 15:26:59 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "Config.hpp"
+#include "ConfigParser.hpp"
 #include "Logger.hpp"
 #include "VServer.hpp"
 #include "Webserv.hpp"
@@ -26,10 +26,7 @@ Webserv::Webserv(): _defaultCfg(true), _shutdown_server(false), _numOfClients(0)
   _Webserv.setServerName("Webserv");
 }
 
-Webserv::Webserv(const Webserv& other)
-{
-  (void)other;
-}
+Webserv::Webserv(const Webserv& other) { (void)other; }
 
 Webserv& Webserv::operator=(const Webserv& other)
 {
@@ -38,8 +35,7 @@ Webserv& Webserv::operator=(const Webserv& other)
 }
 
 // nothing to be done here, so far..
-Webserv::~Webserv()
-{}
+Webserv::~Webserv() {}
 
 // TODO: there will be much more to do in here. What?
 //
@@ -56,21 +52,25 @@ void Webserv::shutdownWebserv()
 // After this method there should be only the vector<Server> which then holds
 // all the data. Additionally there can be some global config options which can
 // be saved in Webserv class or also in Server class.
-void Webserv::getServersFromCfg(const std::string& cfgFilename)
+void Webserv::readConfig(const str& cfgFilename)
 {
-  (void)cfgFilename;
-  Config cfg;
+  ConfigParser parsy(cfgFilename);
+
+  if (parsy.bad())
+    throw WebservInitException("Error reading cfgfile!");
 
   try {
-    cfg.parseCfgFile(cfgFilename);
+    parsy.parse();
   } catch (const std::exception& e) {
     throw(e);
   }
-
-  for (size_t i = 0;; ++i) {
-    _vservers.push_back(VServer(cfg.getCfgs()[i]));
+  const std::vector<VServerCfg>&          cfgs = parsy.getCfgs();
+  std::vector<VServerCfg>::const_iterator it   = cfgs.begin();
+  if (!cfgs.empty()) {
+    for (; it != cfgs.end(); ++it)
+      _vservers.push_back(VServer(*it));
+    _defaultCfg = false;
   }
-  _defaultCfg = false;
 }
 
 // The main routine for setting up the servers listed in the Config.

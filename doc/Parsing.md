@@ -17,9 +17,7 @@
   }
 
   server {
-      listen 1234!
-      listen 9999! # yes! we will have multiple ports
-      listen 42.0.0.1:7777! # ... and maybe even this.
+      listen 42.0.0.1:7777! # we will only allow stuff like this!
       server_name serverB!
       root /var/www/htmlB!
       location / {

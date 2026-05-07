@@ -6,12 +6,11 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/26 08:52:11 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/18 15:54:37 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/07 15:09:32 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef CONFIGPARSER_HPP
-#define CONFIGPARSER_HPP
+#pragma once
 
 #include "VServerCfg.hpp"
 
@@ -20,16 +19,20 @@
 
 class ConfigParser {
   private:
-    std::ofstream _cfgfile;
+    std::ifstream           _cfgfile;
+    const str               _cfgFname;
+    std::vector<VServerCfg> _vcfgs;
+    bool                    _bad;
 
-  public:
     ConfigParser();
     ConfigParser(const ConfigParser& other);
     ConfigParser& operator=(const ConfigParser& other);
+
+  public:
+    ConfigParser(const str& cfgFname);
     ~ConfigParser();
 
-    void                    openCfg(const std::string& fname);
-    std::vector<VServerCfg> parse();
+    void                           parse();
+    bool                           bad() const;
+    const std::vector<VServerCfg>& getCfgs() const;
 };
-
-#endif

@@ -301,3 +301,11 @@ the main resource for everything about headers and methods is: [RFC
 
 For example i just learned that my server won't support range-requests so we
 should include `Accept-ranges:` none in our Responses to a GET
+
+## 2026-05-07
+
+### 15:22 - Finally starting with the parser!
+
+- i will only listen directives like this `listen addr:port!`
+- i will have comments!
+

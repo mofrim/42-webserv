@@ -40,6 +40,8 @@ has to be added to each VServer!
 
 i.e., targets have to start with a "/", otherwise `400`!
 
+### the listen directive in cfgfile will have to be of format addr:port!
+
 
 ---
 
