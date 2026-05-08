@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:36:43 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/07 15:37:47 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/08 11:53:36 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,7 +61,7 @@ void Webserv::readConfig(const str& cfgFilename)
   try {
     parsy.parse();
   } catch (const std::exception& e) {
-    throw e;
+    throw;
   }
   const std::vector<VServerCfg>&          cfgs = parsy.getCfgs();
   std::vector<VServerCfg>::const_iterator it   = cfgs.begin();

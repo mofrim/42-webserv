@@ -68,3 +68,5 @@ AllowShortIfStatementsOnASingleLine: Never
 BreakTemplateDeclarations: Yes
 
 SpacesInAngles: Leave
+
+IndentCaseLabels: true

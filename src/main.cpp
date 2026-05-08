@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:37:25 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/07 14:48:59 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/08 10:05:48 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,7 +46,7 @@ int main(int ac, char **av)
       webserv.readConfig(av[1]);
       webserv.run();
     } catch (const std::exception& e) {
-      std::cout << "e.what(): " << e.what() << std::endl;
+      Logger::log_err(e.what());
     }
   else
     try {

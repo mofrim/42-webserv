@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/26 09:14:47 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/07 15:15:04 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/08 11:51:41 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,9 +29,43 @@ ConfigParser::ConfigParser(const str& cfgFname): _bad(false)
   _cfgfile.open(cfgFname.c_str(), std::ios_base::in);
 }
 
-bool ConfigParser::bad() const { return _cfgfile.bad() || _bad; }
+bool ConfigParser::bad() const { return !_cfgfile.good() || _bad; }
 
 const std::vector<VServerCfg>& ConfigParser::getCfgs() const { return _vcfgs; }
 
-// TODO: implement
-void ConfigParser::parse() { std::vector<VServerCfg> stub; }
+void ConfigParser::parse()
+{
+  try {
+    _tokenize();
+  } catch (const std::runtime_error& e) {
+    throw;
+  }
+}
+
+// ------------------------=[ KnownDirectives Set  ]=------------------------ //
+
+std::set<str> ConfigParser::_initKnownDirectives()
+{
+  const char *dirNames[] = {
+      "server",
+      "serverName",
+      "route",
+      "listen",
+      "maxBodySize",
+      "errorPage",
+      "defaultFile",
+      "autoindex",
+      "methods",
+      "root",
+      "upload",
+      "redirect",
+      "index",
+      "cgi"};
+
+  std::set<str> s(dirNames, dirNames + 14);
+  return s;
+}
+
+const std::set<str> ConfigParser::_knownDirectives = _initKnownDirectives();
+
+std::set<str> ConfigParser::getKnownDirectives() { return _knownDirectives; }

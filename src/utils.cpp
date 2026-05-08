@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/26 10:03:57 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/04 18:48:37 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/08 12:10:45 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,13 @@ str int2str(int n)
 {
   std::ostringstream oss;
   oss << n;
+  return (oss.str());
+}
+
+str char2str(char c)
+{
+  std::ostringstream oss;
+  oss << c;
   return (oss.str());
 }
 

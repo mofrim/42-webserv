@@ -1,9 +1,35 @@
 server {
   serverName moep!
   listen localhost:1111!
+  maxBodySize 1000000!
+
+  errorPage 404 bla/404.html!
+  errorPage 400 bla/400.html!
+
   route / {
-    root ./www!
     defaultFile index.html!
     autoindex on!
+    methods GET POST DELETE!
+    root ./www!
+    upload ./www/uploads!
+  }
+
+  route /moep {
+    redirect 302 /!
+  }
+
+  # don't know if i will do that
+  # redirection will be complicated as it has to respect other route's settings
+  # or overwrite them. idk.
+  route /moep {
+    redirect 308 https://42.fr!
+  }
+
+  # which methods and other things will be relevant for a cgi route? which
+  # things don't apply or are wrong in here?
+  route /cgi {
+    index moep.py!
+    cgi py:/usr/bin/env python!
+    cgi sh:/usr/bin/env bash!
   }
 }
