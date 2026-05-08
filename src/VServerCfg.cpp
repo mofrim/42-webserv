@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/25 08:35:42 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/21 16:24:46 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/08 17:20:31 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,13 +23,13 @@
 // NOTE: do all non-generic setting in ServerSetup
 VServerCfg::VServerCfg()
 {
-  _server_name = "";
+  _serverName  = "";
   _maxBodySize = MAX_BODY_SIZE;
 }
 
 VServerCfg::VServerCfg(const VServerCfg& o)
 {
-  _server_name = o._server_name;
+  _serverName  = o._serverName;
   _interfaces  = o._interfaces;
   _maxBodySize = o._maxBodySize;
   _routes      = o._routes;
@@ -38,7 +38,7 @@ VServerCfg::VServerCfg(const VServerCfg& o)
 VServerCfg& VServerCfg::operator=(const VServerCfg& o)
 {
   if (this != &o) {
-    _server_name = o._server_name;
+    _serverName  = o._serverName;
     _interfaces  = o._interfaces;
     _maxBodySize = o._maxBodySize;
     _routes      = o._routes;
@@ -46,24 +46,17 @@ VServerCfg& VServerCfg::operator=(const VServerCfg& o)
   return (*this);
 }
 
-VServerCfg::~VServerCfg()
-{}
+VServerCfg::~VServerCfg() {}
 
 //// OCF end
 
-void VServerCfg::setServerName(std::string name)
-{
-  _server_name = name;
-}
+void VServerCfg::setServerName(std::string name) { _serverName = name; }
 
-std::string VServerCfg::getServerName() const
-{
-  return (_server_name);
-}
+std::string VServerCfg::getServerName() const { return (_serverName); }
 
 void VServerCfg::printCfg() const
 {
-  std::cout << "  server_name: \"" << _server_name << "\"" << std::endl;
+  std::cout << "  server_name: \"" << _serverName << "\"" << std::endl;
 }
 
 // silently fails if addr:port pair already exists
@@ -115,23 +108,11 @@ void VServerCfg::setRoutes(const std::map<str, Route>& routes)
   _routes = routes;
 }
 
-const std::map<str, Route>& VServerCfg::getRoutes() const
-{
-  return _routes;
-}
+const std::map<str, Route>& VServerCfg::getRoutes() const { return _routes; }
 
 // add a route to _routes map. using the path (aka location) as key.
-void VServerCfg::addRoute(const Route& r)
-{
-  _routes[r.getPath()] = r;
-}
+void VServerCfg::addRoute(const Route& r) { _routes[r.getPath()] = r; }
 
-void VServerCfg::setMaxBodySize(u32 mbs)
-{
-  _maxBodySize = mbs;
-}
+void VServerCfg::setMaxBodySize(u32 mbs) { _maxBodySize = mbs; }
 
-u32 VServerCfg::getMaxBodySize() const
-{
-  return _maxBodySize;
-}
+u32 VServerCfg::getMaxBodySize() const { return _maxBodySize; }

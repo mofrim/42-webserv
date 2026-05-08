@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/26 08:52:11 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/08 11:38:21 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/08 20:55:59 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,6 +32,8 @@ class ConfigParser {
     const str               _cfgFname;
     std::vector<VServerCfg> _vcfgs;
     bool                    _bad;
+
+    // -------------------=[   Tokenizer related things ]=------------------- //
 
     static const std::set<str> _knownDirectives;
     static std::set<str>       _initKnownDirectives();
@@ -87,14 +89,46 @@ class ConfigParser {
         size_t    line;
     } t_Token;
 
-    std::vector<t_Token> _tokens;
+    // have to write this way to often -> shorten it
+
+    std::vector<t_Token>           _tokens;
+    std::vector<t_Token>::iterator _tokIt;
 
     e_TokType _nextTokFromDirec(e_Direcs direc);
     e_Direcs  _str2direc(const str& s);
     void _readTokVal(t_Token& tok, str::iterator& it, const str::iterator& end);
     t_Token _readTok(
         str::iterator& it, const str::iterator& end, const t_Token& lasttok);
+    str  _direc2str(e_Direcs d) const;
+    str  _toktype2str(e_TokType t) const;
+    void _dbgPrintTokens() const;
+    void _evalScope(const t_Token& tok);
     void _tokenize();
+
+    // ------------------------=[ The REAL Parsing ]=------------------------ //
+
+    void _processTokens();
+    bool _parseVServer(VServerCfg& vcfg);
+    void _skipMetaTokens();
+    bool _parseServerDirec(VServerCfg& vcfg);
+    bool _parseRouteDirec(VServerCfg& vcfg);
+
+    // ----------------------=[ Server Scope Parsing ]=---------------------- //
+
+    bool _parseTokName(VServerCfg& vcfg);   // serverName
+    bool _parseTokRoute(VServerCfg& vcfg);  // route
+    bool _parseTokIface(VServerCfg& vcfg);  // listen
+    bool _parseTokBytes(VServerCfg& vcfg);  // maxBodySize
+    bool _parseTokFroute(VServerCfg& vcfg); // errorPage FIXME: which root?!
+
+    // ----------------------=[ Route Scope Parsing ]=----------------------- //
+
+    bool _parseTokFname(VServerCfg& vcfg);  // index
+    bool _parseTokBool(VServerCfg& vcfg);   // autoindex
+    bool _parseTokMeth(VServerCfg& vcfg);   // methods
+    bool _parseTokFspath(VServerCfg& vcfg); // root, upload
+    bool _parseTokRedir(VServerCfg& vcfg);  // redirect
+    bool _parseTokCgi(VServerCfg& vcfg);    // cgi
 
   public:
     ConfigParser(const str& cfgFname);

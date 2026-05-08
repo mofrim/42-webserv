@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/26 09:14:47 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/08 11:51:41 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/08 20:11:13 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,6 +37,8 @@ void ConfigParser::parse()
 {
   try {
     _tokenize();
+    _dbgPrintTokens();
+    _processTokens();
   } catch (const std::runtime_error& e) {
     throw;
   }
@@ -44,6 +46,7 @@ void ConfigParser::parse()
 
 // ------------------------=[ KnownDirectives Set  ]=------------------------ //
 
+// 14 directives i shall support
 std::set<str> ConfigParser::_initKnownDirectives()
 {
   const char *dirNames[] = {
