@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/24 17:31:03 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/07 11:18:36 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/09 17:43:53 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,10 +25,14 @@
 
 #define VERSION "v0.6"
 
+extern bool g_WsrvTesting;
+
 // type abbreviations
-typedef std::string str;
-typedef uint16_t    u16;
-typedef uint32_t    u32;
+typedef std::string                 str;
+typedef uint16_t                    u16;
+typedef uint32_t                    u32;
+typedef std::string::iterator       strIt;
+typedef std::string::const_iterator constrIt;
 
 // maximum number of headers. nginx has this set to 1000 per default. above that
 // -> HTTP_400
@@ -98,8 +102,12 @@ typedef struct {
 
 // For expressiveness' sake declare them here
 enum e_HTTPStatus {
+  HTTP_0   = 0,
   HTTP_200 = 200,
   HTTP_300 = 300,
+  HTTP_301 = 301,
+  HTTP_302 = 302,
+  HTTP_308 = 308,
   HTTP_400 = 400,
   HTTP_404 = 404,
   HTTP_408 = 408,
@@ -138,4 +146,5 @@ class WsrvLib {
     static str                        getMimeTypeFromPath(const str& p);
     static e_HTTPVersion              str2HTTPVer(const str& s);
     static const t_GlobalWsrvSettings WsrvSettings;
+    static e_HTTPStatus               short2HttpStatus(u16 s);
 };

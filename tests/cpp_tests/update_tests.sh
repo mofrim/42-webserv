@@ -59,6 +59,7 @@ cat <<EOF >> $TEST_MAIN
 bool g_GlobalResult = OK;
 int main()
 {
+  g_WsrvTesting = true;
 EOF
 for func in ${tf_fun_arr[@]}; do
 	echo -e "  $func();" >> $TEST_MAIN

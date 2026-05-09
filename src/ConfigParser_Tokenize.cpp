@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/07 20:08:59 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/08 17:28:39 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/10 00:17:18 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 #include "Logger.hpp"
 #include "utils.hpp"
 
+#include <iomanip>
 #include <iostream>
 
 static void skipSpace(str::iterator& it);
@@ -48,6 +49,7 @@ void ConfigParser::_tokenize()
         throw std::runtime_error(
             "(ConfigParser) Error line #" + int2str(lineCnt) + ": " + e.what());
       }
+      newtok.line = lineCnt;
       _tokens.push_back(newtok);
       lastTok = newtok;
       skipSpace(it);
@@ -86,15 +88,12 @@ ConfigParser::t_Token ConfigParser::_readTok(
     case TOK_FSPATH:
     case TOK_BYTES:
     case TOK_NAME:
-    case TOK_FROUTE:
+    case TOK_ERROR:
     case TOK_FNAME:
       newtok.type = TOK_BANG;
       break;
     case TOK_ROUTE:
       newtok.type = TOK_BSTART;
-      break;
-    case TOK_STATUS:
-      newtok.type = TOK_FSPATH; // QUESTION: not sure about that
       break;
     case TOK_DIREC:
       newtok.type = _nextTokFromDirec(lasttok.direc);
@@ -132,7 +131,7 @@ void ConfigParser::_evalScope(const t_Token& tok)
   if (_scope.top() == S_SERVER && tok.type == TOK_DIREC) {
     if (tok.direc != DIR_SERVERNAME && tok.direc != DIR_LISTEN &&
         tok.direc != DIR_MAXBODYSIZE && tok.direc != DIR_ERRORPAGE &&
-        tok.direc != DIR_ROUTE)
+        tok.direc != DIR_ROOT && tok.direc != DIR_ROUTE)
       throw std::runtime_error(
           "Direc " + _direc2str(tok.direc) + " not allowed in server scope");
   }
@@ -141,7 +140,8 @@ void ConfigParser::_evalScope(const t_Token& tok)
     if (tok.direc != DIR_DEFAULTFILE && tok.direc != DIR_AUTOINDEX &&
         tok.direc != DIR_METHODS && tok.direc != DIR_ROOT &&
         tok.direc != DIR_INDEX && tok.direc != DIR_CGI &&
-        tok.direc != DIR_UPLOAD && tok.direc != DIR_REDIRECT)
+        tok.direc != DIR_UPLOAD && tok.direc != DIR_REDIRECT &&
+        tok.direc != DIR_MAXBODYSIZE)
       throw std::runtime_error(
           "Direc " + _direc2str(tok.direc) + " not allowed in route scope");
   }
@@ -193,7 +193,6 @@ void ConfigParser::_readTokVal(
       break;
     }
     case TOK_BYTES:
-    case TOK_STATUS:
       while (itTmp != end && isdigit(*itTmp))
         ++itTmp;
       if (itTmp == end)
@@ -206,7 +205,6 @@ void ConfigParser::_readTokVal(
     case TOK_FSPATH:
     case TOK_FNAME:
     case TOK_NAME:
-    case TOK_FROUTE:
     case TOK_BOOL:
       while (itTmp != end && *itTmp != BANG && !isspace(*itTmp))
         ++itTmp;
@@ -218,7 +216,7 @@ void ConfigParser::_readTokVal(
       it = itTmp;
       break;
     case TOK_ROUTE:
-      while (itTmp != end && *itTmp != '{')
+      while (itTmp != end && *itTmp != '{' && !isspace(*itTmp))
         ++itTmp;
       tok.val.assign(it, itTmp);
       if (tok.val.empty())
@@ -227,6 +225,7 @@ void ConfigParser::_readTokVal(
       break;
     case TOK_METH:
     case TOK_IFACE:
+    case TOK_ERROR:
     case TOK_REDIR:
     case TOK_CGI: {
       str::iterator itTmp = it;
@@ -332,7 +331,7 @@ ConfigParser::e_TokType ConfigParser::_nextTokFromDirec(e_Direcs direc)
     case DIR_MAXBODYSIZE:
       return TOK_BYTES;
     case DIR_ERRORPAGE:
-      return TOK_STATUS;
+      return TOK_ERROR;
     case DIR_DEFAULTFILE:
       return TOK_FNAME;
     case DIR_AUTOINDEX:
@@ -371,14 +370,12 @@ str ConfigParser::_toktype2str(e_TokType t) const
       return "IFACE";
     case TOK_BYTES:
       return "BYTES";
-    case TOK_STATUS:
-      return "STATUS";
+    case TOK_ERROR:
+      return "ERROR";
     case TOK_FSPATH:
       return "FSPATH";
     case TOK_ROUTE:
       return "ROUTE";
-    case TOK_FROUTE:
-      return "FROUTE";
     case TOK_FNAME:
       return "FNAME";
     case TOK_BOOL:
@@ -394,15 +391,14 @@ str ConfigParser::_toktype2str(e_TokType t) const
   }
 }
 
-void ConfigParser::_dbgPrintTokens() const
+void ConfigParser::dbgPrintTokens() const
 {
-  if (LOGLEVEL >= LOG_DEBUG) {
-    Logger::log_dbg1("Found these tokens in cfg:");
-    for (std::vector<t_Token>::const_iterator it = _tokens.begin();
-        it != _tokens.end();
-        ++it)
-      std::cout << "  {" << _toktype2str(it->type) << ", '"
-                << ((it->type != TOK_DIREC) ? it->val : _direc2str(it->direc))
-                << "'}" << std::endl;
-  }
+  Logger::log_dbg0("Found these tokens in cfg:");
+  for (std::vector<t_Token>::const_iterator it = _tokens.begin();
+      it != _tokens.end();
+      ++it)
+    std::cout << "  [ " << std::left << std::setw(6) << _toktype2str(it->type)
+              << ": '"
+              << ((it->type != TOK_DIREC) ? it->val : _direc2str(it->direc))
+              << "' ]" << std::endl;
 }

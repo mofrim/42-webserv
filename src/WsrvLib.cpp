@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/24 17:40:43 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/01 18:27:33 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/09 17:44:34 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,13 +15,9 @@
 
 // --------------------------------=[ OCF ]=-------------------------------- //
 
-WsrvLib::WsrvLib()
-{}
+WsrvLib::WsrvLib() {}
 
-WsrvLib::WsrvLib(const WsrvLib& other)
-{
-  (void)other;
-}
+WsrvLib::WsrvLib(const WsrvLib& other) { (void)other; }
 
 WsrvLib& WsrvLib::operator=(const WsrvLib& other)
 {
@@ -29,8 +25,7 @@ WsrvLib& WsrvLib::operator=(const WsrvLib& other)
   return (*this);
 }
 
-WsrvLib::~WsrvLib()
-{}
+WsrvLib::~WsrvLib() {}
 
 // ------------------------------=[ Methods ]=------------------------------ //
 
@@ -195,3 +190,38 @@ e_HTTPVersion WsrvLib::str2HTTPVer(const str& s)
     return HTTPVER_1_0;
   return HTTPVER_UNKNOWN;
 }
+
+e_HTTPStatus WsrvLib::short2HttpStatus(u16 s)
+{
+  switch (s) {
+    case 200:
+      return HTTP_200;
+    case 300:
+      return HTTP_300;
+    case 301:
+      return HTTP_301;
+    case 302:
+      return HTTP_302;
+    case 308:
+      return HTTP_308;
+    case 400:
+      return HTTP_400;
+    case 404:
+      return HTTP_404;
+    case 408:
+      return HTTP_408;
+    case 413:
+      return HTTP_413;
+    case 500:
+      return HTTP_500;
+    case 501:
+      return HTTP_501;
+    case 502:
+      return HTTP_502;
+    default:
+      return HTTP_0;
+  }
+}
+
+// global flag used to activate certain debug output.
+bool g_WsrvTesting = false;

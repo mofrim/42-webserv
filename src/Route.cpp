@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/09 16:42:51 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/07 13:16:12 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/10 00:25:36 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@
 Route::Route()
 {
   _path         = "/";
-  _root         = "./html";
+  _root         = "./www";
   _autoindex    = false;
   _default_file = "index.html";
 }
@@ -83,5 +83,22 @@ void Route::setRoot(str root)
       _root = withoutTrailingSlash;
   }
 }
-
 str Route::getRoot() const { return _root; }
+
+void Route::reset()
+{
+  _path         = "/";
+  _root         = "./www";
+  _autoindex    = false;
+  _default_file = "index.html";
+}
+
+void Route::addErrPage(e_HTTPStatus s, const str& path) { _errPages[s] = path; }
+
+str Route::getErrPage(e_HTTPStatus s) { return _errPages[s]; }
+
+std::map<e_HTTPStatus, str> Route::getErrPages() const { return _errPages; }
+
+void Route::setMaxBodySize(u32 mbs) { _maxBodySize = mbs; }
+
+u32 Route::getMaxBodySize() const { return _maxBodySize; }

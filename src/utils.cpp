@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/26 10:03:57 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/08 12:10:45 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/08 22:47:22 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 
 #include "utils.hpp"
 
+#include <cstdlib>
 #include <cstring>
 #include <errno.h>
 #include <fcntl.h>
@@ -179,3 +180,6 @@ void tolower(str& s)
   for (size_t i = 0; i < s.size(); i++)
     s[i] = std::tolower(s[i]);
 }
+
+// veeery simple conversion to u16 without any overflow checking.
+u16 str2u16(const str& s) { return static_cast<u16>(atoi(s.c_str())); }

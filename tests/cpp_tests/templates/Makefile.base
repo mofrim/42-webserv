@@ -39,11 +39,11 @@ PROJ_OBJS		= $(patsubst %.cpp,$(PROJ_OBJDIR)/%.o,$(PROJ_SRCS))
 CPP			= c++
 
 # compiler flags
-CFLAGS	= -Wall -Werror -Wextra -std=c++98
+CFLAGS	= -Wall -Werror -Wextra -std=c++98 -g
 
 # if command line var 'DBG=yes' is set activate debug options
 ifeq ($(DBG),yes)
-	CFLAGS	+= -g -DLOGLEVEL=1
+	CFLAGS	+= -DLOGLEVEL=1
 endif
 
 IFLAGS	= -I$(INC) -I.

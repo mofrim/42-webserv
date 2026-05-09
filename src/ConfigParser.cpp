@@ -6,11 +6,12 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/26 09:14:47 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/08 20:11:13 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/09 17:43:05 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ConfigParser.hpp"
+#include "Logger.hpp"
 
 ConfigParser::ConfigParser() {}
 
@@ -37,7 +38,10 @@ void ConfigParser::parse()
 {
   try {
     _tokenize();
-    _dbgPrintTokens();
+
+    if (LOGLEVEL >= LOG_DEBUG || g_WsrvTesting)
+      dbgPrintTokens();
+
     _processTokens();
   } catch (const std::runtime_error& e) {
     throw;

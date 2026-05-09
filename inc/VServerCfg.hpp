@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/25 08:01:29 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/08 17:20:31 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/10 00:24:13 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,9 @@ class VServerCfg {
     std::string                   _serverName;
     std::map<str, std::set<u16> > _interfaces;
     u32                           _maxBodySize;
+    str                           _root;
+
+    std::map<e_HTTPStatus, str> _errPages;
 
     // keys for _routes should be the _path prop of a Route.
     std::map<str, Route> _routes;
@@ -43,8 +46,10 @@ class VServerCfg {
 
     void addInterface(const str& addr, u16 port);
     void addInterfaces(std::map<str, std::set<u16> > _interfaces);
+
     const std::map< str, std::set<u16> >& getInterfaces() const;
     const std::set<u16>&                  getPorts(const str& addr);
+
     int delPort(const str& interface, u16 port);
     int delInterface(const str& interface);
 
@@ -54,4 +59,8 @@ class VServerCfg {
 
     void setMaxBodySize(u32 mbs);
     u32  getMaxBodySize() const;
+
+    void                        addErrPage(e_HTTPStatus s, const str& path);
+    str                         getErrPage(e_HTTPStatus s);
+    std::map<e_HTTPStatus, str> getErrPages() const;
 };

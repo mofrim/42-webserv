@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/24 20:49:55 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/07 13:04:22 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/09 17:03:07 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,7 @@ enum { LOG_INFO = 0, LOG_DEBUG = 1, LOG_BRUTAL = 2 };
 typedef enum { INFO, WARN, ERROR } e_LogType;
 
 #ifndef LOGLEVEL
-#define LOGLEVEL INFO
+#define LOGLEVEL LOG_INFO
 #endif
 
 // IDEA: try to pass a logfile to the Logger-Class via class global variable...

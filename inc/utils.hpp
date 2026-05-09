@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/03 11:26:23 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/08 12:10:14 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/08 22:44:03 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,7 @@ str      method2str(e_Method m);
 int      isDir(const str& path);
 str      strip(str str);
 void     tolower(str& s);
+u16      str2u16(const str& s);
 
 std::vector<str> splitString(
     const str& sstr, const str& delim, bool keepEmpty = false);

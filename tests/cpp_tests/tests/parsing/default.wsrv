@@ -1,0 +1,19 @@
+server {
+  serverName moep!
+  listen localhost:1111!
+  listen localhost:1112!
+  listen 10.0.0.2:1112!
+  maxBodySize 1000000!
+
+  root ./www!
+  errorPage 404:/bla/404.html!
+
+  route / {
+    defaultFile index.html!
+    autoindex on!
+    methods GET POST DELETE!
+    root ./www!
+    upload ./www/uploads!
+    maxBodySize 1000!
+  }
+}

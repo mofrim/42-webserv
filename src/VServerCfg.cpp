@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/25 08:35:42 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/08 17:20:31 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/10 00:38:13 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,7 @@ VServerCfg::VServerCfg()
 {
   _serverName  = "";
   _maxBodySize = MAX_BODY_SIZE;
+  _root        = "./www";
 }
 
 VServerCfg::VServerCfg(const VServerCfg& o)
@@ -33,6 +34,8 @@ VServerCfg::VServerCfg(const VServerCfg& o)
   _interfaces  = o._interfaces;
   _maxBodySize = o._maxBodySize;
   _routes      = o._routes;
+  _errPages    = o._errPages;
+  _root        = o._root;
 }
 
 VServerCfg& VServerCfg::operator=(const VServerCfg& o)
@@ -42,6 +45,8 @@ VServerCfg& VServerCfg::operator=(const VServerCfg& o)
     _interfaces  = o._interfaces;
     _maxBodySize = o._maxBodySize;
     _routes      = o._routes;
+    _errPages    = o._errPages;
+    _root        = o._root;
   }
   return (*this);
 }
@@ -56,7 +61,15 @@ std::string VServerCfg::getServerName() const { return (_serverName); }
 
 void VServerCfg::printCfg() const
 {
-  std::cout << "  server_name: \"" << _serverName << "\"" << std::endl;
+  std::cout << "  serverName: \"" << _serverName << "\"" << std::endl;
+  std::cout << "  maxBodySize: \"" << _maxBodySize << "\"" << std::endl;
+  std::cout << "  root: \"" << _root << "\"" << std::endl;
+  std::cout << "  interfaces:" << std::endl;
+  for (std::map<str, std::set<u16> >::const_iterator it = _interfaces.begin();
+      it != _interfaces.end();
+      ++it)
+    std::cout << "    " << it->first << ": " << getSetAsStr(it->second)
+              << std::endl;
 }
 
 // silently fails if addr:port pair already exists
@@ -116,3 +129,15 @@ void VServerCfg::addRoute(const Route& r) { _routes[r.getPath()] = r; }
 void VServerCfg::setMaxBodySize(u32 mbs) { _maxBodySize = mbs; }
 
 u32 VServerCfg::getMaxBodySize() const { return _maxBodySize; }
+
+void VServerCfg::addErrPage(e_HTTPStatus s, const str& path)
+{
+  _errPages[s] = path;
+}
+
+str VServerCfg::getErrPage(e_HTTPStatus s) { return _errPages[s]; }
+
+std::map<e_HTTPStatus, str> VServerCfg::getErrPages() const
+{
+  return _errPages;
+}

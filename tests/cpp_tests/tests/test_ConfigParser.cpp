@@ -25,7 +25,18 @@ int _test_ConfigParser()
     for (std::set<str>::const_iterator it = s.begin(); it != s.end(); ++it)
       std::cout << *it << ", " << std::endl;
   }
-  return (0);
+
+  print_test_topic("test_ConfigParser", "check knownDirectives");
+  {
+    ConfigParser p("tests/parsing/default.wsrv");
+    if (p.bad())
+      return -1;
+    p.parse();
+    std::vector<VServerCfg> v = p.getCfgs();
+    std::cout << "v.size = " << v.size() << std::endl;
+    v[0].printCfg();
+  }
+  return 0;
 }
 
 void test_ConfigParser()
@@ -37,7 +48,7 @@ void test_ConfigParser()
   } catch (const std::exception& e) {
     print_test_section_header("END ConfigParser");
     print_test_result(false,
-        "Test \"test_ConfigParser\" failed with following exception:\n" +
+        "Test \"test_ConfigParser\" failed with following exception:\n  " RED +
             std::string(e.what()));
     g_GlobalResult = KO;
     return;

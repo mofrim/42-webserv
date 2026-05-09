@@ -3,6 +3,7 @@ server {
   listen localhost:1111!
   maxBodySize 1000000!
 
+  root ./www!
   errorPage 404 bla/404.html!
   errorPage 400 bla/400.html!
 
@@ -12,6 +13,7 @@ server {
     methods GET POST DELETE!
     root ./www!
     upload ./www/uploads!
+    maxBodySize 1000!
   }
 
   route /moep {
