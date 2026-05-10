@@ -8,7 +8,7 @@ server {
   errorPage 400 bla/400.html!
 
   route / {
-    defaultFile index.html!
+    index index.html!
     autoindex on!
     methods GET POST DELETE!
     root ./www!

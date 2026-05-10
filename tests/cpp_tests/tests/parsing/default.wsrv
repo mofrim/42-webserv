@@ -9,11 +9,12 @@ server {
   errorPage 404:/bla/404.html!
 
   route / {
-    defaultFile index.html!
+    index index.html!
     autoindex on!
     methods GET POST DELETE!
     root ./www!
     upload ./www/uploads!
-    maxBodySize 1000!
+    maxBodySize 42!
+    redirect 302:https://moep.de!
   }
 }

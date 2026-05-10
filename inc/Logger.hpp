@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/24 20:49:55 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/09 17:03:07 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/10 23:23:25 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,6 +59,7 @@ class Logger {
     static void log_msg(const str& msg);
     static void log_warn(const str& msg);
     static void log_warn(const str& pre, const str& msg);
+    static void logCfgErr(const size_t line, const str& msg);
     static void log_srv(
         const str& srv_name, const str& msg, e_LogType logtype = INFO);
     static void log_reqres(
@@ -75,7 +76,7 @@ class Logger {
     static void log_dbg0(const str& msg);
     static void log_dbg1(const str& msg);
     static void log_dbg2(const str& msg);
-    static void log_bug(const str& msg);
+    static void logBug(const str& msg);
     static str  getLogtime();
 
     static void drawCycleSep();

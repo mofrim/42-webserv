@@ -6,12 +6,12 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/13 13:06:35 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/18 16:15:22 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/10 22:54:22 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "test-utils.hpp"
 #include "test_hdr.hpp"
-#include "test_utils.hpp"
 
 #include <map>
 
@@ -116,9 +116,12 @@ int _test_VServerCfg()
 
     cfg.addInterfaces(lst);
 
-    cfg.delInterface("10.0.0.1");
-    cfg.delInterface("10.0.0.2");
-    cfg.delInterface("10.0.0.3");
+    if (cfg.delInterface("10.0.0.1") == -1)
+      return -1;
+    if (cfg.delInterface("10.0.0.2") == -1)
+      return -1;
+    if (cfg.delInterface("10.0.0.3") == -1)
+      return -1;
 
     std::map< str, std::set<u16> >::const_iterator it =
         cfg.getInterfaces().begin();

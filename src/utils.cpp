@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/26 10:03:57 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/08 22:47:22 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/10 23:12:25 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,13 @@
 #include <sys/stat.h>
 
 str int2str(int n)
+{
+  std::ostringstream oss;
+  oss << n;
+  return (oss.str());
+}
+
+str u32ToStr(u32 n)
 {
   std::ostringstream oss;
   oss << n;
@@ -78,7 +85,7 @@ str getAddrPortStr4(const struct sockaddr_in& addr)
 // wrapper for getting the error string for current errno
 str getErrStr() { return str(strerror(errno)); }
 
-e_Method str2method(const str& m)
+e_Method str2meth(const str& m)
 {
   if (m == "GET")
     return M_GET;
@@ -89,7 +96,7 @@ e_Method str2method(const str& m)
   return M_UNKNOWN;
 }
 
-str method2str(e_Method m)
+str meth2str(e_Method m)
 {
   if (m == M_GET)
     return "GET";
@@ -138,6 +145,40 @@ std::vector<str> splitString(const str& sstr, const str& delim, bool keepEmpty)
     if (!sub.empty() || keepEmpty)
       ret.push_back(sub);
     i = k + delim.size();
+  }
+  return ret;
+}
+
+// @brief Split string by whitespace chars
+// @param keepEmpty set this to true for keeping empty lines after split
+// @return  an std::vector filled with the split strings.
+std::vector<str> splitStrWhite(const str& sstr, bool keepEmpty)
+{
+  std::vector<str> ret;
+  size_t           i = 0;
+  size_t           k = 0;
+
+  const str ws(" \t\v\f\n");
+
+  if (sstr.empty())
+    return ret;
+
+  i = sstr.find_first_not_of(ws);
+  if (i == str::npos)
+    return ret;
+
+  while (i < sstr.size() && k != str::npos) {
+    k = sstr.find_first_of(ws, i);
+    str sub;
+    if (k == str::npos)
+      sub = sstr.substr(i, str::npos);
+    else
+      sub = sstr.substr(i, k - i);
+    if (!sub.empty() || keepEmpty)
+      ret.push_back(sub);
+    while (isspace(sstr[k]))
+      ++k;
+    i = k;
   }
   return ret;
 }

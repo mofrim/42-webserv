@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/01 18:46:40 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/07 11:41:40 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/10 22:45:45 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,7 @@ e_HTTPStatus Request::_readReqline()
     k++;
   Logger::log_dbg1(
       "Request: found this method: '" + _reqstr.substr(i, k) + "'");
-  if ((_reqline.method = str2method(_reqstr.substr(i, k))) == M_UNKNOWN)
+  if ((_reqline.method = str2meth(_reqstr.substr(i, k))) == M_UNKNOWN)
     return HTTP_400;
 
   i = i + k + 1;

@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/26 09:14:47 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/09 17:43:05 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/10 22:18:31 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,7 +50,7 @@ void ConfigParser::parse()
 
 // ------------------------=[ KnownDirectives Set  ]=------------------------ //
 
-// 14 directives i shall support
+// 13 directives i shall support
 std::set<str> ConfigParser::_initKnownDirectives()
 {
   const char *dirNames[] = {
@@ -60,16 +60,15 @@ std::set<str> ConfigParser::_initKnownDirectives()
       "listen",
       "maxBodySize",
       "errorPage",
-      "defaultFile",
+      "index",
       "autoindex",
       "methods",
       "root",
       "upload",
       "redirect",
-      "index",
       "cgi"};
 
-  std::set<str> s(dirNames, dirNames + 14);
+  std::set<str> s(dirNames, dirNames + 13);
   return s;
 }
 

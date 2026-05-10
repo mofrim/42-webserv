@@ -6,11 +6,12 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/24 20:52:55 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/07 13:05:07 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/10 23:23:25 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Logger.hpp"
+#include "utils.hpp"
 
 #include <ctime>
 #include <iostream>
@@ -64,6 +65,11 @@ void Logger::log_warn(const str& pre, const str& msg)
             << msg << RST << std::endl;
 }
 
+void Logger::logCfgErr(const size_t line, const str& msg)
+{
+  Logger::log_warn("cfg line " + int2str(line), msg);
+}
+
 void Logger::log_dbg0(const str& msg)
 {
   if (LOGLEVEL >= LOG_INFO) {
@@ -115,7 +121,7 @@ void Logger::log_reqres(const str& srvName, const str& resreq, const str& data)
 }
 
 // use this for bug hunting
-void Logger::log_bug(const str& msg)
+void Logger::logBug(const str& msg)
 {
   std::cout << BPUR << "[BUG] " << msg << RST << std::endl;
 }

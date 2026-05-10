@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/08 21:14:52 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/10 00:12:15 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/11 00:37:05 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,13 +14,46 @@
 #include "Logger.hpp"
 #include "utils.hpp"
 
+#include <cstdlib>
+
 // ------------------------=[ Server Scope Parsing ]=------------------------ //
 
 // -------------------------------=[ Utils ]=-------------------------------- //
 
+static bool isNumStr(const str& s)
+{
+  for (std::string::const_iterator it = s.begin(); it != s.end(); ++it)
+    if (!isdigit(*it))
+      return false;
+  return true;
+}
+
 static bool isValidPathChar(char c)
 {
   return isalnum(c) || c == '.' || c == '-' || c == '_' || c == '/';
+}
+
+static bool isValidFnameChar(char c)
+{
+  return isalnum(c) || c == '.' || c == '-' || c == '_';
+}
+
+// arbitraily deciding the filenames should not begin with '-'. idk, but that
+// seems fishy to me.
+static bool isValidFname(const str& s)
+{
+  if (s.length() == 0)
+    return false;
+
+  str::const_iterator it = s.begin();
+  if (*it == '-')
+    return false;
+
+  for (; it != s.end(); ++it)
+    if (!isValidFnameChar(*it))
+      return false;
+
+  return true;
 }
 
 static bool isValidDomainChar(char c)
@@ -56,6 +89,29 @@ static bool isValidDomainName(const str& n)
   return true;
 }
 
+// as we might have URLs like https://moep.de in our string we sadly cannot use
+// splitStr here ;(
+static std::vector<str> splitRedirStr(const str& rs)
+{
+  std::vector<str> ret;
+  if (rs.empty())
+    return ret;
+
+  size_t i = rs.find(":");
+  if (i == str::npos)
+    return ret;
+
+  str code = rs.substr(0, i);
+  if (code.empty())
+    return ret;
+  str url = rs.substr(++i);
+  if (url.empty())
+    return ret;
+  ret.push_back(code);
+  ret.push_back(url);
+  return ret;
+}
+
 // ---------------------------=[ The Real Stuff ]=--------------------------- //
 
 // serverName
@@ -65,8 +121,7 @@ bool ConfigParser::_parseTokName(VServerCfg& vcfg)
     throw std::runtime_error("Wrong token while parsing serverName");
 
   if (!isValidDomainName(_tokIt->val)) {
-    Logger::log_warn("cfg line " + int2str(_tokIt->line),
-        "serverName has to be valid domain-name!");
+    Logger::logCfgErr(_tokIt->line, "serverName has to be valid domain-name!");
     return false;
   }
 
@@ -76,7 +131,8 @@ bool ConfigParser::_parseTokName(VServerCfg& vcfg)
 }
 
 // route
-// TODO: checking where?
+// TODO checking where?
+// TODO  test this!
 bool ConfigParser::_parseTokRoute()
 {
   if ((++_tokIt)->type != TOK_ROUTE)
@@ -85,7 +141,7 @@ bool ConfigParser::_parseTokRoute()
   _currentRoute.reset();
 
   if (!isValidRoute(_tokIt->val)) {
-    Logger::log_warn("cfg line " + int2str(_tokIt->line), "Invalid route!");
+    Logger::logCfgErr(_tokIt->line, "Invalid route!");
     while (_tokIt != _tokens.end() && _tokIt->type != TOK_BEND)
       ++_tokIt;
     return false;
@@ -105,8 +161,7 @@ bool ConfigParser::_parseTokIface(VServerCfg& vcfg)
   std::vector<str> split = splitString(_tokIt->val, ":");
 
   if (split.size() != 2) {
-    Logger::log_warn(
-        "cfg line " + int2str(_tokIt->line), "Invalid interface value");
+    Logger::logCfgErr(_tokIt->line, "Invalid interface value");
     return false;
   }
 
@@ -114,8 +169,7 @@ bool ConfigParser::_parseTokIface(VServerCfg& vcfg)
   strip(split[1]);
 
   if (!isValidDomainName(split[0])) {
-    Logger::log_warn("cfg line " + int2str(_tokIt->line),
-        "invalid iface addr - ip or domain!)");
+    Logger::logCfgErr(_tokIt->line, "invalid iface addr - ip or domain!)");
     return false;
   }
 
@@ -137,7 +191,7 @@ bool ConfigParser::_parseTokError(VServerCfg& vcfg)
   std::vector<str> split = splitString(_tokIt->val, ":");
 
   if (split.size() != 2) {
-    Logger::log_warn("cfg line " + int2str(_tokIt->line), "Invalid errorPage!");
+    Logger::logCfgErr(_tokIt->line, "Invalid errorPage!");
     return false;
   }
 
@@ -147,14 +201,12 @@ bool ConfigParser::_parseTokError(VServerCfg& vcfg)
   e_HTTPStatus errCode = WsrvLib::short2HttpStatus(str2u16(split[0]));
 
   if (errCode < 400) {
-    Logger::log_warn(
-        "cfg line " + int2str(_tokIt->line), "Invalid error status code!");
+    Logger::logCfgErr(_tokIt->line, "Invalid error status code!");
     return false;
   }
 
   if (!isValidRoute(split[1])) {
-    Logger::log_warn("cfg line " + int2str(_tokIt->line),
-        "Invalid file route for errorPage!");
+    Logger::logCfgErr(_tokIt->line, "Invalid file route for errorPage!");
     return false;
   }
 
@@ -171,28 +223,98 @@ bool ConfigParser::_parseTokError(VServerCfg& vcfg)
 // index
 bool ConfigParser::_parseTokFname()
 {
-  ++_tokIt;
+  if ((++_tokIt)->type != TOK_FNAME)
+    throw std::runtime_error("Wrong token while parsing index");
+
+  str& val = _tokIt->val;
+  strip(val);
+
+  if (!isValidFname(val)) {
+    Logger::logCfgErr(_tokIt->line, "'" + val + "' is invalid filename");
+    return false;
+  }
+  _currentRoute.setIndex(val);
   return true;
 }
+
 // autoindex
 bool ConfigParser::_parseTokBool()
 {
-  ++_tokIt;
+  if ((++_tokIt)->type != TOK_BOOL)
+    throw std::runtime_error("Wrong token while parsing autoindex");
+
+  str& val = _tokIt->val;
+  strip(val);
+
+  if (val == "true" || val == "on")
+    _currentRoute.setAutoindex(true);
+  else if (val == "false" || val == "off")
+    _currentRoute.setAutoindex(false);
+  else {
+    Logger::logCfgErr(
+        _tokIt->line, "Only on/off || true/false allowed as boolean values!");
+    return false;
+  }
   return true;
 }
+
 // methods
+// GET POST DELETE
 bool ConfigParser::_parseTokMeth()
 {
-  ++_tokIt;
+  if ((++_tokIt)->type != TOK_METH)
+    throw std::runtime_error("Wrong token while parsing methods");
+
+  std::vector<str> meths = splitStrWhite(_tokIt->val);
+
+  _currentRoute.clearMethods();
+
+  for (std::vector<str>::iterator it = meths.begin(); it != meths.end(); ++it) {
+    e_Method m = str2meth(*it);
+    if (m == M_UNKNOWN) {
+      Logger::logCfgErr(_tokIt->line, "Method unknown!");
+      return false;
+    }
+    _currentRoute.addMethod(m);
+  }
+
   return true;
 }
+
 // redirect
+// Ex: 302:/moep/miep
+// Ex: 302:https://atat.de
+//
+// Do like nginx: don't check anything in here. We will send the Location to
+// client no matter what and it will have to deal with it.
 bool ConfigParser::_parseTokRedir()
 {
-  ++_tokIt;
+  if ((++_tokIt)->type != TOK_REDIR)
+    throw std::runtime_error("Wrong token while parsing redir");
+
+  str& redir = _tokIt->val;
+  strip(redir);
+
+  std::vector<str> sp = splitRedirStr(redir);
+
+  if (sp.size() != 2) {
+    Logger::logCfgErr(_tokIt->line, "Malformed redir string!");
+    return false;
+  }
+
+  e_HTTPStatus code = WsrvLib::str2HttpStatus(sp[0]);
+  if (code == HTTP_0 || code < HTTP_300 || code > HTTP_308) {
+    Logger::logCfgErr(_tokIt->line, "Invalid status code in redir direc!");
+    return false;
+  }
+
+  _currentRoute.setRedir(code, sp[1]);
+
   return true;
 }
+
 // cgisdada
+// NEXT !!!!!!!
 bool ConfigParser::_parseTokCgi()
 {
   ++_tokIt;
@@ -204,8 +326,26 @@ bool ConfigParser::_parseTokCgi()
 // maxBodySize
 bool ConfigParser::_parseTokBytes(VServerCfg& vcfg)
 {
-  (void)vcfg;
-  ++_tokIt;
+  if ((++_tokIt)->type != TOK_BYTES)
+    throw std::runtime_error("Wrong token while parsing maxBodySize");
+
+  str& val = _tokIt->val;
+  strip(val);
+  if (!isNumStr(val))
+    return false;
+
+  u32 bytes = std::atoi(val.c_str());
+  if (bytes > MAX_BYTES) {
+    Logger::logCfgErr(
+        _tokIt->line, "maxBodySize >" + int2str(MAX_BYTES) + " not allowed!");
+    return false;
+  }
+
+  if (_scope.top() == S_SERVER)
+    vcfg.setMaxBodySize(bytes);
+  else
+    _currentRoute.setMaxBodySize(bytes);
+
   return true;
 }
 

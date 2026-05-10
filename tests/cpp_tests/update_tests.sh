@@ -54,7 +54,7 @@ if [ $? -ne 0 ]; then
 	exit 1
 fi
 cat <<EOF >> $TEST_MAIN
-#include "test_utils.hpp"
+#include "test-utils.hpp"
 #include "test_hdr.hpp"
 bool g_GlobalResult = OK;
 int main()
@@ -89,8 +89,8 @@ done
 # populating makefile
 
 cp $TEMPLATE_DIR/Makefile.base Makefile
-sed -i "/test_utils\.cpp/r $tmpf" Makefile
-sed -i 's/test_utils\.cpp/test_utils\.cpp \\/g' Makefile
+sed -i "/test-utils\.cpp/r $tmpf" Makefile
+sed -i 's/test-utils\.cpp/test-utils\.cpp \\/g' Makefile
 last_file="$(cat $tmpf | tail -n 1 | sed 's/\\//')"
 last_file_double_bs="$(cat $tmpf | tail -n 1 | sed 's/\\/\\\\/')"
 if [ -n "$last_file" ] && [ -n "$last_file_double_bs" ]; then

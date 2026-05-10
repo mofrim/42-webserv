@@ -11,7 +11,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "test_utils.hpp"
+#include "test-utils.hpp"
 
 #include <iostream>
 #include <sstream>

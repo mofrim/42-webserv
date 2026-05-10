@@ -29,9 +29,9 @@ PROJ_SRCS_HERE
 PROJ_HDRS_HERE
 
 TEST_SRCS			= test_main.cpp \
-								test_utils.cpp
+								test-utils.cpp
 
-TEST_HDRS			= test_utils.hpp
+TEST_HDRS			= test-utils.hpp
 
 OBJS				= $(patsubst %.cpp,$(OBJDIR)/%.o,$(TEST_SRCS))
 PROJ_OBJS		= $(patsubst %.cpp,$(PROJ_OBJDIR)/%.o,$(PROJ_SRCS))

@@ -6,24 +6,24 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/13 13:06:35 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/10 00:33:20 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/10 22:54:15 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "test-utils.hpp"
 #include "test_hdr.hpp"
-#include "test_utils.hpp"
 
 // test logic goes here, for any failure return (-1) or throw exception.
 // otherwise -> success
 int _test_Routes()
 {
-  std::vector<VServer> dummy;
   print_test_topic("test_Routes", "moep");
   {
-    Route r;
+    std::vector<VServer> dummy;
+    Route                r;
 
     r.setAutoindex(true);
-    r.setDefaultFile("moep.html");
+    r.setIndex("moep.html");
     r.setPath("/miep");
     r.setRoot("./WWW");
 
@@ -39,17 +39,18 @@ int _test_Routes()
 
   print_test_topic("test_Routes", "overwrite");
   {
-    Route r;
+    std::vector<VServer> dummy;
+    Route                r;
 
     r.setAutoindex(true);
-    r.setDefaultFile("moep.html");
+    r.setIndex("moep.html");
     r.setPath("/miep");
     r.setRoot("./WWW");
 
     Route r1;
 
     r1.setAutoindex(true);
-    r1.setDefaultFile("ha, gotcha!");
+    r1.setIndex("ha, gotcha!");
     r1.setPath("/miep");
     r1.setRoot("./overwrite");
 
@@ -84,7 +85,7 @@ int _test_Routes()
       return -1;
   }
 
-  return (0);
+  return 0;
 }
 
 void test_Routes()

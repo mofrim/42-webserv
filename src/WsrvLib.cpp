@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/24 17:40:43 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/09 17:44:34 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/10 23:58:33 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -221,6 +221,12 @@ e_HTTPStatus WsrvLib::short2HttpStatus(u16 s)
     default:
       return HTTP_0;
   }
+}
+
+e_HTTPStatus WsrvLib::str2HttpStatus(const str& s)
+{
+  u16 code = str2u16(s);
+  return short2HttpStatus(code);
 }
 
 // global flag used to activate certain debug output.

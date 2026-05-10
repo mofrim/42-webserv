@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/09 16:42:51 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/10 00:25:36 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/11 00:21:10 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,29 +17,41 @@
 
 Route::Route()
 {
-  _path         = "/";
-  _root         = "./www";
-  _autoindex    = false;
-  _default_file = "index.html";
+  _path        = "/";
+  _root        = "./www";
+  _autoindex   = false;
+  _index       = "index.html";
+  _maxBodySize = MAX_BODY_SIZE;
+  _methods.insert(M_GET);
+  _redir = std::make_pair(HTTP_0, "");
 }
 
+// FIXME check if really all is copied!
 Route::Route(const Route& o)
 {
   if (this != &o) {
-    _path         = o._path;
-    _root         = o._root;
-    _autoindex    = o._autoindex;
-    _default_file = o._default_file;
+    _path        = o._path;
+    _root        = o._root;
+    _autoindex   = o._autoindex;
+    _index       = o._index;
+    _maxBodySize = o._maxBodySize;
+    _errPages    = o._errPages;
+    _methods     = o._methods;
+    _redir       = o._redir;
   }
 }
 
 Route& Route::operator=(const Route& o)
 {
   if (this != &o) {
-    _path         = o._path;
-    _root         = o._root;
-    _autoindex    = o._autoindex;
-    _default_file = o._default_file;
+    _path        = o._path;
+    _root        = o._root;
+    _autoindex   = o._autoindex;
+    _index       = o._index;
+    _maxBodySize = o._maxBodySize;
+    _errPages    = o._errPages;
+    _methods     = o._methods;
+    _redir       = o._redir;
   }
   return (*this);
 }
@@ -58,13 +70,15 @@ bool Route::getAutoindex() const { return _autoindex; }
 
 // we only set the default file if it does not contain any slashes which might
 // lead to root folder escaping
-void Route::setDefaultFile(const str& s)
+//
+// FIXME ... normally this should be taken care of elsewhere
+void Route::setIndex(const str& s)
 {
   if (s.find('/') == str::npos)
-    _default_file = s;
+    _index = s;
 }
 
-str Route::getDefaultFile() const { return _default_file; }
+str Route::getIndex() const { return _index; }
 
 // Sanitizing the input string a little bit, as we don't want any trailing
 // slashes as the path URL we append will start with a slash.
@@ -87,10 +101,16 @@ str Route::getRoot() const { return _root; }
 
 void Route::reset()
 {
-  _path         = "/";
-  _root         = "./www";
-  _autoindex    = false;
-  _default_file = "index.html";
+  _path        = "/";
+  _root        = "./www";
+  _autoindex   = false;
+  _index       = "index.html";
+  _maxBodySize = MAX_BODY_SIZE;
+
+  _methods.empty();
+  _methods.insert(M_GET);
+  _errPages.empty();
+  _redir = std::make_pair(HTTP_0, "");
 }
 
 void Route::addErrPage(e_HTTPStatus s, const str& path) { _errPages[s] = path; }
@@ -102,3 +122,16 @@ std::map<e_HTTPStatus, str> Route::getErrPages() const { return _errPages; }
 void Route::setMaxBodySize(u32 mbs) { _maxBodySize = mbs; }
 
 u32 Route::getMaxBodySize() const { return _maxBodySize; }
+
+const std::set<e_Method>& Route::getMethods() const { return _methods; }
+
+bool Route::addMethod(e_Method m) { return _methods.insert(m).second; }
+
+void Route::clearMethods() { _methods.clear(); }
+
+const std::pair<e_HTTPStatus, str>& Route::getRedir() const { return _redir; }
+
+void Route::setRedir(e_HTTPStatus s, const str& url)
+{
+  _redir = std::make_pair(s, url);
+}

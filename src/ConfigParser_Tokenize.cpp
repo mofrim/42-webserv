@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/07 20:08:59 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/10 00:17:18 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/10 23:23:25 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -137,11 +137,10 @@ void ConfigParser::_evalScope(const t_Token& tok)
   }
 
   if (_scope.top() == S_ROUTE && tok.type == TOK_DIREC) {
-    if (tok.direc != DIR_DEFAULTFILE && tok.direc != DIR_AUTOINDEX &&
+    if (tok.direc != DIR_INDEX && tok.direc != DIR_AUTOINDEX &&
         tok.direc != DIR_METHODS && tok.direc != DIR_ROOT &&
-        tok.direc != DIR_INDEX && tok.direc != DIR_CGI &&
-        tok.direc != DIR_UPLOAD && tok.direc != DIR_REDIRECT &&
-        tok.direc != DIR_MAXBODYSIZE)
+        tok.direc != DIR_CGI && tok.direc != DIR_UPLOAD &&
+        tok.direc != DIR_REDIRECT && tok.direc != DIR_MAXBODYSIZE)
       throw std::runtime_error(
           "Direc " + _direc2str(tok.direc) + " not allowed in route scope");
   }
@@ -184,7 +183,7 @@ void ConfigParser::_readTokVal(
       while (isalpha(*itTmp) && itTmp != end)
         ++itTmp;
       str word(it, itTmp);
-      Logger::log_bug("word = " + word);
+      Logger::logBug("word = " + word);
       e_Direcs dir = _str2direc(word);
       if (dir == DIR_INVALID)
         throw std::runtime_error("Unknown Direc");
@@ -199,7 +198,7 @@ void ConfigParser::_readTokVal(
         throw std::runtime_error("No Bang!");
       tok.val.assign(it, itTmp);
       if (tok.val.empty())
-        throw std::runtime_error("Empty val not allowed!");
+        throw std::runtime_error("Wrong or empty value!");
       it = itTmp;
       break;
     case TOK_FSPATH:
@@ -212,7 +211,7 @@ void ConfigParser::_readTokVal(
         throw std::runtime_error("No Bang!");
       tok.val.assign(it, itTmp);
       if (tok.val.empty())
-        throw std::runtime_error("Empty val not allowed!");
+        throw std::runtime_error("Wrong or empty value!");
       it = itTmp;
       break;
     case TOK_ROUTE:
@@ -220,7 +219,7 @@ void ConfigParser::_readTokVal(
         ++itTmp;
       tok.val.assign(it, itTmp);
       if (tok.val.empty())
-        throw std::runtime_error("Empty val not allowed!");
+        throw std::runtime_error("Wrong or empty value!");
       it = itTmp;
       break;
     case TOK_METH:
@@ -235,7 +234,7 @@ void ConfigParser::_readTokVal(
         throw std::runtime_error("No Bang!");
       tok.val.assign(it, itTmp);
       if (tok.val.empty())
-        throw std::runtime_error("Empty val not allowed!");
+        throw std::runtime_error("Wrong or empty value!");
       it = itTmp;
     }
   }
@@ -264,8 +263,8 @@ ConfigParser::e_Direcs ConfigParser::_str2direc(const str& s)
     return DIR_MAXBODYSIZE;
   if (s == "errorPage")
     return DIR_ERRORPAGE;
-  if (s == "defaultFile")
-    return DIR_DEFAULTFILE;
+  if (s == "index")
+    return DIR_INDEX;
   if (s == "autoindex")
     return DIR_AUTOINDEX;
   if (s == "methods")
@@ -276,8 +275,6 @@ ConfigParser::e_Direcs ConfigParser::_str2direc(const str& s)
     return DIR_UPLOAD;
   if (s == "redirect")
     return DIR_REDIRECT;
-  if (s == "index")
-    return DIR_INDEX;
   return DIR_CGI;
 }
 
@@ -296,8 +293,8 @@ str ConfigParser::_direc2str(e_Direcs d) const
       return "maxBodySize";
     case DIR_ERRORPAGE:
       return "errorPage";
-    case DIR_DEFAULTFILE:
-      return "defaultFile";
+    case DIR_INDEX:
+      return "index";
     case DIR_AUTOINDEX:
       return "autoindex";
     case DIR_METHODS:
@@ -308,8 +305,6 @@ str ConfigParser::_direc2str(e_Direcs d) const
       return "upload";
     case DIR_REDIRECT:
       return "redirect";
-    case DIR_INDEX:
-      return "index";
     case DIR_CGI:
       return "cgi";
     case DIR_INVALID:
@@ -332,7 +327,7 @@ ConfigParser::e_TokType ConfigParser::_nextTokFromDirec(e_Direcs direc)
       return TOK_BYTES;
     case DIR_ERRORPAGE:
       return TOK_ERROR;
-    case DIR_DEFAULTFILE:
+    case DIR_INDEX:
       return TOK_FNAME;
     case DIR_AUTOINDEX:
       return TOK_BOOL;
@@ -344,8 +339,6 @@ ConfigParser::e_TokType ConfigParser::_nextTokFromDirec(e_Direcs direc)
       return TOK_FSPATH; // arbitrary path possible here, also /tmp!
     case DIR_REDIRECT:
       return TOK_REDIR;
-    case DIR_INDEX:
-      return TOK_FNAME;
     case DIR_CGI:
       return TOK_CGI;
     case DIR_INVALID:

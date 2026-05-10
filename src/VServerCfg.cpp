@@ -6,16 +6,13 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/25 08:35:42 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/10 00:38:13 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/11 00:33:02 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "Logger.hpp"
 #include "VServerCfg.hpp"
 #include "utils.hpp"
-
-#include <arpa/inet.h>
-#include <iostream>
-#include <netinet/in.h>
 
 // --------------------------------=[ OCF ]=-------------------------------- //
 
@@ -26,6 +23,7 @@ VServerCfg::VServerCfg()
   _serverName  = "";
   _maxBodySize = MAX_BODY_SIZE;
   _root        = "./www";
+  _initSetDirecs();
 }
 
 VServerCfg::VServerCfg(const VServerCfg& o)
@@ -36,6 +34,7 @@ VServerCfg::VServerCfg(const VServerCfg& o)
   _routes      = o._routes;
   _errPages    = o._errPages;
   _root        = o._root;
+  _setDirecs   = o._setDirecs;
 }
 
 VServerCfg& VServerCfg::operator=(const VServerCfg& o)
@@ -47,6 +46,7 @@ VServerCfg& VServerCfg::operator=(const VServerCfg& o)
     _routes      = o._routes;
     _errPages    = o._errPages;
     _root        = o._root;
+    _setDirecs   = o._setDirecs;
   }
   return (*this);
 }
@@ -61,15 +61,37 @@ std::string VServerCfg::getServerName() const { return (_serverName); }
 
 void VServerCfg::printCfg() const
 {
-  std::cout << "  serverName: \"" << _serverName << "\"" << std::endl;
-  std::cout << "  maxBodySize: \"" << _maxBodySize << "\"" << std::endl;
-  std::cout << "  root: \"" << _root << "\"" << std::endl;
-  std::cout << "  interfaces:" << std::endl;
+  Logger::log_msg("  serverName: \"" + _serverName + "\"");
+  Logger::log_msg("  maxBodySize: \"" + int2str(_maxBodySize) + "\"");
+  Logger::log_msg("  root: \"" + _root + "\"");
+  Logger::log_msg("  interfaces:");
   for (std::map<str, std::set<u16> >::const_iterator it = _interfaces.begin();
       it != _interfaces.end();
       ++it)
-    std::cout << "    " << it->first << ": " << getSetAsStr(it->second)
-              << std::endl;
+    Logger::log_msg("    " + it->first + ": " + getSetAsStr(it->second));
+  Logger::log_msg("  routes:");
+  for (std::map<str, Route>::const_iterator it = _routes.begin();
+      it != _routes.end();
+      it++)
+  {
+    const Route& r = it->second;
+    Logger::log_msg("   - \"" + it->first + "\": ");
+    Logger::log_msg("     + root = " + r.getRoot());
+    Logger::log_msg("     + index = " + r.getIndex());
+    Logger::log_msg("     + autoindex = " + bool2str(r.getAutoindex()));
+    Logger::log_msg("     + maxBodySize = " + u32ToStr(r.getMaxBodySize()));
+    str meths;
+    for (std::set<e_Method>::const_iterator it = r.getMethods().begin();
+        it != r.getMethods().end();
+        ++it)
+    {
+      meths += meth2str(*it) + " ";
+    }
+    Logger::log_msg("     + methods = " + meths);
+    const std::pair<e_HTTPStatus, str>& redir = r.getRedir();
+    Logger::log_msg(
+        "     + redir = " + int2str(redir.first) + ":" + redir.second);
+  }
 }
 
 // silently fails if addr:port pair already exists
@@ -140,4 +162,16 @@ str VServerCfg::getErrPage(e_HTTPStatus s) { return _errPages[s]; }
 std::map<e_HTTPStatus, str> VServerCfg::getErrPages() const
 {
   return _errPages;
+}
+
+// FIXME: think about this more later. Do i need? Or can i handle this with good
+// default values?
+void VServerCfg::_initSetDirecs()
+{
+  _setDirecs["serverName"]  = false;
+  _setDirecs["interfaces"]  = false;
+  _setDirecs["maxBodySize"] = false;
+  _setDirecs["root"]        = false;
+  _setDirecs["errPages"]    = false;
+  _setDirecs["routes"]      = false;
 }

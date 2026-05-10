@@ -6,12 +6,12 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/13 13:06:35 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/07 11:16:04 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/11 00:22:20 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "test-utils.hpp"
 #include "test_hdr.hpp"
-#include "test_utils.hpp"
 
 struct TestCase {
     str input;

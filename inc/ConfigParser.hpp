@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/26 08:52:11 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/09 17:08:54 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/10 22:17:40 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,13 +69,12 @@ class ConfigParser {
       DIR_LISTEN,
       DIR_MAXBODYSIZE,
       DIR_ERRORPAGE,
-      DIR_DEFAULTFILE,
+      DIR_INDEX,
       DIR_AUTOINDEX,
       DIR_METHODS,
       DIR_ROOT,
       DIR_UPLOAD,
       DIR_REDIRECT,
-      DIR_INDEX,
       DIR_CGI,
       DIR_INVALID
     };
@@ -118,7 +117,7 @@ class ConfigParser {
     bool _parseTokName(VServerCfg& vcfg);  // serverName
     bool _parseTokRoute();                 // route
     bool _parseTokIface(VServerCfg& vcfg); // listen
-    bool _parseTokError(VServerCfg& vcfg); // errorPage FIXME: which root?!
+    bool _parseTokError(VServerCfg& vcfg); // errorPage FIXME  which root?!
 
     // ----------------------=[ Route Scope Parsing ]=----------------------- //
 
@@ -137,7 +136,8 @@ class ConfigParser {
     ConfigParser(const str& cfgFname);
     ~ConfigParser();
 
-    void                           parse();
+    void parse();
+
     bool                           bad() const;
     const std::vector<VServerCfg>& getCfgs() const;
 

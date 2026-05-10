@@ -11,8 +11,8 @@
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "test-utils.hpp"
 #include "test_hdr.hpp"
-#include "test_utils.hpp"
 
 // test logic goes here, for any failure return (-1) or throw exception.
 // otherwise -> success
@@ -26,7 +26,7 @@ int _test_ConfigParser()
       std::cout << *it << ", " << std::endl;
   }
 
-  print_test_topic("test_ConfigParser", "check knownDirectives");
+  print_test_topic("test_ConfigParser", "iteration test!!");
   {
     ConfigParser p("tests/parsing/default.wsrv");
     if (p.bad())
@@ -34,7 +34,8 @@ int _test_ConfigParser()
     p.parse();
     std::vector<VServerCfg> v = p.getCfgs();
     std::cout << "v.size = " << v.size() << std::endl;
-    v[0].printCfg();
+    if (v.size() > 0)
+      v[0].printCfg();
   }
   return 0;
 }

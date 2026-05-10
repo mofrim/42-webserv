@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/23 19:11:25 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/07 11:42:45 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/10 22:19:54 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -111,7 +111,7 @@ void Response::_getBody()
     str root = r.getRoot();
     str path = root + _reqline.target.getPath();
     if (isDir(path))
-      path += (path[path.size() - 1] == '/' ? "" : "/") + r.getDefaultFile();
+      path += (path[path.size() - 1] == '/' ? "" : "/") + r.getIndex();
     Logger::log_dbg1("Response::_getBody: trying to read from file: " + path);
 
     _mimeType = WsrvLib::getMimeTypeFromPath(path);

@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/16 12:11:11 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/29 16:56:51 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/10 23:02:04 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,25 +20,13 @@
 ////////////////////////////////////////////////////////////////////////////////
 /// Server methods of minor importance
 
-std::string VServer::getName() const
-{
-  return (_srvName);
-}
+std::string VServer::getName() const { return (_srvName); }
 
-bool VServer::isInitFailed() const
-{
-  return (_setupFailed);
-}
+bool VServer::isInitFailed() const { return (_setupFailed); }
 
-void VServer::setServerName(std::string name)
-{
-  _srvName = name;
-}
+void VServer::setServerName(std::string name) { _srvName = name; }
 
-void VServer::setSetupFailed()
-{
-  _setupFailed = true;
-}
+void VServer::setSetupFailed() { _setupFailed = true; }
 
 void VServer::printClients()
 {
@@ -61,25 +49,13 @@ bool VServer::isValidClientFd(int fd)
   return (_clients.find(fd) != _clients.end());
 }
 
-const std::set<int>& VServer::getListenFds() const
-{
-  return _listenFds;
-}
+const std::set<int>& VServer::getListenFds() const { return _listenFds; }
 
-const std::set<u16>& VServer::getPorts() const
-{
-  return _ports;
-}
+const std::set<u16>& VServer::getPorts() const { return _ports; }
 
-void VServer::setRoutes(const std::map<str, Route>& r)
-{
-  _routes = r;
-}
+void VServer::setRoutes(const std::map<str, Route>& r) { _routes = r; }
 
-const std::map<str, Route>& VServer::getRoutes() const
-{
-  return _routes;
-}
+const std::map<str, Route>& VServer::getRoutes() const { return _routes; }
 
 void VServer::printCfg() const
 {
@@ -99,21 +75,15 @@ void VServer::printCfg() const
   {
     Logger::log_msg("   - \"" + it->first + "\": ");
     Logger::log_msg("     + root = " + it->second.getRoot());
-    Logger::log_msg("     + defaultFile = " + it->second.getDefaultFile());
+    Logger::log_msg("     + index = " + it->second.getIndex());
     Logger::log_msg(
         "     + autoindex = " + bool2str(it->second.getAutoindex()));
   }
 }
 
-void VServer::setMaxBodySize(u32 mbs)
-{
-  _maxBodySize = mbs;
-}
+void VServer::setMaxBodySize(u32 mbs) { _maxBodySize = mbs; }
 
-u32 VServer::getMaxBodySize() const
-{
-  return _maxBodySize;
-}
+u32 VServer::getMaxBodySize() const { return _maxBodySize; }
 
 // @return true, if the given fd is a virtual fd, meaning, the fd will be added
 // to epoll interest-list by the first server who also bound it.

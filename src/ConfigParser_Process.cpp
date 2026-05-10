@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/08 16:14:27 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/10 00:19:40 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/10 23:23:25 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,7 +89,7 @@ bool ConfigParser::_parseVServer(VServerCfg& vcfg)
     if (_tokIt->type != TOK_DIREC)
       throw std::runtime_error("Sth is really wrong here: Not a direc token!");
 
-    Logger::log_bug("Parsing direc: " + _direc2str(_tokIt->direc));
+    Logger::logBug("Parsing direc: " + _direc2str(_tokIt->direc));
 
     try {
       if (_scope.top() == S_SERVER)
@@ -143,22 +143,22 @@ bool ConfigParser::_parseServerDirec(VServerCfg& vcfg)
   bool success = true;
   switch (_tokIt->direc) {
     case DIR_SERVERNAME:
-      success = _parseTokName(vcfg); // DONE:
+      success = _parseTokName(vcfg); // DONE
       break;
     case DIR_ROUTE:
-      success = _parseTokRoute(); // DONE:
+      success = _parseTokRoute(); // DONE
       break;
     case DIR_LISTEN:
-      success = _parseTokIface(vcfg); // DONE:
+      success = _parseTokIface(vcfg); // DONE
       break;
     case DIR_MAXBODYSIZE:
-      success = _parseTokBytes(vcfg); // TODO:
+      success = _parseTokBytes(vcfg); // DONE
       break;
     case DIR_ERRORPAGE:
-      success = _parseTokError(vcfg); // DONE:
+      success = _parseTokError(vcfg); // DONE
       break;
     case DIR_ROOT:
-      success = _parseTokFspath(vcfg); // TODO:
+      success = _parseTokFspath(vcfg); // TODO
       break;
     default:
       return false;
@@ -181,12 +181,12 @@ bool ConfigParser::_parseRouteDirec(VServerCfg& vcfg)
       break;
 
     case DIR_MAXBODYSIZE:
-      success = _parseTokBytes(vcfg);
+      success = _parseTokBytes(vcfg); // DONE
       break;
     case DIR_ERRORPAGE:
       success = _parseTokError(vcfg);
       break;
-    case DIR_DEFAULTFILE:
+    case DIR_INDEX:
       success = _parseTokFname();
       break;
     case DIR_AUTOINDEX:
@@ -197,9 +197,6 @@ bool ConfigParser::_parseRouteDirec(VServerCfg& vcfg)
       break;
     case DIR_REDIRECT:
       success = _parseTokRedir();
-      break;
-    case DIR_INDEX:
-      success = _parseTokFname();
       break;
     case DIR_CGI:
       success = _parseTokCgi();

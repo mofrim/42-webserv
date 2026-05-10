@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/24 17:31:03 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/09 17:43:53 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/10 23:57:10 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,7 +37,8 @@ typedef std::string::const_iterator constrIt;
 // maximum number of headers. nginx has this set to 1000 per default. above that
 // -> HTTP_400
 #define MAX_HEADER_LINES 500
-#define MAX_BODY_SIZE 1000000
+#define MAX_BODY_SIZE 1000000 // 1mb
+#define MAX_BYTES 1000000000  // 1gb
 
 // https://datatracker.ietf.org/doc/html/rfc9112#section-3
 #define MAX_REQLINE_LEN 8000
@@ -141,10 +142,11 @@ class WsrvLib {
     static t_GlobalWsrvSettings _initWsrvSettings();
 
   public:
+    static const t_GlobalWsrvSettings WsrvSettings;
     static str                        getDefaultErrPage(e_HTTPStatus code);
     static str                        getStatusStr(e_HTTPStatus code);
     static str                        getMimeTypeFromPath(const str& p);
     static e_HTTPVersion              str2HTTPVer(const str& s);
-    static const t_GlobalWsrvSettings WsrvSettings;
     static e_HTTPStatus               short2HttpStatus(u16 s);
+    static e_HTTPStatus               str2HttpStatus(const str& s);
 };

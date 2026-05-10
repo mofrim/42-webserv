@@ -30,6 +30,19 @@
       A sender MUST NOT send whitespace between the start-line and the first
       header field.
 
+- [ ] add func comments to hpp *not* to cpp files -> global visibility!
+
+- [ ] check if all getters return reasonable (const!?) values!
+
+- [ ] no two routes with same path are allowed in nginx!
+
+- [ ] impl proper routing in case of multiple routes (how does nginx do it?)
+
+      For matching requests, the URI will be added to the path specified in the
+      root directive, that is, to /data/www, to form the path to the requested
+      file on the local file system. If there are several matching location
+      blocks nginx selects the one with the **longest prefix**.
+
 - [ ] impl redirection
 
 - [ ] find out what should be handled differently with other HTTP-versions
