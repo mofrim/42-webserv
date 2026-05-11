@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/14 20:50:12 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/01 17:13:53 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/11 17:42:28 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,7 +67,8 @@ class Client {
     str        getIfaceFdStr() const;
     e_CliState getState() const;
     void       setState(e_CliState s);
-    void       setReqFinished();
+
+    void processRequest();
 
     bool isReqComplete();
     bool isTimeout() const;

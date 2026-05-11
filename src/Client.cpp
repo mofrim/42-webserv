@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/14 20:51:06 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/04 11:25:32 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/11 17:43:35 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -138,9 +138,6 @@ bool       Client::isSending() const { return _state == CLI_SEND; }
 bool       Client::isDisco() const { return _state == CLI_DISCO; }
 bool       Client::isReqComplete() { return _req.reqComplete(); }
 
-// sets a fully received Req to finished which also runs
-// Request::_parseRequest()
-void                    Client::setReqFinished() { _req.setFinished(); }
 bool                    Client::isTimeout() const { return _timeout; }
 void                    Client::setFd(int fd) { _clientFd = fd; }
 int                     Client::getFd() const { return _clientFd; }
@@ -151,3 +148,7 @@ std::vector<VServer *>& Client::getPotentialVsrvs() { return _potentialVsrvs; }
 str                     Client::getAddr() const { return _addr; }
 u16                     Client::getPort() const { return _port; }
 void                    Client::timeout() { _timeout = true; }
+
+// sets a fully received Req to finished which also runs
+// Request::_parseRequest()
+void Client::processRequest() { _req.process(); }

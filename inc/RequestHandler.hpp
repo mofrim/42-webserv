@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 19:12:58 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/27 19:33:39 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/11 17:42:11 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,6 +32,8 @@ class RequestHandler {
     RequestHandler& operator=(const RequestHandler& o);
 
     void _setVirtualServerFromHeader();
+
+    str _getErrPage(e_HTTPStatus c);
 
   public:
     RequestHandler();

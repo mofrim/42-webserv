@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 23:39:07 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/04 19:11:06 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/11 18:21:45 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,6 +38,7 @@ class Request {
     u16          _hdrLines;
     bool         _reqFinished;
     bool         _hdrComplete;
+    bool         _bodyComplete;
     bool         _closeConn;
 
     // doing it exactly as proposed in:
@@ -45,9 +46,9 @@ class Request {
     t_RequestLine      _reqline;
     std::map<str, str> _headers;
 
-    bool _isTerminatedReq();
-    void _parseRequest();
-    u16  _countReqLines(const str& nstr);
+    str _targetPath;
+
+    u16 _countReqLines(const str& nstr);
 
     // Parsing related
     std::vector< std::pair<str, str> > _splitHdr();
@@ -66,7 +67,7 @@ class Request {
     str getResponseStr() const;
 
     bool isFinished() const;
-    void setFinished();
+    void process();
 
     void append(const str& s);
 

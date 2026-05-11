@@ -23,19 +23,22 @@
 
 class VServer {
   private:
-    std::set<u16> _ports;
-    std::string   _srvName;
-    std::set<int> _listenFds;
-    std::set<int> _virtualFds;
+    // ---------------------=[   Stuff From VServerCfg ]=-------------------- //
 
-    u32 _maxBodySize;
+    std::string                 _srvName;
+    u32                         _maxBodySize;
+    std::map<str, Route>        _routes;
+    str                         _root;
+    std::map<e_HTTPStatus, str> _errPages;
 
-    std::map< str, std::set<u16> > _cfgInterfaces;
-    std::vector<t_vsrvInterface>   _activeInterfaces;
+    // -------------------------=[   Other Things ]=------------------------- //
 
+    std::set<u16>                        _ports;
+    std::set<int>                        _listenFds;
+    std::set<int>                        _virtualFds;
+    std::map< str, std::set<u16> >       _cfgInterfaces;
+    std::vector<t_vsrvInterface>         _activeInterfaces;
     std::map< int, std::pair<str, u16> > _fdIfaceMap;
-
-    std::map<str, Route> _routes;
 
     bool _setupFailed;
 
@@ -92,6 +95,13 @@ class VServer {
 
     void setMaxBodySize(u32 mbs);
     u32  getMaxBodySize() const;
+
+    void    setRoot(constr& s);
+    constr& getRoot() const;
+
+    str getErrPage(e_HTTPStatus c);
+
+    const Route& matchRoute(constr& target);
 
     void cleanup();
 

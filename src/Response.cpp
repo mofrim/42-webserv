@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/23 19:11:25 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/10 22:19:54 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/11 15:11:40 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -232,11 +232,15 @@ std::map<str, str> Response::_buildErrRespoHdrs(
 }
 
 // Returns the response string to a given error status code.
-str Response::genErrResponse(e_HTTPStatus errCode)
+str Response::genErrResponse(e_HTTPStatus errCode, constr errPage)
 {
   str respostr;
+  str body;
 
-  str body = WsrvLib::getDefaultErrPage(errCode);
+  if (!errPage.empty())
+    body = errPage;
+  else
+    body = WsrvLib::getDefaultErrPage(errCode);
 
   std::map<str, str> hdrs = _buildErrRespoHdrs(errCode, body);
 

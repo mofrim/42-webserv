@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:36:43 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/08 11:53:36 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/11 23:18:40 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,15 +78,6 @@ void Webserv::_setupServers()
   if (_defaultCfg)
     _initDefaultCfg();
 
-  // NEXT: i will have to pass to _setupSingleServer and subsequentially to
-  // VServer::init 2 iterators: _vservers.begin and the current one. this will
-  // be for being able to search through the so-far-initialized vsrvs if one has
-  // already been bound to the interface and then check if at least the names
-  // differ. if not -> fail. if they do -> skip interface binding and add 2nd /
-  // 3rd ... srv to _vserverFdMap!
-  //
-  // Hell, wait! This i only need to pass the current not-dereferenced it to
-  // _setupSingleServer!
   std::vector<VServer>::iterator it = _vservers.begin();
   while (it != _vservers.end()) {
     _setupSingleServer(it);

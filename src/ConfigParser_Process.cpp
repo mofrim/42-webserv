@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/08 16:14:27 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/11 12:05:37 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/11 14:54:07 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,22 @@
 #include "utils.hpp"
 
 #include <iostream>
+
+// FIXME is this save?
+void ConfigParser::_advanceTillSrvEnd()
+{
+  while (_tokIt != _tokens.end() &&
+      !(_scope.top() == S_SERVER && _tokIt->type == TOK_BEND))
+  {
+    if (_scope.top() == S_ROUTE && _tokIt->type == TOK_BEND)
+      _scope.pop();
+    else if (_scope.top() == S_SERVER && _tokIt->type == TOK_DIREC &&
+        _tokIt->direc == DIR_ROUTE)
+      _scope.push(S_ROUTE);
+    ++_tokIt;
+  }
+  // don't advance any further here as this will be done by the for-loop!
+}
 
 // trying to be a little bit memoy efficient here by constructing the VServerCfg
 // in the _vcfgs vector and then passing a reference to _parseVServer.
@@ -41,10 +57,12 @@ void ConfigParser::_processTokens()
       if (!success || !currentVcfg.checkEnsureCfg()) {
         Logger::log_warn("ConfigParser", "Parsing vsrv failed!");
         _vcfgs.pop_back();
+        _advanceTillSrvEnd();
       }
     }
     else
-      throw std::runtime_error("Expected server block, but there is none.");
+      throw std::runtime_error(
+          "(ConfigParser) Expected server block, but there is none.");
   }
 }
 
@@ -90,8 +108,6 @@ bool ConfigParser::_parseVServer(VServerCfg& vcfg)
     if (_tokIt->type != TOK_DIREC)
       throw std::runtime_error("Sth is really wrong here: Not a direc token!");
 
-    Logger::logBug("Parsing direc: " + _direc2str(_tokIt->direc));
-
     try {
       if (_scope.top() == S_SERVER)
         success = _parseServerDirec(vcfg);
@@ -109,8 +125,6 @@ bool ConfigParser::_parseVServer(VServerCfg& vcfg)
     if (!_isMetaToken())
       throw std::runtime_error("Expected meta-token got sth else here!");
 
-    // ATTENTION: don't forget to push S_ROUTE to _scope if we encounter it in
-    // _parseServerDirec!
     _skipFooTokens();
     if (_tokIt->type == TOK_BEND) {
 

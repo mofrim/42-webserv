@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/01 18:46:40 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/10 22:45:45 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/11 18:04:18 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,6 +65,10 @@ e_HTTPStatus Request::parseReqLine()
   e_HTTPStatus status = HTTP_200;
   if ((status = _readReqline()) >= HTTP_400)
     return status;
+  Logger::logBug("Req target: " + _reqline.target.getPath());
+  _targetPath = _reqline.target.getPath();
+
+  // QUESTION do i even need this?
   // if ((status = validateUrl(rl.target)) >= HTTP_400)
   //   return status;
 
@@ -139,14 +143,23 @@ e_HTTPStatus Request::checkHeaders()
     }
   }
 
-  if (_reqline.method != M_POST && _headers.count("content-length") > 0 &&
-      _headers["content-length"] != "0")
-  {
-    Logger::log_srv(_vsrv->getName(),
-        "Webserv only accepts req bodies with POST reqs",
-        WARN);
-    return HTTP_400;
+  // we simply ignore the body if we ain't got no POST. by setting _bodyComplete
+  // the Request::reqComplete will return true bc _hdrComplete is already true
+  if (_reqline.method != M_POST)
+    _bodyComplete = true;
+
+  // FIXME: in theory content-length == 0 will be okay but not very useful.
+  if (_reqline.method == M_POST) {
+
+    if (_headers.count("content-length") == 0) {
+      Logger::log_srv(_vsrv->getName(), "No content with POST req", WARN);
+      return HTTP_400;
+    }
+
+    // TODO
+    // NEXT add handling of req body in here
   }
+
   return HTTP_200;
 }
 

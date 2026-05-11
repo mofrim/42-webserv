@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# GET req with content-length other than 0 will be rejected from my webserv
+# GET with Content-Length will simply be ignored and webserved
 
 
 set -u
@@ -18,7 +18,7 @@ sendHdrField "GET / HTTP/1.1" 3
 sendHdrField "Host: miep" 3
 sendHdrField "Content-Length: 100" 3
 finishReq 3
-RESPONSE="$(timeout 0.1s cat <&3 | grep 400)"
+RESPONSE="$(timeout 0.1s cat <&3 | grep 200)"
 exec 3<&-
 
 if [ -z "$RESPONSE" ]; then

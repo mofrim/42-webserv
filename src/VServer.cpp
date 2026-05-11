@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/03 12:51:23 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/29 17:01:09 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/11 23:53:10 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,8 @@ VServer::VServer()
 {
   _srvName     = "";
   _setupFailed = false;
+  _root        = "./www";
+  _maxBodySize = MAX_BODY_SIZE;
 }
 
 // FIXME: think about if assignment and stuff like this really make sense for my
@@ -33,11 +35,18 @@ VServer::VServer()
 VServer::VServer(const VServer& o)
 {
   if (this != &o) {
-    _srvName       = o._srvName;
-    _listenFds     = o._listenFds;
-    _setupFailed   = o._setupFailed;
-    _cfgInterfaces = o._cfgInterfaces;
-    _routes        = o._routes;
+    _srvName          = o._srvName;
+    _listenFds        = o._listenFds;
+    _virtualFds       = o._virtualFds;
+    _setupFailed      = o._setupFailed;
+    _cfgInterfaces    = o._cfgInterfaces;
+    _activeInterfaces = o._activeInterfaces;
+    _fdIfaceMap       = o._fdIfaceMap;
+    _clients          = o._clients;
+    _routes           = o._routes;
+    _root             = o._root;
+    _errPages         = o._errPages;
+    _maxBodySize      = o._maxBodySize;
   }
 }
 
@@ -46,12 +55,18 @@ VServer::VServer(const VServer& o)
 VServer& VServer::operator=(const VServer& o)
 {
   if (this != &o) {
-    _srvName       = o._srvName;
-    _listenFds     = o._listenFds;
-    _setupFailed   = o._setupFailed;
-    _cfgInterfaces = o._cfgInterfaces;
-    _routes        = o._routes;
-    _clients       = o._clients;
+    _srvName          = o._srvName;
+    _listenFds        = o._listenFds;
+    _virtualFds       = o._virtualFds;
+    _setupFailed      = o._setupFailed;
+    _cfgInterfaces    = o._cfgInterfaces;
+    _activeInterfaces = o._activeInterfaces;
+    _fdIfaceMap       = o._fdIfaceMap;
+    _routes           = o._routes;
+    _clients          = o._clients;
+    _root             = o._root;
+    _errPages         = o._errPages;
+    _maxBodySize      = o._maxBodySize;
   }
   return (*this);
 }
@@ -82,6 +97,8 @@ VServer::VServer(const VServerCfg& cfg)
   _cfgInterfaces = cfg.getInterfaces();
   _routes        = cfg.getRoutes();
   _maxBodySize   = cfg.getMaxBodySize();
+  _errPages      = cfg.getErrPages();
+  _root          = cfg.getRoot();
   _setupFailed   = false;
 }
 
@@ -273,10 +290,7 @@ Client *VServer::addClient(int fd)
   return (newCli);
 }
 
-void VServer::addClient(Client *cli)
-{
-  _clients[cli->getFd()] = cli;
-}
+void VServer::addClient(Client *cli) { _clients[cli->getFd()] = cli; }
 
 // remove all traces of a client from the Server _and_ close the socket. things
 // to be cleaned up:
@@ -318,13 +332,17 @@ void VServer::cleanup()
   }
 }
 
-////////////////////////////////////////////////////////////////////////////////
-/// exceptions
+// zap through routes and find the longest matching path
+const Route& VServer::matchRoute(constr& target)
+{
+  for (std::map<str, Route>::const_iterator it = _routes.begin();
+      it != _routes.end();
+      ++it)
+  {
+    constr& path = it->second.getPath();
+    if (target == path)
+      return it->second;
+  }
 
-VServer::ServerInitException::ServerInitException(const std::string& msg):
-  std::runtime_error("ServerInitException: " + msg)
-{}
-
-VServer::ServerException::ServerException(const std::string& msg):
-  std::runtime_error("ServerException: " + msg)
-{}
+  return _routes["/"];
+}

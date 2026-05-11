@@ -1,6 +1,7 @@
 server {
   serverName moep!
   listen localhost:1111!
+  listen askdadasdhsadh!
   maxBodySize 1000000!
   root ./www!
   errorPage 404:/bla/404.html!
@@ -9,11 +10,17 @@ server {
   route / {
     index index.html!
     autoindex off!
-    methods GET!
+    methods GET POST!
   }
 
   route /moep {
     redirect 302:/!
   }
 }
+server {
+  serverName kalle!
+  listen localhost:1111!
 
+  route /kalle {
+  }
+}

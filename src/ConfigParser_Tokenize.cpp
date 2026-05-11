@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/07 20:08:59 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/10 23:23:25 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/11 13:59:57 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -182,8 +182,7 @@ void ConfigParser::_readTokVal(
     case TOK_DIREC: {
       while (isalpha(*itTmp) && itTmp != end)
         ++itTmp;
-      str word(it, itTmp);
-      Logger::logBug("word = " + word);
+      str      word(it, itTmp);
       e_Direcs dir = _str2direc(word);
       if (dir == DIR_INVALID)
         throw std::runtime_error("Unknown Direc");

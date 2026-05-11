@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/16 12:11:11 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/10 23:02:04 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/11 23:42:02 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,8 +17,17 @@
 
 #include <iostream>
 
-////////////////////////////////////////////////////////////////////////////////
-/// Server methods of minor importance
+// -----------------------------=[ Exceptions ]=----------------------------- //
+
+VServer::ServerInitException::ServerInitException(const std::string& msg):
+  std::runtime_error("ServerInitException: " + msg)
+{}
+
+VServer::ServerException::ServerException(const std::string& msg):
+  std::runtime_error("ServerException: " + msg)
+{}
+
+// -----------------=[ Server methods of minor importance ]=----------------- //
 
 std::string VServer::getName() const { return (_srvName); }
 
@@ -57,27 +66,63 @@ void VServer::setRoutes(const std::map<str, Route>& r) { _routes = r; }
 
 const std::map<str, Route>& VServer::getRoutes() const { return _routes; }
 
+// FIXME: possibly remove code-dup with Route::printCfg
 void VServer::printCfg() const
 {
-  Logger::log_msg("  server_name: \"" + _srvName + "\"");
-  Logger::log_msg("  listen_fds: " + getSetAsStr(_listenFds));
-  Logger::log_msg("  active listen interfaces:");
+  Logger::logCfg("  server_name: \"" + _srvName + "\"");
+  Logger::logCfg("  listen_fds: " + getSetAsStr(_listenFds));
+
+  Logger::logCfg("  active listen interfaces:");
   for (std::vector<t_vsrvInterface>::const_iterator it =
            _activeInterfaces.begin();
       it != _activeInterfaces.end();
       it++)
-    Logger::log_msg(
+    Logger::logCfg(
         "    " + it->ip + "(" + it->cname + "):" + getSetAsStr(it->portFd));
-  Logger::log_msg("  routes:");
+
+  Logger::logCfg("  maxBodySize: \"" + int2str(_maxBodySize) + "\"");
+  Logger::logCfg("  root: \"" + _root + "\"");
+
+  Logger::logCfg("  errPages:");
+  for (std::map<e_HTTPStatus, str>::const_iterator it = _errPages.begin();
+      it != _errPages.end();
+      ++it)
+  {
+    Logger::logCfg("    - " + int2str(it->first) + ":" + it->second);
+  }
+
+  Logger::logCfg("  routes:");
   for (std::map<str, Route>::const_iterator it = _routes.begin();
       it != _routes.end();
       it++)
   {
-    Logger::log_msg("   - \"" + it->first + "\": ");
-    Logger::log_msg("     + root = " + it->second.getRoot());
-    Logger::log_msg("     + index = " + it->second.getIndex());
-    Logger::log_msg(
-        "     + autoindex = " + bool2str(it->second.getAutoindex()));
+    const Route& r = it->second;
+    Logger::logCfg("   - \"" + it->first + "\": ");
+    Logger::logCfg("     + root = " + r.getRoot());
+    Logger::logCfg("     + upload = " + r.getUpload());
+    Logger::logCfg("     + index = " + r.getIndex());
+    Logger::logCfg("     + autoindex = " + bool2str(r.getAutoindex()));
+    Logger::logCfg("     + maxBodySize = " + u32ToStr(r.getMaxBodySize()));
+
+    str meths;
+    for (std::set<e_Method>::const_iterator it = r.getMethods().begin();
+        it != r.getMethods().end();
+        ++it)
+    {
+      meths += meth2str(*it) + " ";
+    }
+    Logger::logCfg("     + methods = " + meths);
+
+    const std::pair<e_HTTPStatus, str>& redir = r.getRedir();
+    Logger::logCfg(
+        "     + redir = " + int2str(redir.first) + ":" + redir.second);
+
+    str cgistr;
+    for (std::map<str, str>::const_iterator it = r.getCgi().begin();
+        it != r.getCgi().end();
+        ++it)
+      cgistr += it->first + ":" + it->second + ", ";
+    Logger::logCfg("     + cgi = " + cgistr);
   }
 }
 
@@ -111,3 +156,5 @@ void VServer::_addActiveIface(t_AddrinfoReturn ar, u16 port)
   }
   _activeInterfaces.push_back(vif);
 }
+
+str VServer::getErrPage(e_HTTPStatus c) { return _errPages[c]; }

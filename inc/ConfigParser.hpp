@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/26 08:52:11 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/10 22:17:40 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/11 14:35:43 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -101,6 +101,7 @@ class ConfigParser {
     str  _direc2str(e_Direcs d) const;
     str  _toktype2str(e_TokType t) const;
     void _evalScope(const t_Token& tok);
+    void _advanceTillSrvEnd();
     void _tokenize();
 
     // ------------------------=[ The REAL Parsing ]=------------------------ //

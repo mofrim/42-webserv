@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 19:13:35 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/04 17:49:36 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/11 18:45:26 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,7 +53,7 @@ RequestHandler::RequestHandler(Client *cli): _cli(cli)
 //  NOTE: lgtm
 void RequestHandler::readRequest()
 {
-  memset(_buffer, 0, READ_BUFSIZE);
+  std::memset(_buffer, 0, READ_BUFSIZE);
   ssize_t bytes_read = read(_cli->getFd(), _buffer, READ_BUFSIZE);
 
   Logger::log_srv(_vsrvName,
@@ -109,7 +109,7 @@ void RequestHandler::readRequest()
   if (_cli->isReqComplete()) {
     Logger::log_reqres(
         _vsrvName, "Request complete", _cli->getReq().getReqstr());
-    _cli->setReqFinished();
+    _cli->processRequest();
     _cli->setState(CLI_SEND);
   }
 }
@@ -135,7 +135,11 @@ void RequestHandler::writeResponse()
   e_HTTPStatus statusCode;
 
   Request& req = _cli->getReq();
+
+  // when we get here. do i still need to look for the errorPages? do i need to
+  // somehow try and resolve the target?
   if (req.isFinished() == false) {
+
     // FIXME: maybe tiemout can also happen with finished rquests?!?!
     if (_cli->isTimeout()) {
       Logger::log_dbg1("RequestHandler: 408 due to timeout");
@@ -148,6 +152,7 @@ void RequestHandler::writeResponse()
       statusCode = HTTP_400;
     }
 
+    // TODO: get errorPage if any
     response = Response::genErrResponse(statusCode);
   }
   else {
@@ -161,7 +166,7 @@ void RequestHandler::writeResponse()
   Logger::log_reqres(_cli->getVsrv()->getName(), "Response", response);
 
   if (response.empty())
-    throw(ReqHandlerException("Cannot write response! Nothing to write!"));
+    throw ReqHandlerException("Cannot write response! Nothing to write!");
 
   ssize_t bytes_sent = send(_cli->getFd(), response.data(), response.size(), 0);
 
@@ -170,8 +175,8 @@ void RequestHandler::writeResponse()
     return;
   }
 
-  // if some error occurred -> disco.
-  if (statusCode >= HTTP_400 && statusCode != HTTP_404)
+  // if some error occurred or Connection: close -> disco
+  if ((statusCode >= HTTP_400 && statusCode != HTTP_404) || req.closeConn())
     _cli->setState(CLI_DISCO);
   else
     _cli->setState(CLI_IDLE);
@@ -188,6 +193,7 @@ RequestHandler::ReqHandlerException::ReqHandlerException(
 void RequestHandler::setVsrvName(const str& n) { _vsrvName = n; }
 
 // FIXME: maybe change logging to dbg1 for prod
+// TODO: split away a possible 'https://' or port part, aka: isolate the fqdn
 void RequestHandler::_setVirtualServerFromHeader()
 {
   if (_vsrvName == "__VIRTUAL__") {
@@ -220,4 +226,10 @@ void RequestHandler::_setVirtualServerFromHeader()
     srv->addClient(_cli);
     _vsrvName = srv->getName();
   }
+}
+
+str RequestHandler::_getErrPage(e_HTTPStatus c)
+{
+  (void)c;
+  return "";
 }

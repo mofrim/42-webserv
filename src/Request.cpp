@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 23:39:57 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/04 19:04:37 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/11 23:38:59 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,40 +21,44 @@
 
 Request::Request():
   _vsrv(NULL), _reqstr(""), _hdrLines(0), _reqFinished(false),
-  _hdrComplete(false), _closeConn(false)
+  _hdrComplete(false), _bodyComplete(false), _closeConn(false)
 {}
 
 Request::Request(const Request& o)
 {
   if (this != &o) {
-    _vsrv        = o._vsrv;
-    _cli         = o._cli;
-    _reqstr      = o._reqstr;
-    _respo       = o._respo;
-    _statusCode  = o._statusCode;
-    _reqline     = o._reqline;
-    _headers     = o._headers;
-    _reqFinished = o._reqFinished;
-    _hdrComplete = o._hdrComplete;
-    _hdrLines    = o._hdrLines;
-    _closeConn   = o._closeConn;
+    _vsrv         = o._vsrv;
+    _cli          = o._cli;
+    _reqstr       = o._reqstr;
+    _respo        = o._respo;
+    _statusCode   = o._statusCode;
+    _reqline      = o._reqline;
+    _headers      = o._headers;
+    _reqFinished  = o._reqFinished;
+    _hdrComplete  = o._hdrComplete;
+    _bodyComplete = o._bodyComplete;
+    _hdrLines     = o._hdrLines;
+    _closeConn    = o._closeConn;
+    _targetPath   = o._targetPath;
   }
 }
 
 Request& Request::operator=(const Request& o)
 {
   if (this != &o) {
-    _vsrv        = o._vsrv;
-    _cli         = o._cli;
-    _reqstr      = o._reqstr;
-    _respo       = o._respo;
-    _statusCode  = o._statusCode;
-    _reqline     = o._reqline;
-    _headers     = o._headers;
-    _reqFinished = o._reqFinished;
-    _hdrComplete = o._hdrComplete;
-    _hdrLines    = o._hdrLines;
-    _closeConn   = o._closeConn;
+    _vsrv         = o._vsrv;
+    _cli          = o._cli;
+    _reqstr       = o._reqstr;
+    _respo        = o._respo;
+    _statusCode   = o._statusCode;
+    _reqline      = o._reqline;
+    _headers      = o._headers;
+    _reqFinished  = o._reqFinished;
+    _hdrComplete  = o._hdrComplete;
+    _bodyComplete = o._bodyComplete;
+    _hdrLines     = o._hdrLines;
+    _closeConn    = o._closeConn;
+    _targetPath   = o._targetPath;
   }
   return *this;
 }
@@ -74,34 +78,38 @@ Request::Request(Client *cli, const std::string& reqstr)
   _hdrComplete = false;
   _hdrLines    = _countReqLines(reqstr);
   _closeConn   = false;
+  _targetPath  = "";
+}
+
+e_HTTPStatus Request::parseHeaders()
+{
+  if ((_statusCode = parseReqLine()) >= HTTP_400) {
+    Logger::log_dbg1("Request::parseReqline: >=400");
+    return _statusCode;
+  }
+  if ((_statusCode = _parseHeaders()) != HTTP_200) {
+    Logger::log_dbg1("Request::_parseHeaders: >=400");
+    return _statusCode;
+  }
+  if ((_statusCode = checkHeaders()) != HTTP_200) {
+    Logger::log_dbg1("Request::checkHeaders: >=400");
+    return _statusCode;
+  }
+  return HTTP_200;
 }
 
 // When we hit this function, which is only done at the bottom of
 // RquestHandler::read_request, the header will already be parsed and found to
-// be ok. That's we here only have to deal with response-generation?!
-void Request::_parseRequest()
-{
-  // FIXME: this is not valid procedure for requests with a body!
-  if (!_isTerminatedReq())
-    _statusCode = HTTP_400;
-  else
-    _statusCode = _respo.genResponse(*this);
-}
-
-// check if received request was terminated with '\r\n'
-bool Request::_isTerminatedReq()
-{
-  if (_reqstr.size() < 4)
-    return (false);
-  if (_reqstr.compare(_reqstr.size() - 4, 4, "\r\n\r\n") == 0)
-    return (true);
-  return (false);
-}
-
-void Request::setFinished()
+// be ok. That's why we here only have to deal with response-generation!
+//
+// QUESTION: should i handle CGI in here? Redirect? Routematching?
+// NEXT
+//
+// What will i do in here????
+void Request::process()
 {
   _reqFinished = true;
-  _parseRequest();
+  _statusCode  = _respo.genResponse(*this);
 }
 
 void Request::append(const str& s)
@@ -117,19 +125,13 @@ bool Request::hdrComplete()
 {
   if (_hdrComplete)
     return true;
-  _hdrComplete = _reqstr.rfind(CRLFX2) != str::npos;
+  _hdrComplete = (_reqstr.rfind(CRLFX2) != str::npos);
   return _hdrComplete;
 }
 
 // for now we only look at the hdr
 // TODO: we will also have to look for Content-Length!
-bool Request::reqComplete()
-{
-  if (_hdrComplete) {
-    return true;
-  }
-  return false;
-}
+bool Request::reqComplete() { return (_hdrComplete && _bodyComplete); }
 
 e_Method Request::getMethod()
 {
@@ -141,14 +143,14 @@ e_Method Request::getMethod()
 str Request::getMethodStr() const
 {
   switch (_reqline.method) {
-  case M_GET:
-    return "GET";
-  case M_POST:
-    return "POST";
-  case M_DELETE:
-    return "DELETE";
-  default:
-    return "UNKNOWN";
+    case M_GET:
+      return "GET";
+    case M_POST:
+      return "POST";
+    case M_DELETE:
+      return "DELETE";
+    default:
+      return "UNKNOWN";
   }
 }
 
@@ -159,29 +161,15 @@ void Request::reset()
   _statusCode          = HTTP_200;
   _hdrLines            = 0;
   _hdrComplete         = false;
+  _bodyComplete        = false;
   _reqFinished         = false;
   _reqline.httpVersion = HTTPVER_UNKNOWN;
+  _reqline.method      = M_GET;
+  _targetPath          = "";
+
   _reqline.target.clear();
-  _reqline.method = M_GET;
   _headers.clear();
   _respo.reset();
-}
-
-e_HTTPStatus Request::parseHeaders()
-{
-  if ((_statusCode = parseReqLine()) != HTTP_200) {
-    Logger::log_dbg1("Request::parseReqline: >=400");
-    return _statusCode;
-  }
-  if ((_statusCode = _parseHeaders()) != HTTP_200) {
-    Logger::log_dbg1("Request::_parseHeaders: >=400");
-    return _statusCode;
-  }
-  if ((_statusCode = checkHeaders()) != HTTP_200) {
-    Logger::log_dbg1("Request::checkHeaders: >=400");
-    return _statusCode;
-  }
-  return HTTP_200;
 }
 
 // READ_BUFSIZE is set to 4096 bytes so half of this is in theory the max num of

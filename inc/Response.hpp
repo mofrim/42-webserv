@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/23 19:11:06 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/04 11:04:05 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/11 15:10:34 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,5 +55,5 @@ class Response {
 
     void reset();
 
-    static str genErrResponse(e_HTTPStatus errCode);
+    static str genErrResponse(e_HTTPStatus errCode, constr errPage = "");
 };

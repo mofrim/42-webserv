@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/24 20:52:55 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/10 23:23:25 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/11 14:26:36 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,6 +50,12 @@ void Logger::log_msg(const str& msg)
 {
   str logtime = getLogtime();
   std::cout << BCYA << logtime << msg << RST << std::endl;
+}
+
+void Logger::logCfg(const str& msg)
+{
+  str logtime = getLogtime();
+  std::cout << CYA << msg << RST << std::endl;
 }
 
 void Logger::log_warn(const str& msg)

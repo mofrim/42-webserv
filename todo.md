@@ -32,9 +32,12 @@
 
 - [ ] add func comments to hpp *not* to cpp files -> global visibility!
 
+- [ ] show errPage that is configured for a route / server
+
 - [ ] check if all getters return reasonable (const!?) values!
 
-- [ ] **no two routes with same path are allowed in nginx!**
+- [x] **no two routes with same path are allowed in nginx!**
+  + handled this by simply overwriting the same route with a potential new one
 
 - [ ] impl proper routing in case of multiple routes (how does nginx do it?)
 
