@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/25 08:35:42 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/11 10:43:10 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/11 12:05:37 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -186,3 +186,23 @@ void VServerCfg::_initSetDirecs()
 void VServerCfg::setRoot(str r) { _root = r; }
 
 str VServerCfg::getRoot() const { return _root; }
+
+// TODO ...or do even need this? Is there more to be done here?
+bool VServerCfg::checkEnsureCfg()
+{
+
+  // add at least default route
+  if (_routes.empty())
+    _routes["/"] = Route();
+
+  for (std::map<str, Route>::iterator it = _routes.begin(); it != _routes.end();
+      ++it)
+  {
+    Route& r = it->second;
+
+    // ensure that maxBodySize is set for every route
+    if (r.getMaxBodySize() == 0)
+      r.setMaxBodySize(_maxBodySize);
+  }
+  return true;
+}

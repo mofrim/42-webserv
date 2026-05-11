@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/08 16:14:27 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/10 23:23:25 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/11 12:05:37 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,15 +30,16 @@ void ConfigParser::_processTokens()
       continue;
     if (_tokIt->type == TOK_DIREC && _tokIt->direc == DIR_SERVER) {
       _vcfgs.push_back(VServerCfg());
+      VServerCfg& currentVcfg = _vcfgs.back();
       _scope.push(S_SERVER);
       bool success = false;
       try {
-        success = _parseVServer(_vcfgs.back());
+        success = _parseVServer(currentVcfg);
       } catch (const std::runtime_error& e) {
         throw;
       }
-      if (!success) {
-        std::cout << "no success" << std::endl;
+      if (!success || !currentVcfg.checkEnsureCfg()) {
+        Logger::log_warn("ConfigParser", "Parsing vsrv failed!");
         _vcfgs.pop_back();
       }
     }
