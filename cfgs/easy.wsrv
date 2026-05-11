@@ -1,0 +1,19 @@
+server {
+  serverName moep!
+  listen localhost:1111!
+  maxBodySize 1000000!
+  root ./www!
+  errorPage 404:/bla/404.html!
+  errorPage 400:/bla/400.html!
+
+  route / {
+    index index.html!
+    autoindex off!
+    methods GET!
+  }
+
+  route /moep {
+    redirect 302:/!
+  }
+}
+

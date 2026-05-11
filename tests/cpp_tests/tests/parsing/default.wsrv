@@ -1,4 +1,5 @@
 server {
   serverName Moppel!
   listen localhost:1111!
+  errorPage 400:/bla/400.html!
 }
