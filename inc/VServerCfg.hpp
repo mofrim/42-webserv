@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/25 08:01:29 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/10 16:14:50 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/11 10:29:53 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,6 +63,9 @@ class VServerCfg {
 
     void setMaxBodySize(u32 mbs);
     u32  getMaxBodySize() const;
+
+    void setRoot(str r);
+    str  getRoot() const;
 
     void                        addErrPage(e_HTTPStatus s, const str& path);
     str                         getErrPage(e_HTTPStatus s);

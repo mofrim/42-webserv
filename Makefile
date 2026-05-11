@@ -6,7 +6,7 @@
 #    By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/12/01 11:45:58 by fmaurer           #+#    #+#              #
-#    Updated: 2026/05/10 16:24:30 by fmaurer          ###   ########.fr        #
+#    Updated: 2026/05/11 10:16:23 by fmaurer          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -17,7 +17,7 @@ NAME 		= webserv
 # uses the maximum available number of CPUs
 #
 # ... sadly causes problems with multi-step recipes like `re`
-MAKEFLAGS += -j $(shell echo "`grep -c processor /proc/cpuinfo` / 2" | bc)
+# MAKEFLAGS += -j $(shell echo "`grep -c processor /proc/cpuinfo` / 2" | bc)
 
 # The directories..
 #

@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/26 10:03:57 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/10 23:12:25 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/11 10:22:48 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -206,12 +206,13 @@ str strip(str s)
   // NOTE: this can fail with std::length_error exception when the string, we
   // are trying to create here is longer than std::string::max_size(). this is
   // why we wrap it.
+  str stripped;
   try {
-    s = std::string(it0, ++it1);
+    stripped = std::string(it0, ++it1);
   } catch (const std::length_error& e) {
     std::cout << "strip: std::length_error: " << e.what() << std::endl;
   }
-  return s;
+  return stripped;
 }
 
 // an in-place tolower function because internally we will work case-insensitive

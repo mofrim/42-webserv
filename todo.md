@@ -34,7 +34,7 @@
 
 - [ ] check if all getters return reasonable (const!?) values!
 
-- [ ] no two routes with same path are allowed in nginx!
+- [ ] **no two routes with same path are allowed in nginx!**
 
 - [ ] impl proper routing in case of multiple routes (how does nginx do it?)
 

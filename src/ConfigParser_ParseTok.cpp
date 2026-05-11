@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/08 21:14:52 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/11 00:37:05 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/11 10:40:29 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,6 +69,22 @@ static bool isValidRoute(const str& s)
 
   str::const_iterator it = s.begin();
   if (*it != '/' || (s.size() > 1 && *(s.end() - 1) == '/'))
+    return false;
+
+  for (; it != s.end(); ++it)
+    if (!isValidPathChar(*it))
+      return false;
+
+  return true;
+}
+
+static bool isValidFspath(const str& s)
+{
+  if (s.length() == 0)
+    return false;
+
+  str::const_iterator it = s.begin();
+  if (s.size() > 1 && *(s.end() - 1) == '/')
     return false;
 
   for (; it != s.end(); ++it)
@@ -313,11 +329,25 @@ bool ConfigParser::_parseTokRedir()
   return true;
 }
 
-// cgisdada
-// NEXT !!!!!!!
+// cgi
+// Ex: cgi py:/usr/bin/env python!
 bool ConfigParser::_parseTokCgi()
 {
-  ++_tokIt;
+  if ((++_tokIt)->type != TOK_CGI)
+    throw std::runtime_error("Wrong token while parsing cgi");
+
+  std::vector<str> sp = splitString(_tokIt->val, ":");
+
+  if (sp.size() != 2) {
+    Logger::logCfgErr(_tokIt->line, "Invalid cgi value!");
+    return false;
+  }
+  sp[0] = strip(sp[0]);
+  sp[1] = strip(sp[1]);
+
+  // FIXME: any error checks here?
+  _currentRoute.addCgi(sp[0], sp[1]);
+
   return true;
 }
 
@@ -352,7 +382,33 @@ bool ConfigParser::_parseTokBytes(VServerCfg& vcfg)
 // root, upload
 bool ConfigParser::_parseTokFspath(VServerCfg& vcfg)
 {
-  (void)vcfg;
-  ++_tokIt;
+  e_Direcs dir = _tokIt->direc;
+
+  if ((++_tokIt)->type != TOK_FSPATH)
+    throw std::runtime_error("Wrong token while parsing fspath");
+
+  str& val = _tokIt->val;
+  val      = strip(val);
+
+  if (!isValidFspath(val)) {
+    Logger::logCfgErr(_tokIt->line, "invalid fspath: " + val);
+    return false;
+  }
+
+  switch (dir) {
+    case DIR_ROOT: {
+      if (_scope.top() == S_SERVER)
+        vcfg.setRoot(val);
+      else
+        _currentRoute.setRoot(val);
+      break;
+    }
+    case DIR_UPLOAD:
+      _currentRoute.setUpload(val);
+      break;
+    default:
+      throw std::runtime_error("Ehm.. wrong direc in _parseTokFspath");
+  }
+
   return true;
 }

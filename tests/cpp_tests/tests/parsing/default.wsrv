@@ -12,9 +12,10 @@ server {
     index index.html!
     autoindex on!
     methods GET POST DELETE!
-    root ./www!
+    root ./www/moep!
     upload ./www/uploads!
     maxBodySize 42!
     redirect 302:https://moep.de!
+    cgi py:/usr/bin/env python !
   }
 }

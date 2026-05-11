@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/09 16:42:51 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/11 00:21:10 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/11 10:40:04 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,8 @@ Route::Route()
   _index       = "index.html";
   _maxBodySize = MAX_BODY_SIZE;
   _methods.insert(M_GET);
-  _redir = std::make_pair(HTTP_0, "");
+  _redir  = std::make_pair(HTTP_0, "");
+  _upload = "";
 }
 
 // FIXME check if really all is copied!
@@ -38,6 +39,8 @@ Route::Route(const Route& o)
     _errPages    = o._errPages;
     _methods     = o._methods;
     _redir       = o._redir;
+    _cgi         = o._cgi;
+    _upload      = o._upload;
   }
 }
 
@@ -52,6 +55,8 @@ Route& Route::operator=(const Route& o)
     _errPages    = o._errPages;
     _methods     = o._methods;
     _redir       = o._redir;
+    _cgi         = o._cgi;
+    _upload      = o._upload;
   }
   return (*this);
 }
@@ -106,11 +111,13 @@ void Route::reset()
   _autoindex   = false;
   _index       = "index.html";
   _maxBodySize = MAX_BODY_SIZE;
-
-  _methods.empty();
   _methods.insert(M_GET);
-  _errPages.empty();
   _redir = std::make_pair(HTTP_0, "");
+
+  _upload.clear();
+  _methods.empty();
+  _errPages.empty();
+  _cgi.clear();
 }
 
 void Route::addErrPage(e_HTTPStatus s, const str& path) { _errPages[s] = path; }
@@ -135,3 +142,11 @@ void Route::setRedir(e_HTTPStatus s, const str& url)
 {
   _redir = std::make_pair(s, url);
 }
+
+const std::map<str, str>& Route::getCgi() const { return _cgi; }
+
+void Route::addCgi(constr& ext, constr& exec) { _cgi[ext] = exec; }
+
+void Route::setUpload(str p) { _upload = p; }
+
+str Route::getUpload() const { return _upload; }

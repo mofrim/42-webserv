@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/25 08:35:42 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/11 00:33:02 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/11 10:43:10 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,6 +77,7 @@ void VServerCfg::printCfg() const
     const Route& r = it->second;
     Logger::log_msg("   - \"" + it->first + "\": ");
     Logger::log_msg("     + root = " + r.getRoot());
+    Logger::log_msg("     + upload = " + r.getUpload());
     Logger::log_msg("     + index = " + r.getIndex());
     Logger::log_msg("     + autoindex = " + bool2str(r.getAutoindex()));
     Logger::log_msg("     + maxBodySize = " + u32ToStr(r.getMaxBodySize()));
@@ -91,6 +92,12 @@ void VServerCfg::printCfg() const
     const std::pair<e_HTTPStatus, str>& redir = r.getRedir();
     Logger::log_msg(
         "     + redir = " + int2str(redir.first) + ":" + redir.second);
+    str cgistr;
+    for (std::map<str, str>::const_iterator it = r.getCgi().begin();
+        it != r.getCgi().end();
+        ++it)
+      cgistr += it->first + ":" + it->second + ", ";
+    Logger::log_msg("     + cgi = " + cgistr);
   }
 }
 
@@ -175,3 +182,7 @@ void VServerCfg::_initSetDirecs()
   _setDirecs["errPages"]    = false;
   _setDirecs["routes"]      = false;
 }
+
+void VServerCfg::setRoot(str r) { _root = r; }
+
+str VServerCfg::getRoot() const { return _root; }

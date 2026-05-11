@@ -88,7 +88,7 @@ proj-clean:
 bear: fclean
 	bear -- make
 
-run: $(NAME)
+run: clean $(NAME)
 	./$(NAME)
 
 fclean: clean proj-clean

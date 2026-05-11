@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/09 16:41:56 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/11 00:15:22 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/11 10:39:33 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,12 +24,16 @@ class Route {
     str  _index;
     str  _root;
     u32  _maxBodySize;
+    str  _upload;
 
     std::set<e_Method> _methods;
 
     std::map<e_HTTPStatus, str> _errPages;
 
     std::pair<e_HTTPStatus, str> _redir;
+
+    // Ex.: key = "py", val = "/usr/bin/env python"
+    std::map<str, str> _cgi;
 
   public:
     Route();
@@ -65,6 +69,12 @@ class Route {
 
     const std::pair<e_HTTPStatus, str>& getRedir() const;
     void setRedir(e_HTTPStatus s, const str& url);
+
+    const std::map<str, str>& getCgi() const;
+    void                      addCgi(constr& ext, constr& exec);
+
+    void setUpload(str p);
+    str  getUpload() const;
 
     void reset();
 };
