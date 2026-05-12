@@ -1,0 +1,10 @@
+server {
+  serverName moep!
+  listen localhost:1111!
+  root ./www!
+
+  route /bla {
+    index index.html!
+    autoindex off!
+  }
+}
