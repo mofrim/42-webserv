@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:36:43 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/11 23:18:40 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/12 15:35:46 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,6 +53,8 @@ void Webserv::shutdownWebserv()
 // all the data.
 void Webserv::readConfig(const str& cfgFilename)
 {
+  _defaultCfg = false;
+
   ConfigParser parsy(cfgFilename);
 
   if (parsy.bad())
@@ -63,13 +65,18 @@ void Webserv::readConfig(const str& cfgFilename)
   } catch (const std::exception& e) {
     throw;
   }
-  const std::vector<VServerCfg>&          cfgs = parsy.getCfgs();
-  std::vector<VServerCfg>::const_iterator it   = cfgs.begin();
-  if (!cfgs.empty()) {
-    for (; it != cfgs.end(); ++it)
-      _vservers.push_back(VServer(*it));
-    _defaultCfg = false;
+  const std::vector<VServerCfg>& cfgs = parsy.getCfgs();
+
+  if (cfgs.empty()) {
+    Logger::log_warn(
+        "Webserv::readConfig", "Could not read any vsrvs from cfg!");
+    return;
   }
+
+  for (std::vector<VServerCfg>::const_iterator it = cfgs.begin();
+      it != cfgs.end();
+      ++it)
+    _vservers.push_back(VServer(*it));
 }
 
 // The main routine for setting up the servers listed in the Config.
