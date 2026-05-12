@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/16 12:11:11 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/11 23:42:02 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/12 10:29:06 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -98,6 +98,7 @@ void VServer::printCfg() const
   {
     const Route& r = it->second;
     Logger::logCfg("   - \"" + it->first + "\": ");
+    Logger::logCfg("     + path = " + r.getPath());
     Logger::logCfg("     + root = " + r.getRoot());
     Logger::logCfg("     + upload = " + r.getUpload());
     Logger::logCfg("     + index = " + r.getIndex());
