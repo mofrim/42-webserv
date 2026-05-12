@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/01 18:46:40 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/11 18:04:18 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/12 20:26:44 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,8 +65,7 @@ e_HTTPStatus Request::parseReqLine()
   e_HTTPStatus status = HTTP_200;
   if ((status = _readReqline()) >= HTTP_400)
     return status;
-  Logger::logBug("Req target: " + _reqline.target.getPath());
-  _targetPath = _reqline.target.getPath();
+  _requestTarget = _reqline.target.getPath();
 
   // QUESTION do i even need this?
   // if ((status = validateUrl(rl.target)) >= HTTP_400)

@@ -309,3 +309,97 @@ should include `Accept-ranges:` none in our Responses to a GET
 - i will only listen directives like this `listen addr:port!`
 - i will have comments!
 
+## 2026-05-12
+
+### 09:06 - Writing `Request::_matchRoute` ...
+
+how to match a `/miep/moep/index.html` against `miep`?
+
+### 10:36 - Major AHAAAAA!
+
+    2026/05/12 10:35:37 [error] 60380#60380: *1 open() "././www/moep/moep"
+    failed (2: No such file or directory), client: 127.0.0.1, server: localhost,
+    request: "GET /moep HTTP/1.1", host: "localhost:1234"
+
+with a nginx cfg like
+
+    
+    root ./www;
+    location /moep {
+
+      # Ahaa!!! nginx takes location-roots always relative to server root!
+      root ./www/moep;
+      index index-moep.html;
+    }
+
+and requested URL `localhost:1234/moep`. removing `root ./www/moep` leads to the
+request being successful.
+
+OH! it actually is more subtle:
+
+    127.0.0.1 - - [12/May/2026:10:42:36 +0200] "GET /moep/ HTTP/1.1" 200 113 "-" "Mozilla/5.0 (X11; Linux x86_64; rv:149.0) Gecko/20100101 Firefox/149.0"
+    2026/05/12 10:42:36 [error] 61688#61688: *1 open() "././www/favicon.ico" failed (2: No such file or directory), client: 127.0.0.1, server: localhost, request: "GET /favicon.ico HTTP/1.1", host: "localhost:1234", referrer: "http://localhost:1234/moep/"
+    127.0.0.1 - - [12/May/2026:10:42:36 +0200] "GET /favicon.ico HTTP/1.1" 404 153 "http://localhost:1234/moep/" "Mozilla/5.0 (X11; Linux x86_64; rv:149.0) Gecko/20100101 Firefox/149.0"
+    127.0.0.1 - - [12/May/2026:10:43:02 +0200] "GET /moep HTTP/1.1" 301 169 "-" "Mozilla/5.0 (X11; Linux x86_64; rv:149.0) Gecko/20100101 Firefox/149.0"
+    127.0.0.1 - - [12/May/2026:10:43:02 +0200] "GET /moep/ HTTP/1.1" 200 113 "-" "Mozilla/5.0 (X11; Linux x86_64; rv:149.0) Gecko/20100101 Firefox/149.0"
+
+so if the request is only for `/moep` a redirect `301` to `/moep/` is send.
+
+with curl this is directly visible:
+
+```console
+$ curl -v localhost:1234/moep
+
+* Host localhost:1234 was resolved.
+* IPv6: ::1
+* IPv4: 127.0.0.1
+*   Trying [::1]:1234...
+* connect to ::1 port 1234 from ::1 port 50648 failed: Connection refused
+*   Trying 127.0.0.1:1234...
+* Established connection to localhost (127.0.0.1 port 1234) from 127.0.0.1 port 46066 
+* using HTTP/1.x
+> GET /moep HTTP/1.1
+> Host: localhost:1234
+> User-Agent: curl/8.19.0
+> Accept: */*
+> 
+* Request completely sent off
+< HTTP/1.1 301 Moved Permanently
+< Server: nginx/1.30.0
+< Date: Tue, 12 May 2026 08:45:39 GMT
+< Content-Type: text/html
+< Content-Length: 169
+< Location: http://localhost:1234/moep/
+< Connection: keep-alive
+< 
+<html>
+<head><title>301 Moved Permanently</title></head>
+<body>
+<center><h1>301 Moved Permanently</h1></center>
+<hr><center>nginx/1.30.0</center>
+</body>
+</html>
+* Connection #0 to host localhost:1234 left intact
+```
+
+### 13:50 - still processing request processing...
+
+<https://nginx.org/en/docs/http/request_processing.html>
+
+### 19:03 - the plan for route-matching
+
+given a route `route /moep {}`
+
+given a route `route /moep/index.html {}`
+
+**i somewhat tend towards only doing longest match routing. no fancy trailing
+slash stuff. or, only redirection if dir route exists. meaning, only redirect
+/moep to /moep/ if /moep/ exists.**
+
+**no. if `/moep` is requested and `/moep` as a route exists, there will be no
+redirect but simply the route `/moep` will be selected and the index be served.
+
+if `/moep/bla.html` is requested. the `/moep` route will be selected and
+`bla.html` will be searched for in whatever root the route has. this implies i
+will have to seperate the requested path from the detected route so that i can
+pass on the file which has to be opened to `_getBody` (so far...).

@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/25 08:35:42 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/11 13:46:55 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/12 15:52:17 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -204,8 +204,8 @@ str VServerCfg::getRoot() const { return _root; }
 bool VServerCfg::checkEnsureCfg()
 {
 
-  // add at least default route
-  if (_routes.empty())
+  // add at least default route bc nginx does it too!
+  if (_routes.find("/") == _routes.end())
     _routes["/"] = Route();
 
   for (std::map<str, Route>::iterator it = _routes.begin(); it != _routes.end();

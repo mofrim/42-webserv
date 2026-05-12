@@ -6,7 +6,7 @@
 #    By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/12/01 11:45:58 by fmaurer           #+#    #+#              #
-#    Updated: 2026/05/11 14:16:09 by fmaurer          ###   ########.fr        #
+#    Updated: 2026/05/12 15:56:14 by fmaurer          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -122,8 +122,11 @@ cpptests-clean:
 cpptests-bear:
 	@bear -- make -C tests/cpp_tests
 
-shelltests:
-	@cd tests/shell_tests && ./run_test.sh
+req_tests:
+	@cd tests/req_tests && ./run_test.sh
+
+cfg_tests:
+	@cd tests/cfg_tests && ./run_test.sh
 
 fclean: clean
 	rm -f $(NAME)

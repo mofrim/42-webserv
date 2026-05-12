@@ -1,0 +1,4 @@
+server {
+  serverName webserv!
+  listen localhost:1111!
+}

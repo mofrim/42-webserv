@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/24 20:49:55 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/11 14:26:05 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/12 16:33:32 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,6 +56,7 @@ class Logger {
 
   public:
     static void log_err(const str& msg);
+    static void log_err(const str& pre, const str& msg);
     static void log_msg(const str& msg);
     static void logCfg(const str& msg);
     static void log_warn(const str& msg);

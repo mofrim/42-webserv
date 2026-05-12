@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 23:39:57 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/11 23:38:59 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/12 20:30:34 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,44 +21,49 @@
 
 Request::Request():
   _vsrv(NULL), _reqstr(""), _hdrLines(0), _reqFinished(false),
-  _hdrComplete(false), _bodyComplete(false), _closeConn(false)
+  _hdrComplete(false), _bodyComplete(false), _closeConn(false),
+  _matchedRoute(NULL)
 {}
 
 Request::Request(const Request& o)
 {
   if (this != &o) {
-    _vsrv         = o._vsrv;
-    _cli          = o._cli;
-    _reqstr       = o._reqstr;
-    _respo        = o._respo;
-    _statusCode   = o._statusCode;
-    _reqline      = o._reqline;
-    _headers      = o._headers;
-    _reqFinished  = o._reqFinished;
-    _hdrComplete  = o._hdrComplete;
-    _bodyComplete = o._bodyComplete;
-    _hdrLines     = o._hdrLines;
-    _closeConn    = o._closeConn;
-    _targetPath   = o._targetPath;
+    _vsrv          = o._vsrv;
+    _cli           = o._cli;
+    _reqstr        = o._reqstr;
+    _respo         = o._respo;
+    _statusCode    = o._statusCode;
+    _reqline       = o._reqline;
+    _headers       = o._headers;
+    _reqFinished   = o._reqFinished;
+    _hdrComplete   = o._hdrComplete;
+    _bodyComplete  = o._bodyComplete;
+    _hdrLines      = o._hdrLines;
+    _closeConn     = o._closeConn;
+    _requestTarget = o._requestTarget;
+    _targetPath    = o._targetPath;
+    _matchedRoute  = o._matchedRoute;
   }
 }
 
 Request& Request::operator=(const Request& o)
 {
   if (this != &o) {
-    _vsrv         = o._vsrv;
-    _cli          = o._cli;
-    _reqstr       = o._reqstr;
-    _respo        = o._respo;
-    _statusCode   = o._statusCode;
-    _reqline      = o._reqline;
-    _headers      = o._headers;
-    _reqFinished  = o._reqFinished;
-    _hdrComplete  = o._hdrComplete;
-    _bodyComplete = o._bodyComplete;
-    _hdrLines     = o._hdrLines;
-    _closeConn    = o._closeConn;
-    _targetPath   = o._targetPath;
+    _vsrv          = o._vsrv;
+    _cli           = o._cli;
+    _reqstr        = o._reqstr;
+    _respo         = o._respo;
+    _statusCode    = o._statusCode;
+    _reqline       = o._reqline;
+    _headers       = o._headers;
+    _reqFinished   = o._reqFinished;
+    _hdrComplete   = o._hdrComplete;
+    _bodyComplete  = o._bodyComplete;
+    _hdrLines      = o._hdrLines;
+    _closeConn     = o._closeConn;
+    _requestTarget = o._requestTarget;
+    _targetPath    = o._targetPath;
+    _matchedRoute  = o._matchedRoute;
   }
   return *this;
 }
@@ -71,14 +76,15 @@ Request::~Request() {}
 // RequestHandler::read_request
 Request::Request(Client *cli, const std::string& reqstr)
 {
-  _vsrv        = cli->getVsrv();
-  _cli         = cli;
-  _reqstr      = reqstr;
-  _reqFinished = false;
-  _hdrComplete = false;
-  _hdrLines    = _countReqLines(reqstr);
-  _closeConn   = false;
-  _targetPath  = "";
+  _vsrv          = cli->getVsrv();
+  _cli           = cli;
+  _reqstr        = reqstr;
+  _reqFinished   = false;
+  _hdrComplete   = false;
+  _hdrLines      = _countReqLines(reqstr);
+  _closeConn     = false;
+  _requestTarget = "";
+  _matchedRoute  = NULL;
 }
 
 e_HTTPStatus Request::parseHeaders()
@@ -109,7 +115,59 @@ e_HTTPStatus Request::parseHeaders()
 void Request::process()
 {
   _reqFinished = true;
-  _statusCode  = _respo.genResponse(*this);
+  _matchRoute();
+  Logger::logBug("MATCHED ROUTE: " + _matchedRoute->getPath());
+  Logger::logBug("TARGET PATH: " + _targetPath);
+
+  // What now?
+
+  _statusCode = _respo.genResponse(*this);
+}
+
+// QUESTION: is the targetPath validated enough when we come here?
+//
+// std::map stores items weakly ordered by there keys. that is the
+// std::map::begin() iterator will always point to the smallest element if keys
+// are int. coneversely, end() - 1 will be the largest.
+//
+//
+// how to match target == `/miep/index.html` with `/miep`?
+void Request::_matchRoute()
+{
+  const std::map<str, Route>& vsrvRoutes = _vsrv->getRoutes();
+
+  // return direct matches immediately
+  if (vsrvRoutes.find(_requestTarget) != vsrvRoutes.end()) {
+    _matchedRoute = &vsrvRoutes.at(_requestTarget);
+    return;
+  }
+
+  std::map<size_t, const Route *> rank;
+
+  for (std::map<str, Route>::const_iterator rit = vsrvRoutes.begin();
+      rit != vsrvRoutes.end();
+      ++rit)
+  {
+    const Route& r         = rit->second;
+    str          routePath = r.getPath();
+    size_t       i         = 0;
+    while (i < routePath.size() && i < _requestTarget.size() &&
+        routePath[i] == _requestTarget[i])
+      ++i;
+
+    // this will always be at least true for the default route '/'
+    if (i == routePath.size())
+      rank.insert(std::make_pair(i, &r));
+  }
+
+  if (rank.size() > 0)
+    _matchedRoute = (--rank.end())->second;
+  else
+    _matchedRoute = &(vsrvRoutes.begin()->second); // return default route
+
+  size_t ps = _matchedRoute->getPath().size();
+  if (_requestTarget.size() > ps)
+    _targetPath = _requestTarget.substr(ps);
 }
 
 void Request::append(const str& s)
@@ -165,8 +223,10 @@ void Request::reset()
   _reqFinished         = false;
   _reqline.httpVersion = HTTPVER_UNKNOWN;
   _reqline.method      = M_GET;
-  _targetPath          = "";
+  _matchedRoute        = NULL;
 
+  _targetPath.clear();
+  _requestTarget.clear();
   _reqline.target.clear();
   _headers.clear();
   _respo.reset();

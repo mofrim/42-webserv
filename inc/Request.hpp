@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 23:39:07 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/11 18:21:45 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/12 19:36:41 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@
 // - implement timeout
 
 #include "Response.hpp"
+#include "Route.hpp"
 #include "WsrvLib.hpp"
 
 #include <map>
@@ -46,7 +47,9 @@ class Request {
     t_RequestLine      _reqline;
     std::map<str, str> _headers;
 
-    str _targetPath;
+    str          _requestTarget; // the targetstr from requestline
+    const Route *_matchedRoute;
+    str          _targetPath; // the target-path minus the route
 
     u16 _countReqLines(const str& nstr);
 
@@ -55,6 +58,7 @@ class Request {
     size_t                             _skipEmptyHdrLine() const;
     e_HTTPStatus                       _readReqline();
     e_HTTPStatus                       _parseHeaders();
+    void                               _matchRoute();
 
   public:
     // TODO: decide which ctors we really use here & privatize unused

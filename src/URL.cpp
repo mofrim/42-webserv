@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/06 22:32:39 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/07 11:21:47 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/12 19:42:11 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -254,8 +254,6 @@ str URL::parseTargetURL(const str& target)
   }
 
   str saniURL = sanitizedPath + sanitizedQueryStr + _fragment;
-
-  // we will emit
 
   _bad   = false;
   _empty = false;

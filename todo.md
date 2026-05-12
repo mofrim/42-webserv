@@ -11,6 +11,14 @@
   sec](https://datatracker.ietf.org/doc/html/rfc9112#name-message-parsing) for
   instructions
 
+- [ ] for every route `/route` add a redirect to `/route/`. in general: anything
+  that ends with a slash is a dir everything else a file?! Clarify
+
+- [ ] if a not routed target like `/moep/` is requested this is `403 Forbidden`.
+  The same holds true for `/moep` but then again there is a `301` to `/moep/` in
+  advance! So i really have to clarify the file <-> dir thingy! it seems like
+  nginx is simply stripping of the `/` from routes.
+
 - [ ] pay attention and implement sanitization according to this:
 
       A sender MUST NOT generate a bare CR (a CR character not immediately
@@ -69,6 +77,8 @@
 
 - [ ] add `isatty` based detection to `Logger` class in order to decide on
   colored output
+
+- [ ] rename `Logger` funcs to camelCase!
 
 ## DONEs
 
