@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/01 18:46:40 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/13 09:53:13 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/13 12:51:08 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,6 +71,11 @@ e_HTTPStatus Request::_readReqline()
   _reqline.target.parseTargetURL(_reqstr.substr(i, k));
   if (_reqline.target.bad())
     return HTTP_400;
+
+  Logger::logDbg1(
+      "Request::_readReqline", "URL path: " + _reqline.target.getPath());
+  Logger::logDbg1(
+      "Request::_readReqline", "URL query: " + _reqline.target.getQueryAsStr());
 
   i = i + k + 1;
   k = 0;

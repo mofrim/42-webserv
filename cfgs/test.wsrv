@@ -2,10 +2,21 @@ server {
   serverName moep!
   listen localhost:1111!
   root ./www!
+  errorPage 400:/400.html!
 
   route /bla {
     index index.html!
     autoindex off!
     methods GET POST!
   }
+
+  route /redir {
+    redirect 301:/redir-target!
+  }
+
+  route /redir-target {
+    root ./www/redir-target!
+    index index.html!
+}
+
 }

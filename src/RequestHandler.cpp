@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 19:13:35 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/13 11:45:54 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/13 14:40:15 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -87,8 +87,6 @@ void RequestHandler::readRequest()
   if (req.hdrTooBig()) {
     Logger::log_srv(_vsrvName, "Header too big!", WARN);
     req.setStatusCode(HTTP_400);
-    _cli->setState(CLI_SEND);
-    return;
   }
 
   // if we have got the full header - terminated by 2x CRLF - we will
@@ -96,7 +94,7 @@ void RequestHandler::readRequest()
   //
   //  a) a possible Content-Length field
   //  b) a possible Host header for Virtual Server routing
-  if (req.hdrComplete()) {
+  if (!req.badRequest() && req.hdrComplete()) {
     if (req.parseReqHeaders() == HTTP_400)
       Logger::logDbg1(
           "RequestHandler::readRequest", "400 from Req::parseHeaders");

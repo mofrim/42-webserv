@@ -6,12 +6,14 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/09 16:42:51 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/11 11:41:25 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/13 15:36:42 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Logger.hpp"
 #include "Route.hpp"
+
+#include <stdexcept>
 
 // --------------------------------=[ OCF ]=-------------------------------- //
 
@@ -123,7 +125,16 @@ void Route::reset()
 
 void Route::addErrPage(e_HTTPStatus s, const str& path) { _errPages[s] = path; }
 
-str Route::getErrPage(e_HTTPStatus s) { return _errPages[s]; }
+str Route::getErrPage(e_HTTPStatus s) const
+{
+  str ret;
+  try {
+    ret = _errPages.at(s);
+  } catch (const std::out_of_range& e) {
+    return "";
+  }
+  return ret;
+}
 
 std::map<e_HTTPStatus, str> Route::getErrPages() const { return _errPages; }
 

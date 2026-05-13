@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/16 12:11:11 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/12 10:29:06 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/13 13:18:07 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,14 +29,6 @@ VServer::ServerException::ServerException(const std::string& msg):
 
 // -----------------=[ Server methods of minor importance ]=----------------- //
 
-std::string VServer::getName() const { return (_srvName); }
-
-bool VServer::isInitFailed() const { return (_setupFailed); }
-
-void VServer::setServerName(std::string name) { _srvName = name; }
-
-void VServer::setSetupFailed() { _setupFailed = true; }
-
 void VServer::printClients()
 {
   Logger::log_srv(_srvName, "Printing Clients:");
@@ -57,14 +49,6 @@ bool VServer::isValidClientFd(int fd)
 {
   return (_clients.find(fd) != _clients.end());
 }
-
-const std::set<int>& VServer::getListenFds() const { return _listenFds; }
-
-const std::set<u16>& VServer::getPorts() const { return _ports; }
-
-void VServer::setRoutes(const std::map<str, Route>& r) { _routes = r; }
-
-const std::map<str, Route>& VServer::getRoutes() const { return _routes; }
 
 // FIXME: possibly remove code-dup with Route::printCfg
 void VServer::printCfg() const
@@ -127,10 +111,6 @@ void VServer::printCfg() const
   }
 }
 
-void VServer::setMaxBodySize(u32 mbs) { _maxBodySize = mbs; }
-
-u32 VServer::getMaxBodySize() const { return _maxBodySize; }
-
 // @return true, if the given fd is a virtual fd, meaning, the fd will be added
 // to epoll interest-list by the first server who also bound it.
 bool VServer::isVirtualFd(int fd) const
@@ -158,4 +138,33 @@ void VServer::_addActiveIface(t_AddrinfoReturn ar, u16 port)
   _activeInterfaces.push_back(vif);
 }
 
-str VServer::getErrPage(e_HTTPStatus c) { return _errPages[c]; }
+str VServer::getErrPage(e_HTTPStatus c)
+{
+  if (_errPages.find(c) != _errPages.end())
+    return _errPages[c];
+  return "";
+}
+
+void VServer::setMaxBodySize(u32 mbs) { _maxBodySize = mbs; }
+
+u32 VServer::getMaxBodySize() const { return _maxBodySize; }
+
+const std::set<int>& VServer::getListenFds() const { return _listenFds; }
+
+const std::set<u16>& VServer::getPorts() const { return _ports; }
+
+void VServer::setRoutes(const std::map<str, Route>& r) { _routes = r; }
+
+const std::map<str, Route>& VServer::getRoutes() const { return _routes; }
+
+std::string VServer::getName() const { return (_srvName); }
+
+bool VServer::isInitFailed() const { return (_setupFailed); }
+
+void VServer::setServerName(std::string name) { _srvName = name; }
+
+void VServer::setSetupFailed() { _setupFailed = true; }
+
+void VServer::setRoot(constr& s) { _root = s; }
+
+constr& VServer::getRoot() const { return _root; }

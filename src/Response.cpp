@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/23 19:11:25 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/13 12:03:28 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/13 15:40:35 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -85,16 +85,21 @@ void Response::_setFieldsFromReq(const Request& req)
 //
 //  2) status == 400: we had a bad request. therefore the only thing left to do
 //     is finding the corresponding error page from vsrv BUT keep in mind that
-//     client could be virtual!k
+//     client could be virtual!
 //
 e_HTTPStatus Response::generateResponse(const Request& req)
 {
   _setFieldsFromReq(req);
 
+  // handle HTTP_400
+
   if (req.badRequest()) {
     Logger::logBug("Response::generateResponse", "Bad Request handling");
     _handleBadRequest();
   }
+
+  // hrom here on: only HTTP_200 so far
+
   else if (req.isRedir()) {
     Logger::logBug("Response::generateResponse", "Redir Request handling");
     _handleRedir();
@@ -149,6 +154,8 @@ void Response::_getBody200()
   str path = r.getRoot();
   Logger::logBug("root: " + path);
 
+  // At this point there can only be single slashes in _targetPath as they have
+  // been compressed by URL class.
   if (!_targetPath.empty()) {
     if (_targetPath[0] == '/')
       path += _targetPath;
@@ -160,58 +167,7 @@ void Response::_getBody200()
     path += (path[path.size() - 1] == '/' ? "" : "/") + r.getIndex();
   Logger::log_dbg1("Response::_getBody: trying to read from file: " + path);
 
-  _mimeType = WsrvLib::getMimeTypeFromPath(path);
-
-  std::ifstream target;
-
-  if (_mimeType != "text/html")
-    target.open(path.c_str(), std::ios_base::binary);
-  else
-    target.open(path.c_str());
-
-  // FIXME: is this really not good if file could not be opened?
-  if (!target) {
-    _status = HTTP_404;
-    _body   = WsrvLib::getDefaultErrPage(HTTP_404);
-    return;
-  }
-
-  // get length of file:
-  target.seekg(0, target.end);
-  int length = target.tellg();
-  target.seekg(0, target.beg);
-
-  // FIXME: check length
-  // QUESTION: do we still need it here?
-  if (length <= 0) {
-    _status = HTTP_404;
-    _body   = WsrvLib::getDefaultErrPage(_status);
-    return;
-  }
-
-  Logger::log_dbg1("Response::_getBody: length = " + int2str(length));
-
-  // QUESTION: is this really the optimal solution?
-  // FIXME: what about binary data?
-  std::vector<char> buffer(length);
-
-  // good2know: does not throw but sets the badbit
-  target.read(&buffer[0], length);
-
-  if (target)
-    // like this even NUL bytes and other weird binary-mode data is written to
-    // the std::string obj.
-    //
-    // Furthermore std::string::assign might throw exceptions if the assigned
-    // data is too large. So we catch it here
-    try {
-      _body.assign(buffer.begin(), buffer.end());
-    } catch (const std::exception& e) {
-      Logger::log_err("In Response::_getBody: read body too large!");
-      _status = HTTP_413;
-      _body   = WsrvLib::getDefaultErrPage(_status);
-      return;
-    }
+  _readBodyFromFile(path);
 }
 
 void Response::_buildRespoHdrs()
@@ -226,6 +182,9 @@ void Response::_buildRespoHdrs()
       (_status == HTTP_200) ? _mimeType : "text/html";
 
   _respoHeaders["Content-Length"] = int2str(_body.size());
+
+  if (_req->isRedir())
+    _respoHeaders["Location"] = _req->getRedir().second;
 
   str conn;
   if ((_status >= HTTP_400 && (_status != HTTP_404)) || _closeConn)
@@ -303,12 +262,105 @@ str Response::genDefaultErrResponse(e_HTTPStatus errCode, constr errPage)
 
 // MASSIVE TODO !!!!!
 
-void Response::_handleBadRequest() {}
+// Handle the case of bad req. The only thing left to do in here is checking if
+// client is still virtual -> _body = default errpage. If not virtual check if
+// there is an errPage in server scope and try to read it. If that fails -> set
+// status 404 and return default 404. Else return default 400.
+void Response::_handleBadRequest()
+{
+  if (_cli->isVirtual()) {
+    _body = WsrvLib::getDefaultErrPage(HTTP_400);
+    return;
+  }
 
-void Response::_handleRedir() {}
+  str errPage = _vsrv->getErrPage(HTTP_400);
+
+  if (errPage.empty())
+    _body = WsrvLib::getDefaultErrPage(HTTP_400);
+  else
+    _readBodyFromFile(_vsrv->getRoot() + errPage);
+}
+
+// get status page first from matched route secondly from vsrv. fallback to
+// default page if both did not work
+//
+// TODO to be very perfect here in _readBodyFromFile we would also have to
+// return the corresponding 404 if a status page could not be found.
+void Response::_handleRedir()
+{
+  const e_HTTPStatus& redirCode = _matchedRoute->getRedir().first;
+
+  _status = redirCode;
+
+  str errPage = _matchedRoute->getErrPage(redirCode);
+  if (errPage.empty())
+    errPage = _vsrv->getErrPage(redirCode);
+  else
+    _readBodyFromFile(_matchedRoute->getRoot() + errPage);
+
+  if (errPage.empty())
+    _body = WsrvLib::getDefaultErrPage(redirCode);
+  else
+    _readBodyFromFile(_vsrv->getRoot() + errPage);
+}
 
 void Response::_handleCGI() {}
 
 void Response::_handleSimplePost() {}
 
 void Response::_handleDelete() {}
+
+void Response::_readBodyFromFile(constr& path)
+{
+  _mimeType = WsrvLib::getMimeTypeFromPath(path);
+
+  std::ifstream target;
+
+  if (_mimeType != "text/html")
+    target.open(path.c_str(), std::ios_base::binary);
+  else
+    target.open(path.c_str());
+
+  if (!target) {
+    _status = HTTP_404;
+    _body   = WsrvLib::getDefaultErrPage(HTTP_404);
+    return;
+  }
+
+  // get length of file:
+  target.seekg(0, target.end);
+  int length = target.tellg();
+  target.seekg(0, target.beg);
+
+  // FIXME: check length
+  // QUESTION: do we still need it here?
+  if (length <= 0) {
+    _status = HTTP_404;
+    _body   = WsrvLib::getDefaultErrPage(_status);
+    return;
+  }
+
+  Logger::logDbg1("Response::_getBody", "body-length = " + int2str(length));
+
+  // QUESTION: is this really the optimal solution?
+  // FIXME: what about binary data?
+  std::vector<char> buffer(length);
+
+  // good2know: does not throw but sets the badbit
+  target.read(&buffer[0], length);
+
+  if (target)
+    // like this even NUL bytes and other weird binary-mode data is written to
+    // the std::string obj.
+    //
+    // Furthermore std::string::assign might throw exceptions if the assigned
+    // data is too large. So we catch it here
+    try {
+      _body.assign(buffer.begin(), buffer.end());
+    } catch (const std::exception& e) {
+      Logger::log_err("Response::_getBody", "Read body too large!");
+      _status = HTTP_413;
+      _body   = WsrvLib::getDefaultErrPage(_status);
+      return;
+    }
+}

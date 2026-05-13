@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/09 16:41:56 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/11 10:39:33 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/13 15:16:15 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,7 +54,7 @@ class Route {
     str  getRoot() const;
 
     void                        addErrPage(e_HTTPStatus s, const str& path);
-    str                         getErrPage(e_HTTPStatus s);
+    str                         getErrPage(e_HTTPStatus s) const;
     std::map<e_HTTPStatus, str> getErrPages() const;
 
     void setMaxBodySize(u32 mbs);

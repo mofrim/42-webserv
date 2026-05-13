@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 23:39:57 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/13 11:49:47 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/13 15:05:33 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,6 +42,7 @@ Request::Request(const Request& o)
     _isSimplePOST  = o._isSimplePOST;
     _isDELETE      = o._isDELETE;
     _isRedir       = o._isRedir;
+    _redir         = o._redir;
   }
 }
 
@@ -66,6 +67,7 @@ Request& Request::operator=(const Request& o)
     _isSimplePOST  = o._isSimplePOST;
     _isDELETE      = o._isDELETE;
     _isRedir       = o._isRedir;
+    _redir         = o._redir;
   }
   return *this;
 }
@@ -91,6 +93,7 @@ Request::Request(Client *cli, const std::string& reqstr)
   _isSimplePOST  = false;
   _isDELETE      = false;
   _isRedir       = false;
+  _redir         = std::make_pair(HTTP_0, "");
 }
 
 // There are 2 options when we get here:
@@ -114,7 +117,10 @@ void Request::processReq()
     _isCGI        = !_matchedRoute->getCgi().empty();
     _isSimplePOST = (!_isCGI && _reqline.method == M_POST);
     _isDELETE     = (_reqline.method == M_DELETE);
-    _isRedir      = (_matchedRoute->getRedir().first != HTTP_0);
+
+    _isRedir = (_matchedRoute->getRedir().first != HTTP_0);
+    if (_isRedir)
+      _redir = _matchedRoute->getRedir();
   }
 
   _statusCode = _respo.generateResponse(*this);
@@ -224,6 +230,7 @@ void Request::reset()
   _isSimplePOST        = false;
   _isDELETE            = false;
   _isRedir             = false;
+  _redir               = std::make_pair(HTTP_0, "");
 
   _targetPath.clear();
   _requestTarget.clear();
@@ -294,3 +301,5 @@ bool Request::isSimplePOST() const { return _isSimplePOST; }
 bool Request::isDELETE() const { return _isDELETE; }
 
 bool Request::isRedir() const { return _isRedir; }
+
+const std::pair<e_HTTPStatus, str>& Request::getRedir() const { return _redir; }

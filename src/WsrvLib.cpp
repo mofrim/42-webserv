@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/24 17:40:43 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/10 23:58:33 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/13 14:52:21 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,9 +32,10 @@ WsrvLib::~WsrvLib() {}
 str WsrvLib::_getTemplateWithErrStr(const str& s)
 {
   str ret =
+
       "<html>\n"
       "<head>\n"
-      "<title>m0fr1m's Webserv Error Page</title>\n"
+      "<title>WebServ Default Error Page</title>\n"
       "<style>\n"
       "body {\n"
       "margin: 100px 100px 0px 100px;\n"
@@ -56,6 +57,7 @@ str WsrvLib::_getTemplateWithErrStr(const str& s)
       "<h1>\n";
 
   ret += s +
+
       "\n</h1>\n"
       "</div>\n"
       "<hr>\n"
