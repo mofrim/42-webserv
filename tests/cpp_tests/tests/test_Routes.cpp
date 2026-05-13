@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/13 13:06:35 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/10 22:54:15 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/13 23:24:45 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,7 +69,7 @@ int _test_Routes()
   {
     Route r;
     r.setRoot("////");
-    if (r.getRoot() != "./www")
+    if (r.getRoot() != "")
       return -1;
     r.setRoot("moep/");
     if (r.getRoot() != "moep")
