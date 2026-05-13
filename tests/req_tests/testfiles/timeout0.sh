@@ -1,17 +1,32 @@
 #!/usr/bin/env bash
 
-# Test send a just one line too large header to the server.
+# Send req to server which is never terminated. Make parallel request to trigger
+# timeout.
+
+if [ $# -ne 2 ]; then
+	echo "need 2 args: addr port"
+	exit 1
+fi
+
+if [ ! -e ../_test_utils.sh ]; then
+	echo "test-utils not found!"
+	exit 1
+else
+	source ../_test_utils.sh
+fi
 
 set -u
 
 CRLF="\r\n"
 
-exec 3<>/dev/tcp/localhost/1111
-echo -en "GET / HTTP/1.1$CRLF" >&3
-echo -en "host: moep$CRLF" >&3
+exec 3<>/dev/tcp/"$1"/"$2"
+
+sendHdrField "GET / HTTP/1.1" 3
+sendHdrField "host: moep" 3
 tmpfile=$(mktemp)
-timeout 8s cat <&3 > $tmpfile &
-sleep 6 && curl localhost:1111 &> /dev/null
+timeout 7s cat <&3 > $tmpfile &
+sleep 6 && curl "$1:$2" &> /dev/null
+
 exec 3<&-
 
 cat $tmpfile
@@ -20,5 +35,7 @@ if [ -z "$(cat $tmpfile | grep 408)" ]; then
 	rm $tmpfile
 	exit 1;
 fi
+
+rm -f $tmpfile
 
 

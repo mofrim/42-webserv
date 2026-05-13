@@ -38,6 +38,9 @@
       A sender MUST NOT send whitespace between the start-line and the first
       header field.
 
+- [ ] make the whole CNAME thing work. Problem is: that i work with the IP only
+      from the very beginning.
+
 - [ ] add func comments to hpp *not* to cpp files -> global visibility!
 
 - [ ] show errPage that is configured for a route / server

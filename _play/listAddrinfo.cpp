@@ -26,7 +26,7 @@ int main()
   // hints.ai_flags = AI_CANONNAME;
   hints.ai_flags = AI_PASSIVE | AI_CANONNAME | AI_NUMERICSERV;
 
-  s = getaddrinfo("10.0.0.1", "22", &hints, &result);
+  s = getaddrinfo("localhost", "22", &hints, &result);
   if (s != 0) {
     std::cout << "getaddrinfo: " << gai_strerror(s) << std::endl;
     errno = ENOSYS;
@@ -41,14 +41,14 @@ int main()
     memset(addrbuf, 0, rp->ai_addrlen);
 
     switch (rp->ai_family) {
-    case AF_INET:
-      std::cout << "AF_INET" << std::endl;
-      break;
-    case AF_INET6:
-      std::cout << "AF_INET6" << std::endl;
-      break;
-    default:
-      std::cout << "Unknown family" << std::endl;
+      case AF_INET:
+        std::cout << "AF_INET" << std::endl;
+        break;
+      case AF_INET6:
+        std::cout << "AF_INET6" << std::endl;
+        break;
+      default:
+        std::cout << "Unknown family" << std::endl;
     }
 
     if (rp->ai_family == AF_INET || rp->ai_family == AF_INET6) {
@@ -65,11 +65,13 @@ int main()
 
     std::cout << "trying to bind socket on '" << addrbuf << "'" << std::endl;
     std::cout << "rp->ai_addr: '"
-              << ((struct sockaddr_in *)rp->ai_addr)->sin_addr.s_addr << "'\n"
+              << inet_ntoa(((struct sockaddr_in *)rp->ai_addr)->sin_addr)
+              << "'\n"
               << "port: "
               << ntohs(((struct sockaddr_in *)rp->ai_addr)->sin_port)
               << std::endl;
     std::cout << "rp->ai_canonname: " << rp->ai_canonname << std::endl;
+    sfd = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
     if (bind(sfd, rp->ai_addr, rp->ai_addrlen) != -1) {
       perror("bind");
       std::cout << "SUCCESS!" << std::endl;
