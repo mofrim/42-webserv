@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:36:43 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/12 15:35:46 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/12 21:57:52 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -232,7 +232,10 @@ void Webserv::run()
 
 // For serverless clients there can only be a EPOLLIN event bc it is the first
 // real request that is processed
-// TODO: implement this
+// TODO implement this
+//
+// FIXME DEAD CODE ?!?!?!
+// FIXME REMOVE ?!?!?!?
 void Webserv::_handleEventServerless(u32 ev, Client *cli)
 {
   if (ev & EPOLLIN) {

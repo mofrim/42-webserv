@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 23:39:07 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/12 19:36:41 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/13 11:31:04 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,7 +37,6 @@ class Request {
 
     e_HTTPStatus _statusCode;
     u16          _hdrLines;
-    bool         _reqFinished;
     bool         _hdrComplete;
     bool         _bodyComplete;
     bool         _closeConn;
@@ -51,6 +50,11 @@ class Request {
     const Route *_matchedRoute;
     str          _targetPath; // the target-path minus the route
 
+    bool _isCGI;        // CGI requests can be both POST and GET
+    bool _isSimplePOST; // simple POST without CGI
+    bool _isDELETE;     // DELETEs only have a filename as query param
+    bool _isRedir;      // if route is a redir route
+
     u16 _countReqLines(const str& nstr);
 
     // Parsing related
@@ -59,6 +63,9 @@ class Request {
     e_HTTPStatus                       _readReqline();
     e_HTTPStatus                       _parseHeaders();
     void                               _matchRoute();
+
+    e_HTTPStatus _parseReqLine();
+    e_HTTPStatus _evaluateHdrs();
 
   public:
     // TODO: decide which ctors we really use here & privatize unused
@@ -70,22 +77,17 @@ class Request {
 
     str getResponseStr() const;
 
-    bool isFinished() const;
-    void process();
+    void processReq();
 
     void append(const str& s);
 
-    bool hdrComplete();
-    bool reqComplete();
-
     e_Method     getMethod();
-    const str&   getReqstr() const;
+    constr&      getReqstr() const;
     Client      *getCli() const;
     VServer     *getVsrv() const;
     void         setVsrv(VServer *v);
     e_HTTPStatus getStatusCode() const;
     void         setStatusCode(e_HTTPStatus code);
-    bool         hdrTooBig() const;
     str          getMethodStr() const;
     bool         closeConn() const;
 
@@ -100,8 +102,18 @@ class Request {
     // parsing
     // FIXME: which function should i expose here?
 
-    e_HTTPStatus parseHeaders();
-    e_HTTPStatus parseReqLine();
-    e_HTTPStatus checkHeaders();
-    int          validateUrl(const str& u);
+    e_HTTPStatus parseReqHeaders();
+
+    const Route *getMatchedRoute() const;
+    constr&      getTargetPath() const;
+
+    bool badRequest() const;
+    bool hdrComplete();
+    bool reqComplete();
+    bool hdrTooBig() const;
+
+    bool isCGI() const;
+    bool isSimplePOST() const;
+    bool isDELETE() const;
+    bool isRedir() const;
 };

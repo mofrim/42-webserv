@@ -403,3 +403,13 @@ if `/moep/bla.html` is requested. the `/moep` route will be selected and
 `bla.html` will be searched for in whatever root the route has. this implies i
 will have to seperate the requested path from the detected route so that i can
 pass on the file which has to be opened to `_getBody` (so far...).
+
+## 2026-05-13
+
+1) If a Header is malformed, sth like `asdlkfjalsdhjflksadj` instead of `Host:
+   asdasdas` 400 is returned and the possible route is NOT matched. However IFF
+   a corresponding errorPage exists on server level, this is tried to be served.
+   If that errorpage's file does not exist a 404 with the corresponding
+   errorPage's path is returned.
+
+So, how and where do i inject the errorPage into the Response?

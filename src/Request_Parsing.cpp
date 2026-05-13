@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/01 18:46:40 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/12 20:26:44 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/13 09:53:13 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,34 @@
 #include "VServer.hpp"
 #include "WsrvLib.hpp"
 #include "utils.hpp"
+
+// FIXME add header / body separation somewhere around / before here
+e_HTTPStatus Request::parseReqHeaders()
+{
+  if ((_statusCode = _parseReqLine()) == HTTP_400) {
+    Logger::log_dbg1("Request::parseReqline: 400");
+    return _statusCode;
+  }
+  if ((_statusCode = _parseHeaders()) == HTTP_400) {
+    Logger::log_dbg1("Request::_parseHeaders: 400");
+    return _statusCode;
+  }
+  if ((_statusCode = _evaluateHdrs()) == HTTP_400) {
+    Logger::log_dbg1("Request::checkHeaders: 400");
+    return _statusCode;
+  }
+  return HTTP_200;
+}
+
+e_HTTPStatus Request::_parseReqLine()
+{
+  e_HTTPStatus status = HTTP_200;
+  if ((status = _readReqline()) == HTTP_400)
+    return status;
+  _requestTarget = _reqline.target.getPath();
+
+  return status;
+}
 
 // Parse the reuqest-line. I.e. the uppercase method, then a target URI and then
 // the HTTP-version. The URI is already converted to to lowercase
@@ -60,42 +88,6 @@ e_HTTPStatus Request::_readReqline()
   return HTTP_200;
 }
 
-e_HTTPStatus Request::parseReqLine()
-{
-  e_HTTPStatus status = HTTP_200;
-  if ((status = _readReqline()) >= HTTP_400)
-    return status;
-  _requestTarget = _reqline.target.getPath();
-
-  // QUESTION do i even need this?
-  // if ((status = validateUrl(rl.target)) >= HTTP_400)
-  //   return status;
-
-  return status;
-}
-
-// TODO: add more validity checks here
-std::vector< std::pair<str, str> > Request::_splitHdr()
-{
-  std::vector< std::pair<str, str> > ret;
-
-  // isolate headers from body
-  str              onlyHdrs = _reqstr.substr(0, _reqstr.find(CRLFX2) + 2);
-  std::vector<str> hdrLines = splitString(onlyHdrs, CRLF);
-
-  for (std::vector<str>::iterator it = hdrLines.begin(); it != hdrLines.end();
-      it++)
-  {
-    size_t colonPos = it->find(":");
-    if (colonPos == str::npos)
-      throw std::runtime_error("Request::spliHdr: ivalid header field");
-    str fieldName  = it->substr(0, colonPos);
-    str fieldValue = strip(it->substr(colonPos + 1, str::npos));
-    ret.push_back(std::make_pair(fieldName, fieldValue));
-  }
-  return ret;
-}
-
 // Parse all hdrs lowercasing the field names because we are case-insensitive by
 // RFC. Also we strip any leading or trailing whitespaces from names and values.
 e_HTTPStatus Request::_parseHeaders()
@@ -117,12 +109,14 @@ e_HTTPStatus Request::_parseHeaders()
   return HTTP_200;
 }
 
-// There is a little more to be done in here!
-e_HTTPStatus Request::checkHeaders()
+// Checks headers and Request Semantics. I.e.if req != POST the body will
+// automatically be set to complete.
+e_HTTPStatus Request::_evaluateHdrs()
 {
   if (_reqline.httpVersion == HTTPVER_1_1) {
     if (_reqline.method == M_GET) {
 
+      // RFC MUST for HTTP/1.1
       if (_headers.count("host") == 0) {
         Logger::log_srv(_vsrv->getName(), "GET Req without Host header", WARN);
         return HTTP_400;
@@ -162,13 +156,6 @@ e_HTTPStatus Request::checkHeaders()
   return HTTP_200;
 }
 
-// TODO: implement
-int Request::validateUrl(const str& u)
-{
-  (void)u;
-  return OK;
-}
-
 // we skip exactly one empty line prior to startline as RFC friendly asks from
 // us.
 size_t Request::_skipEmptyHdrLine() const
@@ -176,4 +163,26 @@ size_t Request::_skipEmptyHdrLine() const
   if (_reqstr.size() >= 2 && !_reqstr.compare(0, 2, CRLF))
     return 2;
   return 0;
+}
+
+// TODO: add more validity checks here
+std::vector< std::pair<str, str> > Request::_splitHdr()
+{
+  std::vector< std::pair<str, str> > ret;
+
+  // isolate headers from body
+  str              onlyHdrs = _reqstr.substr(0, _reqstr.find(CRLFX2) + 2);
+  std::vector<str> hdrLines = splitString(onlyHdrs, CRLF);
+
+  for (std::vector<str>::iterator it = hdrLines.begin(); it != hdrLines.end();
+      it++)
+  {
+    size_t colonPos = it->find(":");
+    if (colonPos == str::npos)
+      throw std::runtime_error("Request::spliHdr: ivalid header field");
+    str fieldName  = it->substr(0, colonPos);
+    str fieldValue = strip(it->substr(colonPos + 1, str::npos));
+    ret.push_back(std::make_pair(fieldName, fieldValue));
+  }
+  return ret;
 }

@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/24 20:49:55 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/12 16:33:32 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/13 11:46:59 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,9 +76,13 @@ class Logger {
     // log_dbg0 will be printed, and in LOGLEVEL == INFO == 0 only log_dbg0
     // will be shown.
     static void log_dbg0(const str& msg);
+
     static void log_dbg1(const str& msg);
+    static void logDbg1(const str& pre, const str& msg);
+
     static void log_dbg2(const str& msg);
     static void logBug(const str& msg);
+    static void logBug(constr& pre, const str& msg);
     static str  getLogtime();
 
     static void drawCycleSep();

@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/24 20:52:55 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/12 16:34:20 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/13 11:47:03 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,6 +99,15 @@ void Logger::log_dbg1(const str& msg)
   }
 }
 
+void Logger::logDbg1(const str& pre, const str& msg)
+{
+  if (LOGLEVEL >= LOG_DEBUG) {
+    str logtime = getLogtime();
+    std::cout << PNK << logtime << BPNK << " (" << pre << ") " << RST << PNK
+              << msg << RST << std::endl;
+  }
+}
+
 void Logger::log_dbg2(const str& msg)
 {
   if (LOGLEVEL >= LOG_BRUTAL) {
@@ -137,6 +146,13 @@ void Logger::log_reqres(const str& srvName, const str& resreq, const str& data)
 void Logger::logBug(const str& msg)
 {
   std::cout << BPUR << "[BUG] " << msg << RST << std::endl;
+}
+
+// use this for bug hunting
+void Logger::logBug(constr& pre, const str& msg)
+{
+  std::cout << BPUR << "[BUG] " << "(" << pre << ") " << msg << RST
+            << std::endl;
 }
 
 void Logger::drawCycleSep()

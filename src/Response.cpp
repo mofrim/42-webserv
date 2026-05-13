@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/23 19:11:25 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/11 15:11:40 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/13 12:03:28 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,12 +21,12 @@
 
 // --------------------------------=[ OCF ]=-------------------------------- //
 
-Response::Response() {}
+Response::Response() { this->reset(); }
 
 Response::Response(const Response& o)
 {
   if (this != &o) {
-    _statusCode   = o._statusCode;
+    _status       = o._status;
     _reqline      = o._reqline;
     _reqHeaders   = o._reqHeaders;
     _cli          = o._cli;
@@ -36,13 +36,14 @@ Response::Response(const Response& o)
     _mimeType     = o._mimeType;
     _respoStr     = o._respoStr;
     _closeConn    = o._closeConn;
+    _req          = o._req;
   }
 }
 
 Response& Response::operator=(const Response& o)
 {
   if (this != &o) {
-    _statusCode   = o._statusCode;
+    _status       = o._status;
     _reqline      = o._reqline;
     _reqHeaders   = o._reqHeaders;
     _cli          = o._cli;
@@ -52,6 +53,7 @@ Response& Response::operator=(const Response& o)
     _mimeType     = o._mimeType;
     _respoStr     = o._respoStr;
     _closeConn    = o._closeConn;
+    _req          = o._req;
   }
   return (*this);
 }
@@ -60,27 +62,65 @@ Response::~Response() {}
 
 // ------------------------------=[ END OCF ]=------------------------------ //
 
+// FIXME maybe refac this to use req directly. depends on how often these will
+// be used later in code
 void Response::_setFieldsFromReq(const Request& req)
 {
-  _statusCode = req.getStatusCode();
-  _reqline    = req.getReqline();
-  _reqHeaders = req.getHeaders();
-  _cli        = req.getCli();
-  _vsrv       = req.getVsrv();
-  _closeConn  = req.closeConn();
+  _status       = req.getStatusCode();
+  _reqline      = req.getReqline();
+  _reqHeaders   = req.getHeaders();
+  _cli          = req.getCli();
+  _vsrv         = req.getVsrv();
+  _closeConn    = req.closeConn();
+  _matchedRoute = req.getMatchedRoute();
+  _targetPath   = req.getTargetPath();
+  _req          = &req;
 }
 
-e_HTTPStatus Response::genResponse(const Request& req)
+// THE main function for finally doing what the request wants. When we finally
+// arrive here we have the following setting:
+//
+//  1) status == 200: everything fine until here do normally processing of
+//     request
+//
+//  2) status == 400: we had a bad request. therefore the only thing left to do
+//     is finding the corresponding error page from vsrv BUT keep in mind that
+//     client could be virtual!k
+//
+e_HTTPStatus Response::generateResponse(const Request& req)
 {
   _setFieldsFromReq(req);
 
-  if (_statusCode == HTTP_200 && _reqline.method == M_GET)
-    _getBody();
+  if (req.badRequest()) {
+    Logger::logBug("Response::generateResponse", "Bad Request handling");
+    _handleBadRequest();
+  }
+  else if (req.isRedir()) {
+    Logger::logBug("Response::generateResponse", "Redir Request handling");
+    _handleRedir();
+  }
+  else if (req.isCGI()) {
+    Logger::logBug("Response::generateResponse", "CGI Request handling");
+    _handleCGI();
+  }
+  else if (req.isSimplePOST()) {
+    Logger::logBug("Response::generateResponse", "SimplePost Request handling");
+    _handleSimplePost();
+  }
+  else if (req.isDELETE()) {
+    Logger::logBug("Response::generateResponse", "DELETE Request handling");
+    _handleDelete();
+  }
+  // simple GET request
+  else {
+    Logger::logBug("Response::generateResponse", "Normal GET Request handling");
+    _getBody200();
+  }
 
   _buildRespoHdrs();
   _genResponse();
 
-  return _statusCode;
+  return _status;
 }
 
 // @brief This is the core function for generating the final respostr. Extracted
@@ -101,92 +141,94 @@ void Response::_genResponse()
 // FIXME: this is not at done yet!
 // TODO: we need to handle real routing in here.
 // FIXME: `root` fields in config should never end in a '/'
-void Response::_getBody()
+void Response::_getBody200()
 {
-  if (_vsrv->getRoutes().size() == 1 &&
-      _vsrv->getRoutes().begin()->first == "/")
-  {
-    Route r = _vsrv->getRoutes().begin()->second;
+  const Route& r = *_matchedRoute;
 
-    str root = r.getRoot();
-    str path = root + _reqline.target.getPath();
-    if (isDir(path))
-      path += (path[path.size() - 1] == '/' ? "" : "/") + r.getIndex();
-    Logger::log_dbg1("Response::_getBody: trying to read from file: " + path);
+  // root will NEVER have a trailing slash by parsing!
+  str path = r.getRoot();
+  Logger::logBug("root: " + path);
 
-    _mimeType = WsrvLib::getMimeTypeFromPath(path);
-
-    std::ifstream target;
-
-    // FIXME: mime types!!!
-    if (_mimeType != "text/html")
-      target.open(path.c_str(), std::ios_base::binary);
+  if (!_targetPath.empty()) {
+    if (_targetPath[0] == '/')
+      path += _targetPath;
     else
-      target.open(path.c_str());
-
-    // FIXME: is this really not good if file could not be opened?
-    if (!target) {
-      _statusCode = HTTP_404;
-      _body       = WsrvLib::getDefaultErrPage(HTTP_404);
-      return;
-    }
-
-    // get length of file:
-    target.seekg(0, target.end);
-    int length = target.tellg();
-    target.seekg(0, target.beg);
-
-    // FIXME: check length
-    // QUESTION: do we still need it here?
-    if (length <= 0) {
-      _statusCode = HTTP_404;
-      _body       = WsrvLib::getDefaultErrPage(_statusCode);
-      return;
-    }
-
-    Logger::log_dbg1("Response::_getBody: length = " + int2str(length));
-
-    // QUESTION: is this really the optimal solution?
-    // FIXME: what about binary data?
-    std::vector<char> buffer(length);
-
-    // good2know: does not throw but sets the badbit
-    target.read(&buffer[0], length);
-
-    if (target)
-      // like this even NUL bytes and other weird binary-mode data is written to
-      // the std::string obj.
-      //
-      // Furthermore std::string::assign might throw exceptions if the assigned
-      // data is too large. So we catch it here
-      try {
-        _body.assign(buffer.begin(), buffer.end());
-      } catch (const std::exception& e) {
-        Logger::log_err("In Response::_getBody: read body too large!");
-        _statusCode = HTTP_413;
-        _body       = WsrvLib::getDefaultErrPage(_statusCode);
-        return;
-      }
+      path += "/" + _targetPath;
   }
+
+  if (isDir(path))
+    path += (path[path.size() - 1] == '/' ? "" : "/") + r.getIndex();
+  Logger::log_dbg1("Response::_getBody: trying to read from file: " + path);
+
+  _mimeType = WsrvLib::getMimeTypeFromPath(path);
+
+  std::ifstream target;
+
+  if (_mimeType != "text/html")
+    target.open(path.c_str(), std::ios_base::binary);
   else
-    _body = "";
+    target.open(path.c_str());
+
+  // FIXME: is this really not good if file could not be opened?
+  if (!target) {
+    _status = HTTP_404;
+    _body   = WsrvLib::getDefaultErrPage(HTTP_404);
+    return;
+  }
+
+  // get length of file:
+  target.seekg(0, target.end);
+  int length = target.tellg();
+  target.seekg(0, target.beg);
+
+  // FIXME: check length
+  // QUESTION: do we still need it here?
+  if (length <= 0) {
+    _status = HTTP_404;
+    _body   = WsrvLib::getDefaultErrPage(_status);
+    return;
+  }
+
+  Logger::log_dbg1("Response::_getBody: length = " + int2str(length));
+
+  // QUESTION: is this really the optimal solution?
+  // FIXME: what about binary data?
+  std::vector<char> buffer(length);
+
+  // good2know: does not throw but sets the badbit
+  target.read(&buffer[0], length);
+
+  if (target)
+    // like this even NUL bytes and other weird binary-mode data is written to
+    // the std::string obj.
+    //
+    // Furthermore std::string::assign might throw exceptions if the assigned
+    // data is too large. So we catch it here
+    try {
+      _body.assign(buffer.begin(), buffer.end());
+    } catch (const std::exception& e) {
+      Logger::log_err("In Response::_getBody: read body too large!");
+      _status = HTTP_413;
+      _body   = WsrvLib::getDefaultErrPage(_status);
+      return;
+    }
 }
 
 void Response::_buildRespoHdrs()
 {
-  _respoHeaders["Startline"] = "HTTP/1.1 " + WsrvLib::getStatusStr(_statusCode);
+  _respoHeaders["Startline"] = "HTTP/1.1 " + WsrvLib::getStatusStr(_status);
   _respoHeaders["Server"]    = "m0fr1m's webserv " VERSION;
 
   // FIXME: maybe use sth else here
   _respoHeaders["Date"] = Logger::getLogtime();
 
   _respoHeaders["Content-Type"] =
-      (_statusCode == HTTP_200) ? _mimeType : "text/html";
+      (_status == HTTP_200) ? _mimeType : "text/html";
 
   _respoHeaders["Content-Length"] = int2str(_body.size());
 
   str conn;
-  if ((_statusCode >= HTTP_400 && (_statusCode != HTTP_404)) || _closeConn)
+  if ((_status >= HTTP_400 && (_status != HTTP_404)) || _closeConn)
     conn = "close";
   else
     conn = "keep-alive";
@@ -200,15 +242,19 @@ str Response::getRespoStr() const { return _respoStr; }
 // reset.
 void Response::reset()
 {
-  _statusCode          = HTTP_200;
+  _status              = HTTP_200;
   _reqline.httpVersion = HTTPVER_UNKNOWN;
+  _matchedRoute        = NULL;
+  _reqline.method      = M_UNKNOWN;
+  _req                 = NULL;
+
   _reqline.target.clear();
-  _reqline.method = M_GET;
   _reqHeaders.clear();
   _respoHeaders.clear();
   _body.clear();
   _mimeType.clear();
   _respoStr.clear();
+  _targetPath.clear();
 }
 
 // helper function for generating the response for a failes Req.
@@ -232,7 +278,7 @@ std::map<str, str> Response::_buildErrRespoHdrs(
 }
 
 // Returns the response string to a given error status code.
-str Response::genErrResponse(e_HTTPStatus errCode, constr errPage)
+str Response::genDefaultErrResponse(e_HTTPStatus errCode, constr errPage)
 {
   str respostr;
   str body;
@@ -254,3 +300,15 @@ str Response::genErrResponse(e_HTTPStatus errCode, constr errPage)
   respostr += CRLF + body;
   return respostr;
 }
+
+// MASSIVE TODO !!!!!
+
+void Response::_handleBadRequest() {}
+
+void Response::_handleRedir() {}
+
+void Response::_handleCGI() {}
+
+void Response::_handleSimplePost() {}
+
+void Response::_handleDelete() {}

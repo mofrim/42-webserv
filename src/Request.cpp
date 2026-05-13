@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 23:39:57 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/12 20:30:34 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/13 11:49:47 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,11 +19,7 @@
 
 // --------------------------------=[ OCF ]=-------------------------------- //
 
-Request::Request():
-  _vsrv(NULL), _reqstr(""), _hdrLines(0), _reqFinished(false),
-  _hdrComplete(false), _bodyComplete(false), _closeConn(false),
-  _matchedRoute(NULL)
-{}
+Request::Request() { this->reset(); }
 
 Request::Request(const Request& o)
 {
@@ -35,7 +31,6 @@ Request::Request(const Request& o)
     _statusCode    = o._statusCode;
     _reqline       = o._reqline;
     _headers       = o._headers;
-    _reqFinished   = o._reqFinished;
     _hdrComplete   = o._hdrComplete;
     _bodyComplete  = o._bodyComplete;
     _hdrLines      = o._hdrLines;
@@ -43,6 +38,10 @@ Request::Request(const Request& o)
     _requestTarget = o._requestTarget;
     _targetPath    = o._targetPath;
     _matchedRoute  = o._matchedRoute;
+    _isCGI         = o._isCGI;
+    _isSimplePOST  = o._isSimplePOST;
+    _isDELETE      = o._isDELETE;
+    _isRedir       = o._isRedir;
   }
 }
 
@@ -56,7 +55,6 @@ Request& Request::operator=(const Request& o)
     _statusCode    = o._statusCode;
     _reqline       = o._reqline;
     _headers       = o._headers;
-    _reqFinished   = o._reqFinished;
     _hdrComplete   = o._hdrComplete;
     _bodyComplete  = o._bodyComplete;
     _hdrLines      = o._hdrLines;
@@ -64,6 +62,10 @@ Request& Request::operator=(const Request& o)
     _requestTarget = o._requestTarget;
     _targetPath    = o._targetPath;
     _matchedRoute  = o._matchedRoute;
+    _isCGI         = o._isCGI;
+    _isSimplePOST  = o._isSimplePOST;
+    _isDELETE      = o._isDELETE;
+    _isRedir       = o._isRedir;
   }
   return *this;
 }
@@ -79,49 +81,43 @@ Request::Request(Client *cli, const std::string& reqstr)
   _vsrv          = cli->getVsrv();
   _cli           = cli;
   _reqstr        = reqstr;
-  _reqFinished   = false;
   _hdrComplete   = false;
+  _bodyComplete  = false;
   _hdrLines      = _countReqLines(reqstr);
   _closeConn     = false;
   _requestTarget = "";
   _matchedRoute  = NULL;
+  _isCGI         = false;
+  _isSimplePOST  = false;
+  _isDELETE      = false;
+  _isRedir       = false;
 }
 
-e_HTTPStatus Request::parseHeaders()
-{
-  if ((_statusCode = parseReqLine()) >= HTTP_400) {
-    Logger::log_dbg1("Request::parseReqline: >=400");
-    return _statusCode;
-  }
-  if ((_statusCode = _parseHeaders()) != HTTP_200) {
-    Logger::log_dbg1("Request::_parseHeaders: >=400");
-    return _statusCode;
-  }
-  if ((_statusCode = checkHeaders()) != HTTP_200) {
-    Logger::log_dbg1("Request::checkHeaders: >=400");
-    return _statusCode;
-  }
-  return HTTP_200;
-}
-
-// When we hit this function, which is only done at the bottom of
-// RquestHandler::read_request, the header will already be parsed and found to
-// be ok. That's why we here only have to deal with response-generation!
+// There are 2 options when we get here:
 //
-// QUESTION: should i handle CGI in here? Redirect? Routematching?
-// NEXT
+//  1) Request was valid and so we do normal processing.
 //
-// What will i do in here????
-void Request::process()
+//  2) Request was bad, the only thing we have to do is properly look up the
+//     right error page from server scope and feed that into the respostr. If
+//     that fails we have to return default 404
+void Request::processReq()
 {
-  _reqFinished = true;
-  _matchRoute();
-  Logger::logBug("MATCHED ROUTE: " + _matchedRoute->getPath());
-  Logger::logBug("TARGET PATH: " + _targetPath);
 
-  // What now?
+  // iff request wasn't bad try to match route
+  if (this->badRequest() == false) {
+    _matchRoute();
 
-  _statusCode = _respo.genResponse(*this);
+    Logger::logBug("MATCHED ROUTE: " + _matchedRoute->getPath());
+    Logger::logBug("TARGET PATH: " + _targetPath);
+
+    // classify request a little
+    _isCGI        = !_matchedRoute->getCgi().empty();
+    _isSimplePOST = (!_isCGI && _reqline.method == M_POST);
+    _isDELETE     = (_reqline.method == M_DELETE);
+    _isRedir      = (_matchedRoute->getRedir().first != HTTP_0);
+  }
+
+  _statusCode = _respo.generateResponse(*this);
 }
 
 // QUESTION: is the targetPath validated enough when we come here?
@@ -170,6 +166,7 @@ void Request::_matchRoute()
     _targetPath = _requestTarget.substr(ps);
 }
 
+// TODO: add body separation here for POST reqs
 void Request::append(const str& s)
 {
   _reqstr += s;
@@ -220,10 +217,13 @@ void Request::reset()
   _hdrLines            = 0;
   _hdrComplete         = false;
   _bodyComplete        = false;
-  _reqFinished         = false;
   _reqline.httpVersion = HTTPVER_UNKNOWN;
   _reqline.method      = M_GET;
   _matchedRoute        = NULL;
+  _isCGI               = false;
+  _isSimplePOST        = false;
+  _isDELETE            = false;
+  _isRedir             = false;
 
   _targetPath.clear();
   _requestTarget.clear();
@@ -279,6 +279,18 @@ const t_RequestLine& Request::getReqline() const { return _reqline; }
 
 const std::map<str, str>& Request::getHeaders() const { return _headers; }
 
-str Request::getResponseStr() const { return _respo.getRespoStr(); }
+str          Request::getResponseStr() const { return _respo.getRespoStr(); }
+const Route *Request::getMatchedRoute() const { return _matchedRoute; }
 
-bool Request::isFinished() const { return _reqFinished; }
+constr& Request::getTargetPath() const { return _targetPath; }
+
+// iff at any point we end up with a HTTP_400 the header was bad in some way.
+bool Request::badRequest() const { return _statusCode == HTTP_400; }
+
+bool Request::isCGI() const { return _isCGI; }
+
+bool Request::isSimplePOST() const { return _isSimplePOST; }
+
+bool Request::isDELETE() const { return _isDELETE; }
+
+bool Request::isRedir() const { return _isRedir; }

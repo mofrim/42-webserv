@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 19:13:35 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/11 18:45:26 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/13 11:45:54 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,7 +80,7 @@ void RequestHandler::readRequest()
     req.append(_buffer);
   else {
     Logger::log_srv(_vsrvName, "Starting new Req");
-    _cli->setReq(Request(_cli, _buffer));
+    _cli->setReq(Request(_cli, _buffer)); // this is why **need** copy ctor!
     _cli->setState(CLI_READ);
   }
 
@@ -97,20 +97,17 @@ void RequestHandler::readRequest()
   //  a) a possible Content-Length field
   //  b) a possible Host header for Virtual Server routing
   if (req.hdrComplete()) {
-    e_HTTPStatus status = req.parseHeaders();
-    if (status != HTTP_200) {
-      Logger::log_dbg1("RequestHandler: 400 from header parsing");
-      _cli->setState(CLI_SEND);
-      return;
-    }
-    _setVirtualServerFromHeader();
+    if (req.parseReqHeaders() == HTTP_400)
+      Logger::logDbg1(
+          "RequestHandler::readRequest", "400 from Req::parseHeaders");
+    else
+      _setVirtualServerFromHeader();
   }
 
-  if (_cli->isReqComplete()) {
-    Logger::log_reqres(
-        _vsrvName, "Request complete", _cli->getReq().getReqstr());
-    _cli->processRequest();
+  if (req.reqComplete() || req.badRequest()) {
+    Logger::log_reqres(_vsrvName, "Processing Request...", req.getReqstr());
     _cli->setState(CLI_SEND);
+    req.processReq();
   }
 }
 
@@ -121,41 +118,39 @@ void RequestHandler::readRequest()
 //
 // When this function is called there are 2 possibilities:
 //
-//    1) The Request was completed normally and Client::setReqFinished
-//       has been called. Then als Request::_parseRequest was called and we will
-//       have a generated Response stored in Request::_respo which we can send.
+//    1) The Request was completed normally. Then also Request::processReq was
+//       called and we will have a generated Response stored in Request::_respo
+//       which we can send.
 //
-//    2) The Request was not completely received due to timeout or header
-//       errors. Then we will not yet have a generated response to send, so we
-//       need to do that.
+//    2) The Request was not processed normally. There are several reasons for
+//       this:
+//
+//      a) Bad req -> there were hdr errors. So no route is matched and only if
+//      the client is not virtual we might look up the
 //
 void RequestHandler::writeResponse()
 {
   str          response;
   e_HTTPStatus statusCode;
 
+  // QUESTION what happens here if a client connected but never sent anything?
+  // ANSWER timeout. the clients req object will have been default contructed.
+  // that is reqComplete == false.
   Request& req = _cli->getReq();
 
-  // when we get here. do i still need to look for the errorPages? do i need to
-  // somehow try and resolve the target?
-  if (req.isFinished() == false) {
+  if (_cli->isTimeout()) {
 
-    // FIXME: maybe tiemout can also happen with finished rquests?!?!
-    if (_cli->isTimeout()) {
-      Logger::log_dbg1("RequestHandler: 408 due to timeout");
-      statusCode = HTTP_408;
-    }
-    else if (req.reqError())
-      statusCode = req.getStatusCode();
-    else {
-      Logger::log_dbg1("RequestHandler: 400 due to unfinished req");
-      statusCode = HTTP_400;
-    }
+    Logger::log_dbg1("RequestHandler: 408 due to timeout");
+    statusCode = HTTP_408;
 
-    // TODO: get errorPage if any
-    response = Response::genErrResponse(statusCode);
+    if (_cli->isVirtual())
+      response = Response::genDefaultErrResponse(statusCode);
+    else
+      // TODO add proper errorPage from server scope getting here
+      response = Response::genDefaultErrResponse(statusCode);
   }
   else {
+
     statusCode = req.getStatusCode();
     response   = req.getResponseStr();
   }
@@ -170,6 +165,7 @@ void RequestHandler::writeResponse()
 
   ssize_t bytes_sent = send(_cli->getFd(), response.data(), response.size(), 0);
 
+  // QUESTION: can we somehow provoke this for testing?
   if (bytes_sent == -1) {
     Logger::log_err("Couldn't send response!");
     return;

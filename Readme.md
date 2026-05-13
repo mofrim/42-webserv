@@ -42,6 +42,10 @@ i.e., targets have to start with a "/", otherwise `400`!
 
 ### the listen directive in cfgfile will have to be of format addr:port!
 
+### if sth in the header is wrong -> 400 -> routes are not matched!
+
+if errorpages in the server scope are set the corresponding page is tried to be
+returned. if not found -> 404
 
 ---
 

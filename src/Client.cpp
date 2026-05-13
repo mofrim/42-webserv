@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/14 20:51:06 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/11 17:43:35 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/13 10:28:17 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,6 @@
 #include "VServer.hpp"
 #include "utils.hpp"
 
-#include <iostream>
 #include <sys/epoll.h>
 #include <unistd.h>
 // --------------------------------=[ OCF ]=-------------------------------- //
@@ -38,6 +37,7 @@ Client::Client(int fd, VServer *vsrv, const str& addr, in_port_t port):
     _reqHandler.setVsrvName("__VIRTUAL__");
 }
 
+// not used
 Client& Client::operator=(const Client& o)
 {
   (void)o;
@@ -136,19 +136,16 @@ bool       Client::isIdling() const { return _state == CLI_IDLE; }
 bool       Client::isReading() const { return _state == CLI_READ; }
 bool       Client::isSending() const { return _state == CLI_SEND; }
 bool       Client::isDisco() const { return _state == CLI_DISCO; }
-bool       Client::isReqComplete() { return _req.reqComplete(); }
 
-bool                    Client::isTimeout() const { return _timeout; }
-void                    Client::setFd(int fd) { _clientFd = fd; }
-int                     Client::getFd() const { return _clientFd; }
-void                    Client::setLastActive() { _lastActive = time(NULL); }
-clock_t                 Client::getLastActive() const { return (_lastActive); }
-VServer                *Client::getVsrv() const { return _vsrv; }
+bool     Client::isTimeout() const { return _timeout; }
+void     Client::setFd(int fd) { _clientFd = fd; }
+int      Client::getFd() const { return _clientFd; }
+void     Client::setLastActive() { _lastActive = time(NULL); }
+clock_t  Client::getLastActive() const { return (_lastActive); }
+VServer *Client::getVsrv() const { return _vsrv; }
+str      Client::getAddr() const { return _addr; }
+u16      Client::getPort() const { return _port; }
+void     Client::timeout() { _timeout = true; }
+bool     Client::isVirtual() const { return _vsrv == NULL; }
+
 std::vector<VServer *>& Client::getPotentialVsrvs() { return _potentialVsrvs; }
-str                     Client::getAddr() const { return _addr; }
-u16                     Client::getPort() const { return _port; }
-void                    Client::timeout() { _timeout = true; }
-
-// sets a fully received Req to finished which also runs
-// Request::_parseRequest()
-void Client::processRequest() { _req.process(); }
