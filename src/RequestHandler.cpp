@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 19:13:35 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/13 14:40:15 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/13 19:25:27 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -192,10 +192,11 @@ void RequestHandler::_setVirtualServerFromHeader()
 {
   if (_vsrvName == "__VIRTUAL__") {
 
-    const std::map<str, str>& hdrs = _cli->getReq().getHeaders();
+    std::map<str, str>& hdrs = _cli->getReq().getHeaders();
 
-    if (hdrs.find("Host") != hdrs.end()) {
-      str host = hdrs.at("Host");
+    // FIXME is lowercasing alright here?
+    if (hdrs.find("host") != hdrs.end()) {
+      str host = hdrs["host"];
 
       for (std::vector<VServer *>::iterator it =
                _cli->getPotentialVsrvs().begin();

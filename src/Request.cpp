@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 23:39:57 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/13 16:24:10 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/13 19:23:07 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -140,7 +140,7 @@ void Request::_matchRoute()
 
   // return direct matches immediately
   if (vsrvRoutes.find(_requestTarget) != vsrvRoutes.end()) {
-    _matchedRoute = &vsrvRoutes.at(_requestTarget);
+    _matchedRoute = &vsrvRoutes[_requestTarget];
     return;
   }
 

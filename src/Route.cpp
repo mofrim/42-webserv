@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/09 16:42:51 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/13 15:36:42 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/13 19:28:00 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -125,6 +125,9 @@ void Route::reset()
 
 void Route::addErrPage(e_HTTPStatus s, const str& path) { _errPages[s] = path; }
 
+// keep this for documenting how annoying using std::map::at() in C++98 is! It
+// might throw out_of_range exception! So, better make every maps at least
+// non-const ref in order to be able to use [] operator.
 str Route::getErrPage(e_HTTPStatus s) const
 {
   str ret;

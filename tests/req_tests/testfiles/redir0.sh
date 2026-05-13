@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+# TODO somehow make this reproducible by hardcoding which cfg this is tested
+# against!
+
 # hit redir target
 
 if [ $# -ne 2 ]; then
