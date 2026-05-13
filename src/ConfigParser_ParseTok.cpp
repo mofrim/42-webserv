@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/08 21:14:52 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/11 10:40:29 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/13 15:09:23 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -215,11 +215,6 @@ bool ConfigParser::_parseTokError(VServerCfg& vcfg)
   strip(split[1]);
 
   e_HTTPStatus errCode = WsrvLib::short2HttpStatus(str2u16(split[0]));
-
-  if (errCode < 400) {
-    Logger::logCfgErr(_tokIt->line, "Invalid error status code!");
-    return false;
-  }
 
   if (!isValidRoute(split[1])) {
     Logger::logCfgErr(_tokIt->line, "Invalid file route for errorPage!");
