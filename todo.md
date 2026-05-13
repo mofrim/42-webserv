@@ -2,17 +2,10 @@
 
 ## current TODOs
 
-- [x] according to [this
-  sectio](https://datatracker.ietf.org/doc/html/rfc9112#name-field-syntax) all
-  field-names are case-insensitive! So, i should convert them to lower and then
-  the rest follows.
 
 - [ ] implement Content-Length request handling. See [this
   sec](https://datatracker.ietf.org/doc/html/rfc9112#name-message-parsing) for
   instructions
-
-- [ ] for every route `/route` add a redirect to `/route/`. in general: anything
-  that ends with a slash is a dir everything else a file?! Clarify
 
 - [ ] if a not routed target like `/moep/` is requested this is `403 Forbidden`.
   The same holds true for `/moep` but then again there is a `301` to `/moep/` in
@@ -27,19 +20,11 @@
       replace each bare CR with SP before processing the element or forwarding
       the message.
 
-- [x] and this:
-
-      In the interest of robustness, a server that is expecting to receive and
-      parse a request-line SHOULD ignore at least one empty line (CRLF) received
-      prior to the request-line.
-
 - [ ] and this:
 
       A sender MUST NOT send whitespace between the start-line and the first
       header field.
 
-- [ ] make the whole CNAME thing work. Problem is: that i work with the IP only
-      from the very beginning.
 
 - [ ] add func comments to hpp *not* to cpp files -> global visibility!
 
@@ -57,18 +42,16 @@
       file on the local file system. If there are several matching location
       blocks nginx selects the one with the **longest prefix**.
 
-- [ ] impl redirection
+- [ ] support URL redirection meaning: `redirect` directive will also take a
+  full URL as redir target!
 
 - [ ] find out what should be handled differently with other HTTP-versions
 
-- [ ] GET THE CONFIG FORMAT STRAIGHT!!!
-  - [ ] which config options will i support???
+- [ ] CGI
 
-- [ ] `GET /../bla.md HTTP/1.1` should not be working?!
+- [ ] Simple POST
 
-- [ ] implement tokenization
-
-- [ ] at least think about CGI
+- [ ] DELETE
 
 - [ ] support uploading file to the server using POST method, 
   + [ ] either without query component (POST /upload HTTP/1.1) resulting in a
@@ -86,9 +69,25 @@
 ## DONEs
 
 - [x] fix hanging cfg:
-
 - [x] finish virtual servers by making server listening on localhost:1111 and
       127.0.0.1:1111 with the same srvName distinguishable... **or let it be!**
+- [x] impl redirection
+- [x] GET THE CONFIG FORMAT STRAIGHT!!!
+- [x] which config options will i support???
+- [x] `GET /../bla.md HTTP/1.1` should not be working?!
+- [x] implement tokenization
+- [x] make the whole CNAME thing work. Problem is: that i work with the IP only
+      from the very beginning.
+- [x] according to [this
+  sectio](https://datatracker.ietf.org/doc/html/rfc9112#name-field-syntax) all
+  field-names are case-insensitive! So, i should convert them to lower and then
+  the rest follows.
+- [x] and this:
+
+      In the interest of robustness, a server that is expecting to receive and
+      parse a request-line SHOULD ignore at least one empty line (CRLF) received
+      prior to the request-line.
+
 
 ## more on individual todos...
 
