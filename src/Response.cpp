@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/23 19:11:25 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/13 17:08:37 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/13 23:47:48 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -182,7 +182,8 @@ void Response::_buildRespoHdrs()
 
   if (_req->isRedir())
     _respoHeaders["Location"] = "http://" + _req->getHeaders()["host"] +
-        _req->getRedir().second + _req->getTargetPath() + "?" +
+        _req->getRedir().second + _req->getTargetPath() +
+        (_req->getReqline().target.getQuery().empty() ? "" : "?") +
         _req->getReqline().target.getQueryStr();
 
   str conn;
