@@ -6,7 +6,7 @@
 #    By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/12/01 11:45:58 by fmaurer           #+#    #+#              #
-#    Updated: 2026/05/13 10:27:46 by fmaurer          ###   ########.fr        #
+#    Updated: 2026/05/13 17:07:45 by fmaurer          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -91,14 +91,20 @@ run1: fclean
 	make DBG=1
 	./$(NAME)
 
-dbg1: fclean
+dbg1:
+	make DBG=1
+
+dbg1-re: fclean
 	make DBG=1
 
 run2: fclean
 	make DBG=2
 	./$(NAME)
 
-dbg2: fclean
+dbg2:
+	make DBG=2
+
+dbg2-re: fclean
 	make DBG=2
 
 debug: CFLAGS += -DLOGLEVEL=2
@@ -142,4 +148,5 @@ re: fclean $(NAME)
 re-run: re run
 
 .PHONY: all clean fclean re bear run cpptests cpptests-run cpptests-clean \
-	cpptests-bear shelltests debug debug-run run1 run2 re-run dbg1 dbg2
+	cpptests-bear shelltests debug debug-run run1 run2 re-run dbg1 dbg2 dbg1-re \
+	dbg2-re

@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/26 10:03:57 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/11 10:22:48 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/13 16:59:58 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -107,6 +107,10 @@ str meth2str(e_Method m)
   return "UNKNOWN";
 }
 
+// check if given path is a
+// - dir -> return 1
+// - or a normal file -> return 0
+// - or inexistent -> return -1
 int isDir(const str& path)
 {
   struct stat sb;

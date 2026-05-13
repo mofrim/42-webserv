@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/23 19:11:25 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/13 15:40:35 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/13 17:08:37 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,6 @@ Response::Response(const Response& o)
   if (this != &o) {
     _status       = o._status;
     _reqline      = o._reqline;
-    _reqHeaders   = o._reqHeaders;
     _cli          = o._cli;
     _vsrv         = o._vsrv;
     _respoHeaders = o._respoHeaders;
@@ -45,7 +44,6 @@ Response& Response::operator=(const Response& o)
   if (this != &o) {
     _status       = o._status;
     _reqline      = o._reqline;
-    _reqHeaders   = o._reqHeaders;
     _cli          = o._cli;
     _vsrv         = o._vsrv;
     _respoHeaders = o._respoHeaders;
@@ -64,11 +62,10 @@ Response::~Response() {}
 
 // FIXME maybe refac this to use req directly. depends on how often these will
 // be used later in code
-void Response::_setFieldsFromReq(const Request& req)
+void Response::_setFieldsFromReq(Request& req)
 {
   _status       = req.getStatusCode();
   _reqline      = req.getReqline();
-  _reqHeaders   = req.getHeaders();
   _cli          = req.getCli();
   _vsrv         = req.getVsrv();
   _closeConn    = req.closeConn();
@@ -87,7 +84,7 @@ void Response::_setFieldsFromReq(const Request& req)
 //     is finding the corresponding error page from vsrv BUT keep in mind that
 //     client could be virtual!
 //
-e_HTTPStatus Response::generateResponse(const Request& req)
+e_HTTPStatus Response::generateResponse(Request& req)
 {
   _setFieldsFromReq(req);
 
@@ -163,7 +160,7 @@ void Response::_getBody200()
       path += "/" + _targetPath;
   }
 
-  if (isDir(path))
+  if (isDir(path) == 1)
     path += (path[path.size() - 1] == '/' ? "" : "/") + r.getIndex();
   Logger::log_dbg1("Response::_getBody: trying to read from file: " + path);
 
@@ -184,7 +181,9 @@ void Response::_buildRespoHdrs()
   _respoHeaders["Content-Length"] = int2str(_body.size());
 
   if (_req->isRedir())
-    _respoHeaders["Location"] = _req->getRedir().second;
+    _respoHeaders["Location"] = "http://" + _req->getHeaders()["host"] +
+        _req->getRedir().second + _req->getTargetPath() + "?" +
+        _req->getReqline().target.getQueryStr();
 
   str conn;
   if ((_status >= HTTP_400 && (_status != HTTP_404)) || _closeConn)
@@ -208,7 +207,6 @@ void Response::reset()
   _req                 = NULL;
 
   _reqline.target.clear();
-  _reqHeaders.clear();
   _respoHeaders.clear();
   _body.clear();
   _mimeType.clear();

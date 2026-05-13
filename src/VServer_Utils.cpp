@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/16 12:11:11 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/13 13:18:07 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/13 16:21:26 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -155,7 +155,7 @@ const std::set<u16>& VServer::getPorts() const { return _ports; }
 
 void VServer::setRoutes(const std::map<str, Route>& r) { _routes = r; }
 
-const std::map<str, Route>& VServer::getRoutes() const { return _routes; }
+std::map<str, Route>& VServer::getRoutes() { return _routes; }
 
 std::string VServer::getName() const { return (_srvName); }
 

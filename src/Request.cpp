@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 23:39:57 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/13 15:05:33 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/13 16:24:10 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -136,7 +136,7 @@ void Request::processReq()
 // how to match target == `/miep/index.html` with `/miep`?
 void Request::_matchRoute()
 {
-  const std::map<str, Route>& vsrvRoutes = _vsrv->getRoutes();
+  std::map<str, Route>& vsrvRoutes = _vsrv->getRoutes();
 
   // return direct matches immediately
   if (vsrvRoutes.find(_requestTarget) != vsrvRoutes.end()) {
@@ -144,15 +144,15 @@ void Request::_matchRoute()
     return;
   }
 
-  std::map<size_t, const Route *> rank;
+  std::map<size_t, Route *> rank;
 
-  for (std::map<str, Route>::const_iterator rit = vsrvRoutes.begin();
+  for (std::map<str, Route>::iterator rit = vsrvRoutes.begin();
       rit != vsrvRoutes.end();
       ++rit)
   {
-    const Route& r         = rit->second;
-    str          routePath = r.getPath();
-    size_t       i         = 0;
+    Route& r         = rit->second;
+    str    routePath = r.getPath();
+    size_t i         = 0;
     while (i < routePath.size() && i < _requestTarget.size() &&
         routePath[i] == _requestTarget[i])
       ++i;
@@ -284,10 +284,11 @@ e_HTTPStatus Request::getStatusCode() const { return _statusCode; }
 
 const t_RequestLine& Request::getReqline() const { return _reqline; }
 
-const std::map<str, str>& Request::getHeaders() const { return _headers; }
+std::map<str, str>& Request::getHeaders() { return _headers; }
 
-str          Request::getResponseStr() const { return _respo.getRespoStr(); }
-const Route *Request::getMatchedRoute() const { return _matchedRoute; }
+str Request::getResponseStr() const { return _respo.getRespoStr(); }
+
+Route *Request::getMatchedRoute() { return _matchedRoute; }
 
 constr& Request::getTargetPath() const { return _targetPath; }
 

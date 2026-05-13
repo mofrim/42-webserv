@@ -47,6 +47,17 @@ i.e., targets have to start with a "/", otherwise `400`!
 if errorpages in the server scope are set the corresponding page is tried to be
 returned. if not found -> 404
 
+### my current redirection logic is different from nginx!
+
+in nginx, if `/redir` is a `return 301 /redir-target` a request like `GET
+/redir/bla.html` will only bluntly redirect to `/redir-target` the way i handle
+it now is the redirect will go to `/redir-target/bla.html`. so, the `targetPath`
+is again appended to the redirected URL!
+With the logic like this, you **need** to specify a new `root` for any
+redirected path that corresponds to some real directory! F.ex. if req is for
+`/redir/bla.html` but no root is given in `/redir-target` then default root is
+used and so `./www/bla.html` is being tried.
+
 ---
 
 ## the initial webserv data-flow

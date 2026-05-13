@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/23 19:11:06 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/13 13:12:33 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/13 16:20:22 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,24 +27,23 @@ class Response {
 
     // FIXME: Set them as pointers from Request for convenient access in here.
     // Or do something more elegant than just copying them over.
-    e_HTTPStatus       _status;
-    t_RequestLine      _reqline;
-    std::map<str, str> _reqHeaders;
-    Client            *_cli;
-    VServer           *_vsrv;
-    bool               _closeConn;
+    e_HTTPStatus  _status;
+    t_RequestLine _reqline;
+    Client       *_cli;
+    VServer      *_vsrv;
+    bool          _closeConn;
 
     std::map<str, str> _respoHeaders;
     str                _body;
     str                _mimeType;
     str                _respoStr;
 
-    const Route *_matchedRoute;
-    str          _targetPath; // the target-path minus the route
+    Route *_matchedRoute;
+    str    _targetPath; // the target-path minus the route
 
-    const Request *_req;
+    Request *_req;
 
-    void _setFieldsFromReq(const Request& req);
+    void _setFieldsFromReq(Request& req);
     void _getBody200();
     void _getBody400();
     void _readBodyFromFile(constr& path);
@@ -65,7 +64,7 @@ class Response {
     Response& operator=(const Response& other);
     ~Response();
 
-    e_HTTPStatus generateResponse(const Request& req);
+    e_HTTPStatus generateResponse(Request& req);
     str          getRespoStr() const;
 
     void reset();

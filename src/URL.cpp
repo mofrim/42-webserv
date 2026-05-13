@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/06 22:32:39 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/13 12:50:54 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/13 17:04:40 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -277,8 +277,8 @@ void URL::clear()
   _bad   = false;
 }
 
-// return the query key-value-map as a string
-str URL::getQueryAsStr() const
+// return the query key-value-map as a Comma Separated String
+str URL::getQueryCSStr() const
 {
   str ret;
 
@@ -287,5 +287,19 @@ str URL::getQueryAsStr() const
   {
     ret += it->first + "=" + it->second + (++it != _query.end() ? ", " : "");
   }
+  return ret;
+}
+
+// return query string in URL compatible format
+str URL::getQueryStr() const
+{
+  str ret;
+
+  for (std::map<str, str>::const_iterator it = _query.begin();
+      it != _query.end();)
+  {
+    ret += it->first + "=" + it->second + (++it != _query.end() ? "&" : "");
+  }
+
   return ret;
 }

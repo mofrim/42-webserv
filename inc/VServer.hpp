@@ -90,8 +90,8 @@ class VServer {
     const std::set<int>& getListenFds() const;
     const std::set<u16>& getPorts() const;
 
-    void                        setRoutes(const std::map<str, Route>& r);
-    const std::map<str, Route>& getRoutes() const;
+    void                  setRoutes(const std::map<str, Route>& r);
+    std::map<str, Route>& getRoutes();
 
     void setMaxBodySize(u32 mbs);
     u32  getMaxBodySize() const;

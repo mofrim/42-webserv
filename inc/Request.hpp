@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 23:39:07 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/13 15:05:50 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/13 16:20:48 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,9 +46,9 @@ class Request {
     t_RequestLine      _reqline;
     std::map<str, str> _headers;
 
-    str          _requestTarget; // the targetstr from requestline
-    const Route *_matchedRoute;
-    str          _targetPath; // the target-path minus the route
+    str    _requestTarget; // the targetstr from requestline
+    Route *_matchedRoute;
+    str    _targetPath; // the target-path minus the route
 
     std::pair<e_HTTPStatus, str> _redir;
 
@@ -100,16 +100,16 @@ class Request {
     void reset();
 
     // FIXME: maybe refs are okay here
-    const t_RequestLine&      getReqline() const;
-    const std::map<str, str>& getHeaders() const;
+    const t_RequestLine& getReqline() const;
+    std::map<str, str>&  getHeaders();
 
     // parsing
     // FIXME: which function should i expose here?
 
     e_HTTPStatus parseReqHeaders();
 
-    const Route *getMatchedRoute() const;
-    constr&      getTargetPath() const;
+    Route  *getMatchedRoute();
+    constr& getTargetPath() const;
 
     bool badRequest() const;
     bool hdrComplete();
