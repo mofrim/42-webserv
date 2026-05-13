@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/03 12:51:23 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/11 23:53:10 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/13 16:10:43 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -126,9 +126,13 @@ void VServer::_setupSockets(
   while (it != _cfgInterfaces.end()) {
 
     // resolving possible host-/domain-name to ip addr here for better
-    // comparability
-    str addr = Socket::resolveAddr(it->first);
-    if (addr.empty()) {
+    // comparability. if we cannot resolve ourselves -> skip iface
+    //
+    // ATTENTION if virtual server matching is malfunctioning this might be the
+    // first place to look into
+    str hostname = it->first;
+    str ipAddr   = Socket::resolveAddr(hostname);
+    if (ipAddr.empty()) {
       it = eraseIt(_cfgInterfaces, it);
       continue;
     }
@@ -153,21 +157,21 @@ void VServer::_setupSockets(
     while (itp != ports.end()) {
 
       int sockFd = -1;
-      if ((sockFd = _findVirtualBuddy(begin, cur, addr, *itp)) >= 0) {
+      if ((sockFd = _findVirtualBuddy(begin, cur, ipAddr, *itp)) >= 0) {
         Logger::log_msg("Found real virtual server: " + _srvName + " - " +
-            addr + ":" + int2str(*itp));
+            ipAddr + ":" + int2str(*itp));
         _virtualFds.insert(sockFd);
       }
       // the _srvName did match
       else if (sockFd == -42) {
         Logger::log_warn(
-            "Same interface AND srvName! Dropping duplicate iface for " + addr +
-            ":" + int2str(*itp));
+            "Same interface AND srvName! Dropping duplicate iface for " +
+            ipAddr + ":" + int2str(*itp));
         itp = eraseIt(ports, itp);
         continue;
       }
       else {
-        ipCnameFd = Socket::bindSocket(addr, *itp);
+        ipCnameFd = Socket::bindSocket(hostname, *itp);
         sockFd    = ipCnameFd.fd;
 
         if (sockFd == -1) {
@@ -193,7 +197,7 @@ void VServer::_setupSockets(
 
       // store fd and iface:port mapping for use in virtual server
       // identification
-      _fdIfaceMap[sockFd] = std::make_pair(addr, *itp);
+      _fdIfaceMap[sockFd] = std::make_pair(ipAddr, *itp);
 
       itp++;
     }
