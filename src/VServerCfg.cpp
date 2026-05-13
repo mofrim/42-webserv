@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/25 08:35:42 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/12 15:52:17 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/13 21:16:38 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -216,6 +216,9 @@ bool VServerCfg::checkEnsureCfg()
     // ensure that maxBodySize is set for every route
     if (r.getMaxBodySize() == 0)
       r.setMaxBodySize(_maxBodySize);
+
+    if (r.getRoot().empty())
+      r.setRoot(_root);
   }
   return true;
 }

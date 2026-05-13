@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/09 16:42:51 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/13 19:28:00 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/13 21:15:18 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@
 Route::Route()
 {
   _path        = "/";
-  _root        = "./www";
+  _root        = "";
   _autoindex   = false;
   _index       = "index.html";
   _maxBodySize = 0;
@@ -110,12 +110,12 @@ str Route::getRoot() const { return _root; }
 void Route::reset()
 {
   _path        = "/";
-  _root        = "./www";
   _autoindex   = false;
   _index       = "index.html";
   _maxBodySize = 0;
   _redir       = std::make_pair(HTTP_0, "");
 
+  _root.clear();
   _upload.clear();
   _methods.clear();
   _methods.insert(M_GET);
