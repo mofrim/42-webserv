@@ -37,13 +37,15 @@ fi
 
 exec 3<>/dev/tcp/"$hostname"/"$port"
 
+# ------------------------=[ test logic starts here ]=------------------------ #
+
 sendHdrField "GET / HTTP/1.1" 3
 sendHdrField "Host: moep" 3
 finishReq 3
 
 cat < ./zero >&3
 
-RESPONSE="$(timeout 0.3s cat <&3 | grep -E '200|400')"
+RESPONSE="$(timeout 0.3s cat <&3 2>/dev/null | grep -E '200|400')"
 echo "Response:"
 echo "---------"
 echo "${RESPONSE[@]}"
@@ -52,7 +54,7 @@ exec 3<&-
 
 # SIGINT kill webserv
 if [ $# -eq 2 ]; then
-	kill -INT %1
+	pkill -INT webserv
 fi
 
 if [[ -z "$(echo ${RESPONSE[@]} | grep 200)" ||  \

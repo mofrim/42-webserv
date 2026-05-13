@@ -52,8 +52,8 @@ echo "${RESPONSE[@]}"
 exec 3<&-
 
 # SIGINT kill webserv
-if [ $# -ne 3 ]; then
-	kill -INT %1
+if [ $# -eq 2 ]; then
+	pkill -INT webserv
 fi
 
 if [[ -z "$(echo ${RESPONSE[@]} | grep 200)" ||  \

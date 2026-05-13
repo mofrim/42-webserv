@@ -40,7 +40,9 @@ echo "${RESPONSE[@]}"
 exec 3<&-
 
 # SIGINT kill webserv
-kill -INT %1
+if [ $# -eq 2 ]; then
+	pkill -INT webserv
+fi
 
 if [ -z "$RESPONSE" ]; then
 	exit 1;

@@ -41,7 +41,7 @@ sendHdrField "GETA / HTTP/1.1" 3
 sendHdrField "Host: miep" 3
 finishReq 3
 
-RESPONSE="$(timeout 0.1s cat <&3 | grep 400)"
+RESPONSE="$(timeout 0.1s cat <&3 2>/dev/null | grep 400)"
 echo "Response:"
 echo "---------"
 echo "${RESPONSE[@]}"
@@ -49,7 +49,9 @@ echo "${RESPONSE[@]}"
 exec 3<&-
 
 # SIGINT kill webserv
-kill -INT %1
+if [ $# -eq 2 ]; then
+	pkill -INT webserv
+fi
 
 if [ -z "$RESPONSE" ]; then
 	exit 1;
