@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 23:39:07 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/13 22:23:13 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/13 23:21:08 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,7 @@ class Request {
   private:
     VServer *_vsrv;
     Client  *_cli;
-    str      _reqstr;
+    str      _reqdata;
     Response _respo;
 
     e_HTTPStatus _statusCode;

@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/26 10:03:57 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/13 16:59:58 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/13 23:34:59 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,7 @@
 #include <cstring>
 #include <errno.h>
 #include <fcntl.h>
+#include <iomanip>
 #include <iostream>
 #include <sys/stat.h>
 
@@ -229,3 +230,13 @@ void tolower(str& s)
 
 // veeery simple conversion to u16 without any overflow checking.
 u16 str2u16(const str& s) { return static_cast<u16>(atoi(s.c_str())); }
+
+str data2hexStr(constr& s)
+{
+  std::ostringstream oss;
+  for (size_t i = 0; i < s.size(); ++i) {
+    oss << "\\x" << std::hex << std::setw(2) << std::setfill('0')
+        << static_cast<int>(s[i]);
+  }
+  return oss.str();
+}

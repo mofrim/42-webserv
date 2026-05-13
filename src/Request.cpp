@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 23:39:57 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/13 22:50:41 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/13 23:21:08 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@ Request::Request(const Request& o)
   if (this != &o) {
     _vsrv          = o._vsrv;
     _cli           = o._cli;
-    _reqstr        = o._reqstr;
+    _reqdata       = o._reqdata;
     _respo         = o._respo;
     _statusCode    = o._statusCode;
     _reqline       = o._reqline;
@@ -51,7 +51,7 @@ Request& Request::operator=(const Request& o)
   if (this != &o) {
     _vsrv          = o._vsrv;
     _cli           = o._cli;
-    _reqstr        = o._reqstr;
+    _reqdata       = o._reqdata;
     _respo         = o._respo;
     _statusCode    = o._statusCode;
     _reqline       = o._reqline;
@@ -82,7 +82,7 @@ Request::Request(Client *cli, const std::string& reqstr)
 {
   _vsrv          = cli->getVsrv();
   _cli           = cli;
-  _reqstr        = reqstr;
+  _reqdata       = reqstr;
   _hdrComplete   = false;
   _bodyComplete  = false;
   _hdrLines      = _countReqLines(reqstr);
@@ -175,7 +175,7 @@ void Request::_matchRoute()
 // TODO: add body separation here for POST reqs
 void Request::append(char *s, ssize_t bytesRead)
 {
-  _reqstr.append(s, bytesRead);
+  _reqdata.append(s, bytesRead);
   _hdrLines += _countReqLines(s);
   Logger::log_reqres(_vsrv->getName(), "Appending to Req:", s);
 }
@@ -186,7 +186,7 @@ bool Request::hdrComplete()
 {
   if (_hdrComplete)
     return true;
-  _hdrComplete = (_reqstr.rfind(CRLFX2) != str::npos);
+  _hdrComplete = (_reqdata.rfind(CRLFX2) != str::npos);
   return _hdrComplete;
 }
 
@@ -218,7 +218,7 @@ str Request::getMethodStr() const
 // FIXME: make sure this is bullet-proof and nothing is missed-out!
 void Request::reset()
 {
-  _reqstr.clear();
+  _reqdata.clear();
   _statusCode          = HTTP_200;
   _hdrLines            = 0;
   _hdrComplete         = false;
@@ -275,7 +275,7 @@ bool Request::reqError() const { return _statusCode >= HTTP_400; }
 // should connection be closed?
 bool Request::closeConn() const { return _closeConn; }
 
-const str& Request::getReqstr() const { return _reqstr; }
+const str& Request::getReqstr() const { return _reqdata; }
 
 Client *Request::getCli() const { return _cli; }
 
@@ -310,6 +310,6 @@ const std::pair<e_HTTPStatus, str>& Request::getRedir() const { return _redir; }
 // already received we should check at least if the reqline is correct
 bool Request::reqlineReceived() const
 {
-  Logger::logBug("_reqstr.size = " + int2str(_reqstr.size()));
-  return (_hdrLines >= 2 || _reqstr.size() >= MAX_REQLINE_LEN);
+  Logger::logBug("_reqstr.size = " + int2str(_reqdata.size()));
+  return (_hdrLines >= 2 || _reqdata.size() >= MAX_REQLINE_LEN);
 }

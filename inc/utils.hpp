@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/03 11:26:23 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/11 10:21:41 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/13 23:34:54 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,17 +26,18 @@ str      inAddrToStr(const struct in_addr& addr);
 str      getAddrPortStr4(const struct sockaddr_in& addr);
 int      setFdNonBlocking(int fd);
 str      getErrStr();
-e_Method str2meth(const str& m);
+e_Method str2meth(constr& m);
 str      meth2str(e_Method m);
-int      isDir(const str& path);
+int      isDir(constr& path);
 str      strip(str str);
 void     tolower(str& s);
-u16      str2u16(const str& s);
+u16      str2u16(constr& s);
+str      data2hexStr(constr& s);
 
 std::vector<str> splitString(
-    const str& sstr, const str& delim, bool keepEmpty = false);
+    constr& sstr, constr& delim, bool keepEmpty = false);
 
-std::vector<str> splitStrWhite(const str& sstr, bool keepEmpty = false);
+std::vector<str> splitStrWhite(constr& sstr, bool keepEmpty = false);
 
 // -----------------------------=[ Templates ]=-----------------------------
 // //

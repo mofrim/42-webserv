@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/01 18:46:40 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/13 22:59:53 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/13 23:35:47 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,27 +43,31 @@ e_HTTPStatus Request::parseReqHeaders()
 // the HTTP-version. The URI is already converted to to lowercase
 e_HTTPStatus Request::_readReqline()
 {
-  if (_reqstr.size() > MAX_REQLINE_LEN)
+  if (_reqdata.size() > 2 * READ_BUFSIZE)
     return HTTP_400;
 
   int i = _skipEmptyHdrLine();
   int k = 0;
-  while (k < 6 && !std::isspace(_reqstr[i + k]))
+  while (k < 6 && !std::isspace(_reqdata[i + k]))
     k++;
   Logger::log_dbg1(
-      "Request: found this method: '" + _reqstr.substr(i, k) + "'");
-  if ((_reqline.method = str2meth(_reqstr.substr(i, k))) == M_UNKNOWN)
+      "Request: found this method: '" + _reqdata.substr(i, k) + "'");
+  if ((_reqline.method = str2meth(_reqdata.substr(i, k))) == M_UNKNOWN) {
+    Logger::log_srv(_vsrv->getName(),
+        "Invalid method in Reqline: '" + data2hexStr(_reqdata.substr(i, k)) +
+            "'");
     return HTTP_400;
+  }
 
   i = i + k + 1;
   k = 0;
-  while (k <= MAX_TARGET_LEN && !std::isspace(_reqstr[i + k]))
+  while (k <= MAX_TARGET_LEN && !std::isspace(_reqdata[i + k]))
     k++;
   Logger::log_dbg1(
-      "Request: found this target URL: '" + _reqstr.substr(i, k) + "'");
+      "Request: found this target URL: '" + _reqdata.substr(i, k) + "'");
   if (k > MAX_TARGET_LEN)
     return HTTP_400;
-  _reqline.target.parseTargetURL(_reqstr.substr(i, k));
+  _reqline.target.parseTargetURL(_reqdata.substr(i, k));
   if (_reqline.target.bad())
     return HTTP_400;
 
@@ -74,14 +78,14 @@ e_HTTPStatus Request::_readReqline()
 
   i = i + k + 1;
   k = 0;
-  while (i + k <= MAX_REQLINE_LEN && !std::isspace(_reqstr[i + k]))
+  while (i + k <= MAX_REQLINE_LEN && !std::isspace(_reqdata[i + k]))
     k++;
   if (i + k > MAX_REQLINE_LEN)
     return HTTP_400;
   Logger::log_dbg1(
-      "Request: found this httpVer: '" + _reqstr.substr(i, k) + "'");
-  _reqline.httpVersion = WsrvLib::str2HTTPVer(_reqstr.substr(i, k));
-  if (_reqstr.compare(i + k, 2, CRLF) != 0)
+      "Request: found this httpVer: '" + _reqdata.substr(i, k) + "'");
+  _reqline.httpVersion = WsrvLib::str2HTTPVer(_reqdata.substr(i, k));
+  if (_reqdata.compare(i + k, 2, CRLF) != 0)
     return HTTP_400;
 
   // FIXME: add here or somwhere else a NGINX like logmsg
@@ -92,7 +96,7 @@ e_HTTPStatus Request::_readReqline()
 // RFC. Also we strip any leading or trailing whitespaces from names and values.
 e_HTTPStatus Request::_parseHeaders()
 {
-  str              onlyHdrs = _reqstr.substr(0, _reqstr.find(CRLFX2) + 2);
+  str              onlyHdrs = _reqdata.substr(0, _reqdata.find(CRLFX2) + 2);
   std::vector<str> hdrLines = splitString(onlyHdrs, CRLF);
 
   // skipping the requline
@@ -160,7 +164,7 @@ e_HTTPStatus Request::_evaluateHdrs()
 // us.
 size_t Request::_skipEmptyHdrLine() const
 {
-  if (_reqstr.size() >= 2 && !_reqstr.compare(0, 2, CRLF))
+  if (_reqdata.size() >= 2 && !_reqdata.compare(0, 2, CRLF))
     return 2;
   return 0;
 }
@@ -171,7 +175,7 @@ std::vector< std::pair<str, str> > Request::_splitHdr()
   std::vector< std::pair<str, str> > ret;
 
   // isolate headers from body
-  str              onlyHdrs = _reqstr.substr(0, _reqstr.find(CRLFX2) + 2);
+  str              onlyHdrs = _reqdata.substr(0, _reqdata.find(CRLFX2) + 2);
   std::vector<str> hdrLines = splitString(onlyHdrs, CRLF);
 
   for (std::vector<str>::iterator it = hdrLines.begin(); it != hdrLines.end();
