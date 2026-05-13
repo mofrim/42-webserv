@@ -1,10 +1,8 @@
 #!/usr/bin/env bash
 
-# sending huge body... should be 200 first and then 400 as the body does not
-# make any sense as header
-
+# sending huge body with GET. get 200 at first but 400 and client close later
 # create hugefile using: `dd if=/dev/random of=./hugefile bs=1024 count=100000 `
-# this will be 100MiB but less will also work
+# this will be 100MiB
 
 if [ $# -lt 2 ]; then
 	echo "need at least 2 args: [-n] addr port"
@@ -17,6 +15,7 @@ if [[ $# -eq 3 && "$1" != "-n" ]]; then
 fi
 
 if [ ! -e ../_test_utils.sh ]; then
+
 	echo "test-utils not found!"
 	exit 1
 else
@@ -42,7 +41,7 @@ sendHdrField "GET / HTTP/1.1" 3
 sendHdrField "Host: moep" 3
 finishReq 3
 
-cat < ./hugefile >&3
+cat < ./zero >&3
 
 RESPONSE="$(timeout 0.3s cat <&3 | grep -E '200|400')"
 echo "Response:"
@@ -52,7 +51,7 @@ echo "${RESPONSE[@]}"
 exec 3<&-
 
 # SIGINT kill webserv
-if [ $# -ne 3 ]; then
+if [ $# -eq 2 ]; then
 	kill -INT %1
 fi
 

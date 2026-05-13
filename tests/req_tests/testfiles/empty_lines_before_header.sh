@@ -17,14 +17,27 @@ fi
 
 set -u
 
-exec 3<>/dev/tcp/"$1"/"$2"
+# change interface here if required
+hostname="$1"
+port="$2"
+
+$webserv $cfgDir/simplest.wsrv > /dev/null &
+
+sleep 0.1s
+
+exec 3<>/dev/tcp/"$hostname"/"$port"
 
 sendHdrField "" 3
 sendHdrField "GET / HTTP/1.1" 3
 sendHdrField "Host: miep" 3
 finishReq 3
+
 RESPONSE="$(timeout 0.1s cat <&3 | grep 200)"
+
 exec 3<&-
+
+# SIGINT kill webserv
+kill -INT %1
 
 if [ -z "$RESPONSE" ]; then
 	exit 1;

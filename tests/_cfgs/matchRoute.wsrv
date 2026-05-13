@@ -1,0 +1,11 @@
+server {
+  serverName webserv!
+  listen localhost:1111!
+  route /at {
+    root ./www/miep!
+  }
+ 
+  route /atat {
+    root ./www/moep!
+  }
+}

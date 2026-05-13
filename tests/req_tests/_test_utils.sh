@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Utility funcs used in my shell-tests
+# ---------------=[ some funcs & vars used in my shell-tests ]=--------------- #
 
 CRLF="\r\n"
 
@@ -34,3 +34,13 @@ function arrContains() {
 	done
 	return 1
 }
+
+# ----------------------------=[ some variables ]=---------------------------- #
+
+repoRoot="$(git rev-parse --show-toplevel)"
+
+cfgDir="$repoRoot/tests/_cfgs"
+
+wwwDir="$repoRoot/tests/_www"
+
+webserv="$repoRoot/webserv"

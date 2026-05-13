@@ -1,0 +1,17 @@
+server {
+  serverName moep!
+  listen localhost:1111!
+
+  route /redir {
+    redirect 301:/redir-target!
+  }
+
+  # if root is not specified here the default root will be searched, i.e.
+  # `./www`.
+  # Also, if this target did not exist, we would run into a ifinite loop which
+  # will be cancancelled by the browser as the `/redir` route will match it's
+  # own redir. but this happens to nginx too
+  route /redir-target {
+    root ./www/redir-target!
+  }
+}

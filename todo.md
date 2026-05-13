@@ -32,8 +32,6 @@
 
 - [ ] check if all getters return reasonable (const!?) values!
 
-- [x] **no two routes with same path are allowed in nginx!**
-  + handled this by simply overwriting the same route with a potential new one
 
 - [ ] impl proper routing in case of multiple routes (how does nginx do it?)
 
@@ -44,6 +42,9 @@
 
 - [ ] support URL redirection meaning: `redirect` directive will also take a
   full URL as redir target!
+
+- [ ] if a GET or DELETE req is detected stop reading body from then on. but
+  what if client is sending body?
 
 - [ ] find out what should be handled differently with other HTTP-versions
 
@@ -87,6 +88,8 @@
       In the interest of robustness, a server that is expecting to receive and
       parse a request-line SHOULD ignore at least one empty line (CRLF) received
       prior to the request-line.
+- [x] **no two routes with same path are allowed in nginx!**
+  + handled this by simply overwriting the same route with a potential new one
 
 
 ## more on individual todos...
