@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 23:39:07 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/13 16:20:48 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/13 22:23:13 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,7 @@
 #include "WsrvLib.hpp"
 
 #include <map>
+#include <unistd.h>
 #include <vector>
 
 // The Request class.
@@ -66,7 +67,6 @@ class Request {
     e_HTTPStatus                       _parseHeaders();
     void                               _matchRoute();
 
-    e_HTTPStatus _parseReqLine();
     e_HTTPStatus _evaluateHdrs();
 
   public:
@@ -81,7 +81,7 @@ class Request {
 
     void processReq();
 
-    void append(const str& s);
+    void append(char *s, ssize_t readBytes);
 
     e_Method     getMethod();
     constr&      getReqstr() const;
@@ -107,6 +107,7 @@ class Request {
     // FIXME: which function should i expose here?
 
     e_HTTPStatus parseReqHeaders();
+    e_HTTPStatus parseReqLine();
 
     Route  *getMatchedRoute();
     constr& getTargetPath() const;
@@ -120,4 +121,6 @@ class Request {
     bool isSimplePOST() const;
     bool isDELETE() const;
     bool isRedir() const;
+
+    bool reqlineReceived() const;
 };

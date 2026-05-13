@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 19:13:35 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/13 19:25:27 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/13 23:15:42 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,17 +54,17 @@ RequestHandler::RequestHandler(Client *cli): _cli(cli)
 void RequestHandler::readRequest()
 {
   std::memset(_buffer, 0, READ_BUFSIZE);
-  ssize_t bytes_read = read(_cli->getFd(), _buffer, READ_BUFSIZE);
+  ssize_t bytesRead = read(_cli->getFd(), _buffer, READ_BUFSIZE);
 
   Logger::log_srv(_vsrvName,
-      "read " + int2str(bytes_read) + " bytes from " + _cli->getIfaceFdStr());
+      "read " + int2str(bytesRead) + " bytes from " + _cli->getIfaceFdStr());
 
-  if (bytes_read <= 0) {
+  if (bytesRead <= 0) {
 
     // if client closes conn i will receive a EPOLLIN event with 0 bytes read.
     // at this point the request reading should have already been finished in a
     // previous read!
-    if (bytes_read == 0)
+    if (bytesRead == 0)
       Logger::log_srv(
           _vsrvName, "Client disco -> closing client " + _cli->getIfaceFdStr());
     else
@@ -77,7 +77,7 @@ void RequestHandler::readRequest()
   Request& req = _cli->getReq();
 
   if (_cli->isReading())
-    req.append(_buffer);
+    req.append(_buffer, bytesRead);
   else {
     Logger::log_srv(_vsrvName, "Starting new Req");
     _cli->setReq(Request(_cli, _buffer)); // this is why **need** copy ctor!
@@ -88,6 +88,12 @@ void RequestHandler::readRequest()
     Logger::log_srv(_vsrvName, "Header too big!", WARN);
     req.setStatusCode(HTTP_400);
   }
+
+  // to prevent being flooded by non-sense requests check if the reqline must
+  // have been received already. this will be the case after sth like 8000 bytes
+  // or 2 read cycles. if this yields non-sense we can directly quit.
+  if (req.reqlineReceived())
+    req.parseReqLine();
 
   // if we have got the full header - terminated by 2x CRLF - we will
   // immediately parse that in order to get

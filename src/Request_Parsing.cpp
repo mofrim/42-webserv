@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/01 18:46:40 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/13 17:03:01 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/13 22:59:53 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,13 +16,18 @@
 #include "WsrvLib.hpp"
 #include "utils.hpp"
 
+e_HTTPStatus Request::parseReqLine()
+{
+  if ((_statusCode = _readReqline()) == HTTP_400)
+    return _statusCode;
+  _requestTarget = _reqline.target.getPath();
+
+  return _statusCode;
+}
+
 // FIXME add header / body separation somewhere around / before here
 e_HTTPStatus Request::parseReqHeaders()
 {
-  if ((_statusCode = _parseReqLine()) == HTTP_400) {
-    Logger::log_dbg1("Request::parseReqline: 400");
-    return _statusCode;
-  }
   if ((_statusCode = _parseHeaders()) == HTTP_400) {
     Logger::log_dbg1("Request::_parseHeaders: 400");
     return _statusCode;
@@ -32,16 +37,6 @@ e_HTTPStatus Request::parseReqHeaders()
     return _statusCode;
   }
   return HTTP_200;
-}
-
-e_HTTPStatus Request::_parseReqLine()
-{
-  e_HTTPStatus status = HTTP_200;
-  if ((status = _readReqline()) == HTTP_400)
-    return status;
-  _requestTarget = _reqline.target.getPath();
-
-  return status;
 }
 
 // Parse the reuqest-line. I.e. the uppercase method, then a target URI and then

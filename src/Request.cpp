@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 23:39:57 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/13 19:23:07 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/13 22:50:41 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -173,9 +173,9 @@ void Request::_matchRoute()
 }
 
 // TODO: add body separation here for POST reqs
-void Request::append(const str& s)
+void Request::append(char *s, ssize_t bytesRead)
 {
-  _reqstr += s;
+  _reqstr.append(s, bytesRead);
   _hdrLines += _countReqLines(s);
   Logger::log_reqres(_vsrv->getName(), "Appending to Req:", s);
 }
@@ -260,6 +260,7 @@ u16 Request::_countReqLines(const str& s)
     lineNum++;
     i += 2;
   }
+  Logger::logBug("Found " + int2str(lineNum) + " new lines");
   return lineNum;
 }
 
@@ -304,3 +305,11 @@ bool Request::isDELETE() const { return _isDELETE; }
 bool Request::isRedir() const { return _isRedir; }
 
 const std::pair<e_HTTPStatus, str>& Request::getRedir() const { return _redir; }
+
+// if we have received at least 2 lines or the maximum reqline length was
+// already received we should check at least if the reqline is correct
+bool Request::reqlineReceived() const
+{
+  Logger::logBug("_reqstr.size = " + int2str(_reqstr.size()));
+  return (_hdrLines >= 2 || _reqstr.size() >= MAX_REQLINE_LEN);
+}
