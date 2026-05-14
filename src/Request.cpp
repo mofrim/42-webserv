@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 23:39:57 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/14 16:37:24 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/14 21:10:58 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,7 +86,7 @@ Request::~Request() {}
 
 // the standard ctor we use for initializing a request in
 // RequestHandler::read_request
-Request::Request(Client *cli, const std::string& reqstr)
+Request::Request(Client *cli, const char *reqstr, size_t reqstrLen)
 {
   _vsrv = cli->getVsrv();
   _cli  = cli;
@@ -107,8 +107,8 @@ Request::Request(Client *cli, const std::string& reqstr)
   _hdrsParsed          = false;
   _contentLength       = 0;
   _closeConn           = false;
-  _reqdata             = reqstr;
-  _requestTarget       = "";
+  _reqdata.assign(reqstr, reqstrLen);
+  _requestTarget = "";
 }
 
 // There are 2 options when we get here:
@@ -122,7 +122,7 @@ void Request::processReq()
 {
 
   // should already be done until here, but better safe then deref NULL
-  if (_matchedRoute == NULL)
+  if (!this->badRequest() && _matchedRoute == NULL)
     this->evaluateTarget();
 
   _statusCode = _respo.generateResponse(*this);
@@ -197,7 +197,8 @@ void Request::append(char *s, ssize_t bytesRead)
     _reqdata.append(s, bytesRead);
     _hdrLines += _countReqLines(s);
   }
-  Logger::logBug("Appending to req: '" + str(s) + "'");
+  Logger::logDbg1("Request::append",
+      "Appending to req: '" + data2hexStr(s, bytesRead) + "'");
 }
 
 // @brief Simply checks if `CRLFCRLF` is found somewhere in the reqstr. for
@@ -217,8 +218,13 @@ bool Request::reqComplete()
 {
   if (_hdrComplete && _bodyComplete)
     return true;
+
+  Logger::logDbg1("Request::reqComplete",
+      "bodysiz: " + int2str(_body.getSize()) +
+          ", Content-Length: " + int2str(_contentLength));
+
   if (_hdrComplete && _body.getSize() >= _contentLength) {
-    Logger::logBug("Request::reqComplete", "Content-Length reached");
+    Logger::logDbg1("Request::reqComplete", "Content-Length reached");
     return true;
   }
   return false;
@@ -321,7 +327,7 @@ VServer *Request::getVsrv() const { return _vsrv; }
 
 e_HTTPStatus Request::getStatusCode() const { return _statusCode; }
 
-const t_RequestLine& Request::getReqline() const { return _reqline; }
+t_RequestLine& Request::getReqline() { return _reqline; }
 
 std::map<str, str>& Request::getHeaders() { return _headers; }
 
@@ -357,6 +363,6 @@ bool Request::reqlineParsed() const { return _reqlineParsed; }
 
 RequestBody& Request::getBody() { return _body; }
 
-std::vector<u8>& Request::getBodyData() { return _body.getBodyData(); }
+std::vector<char>& Request::getBodyData() { return _body.getBodyData(); }
 
 bool Request::hdrsParsed() const { return _hdrsParsed; }

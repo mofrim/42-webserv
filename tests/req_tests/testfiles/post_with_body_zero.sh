@@ -42,9 +42,9 @@ sendHdrField "Host: miep" 3
 sendHdrField "Content-Length: 10000" 3
 finishReq 3
 
-dd if=/dev/zero bs=10000 count=1 >&3
+dd if=/dev/zero bs=10000 count=1 >&3 2>/dev/null
 
-RESPONSE="$(timeout 0.1s cat <&3 | grep 200)"
+RESPONSE="$(timeout 0.1s cat <&3 | grep 201)"
 echo "Response:"
 echo "---------"
 echo "${RESPONSE[@]}"
@@ -55,6 +55,8 @@ exec 3<&-
 if [ $# -eq 2 ]; then
 	pkill -INT webserv
 fi
+
+rm -f ../../_www/up/*.dat
 
 if [ -z "$RESPONSE" ]; then
 	exit 1;

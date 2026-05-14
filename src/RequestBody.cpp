@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/14 10:18:32 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/14 15:38:31 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/14 19:43:00 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,6 +44,7 @@ void RequestBody::setBodyData(const char *data, size_t len)
 {
   try {
     _bodyData.assign(data, data + len);
+    _size = len;
   } catch (const std::exception& e) {
     Logger::log_err("RequestBody::setBodyData", "Could assign to _bodyData");
   }
@@ -60,7 +61,7 @@ str RequestBody::getBodyDataAsStr()
   return body;
 }
 
-std::vector<u8>& RequestBody::getBodyData() { return _bodyData; }
+std::vector<char>& RequestBody::getBodyData() { return _bodyData; }
 
 // append raw bytes to bodyData
 // FIXME ooh, these exceptions. how could i really handle them?!

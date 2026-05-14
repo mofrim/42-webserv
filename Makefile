@@ -6,7 +6,7 @@
 #    By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/12/01 11:45:58 by fmaurer           #+#    #+#              #
-#    Updated: 2026/05/14 10:26:11 by fmaurer          ###   ########.fr        #
+#    Updated: 2026/05/14 19:21:13 by fmaurer          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -36,7 +36,8 @@ SRCS			= main.cpp Webserv.cpp Logger.cpp VServerCfg.cpp \
 						Webserv_Utils.cpp VServer_Utils.cpp RequestHandler.cpp \
 						Request.cpp Socket.cpp Route.cpp Request_Parsing.cpp Response.cpp \
 						WsrvLib.cpp URL.cpp ConfigParser_Tokenize.cpp \
-						ConfigParser_Process.cpp ConfigParser_ParseTok.cpp RequestBody.cpp
+						ConfigParser_Process.cpp ConfigParser_ParseTok.cpp RequestBody.cpp \
+						Response_HandlePost.cpp
 
 HDRS			= Webserv.hpp Logger.hpp VServerCfg.hpp ConfigParser.hpp \
 						utils.hpp VServer.hpp Client.hpp Epoll.hpp RequestHandler.hpp \

@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/01 18:46:40 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/14 15:26:08 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/14 21:01:36 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,7 +49,7 @@ void Request::evaluateTarget()
   const std::set<e_Method>& allowedMethods = _matchedRoute->getMethods();
   if (allowedMethods.find(_reqline.method) == allowedMethods.end()) {
     Logger::log_srv(_vsrv->getName(),
-        "forbidden meth" + meth2str(_reqline.method) + " for route " +
+        "forbidden meth " + meth2str(_reqline.method) + " for route " +
             _matchedRoute->getPath());
     _statusCode = HTTP_403;
     return;
@@ -145,6 +145,7 @@ e_HTTPStatus Request::_readReqline()
 // fo CRLFX2 anyway and we would have to do this again elsewhere otherwise.
 e_HTTPStatus Request::_parseHeaders()
 {
+  Logger::logDbg1("Request::_parseHeaders", "Parsing hdrs...");
   size_t crlfx2 = _reqdata.find(CRLFX2);
 
   if (crlfx2 == str::npos)
@@ -155,12 +156,17 @@ e_HTTPStatus Request::_parseHeaders()
   // +2 because we want to keep the CRLF after the last hdr line
   str onlyHdrs = _reqdata.substr(0, crlfx2 + 2);
 
+  Logger::logBug("onlyHdrs size: " + int2str(onlyHdrs.size()));
+  Logger::logBug("reqdata size: " + int2str(_reqdata.size()));
+
   // handle hdrs body separation for POST reqs
   if (_reqline.method == M_POST) {
 
     _body.setBodyData(_reqdata.substr(crlfx2).data() + 4,
         _reqdata.size() - onlyHdrs.size() - 2);
-    Logger::logDbg1("Request::_parseHeaders", "starting to append to _body!");
+    Logger::logDbg1("Request::_parseHeaders",
+        "starting to append " + int2str(_reqdata.size() - onlyHdrs.size() - 2) +
+            " to _body!");
   }
 
   // set free _reqdata as we will not need it anymore.

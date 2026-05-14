@@ -102,7 +102,7 @@ sendHdrField "Content-Length: 16" 3
 finishReq 3
 echo -n "this is the body" >&3
 
-RESPONSE="$(timeout 0.2s cat <&3 2>/dev/null | grep 200)"
+RESPONSE="$(timeout 0.2s cat <&3 2>/dev/null | grep 500)"
 echo "Response:"
 echo "---------"
 echo "${RESPONSE[@]}"

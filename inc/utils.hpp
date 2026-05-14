@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/03 11:26:23 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/14 15:25:18 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/14 20:37:25 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,10 @@ str      strip(str str);
 void     tolower(str& s);
 u16      str2u16(constr& s);
 str      data2hexStr(const char *s, size_t len);
+bool     isValidFnameChar(char c);
+bool     isValidFname(const str& s);
+
+std::set<str> listDirFiles(constr& directoryPath, bool dirSlash = true);
 
 std::vector<str> splitString(
     constr& sstr, constr& delim, bool keepEmpty = false);
@@ -56,7 +60,7 @@ std::ostream& operator<<(std::ostream& os, std::set<T> lst)
   return os;
 }
 
-// again a convenience function for outputting sets in logging
+// convenience function for outputting sets in logging
 template <typename T>
 str getSetAsStr(const std::set<T>& s)
 {
@@ -66,6 +70,19 @@ str getSetAsStr(const std::set<T>& s)
   ret += "{";
   for (typename std::set<T>::iterator it = s.begin(); it != s.end();)
     ret += int2str(*it) + (++it != s.end() ? ", " : "}");
+  return ret;
+}
+
+// convenience function for outputting sets in logging
+template <typename T>
+str getStrSetAsStr(const std::set<T>& s)
+{
+  str ret("");
+  if (s.size() == 0)
+    return ret;
+  ret += "{";
+  for (typename std::set<T>::iterator it = s.begin(); it != s.end();)
+    ret += *it + (++it != s.end() ? ", " : "}");
   return ret;
 }
 

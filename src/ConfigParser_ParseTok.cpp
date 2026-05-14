@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/08 21:14:52 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/13 15:09:23 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/14 18:14:09 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,29 +31,6 @@ static bool isNumStr(const str& s)
 static bool isValidPathChar(char c)
 {
   return isalnum(c) || c == '.' || c == '-' || c == '_' || c == '/';
-}
-
-static bool isValidFnameChar(char c)
-{
-  return isalnum(c) || c == '.' || c == '-' || c == '_';
-}
-
-// arbitraily deciding the filenames should not begin with '-'. idk, but that
-// seems fishy to me.
-static bool isValidFname(const str& s)
-{
-  if (s.length() == 0)
-    return false;
-
-  str::const_iterator it = s.begin();
-  if (*it == '-')
-    return false;
-
-  for (; it != s.end(); ++it)
-    if (!isValidFnameChar(*it))
-      return false;
-
-  return true;
 }
 
 static bool isValidDomainChar(char c)

@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/23 19:11:25 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/14 08:17:15 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/14 17:53:52 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -304,8 +304,6 @@ void Response::_handleRedir()
 }
 
 void Response::_handleCGI() {}
-
-void Response::_handleSimplePost() {}
 
 void Response::_handleDelete() {}
 

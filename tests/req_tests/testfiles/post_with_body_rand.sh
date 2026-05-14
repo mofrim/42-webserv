@@ -42,7 +42,7 @@ sendHdrField "Host: miep" 3
 sendHdrField "Content-Length: 10000" 3
 finishReq 3
 
-dd if=/dev/urandom bs=10000 count=1 >&3
+dd if=/dev/urandom bs=10000 count=1 >&3 2>/dev/null
 
 # RESPONSE="$(timeout 0.1s cat <&3 | grep 200)"
 RESPONSE="$(timeout 0.1s cat <&3)"

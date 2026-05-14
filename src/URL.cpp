@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/06 22:32:39 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/13 17:04:40 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/14 18:11:10 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -263,10 +263,10 @@ str URL::parseTargetURL(const str& target)
 
 // ------------------------=[ The usual one-liners ]=------------------------ //
 
-bool               URL::bad() const { return _bad; }
-bool               URL::empty() const { return _empty; }
-str                URL::getPath() const { return _path; }
-std::map<str, str> URL::getQuery() const { return _query; }
+bool                URL::bad() const { return _bad; }
+bool                URL::empty() const { return _empty; }
+str                 URL::getPath() const { return _path; }
+std::map<str, str>& URL::getQuery() { return _query; }
 
 void URL::clear()
 {

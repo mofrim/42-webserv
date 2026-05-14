@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/14 10:17:58 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/14 15:31:48 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/14 19:16:51 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,9 +22,9 @@
 
 class RequestBody {
   private:
-    std::vector<u8> _bodyData;
-    size_t          _size;
-    size_t          _maxSize;
+    std::vector<char> _bodyData;
+    size_t            _size;
+    size_t            _maxSize;
 
   public:
     RequestBody();
@@ -32,11 +32,11 @@ class RequestBody {
     RequestBody& operator=(const RequestBody& other);
     ~RequestBody();
 
-    void             setBodyData(const char *data, size_t len);
-    std::vector<u8>& getBodyData();
-    str              getBodyDataAsStr();
-    int              appendData(const char *dat, size_t len);
-    void             reset();
-    bool             setMaxSize(size_t mbs);
-    size_t           getSize();
+    void               setBodyData(const char *data, size_t len);
+    std::vector<char>& getBodyData();
+    str                getBodyDataAsStr();
+    int                appendData(const char *dat, size_t len);
+    void               reset();
+    bool               setMaxSize(size_t mbs);
+    size_t             getSize();
 };

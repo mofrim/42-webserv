@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/26 10:03:57 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/14 15:25:02 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/14 19:04:33 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 
 #include <cstdlib>
 #include <cstring>
+#include <dirent.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <iomanip>
@@ -242,4 +243,52 @@ str data2hexStr(const char *s, size_t len)
         << static_cast<int>(static_cast<unsigned char>(s[i]));
   }
   return oss.str();
+}
+
+bool isValidFnameChar(char c)
+{
+  return isalnum(c) || c == '.' || c == '-' || c == '_';
+}
+
+// arbitraily deciding the filenames should not begin with '-'. idk, but that
+// seems fishy to me.
+bool isValidFname(const str& s)
+{
+  if (s.length() == 0)
+    return false;
+
+  str::const_iterator it = s.begin();
+  if (*it == '-')
+    return false;
+
+  for (; it != s.end(); ++it)
+    if (!isValidFnameChar(*it))
+      return false;
+
+  return true;
+}
+
+// ls
+//
+// will return an empty set if sth went wrong. the set of files in the dir
+// otherwise. if dirSlash param is true add a '/' to every dir.
+std::set<str> listDirFiles(constr& directoryPath, bool dirSlash)
+{
+  DIR           *dir;
+  struct dirent *entry;
+  std::set<str>  files;
+  str            fname;
+
+  if ((dir = opendir(directoryPath.c_str())) != NULL) {
+
+    while ((entry = readdir(dir)) != NULL) {
+      fname = entry->d_name;
+      if (fname != ".")
+        files.insert(
+            fname + ((entry->d_type == DT_DIR && dirSlash) ? "/" : ""));
+    }
+    closedir(dir);
+  }
+
+  return files;
 }

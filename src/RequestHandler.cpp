@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 19:13:35 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/14 16:44:16 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/14 21:07:47 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,7 +78,8 @@ void RequestHandler::readRequest()
     req.append(_buffer, bytesRead);
   else {
     Logger::log_srv(_vsrvName, "Starting new Req");
-    _cli->setReq(Request(_cli, _buffer)); // this is why **need** copy ctor!
+    _cli->setReq(
+        Request(_cli, _buffer, bytesRead)); // this is why **need** copy ctor!
     _cli->setState(CLI_READ);
   }
 
@@ -203,7 +204,6 @@ void RequestHandler::_setVirtualServerFromHeader()
 
     std::map<str, str>& hdrs = _cli->getReq().getHeaders();
 
-    // FIXME is lowercasing alright here?
     if (hdrs.find("host") != hdrs.end()) {
       str host = hdrs["host"];
 

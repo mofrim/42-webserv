@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/06 22:32:20 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/13 17:03:43 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/14 18:11:04 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,11 +43,11 @@ class URL {
 
     str parseTargetURL(const str& t);
 
-    bool               bad() const;
-    bool               empty() const;
-    str                getPath() const;
-    std::map<str, str> getQuery() const;
-    str                getQueryCSStr() const;
-    str                getQueryStr() const;
-    void               clear();
+    bool                bad() const;
+    bool                empty() const;
+    str                 getPath() const;
+    std::map<str, str>& getQuery();
+    str                 getQueryCSStr() const;
+    str                 getQueryStr() const;
+    void                clear();
 };

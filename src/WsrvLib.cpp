@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/24 17:40:43 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/14 13:40:00 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/14 19:51:59 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,7 +77,7 @@ str WsrvLib::getDefaultErrPage(e_HTTPStatus code)
 
 // others might have put this into files...
 
-std::map<str, str> WsrvLib::_initMimeTypes()
+std::map<str, str> WsrvLib::_initExt2MimeTypes()
 {
   std::map<str, str> m;
 
@@ -108,11 +108,50 @@ std::map<str, str> WsrvLib::_initMimeTypes()
   m["webmanifest"] = "application/json";
   m["xhtml"]       = "application/xhtml+xml";
   m["xml"]         = "application/xml";
+  m["dat"]         = "application/octet-stream";
 
   return m;
 }
 
-const std::map<str, str> WsrvLib::_mimeTypes = _initMimeTypes();
+const std::map<str, str> WsrvLib::_ext2MimeTypes = _initExt2MimeTypes();
+
+std::map<str, str> WsrvLib::_initMimeTypes2Ext()
+{
+  std::map<str, str> m;
+
+  m["image/bmp"]                = "bmp";
+  m["text/css"]                 = "css";
+  m["text/csv"]                 = "csv";
+  m["image/gif"]                = "gif";
+  m["text/html"]                = "html";
+  m["image/png"]                = "ico";
+  m["text/calendar"]            = "ics";
+  m["image/jpeg"]               = "jpeg";
+  m["image/jpeg"]               = "jpg";
+  m["text/javascript"]          = "js";
+  m["application/json"]         = "json";
+  m["audio/mpeg"]               = "mp3";
+  m["video/mp4"]                = "mp4";
+  m["audio/ogg"]                = "ogg";
+  m["font/otf"]                 = "otf";
+  m["application/pdf"]          = "pdf";
+  m["image/png"]                = "png";
+  m["application/x-httpd-php"]  = "php";
+  m["image/svg+xml"]            = "svg";
+  m["font/ttf"]                 = "ttf";
+  m["text/plain"]               = "txt";
+  m["audio/wav"]                = "wav";
+  m["font/woff"]                = "woff";
+  m["font/woff2"]               = "woff2";
+  m["application/json"]         = "webmanifest";
+  m["application/xhtml+xml"]    = "xhtml";
+  m["application/xml"]          = "xml";
+  m["application/octet-stream"] = "dat";
+
+  return m;
+}
+
+const std::map<str, str> WsrvLib::_mimeTypes2Ext = _initMimeTypes2Ext();
 
 // @brief Extracts the file-ext from the path-string and looks up the
 //        corresponding mimestr in mimetype database
@@ -122,11 +161,19 @@ str WsrvLib::getMimeTypeFromPath(const str& p)
 {
   str ext = p.substr(p.rfind(".") + 1);
 
-  std::map<str, str>::const_iterator it = _mimeTypes.find(ext);
-  if (it != _mimeTypes.end())
+  std::map<str, str>::const_iterator it = _ext2MimeTypes.find(ext);
+  if (it != _ext2MimeTypes.end())
     return it->second;
 
-  return "text/plain";
+  return "application/octet-stream";
+}
+
+str WsrvLib::getExtFromMimeType(constr& mime)
+{
+  std::map<str, str>::const_iterator it = _mimeTypes2Ext.find(mime);
+  if (it != _mimeTypes2Ext.end())
+    return it->second;
+  return "dat";
 }
 
 std::map<u16, str> WsrvLib::_initStatusCodes()

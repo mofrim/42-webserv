@@ -41,7 +41,8 @@ sendHdrField "GETA / HTTP/1.1" 3
 sendHdrField "Host: miep" 3
 finishReq 3
 
-RESPONSE="$(timeout 0.1s cat <&3 2>/dev/null | grep 400)"
+# RESPONSE="$(timeout 0.1s cat <&3 2>/dev/null | grep 400)"
+RESPONSE="$(timeout 0.1s cat <&3 2>/dev/null)"
 echo "Response:"
 echo "---------"
 echo "${RESPONSE[@]}"

@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 23:39:07 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/14 13:48:08 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/14 20:29:21 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,7 +78,7 @@ class Request {
     // TODO: decide which ctors we really use here & privatize unused
     Request();
     Request(const Request& other);
-    Request(Client *cli, const str& rstr);
+    Request(Client *cli, const char *reqstr, size_t reqstrLen);
     Request& operator=(const Request& other);
     ~Request();
 
@@ -104,13 +104,9 @@ class Request {
 
     void reset();
 
-    // FIXME: maybe refs are okay here
-    const t_RequestLine& getReqline() const;
-    std::map<str, str>&  getHeaders();
-    void                 evaluateTarget();
-
-    // parsing
-    // FIXME: which function should i expose here?
+    t_RequestLine&      getReqline();
+    std::map<str, str>& getHeaders();
+    void                evaluateTarget();
 
     e_HTTPStatus parseReqHeaders();
     e_HTTPStatus parseReqLine();
@@ -132,6 +128,6 @@ class Request {
     bool reqlineParsed() const;
     bool hdrsParsed() const;
 
-    RequestBody&     getBody();
-    std::vector<u8>& getBodyData();
+    RequestBody&       getBody();
+    std::vector<char>& getBodyData();
 };

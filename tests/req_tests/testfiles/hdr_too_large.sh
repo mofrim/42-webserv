@@ -39,7 +39,7 @@ exec 3<>/dev/tcp/"$hostname"/"$port"
 
 sendHdrField "GET / HTTP/1.1" 3
 
-for ((i=0;i<499;i++)); do
+for ((i=0;i<199;i++)); do
 	sendHdrField "Dummy: header" 3
 done
 finishReq 3

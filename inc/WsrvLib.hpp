@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/24 17:31:03 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/14 11:15:32 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/14 19:23:04 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -107,6 +107,7 @@ typedef struct {
 enum e_HTTPStatus {
   HTTP_0   = 0,
   HTTP_200 = 200,
+  HTTP_201 = 201,
   HTTP_300 = 300,
   HTTP_301 = 301,
   HTTP_302 = 302,
@@ -136,8 +137,11 @@ class WsrvLib {
 
     static str _getTemplateWithErrStr(const str& s);
 
-    static const std::map<str, str> _mimeTypes;
-    static std::map<str, str>       _initMimeTypes();
+    static const std::map<str, str> _ext2MimeTypes;
+    static std::map<str, str>       _initExt2MimeTypes();
+
+    static const std::map<str, str> _mimeTypes2Ext;
+    static std::map<str, str>       _initMimeTypes2Ext();
 
     static const std::map<u16, str> _statusCodes;
     static std::map<u16, str>       _initStatusCodes();
@@ -146,10 +150,14 @@ class WsrvLib {
 
   public:
     static const t_GlobalWsrvSettings WsrvSettings;
-    static str                        getDefaultErrPage(e_HTTPStatus code);
-    static str                        getStatusStr(e_HTTPStatus code);
-    static str                        getMimeTypeFromPath(const str& p);
-    static e_HTTPVersion              str2HTTPVer(const str& s);
-    static e_HTTPStatus               short2HttpStatus(u16 s);
-    static e_HTTPStatus               str2HttpStatus(const str& s);
+
+    static str getDefaultErrPage(e_HTTPStatus code);
+    static str getStatusStr(e_HTTPStatus code);
+
+    static str getMimeTypeFromPath(const str& p);
+    static str getExtFromMimeType(constr& mime);
+
+    static e_HTTPVersion str2HTTPVer(const str& s);
+    static e_HTTPStatus  short2HttpStatus(u16 s);
+    static e_HTTPStatus  str2HttpStatus(const str& s);
 };

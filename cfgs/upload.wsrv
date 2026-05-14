@@ -1,9 +1,8 @@
 server {
   serverName webserv!
   listen localhost:1111!
-  root ../../_www!
   route / {
+    upload ./www/upload!
     methods POST GET!
-    upload ../../_www/up!
   }
 }

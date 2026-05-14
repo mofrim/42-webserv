@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/23 19:11:06 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/13 16:20:22 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/14 18:03:03 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,6 +54,9 @@ class Response {
     void _handleRedir();
     void _handleCGI();
     void _handleSimplePost();
+    void _handleSimplePostFile(
+        constr& upDir, constr& mimeType = "application/octet-stream");
+    void _handleSimplePostForm(constr& upDir, constr& mimeType);
     void _handleDelete();
 
     static std::map<str, str> _buildErrRespoHdrs(
