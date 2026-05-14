@@ -58,6 +58,8 @@ redirected path that corresponds to some real directory! F.ex. if req is for
 `/redir/bla.html` but no root is given in `/redir-target` then default root is
 used and so `./www/bla.html` is being tried.
 
+### upload dir is always relative to routes / servers root!
+
 ---
 
 ## the initial webserv data-flow

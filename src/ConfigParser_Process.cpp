@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/08 16:14:27 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/11 14:54:07 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/14 21:56:48 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -158,22 +158,22 @@ bool ConfigParser::_parseServerDirec(VServerCfg& vcfg)
   bool success = true;
   switch (_tokIt->direc) {
     case DIR_SERVERNAME:
-      success = _parseTokName(vcfg); // DONE
+      success = _parseTokName(vcfg);
       break;
     case DIR_ROUTE:
-      success = _parseTokRoute(); // DONE
+      success = _parseTokRoute();
       break;
     case DIR_LISTEN:
-      success = _parseTokIface(vcfg); // DONE
+      success = _parseTokIface(vcfg);
       break;
     case DIR_MAXBODYSIZE:
-      success = _parseTokBytes(vcfg); // DONE
+      success = _parseTokBytes(vcfg);
       break;
     case DIR_ERRORPAGE:
-      success = _parseTokError(vcfg); // DONE
+      success = _parseTokError(vcfg);
       break;
     case DIR_ROOT:
-      success = _parseTokFspath(vcfg); // TODO
+      success = _parseTokFspath(vcfg);
       break;
     default:
       return false;
@@ -186,17 +186,14 @@ bool ConfigParser::_parseRouteDirec(VServerCfg& vcfg)
 {
   bool success = true;
   switch (_tokIt->direc) {
-
-      // ATTENTION: for those 2 i have to check ROOT || UPLOAD
     case DIR_ROOT:
       success = _parseTokFspath(vcfg);
       break;
     case DIR_UPLOAD:
-      success = _parseTokFspath(vcfg);
+      success = _parseTokPath();
       break;
-
     case DIR_MAXBODYSIZE:
-      success = _parseTokBytes(vcfg); // DONE
+      success = _parseTokBytes(vcfg);
       break;
     case DIR_ERRORPAGE:
       success = _parseTokError(vcfg);

@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/14 17:51:57 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/14 20:46:23 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/14 22:08:15 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,7 @@
 // created file path in `Location`
 void Response::_handleSimplePost()
 {
-  const str& upDir = _matchedRoute->getUpload();
+  str upDir = _matchedRoute->getUpload();
 
   if (upDir.empty()) {
     _status = HTTP_500;
@@ -38,6 +38,11 @@ void Response::_handleSimplePost()
         WARN);
     return;
   }
+
+  // append upDir to routes root!
+  upDir = _matchedRoute->getRoot() + upDir;
+
+  Logger::logBug("upDir: " + upDir);
 
   // if upload dir is not a dir -> 500
   if (!isDir(upDir))
@@ -116,9 +121,9 @@ void Response::_handleSimplePostFile(constr& upDir, constr& mimeType)
     fname += ext;
   }
 
-  fname = upDir + "/" + fname;
+  str fullPath = upDir + "/" + fname;
 
-  std::ofstream outfile(fname.c_str());
+  std::ofstream outfile(fullPath.c_str());
 
   if (outfile)
     outfile.write(&_req->getBodyData()[0], _req->getBody().getSize());
@@ -129,7 +134,7 @@ void Response::_handleSimplePostFile(constr& upDir, constr& mimeType)
     _status = HTTP_201;
 
     // FIXME this should only be the path from root
-    _respoHeaders["Location"]     = fname;
+    _respoHeaders["Location"]     = _matchedRoute->getUpload() + "/" + fname;
     _respoHeaders["Content-Type"] = mimeType;
   }
 }

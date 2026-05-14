@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/26 08:52:11 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/11 14:35:43 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/14 21:51:59 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,6 +51,7 @@ class ConfigParser {
       TOK_IFACE,  // localhost:1234
       TOK_BYTES,  // 10000000
       TOK_FSPATH, // ./www
+      TOK_PATH,   // /upload
       TOK_ROUTE,  // /moep/miep -> no dots!
       TOK_ERROR,  // 404:/moep/miep/404.html -> route + filename but has to be
                   // under root
@@ -127,11 +128,12 @@ class ConfigParser {
     bool _parseTokMeth();  // methods
     bool _parseTokRedir(); // redirect
     bool _parseTokCgi();   // cgi
+    bool _parseTokPath();  // upload
 
     // ----------------------=[ Mixed Scope Parsing ]=----------------------- //
 
     bool _parseTokBytes(VServerCfg& vcfg);  // maxBodySize
-    bool _parseTokFspath(VServerCfg& vcfg); // root, upload
+    bool _parseTokFspath(VServerCfg& vcfg); // root
 
   public:
     ConfigParser(const str& cfgFname);

@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/07 20:08:59 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/11 13:59:57 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/14 22:00:07 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,6 +86,7 @@ ConfigParser::t_Token ConfigParser::_readTok(
     case TOK_CGI:
     case TOK_METH:
     case TOK_FSPATH:
+    case TOK_PATH:
     case TOK_BYTES:
     case TOK_NAME:
     case TOK_ERROR:
@@ -201,6 +202,7 @@ void ConfigParser::_readTokVal(
       it = itTmp;
       break;
     case TOK_FSPATH:
+    case TOK_PATH:
     case TOK_FNAME:
     case TOK_NAME:
     case TOK_BOOL:
@@ -335,7 +337,7 @@ ConfigParser::e_TokType ConfigParser::_nextTokFromDirec(e_Direcs direc)
     case DIR_ROOT:
       return TOK_FSPATH;
     case DIR_UPLOAD:
-      return TOK_FSPATH; // arbitrary path possible here, also /tmp!
+      return TOK_PATH;
     case DIR_REDIRECT:
       return TOK_REDIR;
     case DIR_CGI:
@@ -366,6 +368,8 @@ str ConfigParser::_toktype2str(e_TokType t) const
       return "ERROR";
     case TOK_FSPATH:
       return "FSPATH";
+    case TOK_PATH:
+      return "PATH";
     case TOK_ROUTE:
       return "ROUTE";
     case TOK_FNAME:

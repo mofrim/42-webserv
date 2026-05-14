@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/08 21:14:52 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/14 18:14:09 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/14 21:59:12 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -124,8 +124,6 @@ bool ConfigParser::_parseTokName(VServerCfg& vcfg)
 }
 
 // route
-// TODO checking where?
-// TODO  test this!
 bool ConfigParser::_parseTokRoute()
 {
   if ((++_tokIt)->type != TOK_ROUTE)
@@ -351,11 +349,9 @@ bool ConfigParser::_parseTokBytes(VServerCfg& vcfg)
   return true;
 }
 
-// root, upload
+// root
 bool ConfigParser::_parseTokFspath(VServerCfg& vcfg)
 {
-  e_Direcs dir = _tokIt->direc;
-
   if ((++_tokIt)->type != TOK_FSPATH)
     throw std::runtime_error("Wrong token while parsing fspath");
 
@@ -367,20 +363,29 @@ bool ConfigParser::_parseTokFspath(VServerCfg& vcfg)
     return false;
   }
 
-  switch (dir) {
-    case DIR_ROOT: {
-      if (_scope.top() == S_SERVER)
-        vcfg.setRoot(val);
-      else
-        _currentRoute.setRoot(val);
-      break;
-    }
-    case DIR_UPLOAD:
-      _currentRoute.setUpload(val);
-      break;
-    default:
-      throw std::runtime_error("Ehm.. wrong direc in _parseTokFspath");
+  if (_scope.top() == S_SERVER)
+    vcfg.setRoot(val);
+  else
+    _currentRoute.setRoot(val);
+
+  return true;
+}
+
+// upload
+bool ConfigParser::_parseTokPath()
+{
+  if ((++_tokIt)->type != TOK_PATH)
+    throw std::runtime_error("Wrong token while parsing upload path!");
+
+  str& val = _tokIt->val;
+  val      = strip(val);
+
+  if (!isValidRoute(val)) {
+    Logger::logCfgErr(_tokIt->line, "invalid path: " + val);
+    return false;
   }
+
+  _currentRoute.setUpload(val);
 
   return true;
 }
