@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 23:39:57 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/14 15:44:52 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/14 16:37:24 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -88,23 +88,27 @@ Request::~Request() {}
 // RequestHandler::read_request
 Request::Request(Client *cli, const std::string& reqstr)
 {
-  _vsrv          = cli->getVsrv();
-  _cli           = cli;
-  _reqdata       = reqstr;
-  _hdrComplete   = false;
-  _bodyComplete  = false;
-  _hdrLines      = _countReqLines(reqstr);
-  _closeConn     = false;
-  _requestTarget = "";
-  _matchedRoute  = NULL;
-  _isCGI         = false;
-  _isSimplePOST  = false;
-  _isDELETE      = false;
-  _isRedir       = false;
-  _reqlineParsed = false;
-  _hdrsParsed    = false;
-  _redir         = std::make_pair(HTTP_0, "");
-  _contentLength = 0;
+  _vsrv = cli->getVsrv();
+  _cli  = cli;
+
+  _statusCode          = HTTP_200;
+  _hdrLines            = _countReqLines(reqstr);
+  _hdrComplete         = false;
+  _bodyComplete        = false;
+  _reqline.httpVersion = HTTPVER_UNKNOWN;
+  _reqline.method      = M_GET;
+  _matchedRoute        = NULL;
+  _isCGI               = false;
+  _isSimplePOST        = false;
+  _isDELETE            = false;
+  _isRedir             = false;
+  _redir               = std::make_pair(HTTP_0, "");
+  _reqlineParsed       = false;
+  _hdrsParsed          = false;
+  _contentLength       = 0;
+  _closeConn           = false;
+  _reqdata             = reqstr;
+  _requestTarget       = "";
 }
 
 // There are 2 options when we get here:
@@ -193,7 +197,7 @@ void Request::append(char *s, ssize_t bytesRead)
     _reqdata.append(s, bytesRead);
     _hdrLines += _countReqLines(s);
   }
-  Logger::log_reqres(_vsrv->getName(), "Appending to Req:", s);
+  Logger::logBug("Appending to req: '" + str(s) + "'");
 }
 
 // @brief Simply checks if `CRLFCRLF` is found somewhere in the reqstr. for
@@ -259,6 +263,7 @@ void Request::reset()
   _reqlineParsed       = false;
   _hdrsParsed          = false;
   _contentLength       = 0;
+  _closeConn           = false;
 
   _reqdata.clear();
   _body.reset();

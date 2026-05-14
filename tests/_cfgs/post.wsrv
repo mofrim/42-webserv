@@ -4,6 +4,6 @@ server {
   root ../../_www!
   route / {
     methods POST GET!
-    upload ../../_www/up!
+    # upload ../../_www/up!
   }
 }

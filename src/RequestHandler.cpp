@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 19:13:35 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/14 15:50:51 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/14 16:44:16 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -112,7 +112,7 @@ void RequestHandler::readRequest()
   }
 
   if (req.reqComplete() || req.badRequest()) {
-    Logger::log_reqres(_vsrvName, "Processing Request...", req.getReqstr());
+    Logger::log_reqres(_vsrvName, "Processing Request", req.getReqstr());
     _cli->setState(CLI_SEND);
     req.processReq();
   }
