@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/08 16:14:27 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/14 21:56:48 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/14 22:14:59 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,7 +55,7 @@ void ConfigParser::_processTokens()
         throw;
       }
       if (!success || !currentVcfg.checkEnsureCfg()) {
-        Logger::log_warn("ConfigParser", "Parsing vsrv failed!");
+        Logger::logWarn("ConfigParser", "Parsing vsrv failed!");
         _vcfgs.pop_back();
         _advanceTillSrvEnd();
       }
@@ -100,7 +100,7 @@ bool ConfigParser::_parseVServer(VServerCfg& vcfg)
     _skipFooTokens();
 
     if (_tokIt->type == TOK_BEND) {
-      Logger::log_warn("cfg line " + int2str(_tokIt->line),
+      Logger::logWarn("cfg line " + int2str(_tokIt->line),
           "Empty server block not allowed");
       return false;
     }

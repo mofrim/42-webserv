@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/16 12:11:11 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/13 16:21:26 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/14 22:15:25 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,9 +31,9 @@ VServer::ServerException::ServerException(const std::string& msg):
 
 void VServer::printClients()
 {
-  Logger::log_srv(_srvName, "Printing Clients:");
+  Logger::logSrv(_srvName, "Printing Clients:");
   if (_clients.empty()) {
-    Logger::log_msg("-> Server has got no clients");
+    Logger::logMsg("-> Server has got no clients");
     return;
   }
   for (std::map<int, Client *>::iterator it = _clients.begin();

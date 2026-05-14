@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/14 23:12:17 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/14 15:53:12 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/14 22:19:37 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,7 +79,7 @@ void Epoll::addClient(int cfd)
   client_ev.events  = EPOLLIN;
   client_ev.data.fd = cfd;
   if (epoll_ctl(_epoll_fd, EPOLL_CTL_ADD, cfd, &client_ev) == -1) {
-    Logger::log_err("epoll_ctl failed");
+    Logger::logErr("epoll_ctl failed");
     close(cfd);
     throw(EpollException("adding client to epoll failed"));
   }
@@ -109,7 +109,7 @@ void Epoll::removeClient(int cfd)
 // wrapper for closing the epoll fd.
 void Epoll::closeEpollFd()
 {
-  Logger::log_warn("closing epoll fd");
+  Logger::logWarn("closing epoll fd");
   close(_epoll_fd);
 }
 
@@ -133,11 +133,11 @@ str Epoll::_getEventStr(const uint32_t& ev) const
 
 void Epoll::printReadylist() const
 {
-  Logger::log_dbg2("epoll_wait returned nfds = " + int2str(_nfds));
+  Logger::logDbg2("epoll_wait returned nfds = " + int2str(_nfds));
   if (_nfds > 0) {
-    Logger::log_dbg2("Printing Events in the epoll-ready-list:");
+    Logger::logDbg2("Printing Events in the epoll-ready-list:");
     for (int i = 0; i < _nfds; i++)
-      Logger::log_dbg2("  fd: " + int2str(_events[i].data.fd) +
+      Logger::logDbg2("  fd: " + int2str(_events[i].data.fd) +
           ", event: " + _getEventStr(_events[i].events));
   }
 }

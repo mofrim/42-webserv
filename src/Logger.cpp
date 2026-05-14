@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/24 20:52:55 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/14 15:42:13 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/14 22:19:38 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,20 +40,20 @@ str Logger::getLogtime()
   return (str(timestamp));
 }
 
-void Logger::log_err(const str& msg)
+void Logger::logErr(const str& msg)
 {
   str logtime = getLogtime();
   std::cout << BRED << logtime << msg << RST << std::endl;
 }
 
-void Logger::log_err(const str& pre, const str& msg)
+void Logger::logErr(const str& pre, const str& msg)
 {
   str logtime = getLogtime();
   std::cout << RED << logtime << BRED << "(" << pre << ") " << RST << RED << msg
             << RST << std::endl;
 }
 
-void Logger::log_msg(const str& msg)
+void Logger::logMsg(const str& msg)
 {
   str logtime = getLogtime();
   std::cout << BCYA << logtime << msg << RST << std::endl;
@@ -65,13 +65,13 @@ void Logger::logCfg(const str& msg)
   std::cout << CYA << msg << RST << std::endl;
 }
 
-void Logger::log_warn(const str& msg)
+void Logger::logWarn(const str& msg)
 {
   str logtime = getLogtime();
   std::cout << YLO << logtime << msg << RST << std::endl;
 }
 
-void Logger::log_warn(const str& pre, const str& msg)
+void Logger::logWarn(const str& pre, const str& msg)
 {
   str logtime = getLogtime();
   std::cout << YLO << logtime << BYLO << " (" << pre << ") " << RST << YLO
@@ -80,10 +80,10 @@ void Logger::log_warn(const str& pre, const str& msg)
 
 void Logger::logCfgErr(const size_t line, const str& msg)
 {
-  Logger::log_warn("cfg line " + int2str(line), msg);
+  Logger::logWarn("cfg line " + int2str(line), msg);
 }
 
-void Logger::log_dbg0(const str& msg)
+void Logger::logDbg0(const str& msg)
 {
   if (LOGLEVEL >= LOG_INFO) {
     str logtime = getLogtime();
@@ -91,7 +91,7 @@ void Logger::log_dbg0(const str& msg)
   }
 }
 
-void Logger::log_dbg1(const str& msg)
+void Logger::logDbg1(const str& msg)
 {
   if (LOGLEVEL >= LOG_DEBUG) {
     str logtime = getLogtime();
@@ -108,7 +108,7 @@ void Logger::logDbg1(const str& pre, const str& msg)
   }
 }
 
-void Logger::log_dbg2(const str& msg)
+void Logger::logDbg2(const str& msg)
 {
   if (LOGLEVEL >= LOG_BRUTAL) {
     str logtime = getLogtime();
@@ -116,7 +116,7 @@ void Logger::log_dbg2(const str& msg)
   }
 }
 
-void Logger::log_srv(const str& srvName, const str& msg, e_LogType logtype)
+void Logger::logSrv(const str& srvName, const str& msg, e_LogType logtype)
 {
   if (LOGLEVEL >= LOG_INFO) {
     str txtcolr = (logtype == INFO ? GRY : YLO);
@@ -131,7 +131,7 @@ void Logger::log_srv(const str& srvName, const str& msg, e_LogType logtype)
 //
 // FIXME: refac to take Client as first param. and maybe even whole response bc
 // we might want to print the headers seperate from the body
-void Logger::log_reqres(const str& srvName, const str& resreq, const str& data)
+void Logger::logReqRes(const str& srvName, const str& resreq, const str& data)
 {
   if (LOGLEVEL >= LOG_BRUTAL) {
     str logtime = getLogtime();

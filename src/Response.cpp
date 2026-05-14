@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/23 19:11:25 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/14 17:53:52 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/14 22:18:44 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -162,7 +162,7 @@ void Response::_getBody200()
 
   if (isDir(path) == 1)
     path += (path[path.size() - 1] == '/' ? "" : "/") + r.getIndex();
-  Logger::log_dbg1("Response::_getBody: trying to read from file: " + path);
+  Logger::logDbg1("Response::_getBody: trying to read from file: " + path);
 
   _readBodyFromFile(path);
 }
@@ -355,7 +355,7 @@ void Response::_readBodyFromFile(constr& path)
     try {
       _body.assign(buffer.begin(), buffer.end());
     } catch (const std::exception& e) {
-      Logger::log_err("Response::_getBody", "Read body too large!");
+      Logger::logErr("Response::_getBody", "Read body too large!");
       _status = HTTP_413;
       _body   = WsrvLib::getDefaultErrPage(_status);
       return;

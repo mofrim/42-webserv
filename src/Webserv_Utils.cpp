@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/16 11:54:27 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/07 15:36:35 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/14 22:16:25 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,7 @@ void Webserv::_printSockname(int sock)
   socklen_t          addrlen = sizeof(addr);
   if (getsockname(sock, (struct sockaddr *)&addr, &addrlen) == -1)
     throw(WebservRunException("could not getsockname for fd " + int2str(sock)));
-  Logger::log_dbg0("getsockname: " + getAddrPortStr4(addr));
+  Logger::logDbg0("getsockname: " + getAddrPortStr4(addr));
 }
 
 // NOTE: this _only_ needs to be done for the default config. all non-default

@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/24 20:49:55 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/13 11:46:59 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/14 22:19:37 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,16 +55,16 @@ class Logger {
     ~Logger();
 
   public:
-    static void log_err(const str& msg);
-    static void log_err(const str& pre, const str& msg);
-    static void log_msg(const str& msg);
+    static void logErr(const str& msg);
+    static void logErr(const str& pre, const str& msg);
+    static void logMsg(const str& msg);
     static void logCfg(const str& msg);
-    static void log_warn(const str& msg);
-    static void log_warn(const str& pre, const str& msg);
+    static void logWarn(const str& msg);
+    static void logWarn(const str& pre, const str& msg);
     static void logCfgErr(const size_t line, const str& msg);
-    static void log_srv(
+    static void logSrv(
         const str& srv_name, const str& msg, e_LogType logtype = INFO);
-    static void log_reqres(
+    static void logReqRes(
         const str& srvName, const str& resreq, const str& data);
 
     // The idead behind log_dbg{0,1,2} goes like this: at compile-time
@@ -75,12 +75,12 @@ class Logger {
     // log_dbg2() will be printed. In LOGLEVEL == DEBUG == 1 log_dbg1 and
     // log_dbg0 will be printed, and in LOGLEVEL == INFO == 0 only log_dbg0
     // will be shown.
-    static void log_dbg0(const str& msg);
+    static void logDbg0(const str& msg);
 
-    static void log_dbg1(const str& msg);
+    static void logDbg1(const str& msg);
     static void logDbg1(const str& pre, const str& msg);
 
-    static void log_dbg2(const str& msg);
+    static void logDbg2(const str& msg);
     static void logBug(const str& msg);
     static void logBug(constr& pre, const str& msg);
     static str  getLogtime();

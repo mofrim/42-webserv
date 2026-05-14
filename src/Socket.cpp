@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/28 07:26:35 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/29 17:07:43 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/14 22:13:04 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,13 +22,9 @@
 
 // --------------------------------=[ OCF ]=-------------------------------- //
 
-Socket::Socket()
-{}
+Socket::Socket() {}
 
-Socket::Socket(const Socket& other)
-{
-  (void)other;
-}
+Socket::Socket(const Socket& other) { (void)other; }
 
 Socket& Socket::operator=(const Socket& other)
 {
@@ -36,8 +32,7 @@ Socket& Socket::operator=(const Socket& other)
   return (*this);
 }
 
-Socket::~Socket()
-{}
+Socket::~Socket() {}
 
 // ------------------------------=[ Methods ]=------------------------------ //
 
@@ -88,39 +83,39 @@ void Socket::printAddrlist(const str& addr, u16 port)
   ap = ai;
   while (ap != NULL) {
     switch (ap->ai_family) {
-    case AF_UNSPEC:
-      out += "  ai_family: AF_UNSPEC\n";
-      break;
-    case AF_INET:
-      out += "  ai_family: AF_INET\n";
-      break;
-    case AF_INET6:
-      out += "  ai_family: AF_INET6\n";
-      break;
-    default:
-      out += "  ai_family: unknown\n";
+      case AF_UNSPEC:
+        out += "  ai_family: AF_UNSPEC\n";
+        break;
+      case AF_INET:
+        out += "  ai_family: AF_INET\n";
+        break;
+      case AF_INET6:
+        out += "  ai_family: AF_INET6\n";
+        break;
+      default:
+        out += "  ai_family: unknown\n";
     }
 
     switch (ap->ai_socktype) {
-    case SOCK_STREAM:
-      out += "  ai_socktype: SOCK_STREAM\n";
-      break;
-    case SOCK_DGRAM:
-      out += "  ai_socktype: SOCK_DGRAM\n";
-      break;
-    default:
-      out += "  ai_socktype: 0\n";
+      case SOCK_STREAM:
+        out += "  ai_socktype: SOCK_STREAM\n";
+        break;
+      case SOCK_DGRAM:
+        out += "  ai_socktype: SOCK_DGRAM\n";
+        break;
+      default:
+        out += "  ai_socktype: 0\n";
     }
 
     switch (ap->ai_protocol) {
-    case IPPROTO_TCP:
-      out += "  ai_protocol: IPPROTO_TCP\n";
-      break;
-    case IPPROTO_UDP:
-      out += "  ai_protocol: IPPROTO_UDP\n";
-      break;
-    default:
-      out += "  ai_protocol: 0\n";
+      case IPPROTO_TCP:
+        out += "  ai_protocol: IPPROTO_TCP\n";
+        break;
+      case IPPROTO_UDP:
+        out += "  ai_protocol: IPPROTO_UDP\n";
+        break;
+      default:
+        out += "  ai_protocol: 0\n";
     }
 
     out += "  ai_addrlen: " + int2str(ap->ai_addrlen) + "\n";
@@ -222,7 +217,7 @@ t_AddrinfoReturn Socket::bindSocket(const str& addr, u16 port)
   if ((fd = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, ai->ai_protocol)) ==
       -1)
   {
-    Logger::log_err("bindSocket: socket failed for (" + addr + ":" +
+    Logger::logErr("bindSocket: socket failed for (" + addr + ":" +
         int2str(port) + ") with: " + getErrStr());
     freeaddrinfo(ai);
     return (t_AddrinfoReturn){"0", addr, -1};
@@ -230,7 +225,7 @@ t_AddrinfoReturn Socket::bindSocket(const str& addr, u16 port)
 
   int opt = 1;
   if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) == -1) {
-    Logger::log_err("bindSocket: setsockopt failed for (" + addr + ":" +
+    Logger::logErr("bindSocket: setsockopt failed for (" + addr + ":" +
         int2str(port) + ") with: " + getErrStr());
     close(fd);
     freeaddrinfo(ai);
@@ -238,7 +233,7 @@ t_AddrinfoReturn Socket::bindSocket(const str& addr, u16 port)
   }
 
   if (bind(fd, ai->ai_addr, ai->ai_addrlen) == -1) {
-    Logger::log_err("bindSocket: bind failed for (" + addr + ":" +
+    Logger::logErr("bindSocket: bind failed for (" + addr + ":" +
         int2str(port) + ") with: " + getErrStr());
     close(fd);
     freeaddrinfo(ai);

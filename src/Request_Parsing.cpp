@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/01 18:46:40 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/14 21:01:36 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/14 22:18:44 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,7 +48,7 @@ void Request::evaluateTarget()
   // check if method is allowed for this route, if not -> 403
   const std::set<e_Method>& allowedMethods = _matchedRoute->getMethods();
   if (allowedMethods.find(_reqline.method) == allowedMethods.end()) {
-    Logger::log_srv(_vsrv->getName(),
+    Logger::logSrv(_vsrv->getName(),
         "forbidden meth " + meth2str(_reqline.method) + " for route " +
             _matchedRoute->getPath());
     _statusCode = HTTP_403;
@@ -72,11 +72,11 @@ e_HTTPStatus Request::parseReqHeaders()
   _hdrsParsed = true;
 
   if ((_statusCode = _parseHeaders()) == HTTP_400) {
-    Logger::log_dbg1("Request::_parseHeaders: 400");
+    Logger::logDbg1("Request::_parseHeaders: 400");
     return _statusCode;
   }
   if ((_statusCode = _evaluateHdrs()) == HTTP_400) {
-    Logger::log_dbg1("Request::checkHeaders: 400");
+    Logger::logDbg1("Request::checkHeaders: 400");
     return _statusCode;
   }
   return HTTP_200;
@@ -98,7 +98,7 @@ e_HTTPStatus Request::_readReqline()
   Logger::logDbg1("Request::_readReqline",
       "Request: found this method: '" + _reqdata.substr(i, k) + "'");
   if ((_reqline.method = str2meth(_reqdata.substr(i, k))) == M_UNKNOWN) {
-    Logger::log_srv(_vsrv->getName(),
+    Logger::logSrv(_vsrv->getName(),
         "Invalid method in Reqline: '" +
             data2hexStr(
                 _reqdata.substr(i, k).data(), _reqdata.substr(i, k).size()) +
@@ -197,7 +197,7 @@ e_HTTPStatus Request::_evaluateHdrs()
 
       // RFC MUST for HTTP/1.1
       if (_headers.count("host") == 0) {
-        Logger::log_srv(_vsrv->getName(), "GET Req without Host header", WARN);
+        Logger::logSrv(_vsrv->getName(), "GET Req without Host header", WARN);
         return HTTP_400;
       }
       if (_headers.count("connection") > 0 && _headers["connection"] == "close")
@@ -208,7 +208,7 @@ e_HTTPStatus Request::_evaluateHdrs()
     if (!(_headers.count("connection") > 0 &&
             _headers["connection"] == "keep-alive"))
     {
-      Logger::log_dbg1(
+      Logger::logDbg1(
           "Request::checkHeaders: closing conn per default, reason: HTTP <= "
           "1.0");
       _closeConn = true;
@@ -223,14 +223,14 @@ e_HTTPStatus Request::_evaluateHdrs()
   if (_reqline.method == M_POST) {
 
     if (_headers.count("content-length") == 0) {
-      Logger::log_srv(_vsrv->getName(), "No content with POST req", WARN);
+      Logger::logSrv(_vsrv->getName(), "No content with POST req", WARN);
       return HTTP_400;
     }
 
     _contentLength = std::atol(_headers["content-length"].c_str());
 
     if (_contentLength > _matchedRoute->getMaxBodySize()) {
-      Logger::log_srv(_vsrv->getName(),
+      Logger::logSrv(_vsrv->getName(),
           "Requested Content-Length exceeds maxBodySize",
           WARN);
       return HTTP_413;

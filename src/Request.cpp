@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 23:39:57 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/14 21:10:58 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/14 22:19:39 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -177,19 +177,19 @@ void Request::_matchRoute()
 void Request::append(char *s, ssize_t bytesRead)
 {
   if (_hdrComplete) {
-    Logger::log_dbg2("Appending this to body now:");
-    Logger::log_dbg2(data2hexStr(s, bytesRead));
+    Logger::logDbg2("Appending this to body now:");
+    Logger::logDbg2(data2hexStr(s, bytesRead));
 
     switch (_body.appendData(s, bytesRead)) {
       case 1:
         break;
       case 0:
-        Logger::log_srv(_vsrv->getName(),
+        Logger::logSrv(_vsrv->getName(),
             "(RequestBody::appendData) truncating body data!",
             WARN);
         break;
       default:
-        Logger::log_err(
+        Logger::logErr(
             "RequestBody::appendData", "Could not append to bodyData!");
     }
   }

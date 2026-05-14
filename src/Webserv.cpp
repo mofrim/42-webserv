@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:36:43 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/14 15:53:38 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/14 22:19:37 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,7 @@ Webserv::~Webserv() {}
 // - etc....
 void Webserv::shutdownWebserv()
 {
-  Logger::log_warn("shutting down webserv...");
+  Logger::logWarn("shutting down webserv...");
   _shutdown_server = true;
 }
 
@@ -68,7 +68,7 @@ void Webserv::readConfig(const str& cfgFilename)
   const std::vector<VServerCfg>& cfgs = parsy.getCfgs();
 
   if (cfgs.empty()) {
-    Logger::log_warn(
+    Logger::logWarn(
         "Webserv::readConfig", "Could not read any vsrvs from cfg!");
     return;
   }
@@ -93,10 +93,10 @@ void Webserv::_setupServers()
     else
       ++it;
   }
-  Logger::log_dbg2("Number of not-failed Servers left after cleanup: " +
+  Logger::logDbg2("Number of not-failed Servers left after cleanup: " +
       int2str(_vservers.size()));
   if (_vservers.size() == 0) {
-    Logger::log_err("Could not setup any Server!");
+    Logger::logErr("Could not setup any Server!");
     shutdownWebserv();
   }
 }
@@ -112,7 +112,7 @@ void Webserv::_setupServers()
 // implement in VServer initialization.
 void Webserv::_setupSingleServer(std::vector<VServer>::iterator srvIt)
 {
-  Logger::log_msg("Trying to setup server '" + srvIt->getName() + "':");
+  Logger::logMsg("Trying to setup server '" + srvIt->getName() + "':");
   try {
     // init() needs the _vservers.begin and srvIt
     srvIt->init(_vservers.begin(), srvIt);
@@ -121,7 +121,7 @@ void Webserv::_setupSingleServer(std::vector<VServer>::iterator srvIt)
         it++)
       _vserverFdMap[*it].push_back(&*srvIt);
   } catch (const VServer::ServerInitException& e) {
-    Logger::log_warn(
+    Logger::logWarn(
         "Setting up server " + srvIt->getName() + " failed: " + e.what());
     srvIt->setSetupFailed();
   }
@@ -132,7 +132,7 @@ void Webserv::_setupSingleServer(std::vector<VServer>::iterator srvIt)
 // nothing to do here so far...
 void Webserv::_shutdownAllServers()
 {
-  Logger::log_msg("Bye-bye from m0fr1m's webserv!");
+  Logger::logMsg("Bye-bye from m0fr1m's webserv!");
 }
 
 // TODO: figure out the best timeout for epoll_wait. For now -1 is okay. but
@@ -170,7 +170,7 @@ void Webserv::run()
         std::vector<VServer *> vsrvs = _getServersByFd(currentFd);
 
         if (vsrvs.empty()) {
-          Logger::log_warn("Webserv::run: _getServerByFd returned no servers");
+          Logger::logWarn("Webserv::run: _getServerByFd returned no servers");
           continue;
         }
 
@@ -178,9 +178,9 @@ void Webserv::run()
         if (vsrvs.size() == 1)
           cli = vsrvs[0]->addClient(currentFd);
         else {
-          Logger::log_err("MULTISERVER BRANCH CALLED!!!");
+          Logger::logErr("MULTISERVER BRANCH CALLED!!!");
           if ((cli = Client::newVirtualCli(currentFd)) == NULL) {
-            Logger::log_warn(
+            Logger::logWarn(
                 "Webserv::run: Client::newCliServerless returned NULL");
             continue;
           }
@@ -241,7 +241,7 @@ void Webserv::_handleEventServerless(u32 ev, Client *cli)
   if (ev & EPOLLIN) {
     return cli->handleEvent(ev);
   }
-  Logger::log_err("Webserv::handleEventServerless: srvless event not EPOLLIN!");
+  Logger::logErr("Webserv::handleEventServerless: srvless event not EPOLLIN!");
   cli->setState(CLI_DISCO);
 }
 

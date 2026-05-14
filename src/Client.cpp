@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/14 20:51:06 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/13 10:28:17 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/14 22:16:24 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,7 +46,7 @@ Client& Client::operator=(const Client& o)
 
 Client::~Client()
 {
-  Logger::log_dbg0("Destroying client " + _ifaceFdStr);
+  Logger::logDbg0("Destroying client " + _ifaceFdStr);
   close(_clientFd);
 }
 
@@ -77,9 +77,9 @@ Client *Client::newVirtualCli(int listenFd)
       accept(listenFd, (struct sockaddr *)&client_addr, &client_addr_len);
   if (client_fd == -1) {
     if (errno == EAGAIN || errno == EWOULDBLOCK)
-      Logger::log_err("accept failed with EAGAIN || WOULDBLOCK");
+      Logger::logErr("accept failed with EAGAIN || WOULDBLOCK");
     else
-      Logger::log_err("accept failed: " + getErrStr());
+      Logger::logErr("accept failed: " + getErrStr());
   }
 
   if (setFdNonBlocking(client_fd) == -1) {
@@ -90,7 +90,7 @@ Client *Client::newVirtualCli(int listenFd)
   str     hostname(inAddrToStr(client_addr.sin_addr));
   Client *newCli = new Client(client_fd, NULL, hostname, client_addr.sin_port);
 
-  Logger::log_srv(
+  Logger::logSrv(
       "ServerLess", "Client connected from " + newCli->getIfaceFdStr());
 
   return newCli;
@@ -101,11 +101,11 @@ void Client::handleEvent(u32 ev)
   if (ev & (EPOLLIN | EPOLLOUT)) {
     this->setLastActive();
     if (ev & EPOLLIN) {
-      Logger::log_msg("Got EPOLLIN!");
+      Logger::logMsg("Got EPOLLIN!");
       _reqHandler.readRequest();
     }
     if (ev & EPOLLOUT) {
-      Logger::log_msg("Got EPOLLOUT!");
+      Logger::logMsg("Got EPOLLOUT!");
       _reqHandler.writeResponse();
     }
   }

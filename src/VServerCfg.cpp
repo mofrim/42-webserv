@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/25 08:35:42 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/13 21:16:38 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/14 22:13:59 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,36 +61,36 @@ std::string VServerCfg::getServerName() const { return (_serverName); }
 
 void VServerCfg::printCfg() const
 {
-  Logger::log_msg("  serverName: \"" + _serverName + "\"");
-  Logger::log_msg("  maxBodySize: \"" + int2str(_maxBodySize) + "\"");
-  Logger::log_msg("  root: \"" + _root + "\"");
+  Logger::logMsg("  serverName: \"" + _serverName + "\"");
+  Logger::logMsg("  maxBodySize: \"" + int2str(_maxBodySize) + "\"");
+  Logger::logMsg("  root: \"" + _root + "\"");
 
-  Logger::log_msg("  interfaces:");
+  Logger::logMsg("  interfaces:");
   for (std::map<str, std::set<u16> >::const_iterator it = _interfaces.begin();
       it != _interfaces.end();
       ++it)
-    Logger::log_msg("    " + it->first + ": " + getSetAsStr(it->second));
+    Logger::logMsg("    " + it->first + ": " + getSetAsStr(it->second));
 
-  Logger::log_msg("  errPages:");
+  Logger::logMsg("  errPages:");
   for (std::map<e_HTTPStatus, str>::const_iterator it = _errPages.begin();
       it != _errPages.end();
       ++it)
   {
-    Logger::log_msg("    - " + int2str(it->first) + ":" + it->second);
+    Logger::logMsg("    - " + int2str(it->first) + ":" + it->second);
   }
 
-  Logger::log_msg("  routes:");
+  Logger::logMsg("  routes:");
   for (std::map<str, Route>::const_iterator it = _routes.begin();
       it != _routes.end();
       it++)
   {
     const Route& r = it->second;
-    Logger::log_msg("   - \"" + it->first + "\": ");
-    Logger::log_msg("     + root = " + r.getRoot());
-    Logger::log_msg("     + upload = " + r.getUpload());
-    Logger::log_msg("     + index = " + r.getIndex());
-    Logger::log_msg("     + autoindex = " + bool2str(r.getAutoindex()));
-    Logger::log_msg("     + maxBodySize = " + u32ToStr(r.getMaxBodySize()));
+    Logger::logMsg("   - \"" + it->first + "\": ");
+    Logger::logMsg("     + root = " + r.getRoot());
+    Logger::logMsg("     + upload = " + r.getUpload());
+    Logger::logMsg("     + index = " + r.getIndex());
+    Logger::logMsg("     + autoindex = " + bool2str(r.getAutoindex()));
+    Logger::logMsg("     + maxBodySize = " + u32ToStr(r.getMaxBodySize()));
 
     str meths;
     for (std::set<e_Method>::const_iterator it = r.getMethods().begin();
@@ -99,10 +99,10 @@ void VServerCfg::printCfg() const
     {
       meths += meth2str(*it) + " ";
     }
-    Logger::log_msg("     + methods = " + meths);
+    Logger::logMsg("     + methods = " + meths);
 
     const std::pair<e_HTTPStatus, str>& redir = r.getRedir();
-    Logger::log_msg(
+    Logger::logMsg(
         "     + redir = " + int2str(redir.first) + ":" + redir.second);
 
     str cgistr;
@@ -110,7 +110,7 @@ void VServerCfg::printCfg() const
         it != r.getCgi().end();
         ++it)
       cgistr += it->first + ":" + it->second + ", ";
-    Logger::log_msg("     + cgi = " + cgistr);
+    Logger::logMsg("     + cgi = " + cgistr);
   }
 }
 

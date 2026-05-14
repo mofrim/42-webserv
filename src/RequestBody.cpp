@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/14 10:18:32 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/14 19:43:00 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/14 22:13:31 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,7 +46,7 @@ void RequestBody::setBodyData(const char *data, size_t len)
     _bodyData.assign(data, data + len);
     _size = len;
   } catch (const std::exception& e) {
-    Logger::log_err("RequestBody::setBodyData", "Could assign to _bodyData");
+    Logger::logErr("RequestBody::setBodyData", "Could assign to _bodyData");
   }
 }
 
@@ -56,7 +56,7 @@ str RequestBody::getBodyDataAsStr()
   try {
     body.assign(_bodyData.begin(), _bodyData.end());
   } catch (const std::exception& e) {
-    Logger::log_err("RequestBody::getBodyDataAsStr", "Failed to assign string");
+    Logger::logErr("RequestBody::getBodyDataAsStr", "Failed to assign string");
   }
   return body;
 }
@@ -94,7 +94,7 @@ bool RequestBody::setMaxSize(size_t mbs)
     _bodyData.resize(mbs);
     _maxSize = mbs;
   } catch (const std::exception& e) {
-    Logger::log_err("RequestBody::setMaxBodySize", "Resizing _bodyData failed");
+    Logger::logErr("RequestBody::setMaxBodySize", "Resizing _bodyData failed");
     return KO;
   }
   return OK;

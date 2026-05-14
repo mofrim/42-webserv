@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/03 12:51:23 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/13 16:10:43 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/14 22:15:25 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,9 +80,9 @@ VServer& VServer::operator=(const VServer& o)
 VServer::~VServer()
 {
   if (!_listenFds.empty())
-    Logger::log_srv(_srvName, "going out of scope");
+    Logger::logSrv(_srvName, "going out of scope");
   if (!_clients.empty()) {
-    Logger::log_srv(_srvName, "removing all clients");
+    Logger::logSrv(_srvName, "removing all clients");
     // _clients.clear();
     _removeAllClients();
   }
@@ -114,7 +114,7 @@ void VServer::init(
   } catch (const VServer::ServerInitException& e) {
     throw;
   }
-  Logger::log_srv(_srvName, "initialized!");
+  Logger::logSrv(_srvName, "initialized!");
 }
 
 // settings up sockets per server.
@@ -158,13 +158,13 @@ void VServer::_setupSockets(
 
       int sockFd = -1;
       if ((sockFd = _findVirtualBuddy(begin, cur, ipAddr, *itp)) >= 0) {
-        Logger::log_msg("Found real virtual server: " + _srvName + " - " +
+        Logger::logMsg("Found real virtual server: " + _srvName + " - " +
             ipAddr + ":" + int2str(*itp));
         _virtualFds.insert(sockFd);
       }
       // the _srvName did match
       else if (sockFd == -42) {
-        Logger::log_warn(
+        Logger::logWarn(
             "Same interface AND srvName! Dropping duplicate iface for " +
             ipAddr + ":" + int2str(*itp));
         itp = eraseIt(ports, itp);
@@ -267,11 +267,11 @@ Client *VServer::addClient(int fd)
   int client_fd = accept(fd, (struct sockaddr *)&client_addr, &client_addr_len);
   if (client_fd == -1) {
     if (errno == EAGAIN || errno == EWOULDBLOCK)
-      Logger::log_err("accept failed with EAGAIN || WOULDBLOCK");
+      Logger::logErr("accept failed with EAGAIN || WOULDBLOCK");
     else
-      Logger::log_err("accept failed: " + getErrStr());
+      Logger::logErr("accept failed: " + getErrStr());
   }
-  Logger::log_srv(_srvName,
+  Logger::logSrv(_srvName,
       "Client " + getAddrPortStr4(client_addr) + " connected on fd " +
           int2str(client_fd));
 
@@ -331,8 +331,8 @@ void VServer::cleanup()
   {
     if (*it != -1 && !isVirtualFd(*it))
       if (close(*it) == -1)
-        Logger::log_warn("VServer::cleanup: failed to close fd " +
-            int2str(*it) + " with error: " + getErrStr());
+        Logger::logWarn("VServer::cleanup: failed to close fd " + int2str(*it) +
+            " with error: " + getErrStr());
   }
 }
 

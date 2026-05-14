@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/14 17:51:57 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/14 22:08:15 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/14 22:15:26 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,7 @@ void Response::_handleSimplePost()
 
   if (upDir.empty()) {
     _status = HTTP_500;
-    Logger::log_srv(_vsrv->getName(),
+    Logger::logSrv(_vsrv->getName(),
         "No upload dir configured for route -> POST fail!",
         WARN);
     return;

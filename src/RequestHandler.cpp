@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 19:13:35 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/14 21:07:47 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/14 22:18:43 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,7 +54,7 @@ void RequestHandler::readRequest()
   std::memset(_buffer, 0, READ_BUFSIZE);
   ssize_t bytesRead = read(_cli->getFd(), _buffer, READ_BUFSIZE);
 
-  Logger::log_srv(_vsrvName,
+  Logger::logSrv(_vsrvName,
       "read " + int2str(bytesRead) + " bytes from " + _cli->getIfaceFdStr());
 
   if (bytesRead <= 0) {
@@ -63,10 +63,10 @@ void RequestHandler::readRequest()
     // at this point the request reading should have already been finished in a
     // previous read!
     if (bytesRead == 0)
-      Logger::log_srv(
+      Logger::logSrv(
           _vsrvName, "Client disco -> closing client " + _cli->getIfaceFdStr());
     else
-      Logger::log_err(
+      Logger::logErr(
           "Read failed, errno: " + int2str(errno) + " = " + getErrStr());
     _cli->setState(CLI_DISCO);
     return;
@@ -77,14 +77,14 @@ void RequestHandler::readRequest()
   if (_cli->isReading())
     req.append(_buffer, bytesRead);
   else {
-    Logger::log_srv(_vsrvName, "Starting new Req");
+    Logger::logSrv(_vsrvName, "Starting new Req");
     _cli->setReq(
         Request(_cli, _buffer, bytesRead)); // this is why **need** copy ctor!
     _cli->setState(CLI_READ);
   }
 
   if (req.hdrTooBig()) {
-    Logger::log_srv(_vsrvName, "Header too big!", WARN);
+    Logger::logSrv(_vsrvName, "Header too big!", WARN);
     req.setStatusCode(HTTP_400);
   }
 
@@ -113,7 +113,7 @@ void RequestHandler::readRequest()
   }
 
   if (req.reqComplete() || req.badRequest()) {
-    Logger::log_reqres(_vsrvName, "Processing Request", req.getReqstr());
+    Logger::logReqRes(_vsrvName, "Processing Request", req.getReqstr());
     _cli->setState(CLI_SEND);
     req.processReq();
   }
@@ -148,7 +148,7 @@ void RequestHandler::writeResponse()
 
   if (_cli->isTimeout()) {
 
-    Logger::log_dbg1("RequestHandler: 408 due to timeout");
+    Logger::logDbg1("RequestHandler: 408 due to timeout");
     statusCode = HTTP_408;
 
     if (_cli->isVirtual())
@@ -163,10 +163,10 @@ void RequestHandler::writeResponse()
     response   = req.getResponseStr();
   }
 
-  Logger::log_srv(_cli->getVsrv()->getName(),
+  Logger::logSrv(_cli->getVsrv()->getName(),
       "Sending Response (" + int2str(statusCode) + ") to " +
           _cli->getIfaceFdStr());
-  Logger::log_reqres(_cli->getVsrv()->getName(), "Response", response);
+  Logger::logReqRes(_cli->getVsrv()->getName(), "Response", response);
 
   if (response.empty())
     throw ReqHandlerException("Cannot write response! Nothing to write!");
@@ -175,7 +175,7 @@ void RequestHandler::writeResponse()
 
   // QUESTION: can we somehow provoke this for testing?
   if (bytes_sent == -1) {
-    Logger::log_err("Couldn't send response!");
+    Logger::logErr("Couldn't send response!");
     return;
   }
 
@@ -185,7 +185,7 @@ void RequestHandler::writeResponse()
   else
     _cli->setState(CLI_IDLE);
 
-  Logger::log_srv(_cli->getVsrv()->getName(), "Response successfully sent!");
+  Logger::logSrv(_cli->getVsrv()->getName(), "Response successfully sent!");
 
   _cli->resetReq();
 }
@@ -212,9 +212,9 @@ void RequestHandler::_setVirtualServerFromHeader()
           it != _cli->getPotentialVsrvs().end();
           it++)
       {
-        Logger::log_dbg0("checking this potential server: " + (*it)->getName());
+        Logger::logDbg0("checking this potential server: " + (*it)->getName());
         if ((*it)->getName() == host) {
-          Logger::log_dbg0("Found matching VServer for host = " + host);
+          Logger::logDbg0("Found matching VServer for host = " + host);
           _cli->setVsrv(*it);
           (*it)->addClient(_cli);
           _vsrvName = host;
@@ -223,7 +223,7 @@ void RequestHandler::_setVirtualServerFromHeader()
       }
     }
 
-    Logger::log_warn("RequestHandler::_setVirtualServerFromHeader",
+    Logger::logWarn("RequestHandler::_setVirtualServerFromHeader",
         "No matching vSrv found. Moving Req to default vSrv.");
 
     VServer *srv = _cli->getPotentialVsrvs()[0];

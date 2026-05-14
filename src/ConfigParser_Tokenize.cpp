@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/07 20:08:59 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/14 22:00:07 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/14 22:16:25 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -389,7 +389,7 @@ str ConfigParser::_toktype2str(e_TokType t) const
 
 void ConfigParser::dbgPrintTokens() const
 {
-  Logger::log_dbg0("Found these tokens in cfg:");
+  Logger::logDbg0("Found these tokens in cfg:");
   for (std::vector<t_Token>::const_iterator it = _tokens.begin();
       it != _tokens.end();
       ++it)
