@@ -2,10 +2,10 @@ server {
   serverName webserv!
   listen localhost:1111!
   route /at {
-    root ./www/miep!
+  root ../../_www/miep!
   }
  
   route /atat {
-    root ./www/moep!
+  root ../../_www/moep!
   }
 }

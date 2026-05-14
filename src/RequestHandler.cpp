@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 19:13:35 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/13 23:15:42 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/14 08:10:59 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -220,12 +220,15 @@ void RequestHandler::_setVirtualServerFromHeader()
       }
     }
 
-    Logger::log_warn("No matching vSrv found. Moving Req to default vSrv.");
+    Logger::log_warn("RequestHandler::_setVirtualServerFromHeader",
+        "No matching vSrv found. Moving Req to default vSrv.");
 
     VServer *srv = _cli->getPotentialVsrvs()[0];
     _cli->setVsrv(srv);
     srv->addClient(_cli);
     _vsrvName = srv->getName();
+
+    _cli->getReq().evaluateTarget();
   }
 }
 

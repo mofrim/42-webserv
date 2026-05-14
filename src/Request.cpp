@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 23:39:57 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/13 23:21:08 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/14 08:15:19 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -106,22 +106,9 @@ Request::Request(Client *cli, const std::string& reqstr)
 void Request::processReq()
 {
 
-  // iff request wasn't bad try to match route
-  if (this->badRequest() == false) {
-    _matchRoute();
-
-    Logger::logBug("MATCHED ROUTE: " + _matchedRoute->getPath());
-    Logger::logBug("TARGET PATH: " + _targetPath);
-
-    // classify request a little
-    _isCGI        = !_matchedRoute->getCgi().empty();
-    _isSimplePOST = (!_isCGI && _reqline.method == M_POST);
-    _isDELETE     = (_reqline.method == M_DELETE);
-
-    _isRedir = (_matchedRoute->getRedir().first != HTTP_0);
-    if (_isRedir)
-      _redir = _matchedRoute->getRedir();
-  }
+  // should already be done until here, but better safe then deref NULL
+  if (_matchedRoute == NULL)
+    this->evaluateTarget();
 
   _statusCode = _respo.generateResponse(*this);
 }
@@ -294,7 +281,8 @@ Route *Request::getMatchedRoute() { return _matchedRoute; }
 constr& Request::getTargetPath() const { return _targetPath; }
 
 // iff at any point we end up with a HTTP_400 the header was bad in some way.
-bool Request::badRequest() const { return _statusCode == HTTP_400; }
+// another cause for badness would be a disallowed method.
+bool Request::badRequest() const { return _statusCode >= HTTP_400; }
 
 bool Request::isCGI() const { return _isCGI; }
 

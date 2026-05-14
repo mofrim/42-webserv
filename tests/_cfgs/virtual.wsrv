@@ -1,9 +1,8 @@
 server {
-  serverName moep!
+  serverName v1!
   listen localhost:1111!
-  listen askdadasdhsadh!
   maxBodySize 1000000!
-  root ./www!
+  root ../../_www!
   errorPage 404:/bla/404.html!
   errorPage 400:/bla/400.html!
 
@@ -18,7 +17,7 @@ server {
   }
 }
 server {
-  serverName kalle!
+  serverName v2!
   listen localhost:1111!
 
   route /kalle {

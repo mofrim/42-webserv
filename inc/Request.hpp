@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 23:39:07 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/13 23:21:08 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/14 07:56:45 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -102,6 +102,7 @@ class Request {
     // FIXME: maybe refs are okay here
     const t_RequestLine& getReqline() const;
     std::map<str, str>&  getHeaders();
+    void                 evaluateTarget();
 
     // parsing
     // FIXME: which function should i expose here?

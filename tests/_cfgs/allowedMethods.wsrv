@@ -1,8 +1,7 @@
 server {
   serverName moep!
   listen localhost:1111!
-  root ./www!
-  errorPage 400:/400.html!
+  root ../../_www!
 
   route /post {
     methods POST!

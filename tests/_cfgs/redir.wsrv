@@ -12,6 +12,6 @@ server {
   # will be cancancelled by the browser as the `/redir` route will match it's
   # own redir. but this happens to nginx too
   route /redir-target {
-    root ./www/redir-target!
+    root ../../_www/redir-target!
   }
 }

@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/01 18:46:40 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/13 23:35:47 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/14 08:06:30 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,13 +16,47 @@
 #include "WsrvLib.hpp"
 #include "utils.hpp"
 
+// parse reqline and, if successful, match the route responsible for handling
+// this req
 e_HTTPStatus Request::parseReqLine()
 {
   if ((_statusCode = _readReqline()) == HTTP_400)
     return _statusCode;
   _requestTarget = _reqline.target.getPath();
 
+  // if our client is not virtual immediately evaluate the target path
+  if (_vsrv)
+    this->evaluateTarget();
+
   return _statusCode;
+}
+
+void Request::evaluateTarget()
+{
+  if (_vsrv == NULL)
+    throw std::runtime_error(
+        "(Request::_evaluateTarget) virtual client cannot eval target!");
+
+  _matchRoute();
+
+  Logger::logBug("MATCHED ROUTE: " + _matchedRoute->getPath());
+  Logger::logBug("TARGET PATH: " + _targetPath);
+
+  // check if method is allowed for this route, if not -> 403
+  const std::set<e_Method>& allowedMethods = _matchedRoute->getMethods();
+  if (allowedMethods.find(_reqline.method) == allowedMethods.end()) {
+    _statusCode = HTTP_403;
+    return;
+  }
+
+  // classify request a little
+  _isCGI        = (!_matchedRoute->getCgi().empty());
+  _isSimplePOST = (!_isCGI && _reqline.method == M_POST);
+  _isDELETE     = (_reqline.method == M_DELETE);
+
+  _isRedir = (_matchedRoute->getRedir().first != HTTP_0);
+  if (_isRedir)
+    _redir = _matchedRoute->getRedir();
 }
 
 // FIXME add header / body separation somewhere around / before here
