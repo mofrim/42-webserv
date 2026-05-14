@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 23:39:57 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/14 08:15:19 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/14 15:44:52 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,6 +43,10 @@ Request::Request(const Request& o)
     _isDELETE      = o._isDELETE;
     _isRedir       = o._isRedir;
     _redir         = o._redir;
+    _body          = o._body;
+    _reqlineParsed = o._reqlineParsed;
+    _hdrsParsed    = o._hdrsParsed;
+    _contentLength = o._contentLength;
   }
 }
 
@@ -68,6 +72,10 @@ Request& Request::operator=(const Request& o)
     _isDELETE      = o._isDELETE;
     _isRedir       = o._isRedir;
     _redir         = o._redir;
+    _body          = o._body;
+    _reqlineParsed = o._reqlineParsed;
+    _hdrsParsed    = o._hdrsParsed;
+    _contentLength = o._contentLength;
   }
   return *this;
 }
@@ -93,7 +101,10 @@ Request::Request(Client *cli, const std::string& reqstr)
   _isSimplePOST  = false;
   _isDELETE      = false;
   _isRedir       = false;
+  _reqlineParsed = false;
+  _hdrsParsed    = false;
   _redir         = std::make_pair(HTTP_0, "");
+  _contentLength = 0;
 }
 
 // There are 2 options when we get here:
@@ -159,11 +170,29 @@ void Request::_matchRoute()
     _targetPath = _requestTarget.substr(ps);
 }
 
-// TODO: add body separation here for POST reqs
 void Request::append(char *s, ssize_t bytesRead)
 {
-  _reqdata.append(s, bytesRead);
-  _hdrLines += _countReqLines(s);
+  if (_hdrComplete) {
+    Logger::log_dbg2("Appending this to body now:");
+    Logger::log_dbg2(data2hexStr(s, bytesRead));
+
+    switch (_body.appendData(s, bytesRead)) {
+      case 1:
+        break;
+      case 0:
+        Logger::log_srv(_vsrv->getName(),
+            "(RequestBody::appendData) truncating body data!",
+            WARN);
+        break;
+      default:
+        Logger::log_err(
+            "RequestBody::appendData", "Could not append to bodyData!");
+    }
+  }
+  else {
+    _reqdata.append(s, bytesRead);
+    _hdrLines += _countReqLines(s);
+  }
   Logger::log_reqres(_vsrv->getName(), "Appending to Req:", s);
 }
 
@@ -177,9 +206,19 @@ bool Request::hdrComplete()
   return _hdrComplete;
 }
 
-// for now we only look at the hdr
-// TODO: we will also have to look for Content-Length!
-bool Request::reqComplete() { return (_hdrComplete && _bodyComplete); }
+// check if a req is complete. for reqs != POST this is the case if the hdr is
+// complete (we set _bodyComplete in _evaluateHeaders if req is not POST). for
+// POST reqs this is the case if Content-Length bytes were read.
+bool Request::reqComplete()
+{
+  if (_hdrComplete && _bodyComplete)
+    return true;
+  if (_hdrComplete && _body.getSize() >= _contentLength) {
+    Logger::logBug("Request::reqComplete", "Content-Length reached");
+    return true;
+  }
+  return false;
+}
 
 e_Method Request::getMethod()
 {
@@ -202,10 +241,9 @@ str Request::getMethodStr() const
   }
 }
 
-// FIXME: make sure this is bullet-proof and nothing is missed-out!
+// WARN make sure this is bullet-proof and nothing is missed-out!
 void Request::reset()
 {
-  _reqdata.clear();
   _statusCode          = HTTP_200;
   _hdrLines            = 0;
   _hdrComplete         = false;
@@ -218,7 +256,12 @@ void Request::reset()
   _isDELETE            = false;
   _isRedir             = false;
   _redir               = std::make_pair(HTTP_0, "");
+  _reqlineParsed       = false;
+  _hdrsParsed          = false;
+  _contentLength       = 0;
 
+  _reqdata.clear();
+  _body.reset();
   _targetPath.clear();
   _requestTarget.clear();
   _reqline.target.clear();
@@ -226,9 +269,9 @@ void Request::reset()
   _respo.reset();
 }
 
-// READ_BUFSIZE is set to 4096 bytes so half of this is in theory the max num of
-// CRLFs in a string that can be checked -> u16 is enough.
-// NOTE: empty lines are also counted
+// READ_BUFSIZE is set to 4096 bytes so half of this is in theory the max num
+// of CRLFs in a string that can be checked -> u16 is enough. NOTE: empty
+// lines are also counted
 u16 Request::_countReqLines(const str& s)
 {
   u16 lineNum = 0;
@@ -250,6 +293,9 @@ u16 Request::_countReqLines(const str& s)
   Logger::logBug("Found " + int2str(lineNum) + " new lines");
   return lineNum;
 }
+
+// -----------------------------=[ one-liners ]=-----------------------------
+// //
 
 void Request::setVsrv(VServer *v) { _vsrv = v; }
 
@@ -298,6 +344,14 @@ const std::pair<e_HTTPStatus, str>& Request::getRedir() const { return _redir; }
 // already received we should check at least if the reqline is correct
 bool Request::reqlineReceived() const
 {
-  Logger::logBug("_reqstr.size = " + int2str(_reqdata.size()));
+  if (_reqlineParsed)
+    return _reqlineParsed;
   return (_hdrLines >= 2 || _reqdata.size() >= MAX_REQLINE_LEN);
 }
+bool Request::reqlineParsed() const { return _reqlineParsed; }
+
+RequestBody& Request::getBody() { return _body; }
+
+std::vector<u8>& Request::getBodyData() { return _body.getBodyData(); }
+
+bool Request::hdrsParsed() const { return _hdrsParsed; }

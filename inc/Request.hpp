@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 23:39:07 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/14 07:56:45 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/14 13:48:08 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 //
 // - implement timeout
 
+#include "RequestBody.hpp"
 #include "Response.hpp"
 #include "Route.hpp"
 #include "WsrvLib.hpp"
@@ -31,16 +32,20 @@ class Client;
 
 class Request {
   private:
-    VServer *_vsrv;
-    Client  *_cli;
-    str      _reqdata;
-    Response _respo;
+    VServer    *_vsrv;
+    Client     *_cli;
+    str         _reqdata;
+    Response    _respo;
+    RequestBody _body;
 
     e_HTTPStatus _statusCode;
     u16          _hdrLines;
     bool         _hdrComplete;
     bool         _bodyComplete;
+    bool         _reqlineParsed;
+    bool         _hdrsParsed;
     bool         _closeConn;
+    u32          _contentLength;
 
     // doing it exactly as proposed in:
     // https://datatracker.ietf.org/doc/html/rfc9112#section-2.2
@@ -124,4 +129,9 @@ class Request {
     bool isRedir() const;
 
     bool reqlineReceived() const;
+    bool reqlineParsed() const;
+    bool hdrsParsed() const;
+
+    RequestBody&     getBody();
+    std::vector<u8>& getBodyData();
 };

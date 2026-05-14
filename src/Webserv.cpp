@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:36:43 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/12 21:57:52 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/14 15:53:38 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -159,8 +159,8 @@ void Webserv::run()
     if (nfds == -1 && errno != EINTR)
       throw(WebservRunException("epoll_wait failed"));
 
-    // will only be printed @ LOGLEVEL=1
-    _epoll.printReadylist();
+    // DEBUG
+    // _epoll.printReadylist();
 
     for (int eventIdx = 0; eventIdx < nfds; ++eventIdx) {
       int currentFd = _epoll.getEventFd(eventIdx);

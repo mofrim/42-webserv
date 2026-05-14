@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/24 20:52:55 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/13 12:52:53 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/14 15:42:13 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,8 +49,8 @@ void Logger::log_err(const str& msg)
 void Logger::log_err(const str& pre, const str& msg)
 {
   str logtime = getLogtime();
-  std::cout << RED << logtime << BRED << " (" << pre << ") " << RST << RED
-            << msg << RST << std::endl;
+  std::cout << RED << logtime << BRED << "(" << pre << ") " << RST << RED << msg
+            << RST << std::endl;
 }
 
 void Logger::log_msg(const str& msg)

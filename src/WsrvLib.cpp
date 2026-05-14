@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/24 17:40:43 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/13 14:52:21 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/14 13:40:00 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -146,7 +146,7 @@ std::map<u16, str> WsrvLib::_initStatusCodes()
   s[404] = "Not Found";
   s[405] = "Not Allowed";
   s[408] = "Request Timeout";
-  s[413] = "Payload Too Large";
+  s[413] = "Content Too Large";
   s[415] = "Unsupported Media Type";
   s[500] = "Internal Server Error";
   s[503] = "Service Unavailable";

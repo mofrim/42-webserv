@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/14 23:12:17 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/01 15:42:53 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/14 15:53:12 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,13 +19,9 @@
 ////////////////////////////////////////////////////////////////////////////////
 /// OCF
 
-Epoll::Epoll(): _nfds(0)
-{}
+Epoll::Epoll(): _nfds(0) {}
 
-Epoll::Epoll(const Epoll& other)
-{
-  (void)other;
-}
+Epoll::Epoll(const Epoll& other) { (void)other; }
 
 Epoll& Epoll::operator=(const Epoll& other)
 {
@@ -33,8 +29,7 @@ Epoll& Epoll::operator=(const Epoll& other)
   return (*this);
 }
 
-Epoll::~Epoll()
-{}
+Epoll::~Epoll() {}
 
 // ------------------------------=[ methods ]=------------------------------ //
 
@@ -73,7 +68,6 @@ void Epoll::setup(const std::vector<VServer>& vservers)
 // ready fds in _nfds vor usage in printEvents f.ex.
 int Epoll::wait()
 {
-  Logger::log_dbg2("calling epoll_wait...");
   _nfds = epoll_wait(_epoll_fd, _events, MAX_EVENTS, 500);
   return (_nfds);
 }
@@ -119,20 +113,14 @@ void Epoll::closeEpollFd()
   close(_epoll_fd);
 }
 
-int Epoll::getEpollFd() const
-{
-  return (_epoll_fd);
-}
+int Epoll::getEpollFd() const { return (_epoll_fd); }
 
 int Epoll::getEventFd(int event_idx) const
 {
   return (_events[event_idx].data.fd);
 }
 
-u32 Epoll::getEvent(int event_idx) const
-{
-  return (_events[event_idx].events);
-}
+u32 Epoll::getEvent(int event_idx) const { return (_events[event_idx].events); }
 
 str Epoll::_getEventStr(const uint32_t& ev) const
 {

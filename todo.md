@@ -3,14 +3,10 @@
 ## current TODOs
 
 
-- [ ] implement Content-Length request handling. See [this
-  sec](https://datatracker.ietf.org/doc/html/rfc9112#name-message-parsing) for
-  instructions
+- [ ] implement autoindex!
 
-- [ ] if a not routed target like `/moep/` is requested this is `403 Forbidden`.
-  The same holds true for `/moep` but then again there is a `301` to `/moep/` in
-  advance! So i really have to clarify the file <-> dir thingy! it seems like
-  nginx is simply stripping of the `/` from routes.
+- [ ] if autoindex is not on and there is no index in a route which exists and is requested
+via `/route/` then this is forbidden 403
 
 - [ ] pay attention and implement sanitization according to this:
 
@@ -33,15 +29,8 @@
 - [ ] check if all getters return reasonable (const!?) values!
 
 
-- [ ] impl proper routing in case of multiple routes (how does nginx do it?)
-
-      For matching requests, the URI will be added to the path specified in the
-      root directive, that is, to /data/www, to form the path to the requested
-      file on the local file system. If there are several matching location
-      blocks nginx selects the one with the **longest prefix**.
-
 - [ ] support URL redirection meaning: `redirect` directive will also take a
-  full URL as redir target!
+  full URL (like https://42.fr) as redir target!
 
 - [ ] if a GET or DELETE req is detected stop reading body from then on. but
   what if client is sending body?
@@ -70,26 +59,53 @@
 ## DONEs
 
 - [x] fix hanging cfg:
+
 - [x] finish virtual servers by making server listening on localhost:1111 and
       127.0.0.1:1111 with the same srvName distinguishable... **or let it be!**
+
 - [x] impl redirection
+
 - [x] GET THE CONFIG FORMAT STRAIGHT!!!
+
 - [x] which config options will i support???
+
 - [x] `GET /../bla.md HTTP/1.1` should not be working?!
+
 - [x] implement tokenization
+
 - [x] make the whole CNAME thing work. Problem is: that i work with the IP only
       from the very beginning.
+
 - [x] according to [this
   sectio](https://datatracker.ietf.org/doc/html/rfc9112#name-field-syntax) all
   field-names are case-insensitive! So, i should convert them to lower and then
   the rest follows.
+
 - [x] and this:
 
       In the interest of robustness, a server that is expecting to receive and
       parse a request-line SHOULD ignore at least one empty line (CRLF) received
       prior to the request-line.
+
 - [x] **no two routes with same path are allowed in nginx!**
   + handled this by simply overwriting the same route with a potential new one
+
+- [x] implement body / hdrs separation for requests that support bodies
+
+- [x] implement Content-Length request handling. See [this
+sec](https://datatracker.ietf.org/doc/html/rfc9112#name-message-parsing) for
+instructions
+
+- [x] implement forbidden methods handling. prereq: every route must have at
+  least one allowed method! not allowed meths receive 403
+
+- [x] impl proper routing in case of multiple routes (how does nginx do it?)
+
+      For matching requests, the URI will be added to the path specified in the
+      root directive, that is, to /data/www, to form the path to the requested
+      file on the local file system. If there are several matching location
+      blocks nginx selects the one with the **longest prefix**.
+
 
 
 ## more on individual todos...

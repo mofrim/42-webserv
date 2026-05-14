@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 19:13:35 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/14 08:10:59 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/14 15:50:51 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,8 +49,6 @@ RequestHandler::RequestHandler(Client *cli): _cli(cli)
 //
 //  1) The Length of the body reached the `Content-Length` Header field value
 //  2) The connection is closed by the client (read == 0)
-//
-//  NOTE: lgtm
 void RequestHandler::readRequest()
 {
   std::memset(_buffer, 0, READ_BUFSIZE);
@@ -91,16 +89,21 @@ void RequestHandler::readRequest()
 
   // to prevent being flooded by non-sense requests check if the reqline must
   // have been received already. this will be the case after sth like 8000 bytes
-  // or 2 read cycles. if this yields non-sense we can directly quit.
-  if (req.reqlineReceived())
+  // or 2 read cycles. if this yields non-sense we can directly quit with 400
+  if (req.reqlineReceived() && !req.reqlineParsed()) {
+    Logger::logDbg1("RequestHandler::readRequest", "Parsing reqline...");
     req.parseReqLine();
+  }
 
   // if we have got the full header - terminated by 2x CRLF - we will
   // immediately parse that in order to get
   //
   //  a) a possible Content-Length field
   //  b) a possible Host header for Virtual Server routing
-  if (!req.badRequest() && req.hdrComplete()) {
+  //
+  //  if the hdrs were already parsed, i.e. we are reading a body to some POST
+  //  req, we don't do anyhing here.
+  if (!req.badRequest() && req.hdrComplete() && !req.hdrsParsed()) {
     if (req.parseReqHeaders() == HTTP_400)
       Logger::logDbg1(
           "RequestHandler::readRequest", "400 from Req::parseHeaders");

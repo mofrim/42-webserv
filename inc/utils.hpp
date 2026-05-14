@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/03 11:26:23 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/13 23:34:54 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/14 15:25:18 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,7 @@ int      isDir(constr& path);
 str      strip(str str);
 void     tolower(str& s);
 u16      str2u16(constr& s);
-str      data2hexStr(constr& s);
+str      data2hexStr(const char *s, size_t len);
 
 std::vector<str> splitString(
     constr& sstr, constr& delim, bool keepEmpty = false);

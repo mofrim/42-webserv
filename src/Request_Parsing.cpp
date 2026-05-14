@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/01 18:46:40 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/14 08:06:30 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/14 15:26:08 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,10 +16,13 @@
 #include "WsrvLib.hpp"
 #include "utils.hpp"
 
+#include <cstdlib>
+
 // parse reqline and, if successful, match the route responsible for handling
 // this req
 e_HTTPStatus Request::parseReqLine()
 {
+  _reqlineParsed = true;
   if ((_statusCode = _readReqline()) == HTTP_400)
     return _statusCode;
   _requestTarget = _reqline.target.getPath();
@@ -37,7 +40,7 @@ void Request::evaluateTarget()
     throw std::runtime_error(
         "(Request::_evaluateTarget) virtual client cannot eval target!");
 
-  _matchRoute();
+  this->_matchRoute();
 
   Logger::logBug("MATCHED ROUTE: " + _matchedRoute->getPath());
   Logger::logBug("TARGET PATH: " + _targetPath);
@@ -45,11 +48,14 @@ void Request::evaluateTarget()
   // check if method is allowed for this route, if not -> 403
   const std::set<e_Method>& allowedMethods = _matchedRoute->getMethods();
   if (allowedMethods.find(_reqline.method) == allowedMethods.end()) {
+    Logger::log_srv(_vsrv->getName(),
+        "forbidden meth" + meth2str(_reqline.method) + " for route " +
+            _matchedRoute->getPath());
     _statusCode = HTTP_403;
     return;
   }
 
-  // classify request a little
+  // classify request
   _isCGI        = (!_matchedRoute->getCgi().empty());
   _isSimplePOST = (!_isCGI && _reqline.method == M_POST);
   _isDELETE     = (_reqline.method == M_DELETE);
@@ -59,9 +65,12 @@ void Request::evaluateTarget()
     _redir = _matchedRoute->getRedir();
 }
 
-// FIXME add header / body separation somewhere around / before here
+// is only being called if CRLFX2 was found in reqdata! That means: we can
+// separate body and headers from here on.
 e_HTTPStatus Request::parseReqHeaders()
 {
+  _hdrsParsed = true;
+
   if ((_statusCode = _parseHeaders()) == HTTP_400) {
     Logger::log_dbg1("Request::_parseHeaders: 400");
     return _statusCode;
@@ -73,22 +82,26 @@ e_HTTPStatus Request::parseReqHeaders()
   return HTTP_200;
 }
 
-// Parse the reuqest-line. I.e. the uppercase method, then a target URI and then
-// the HTTP-version. The URI is already converted to to lowercase
+// Parse the reqline. I.e. the uppercase method, then a target URI and then
+// the HTTP-version. I leave it some kind of arbitrary threshold for of 2 *
+// MAX_REQLINE_LEN to successfully send a valid reqline. but if there is only
+// garbage in _reqdata it will fail anyhow in one of the next steps.
 e_HTTPStatus Request::_readReqline()
 {
-  if (_reqdata.size() > 2 * READ_BUFSIZE)
+  if (_reqdata.size() > 2 * MAX_REQLINE_LEN)
     return HTTP_400;
 
   int i = _skipEmptyHdrLine();
   int k = 0;
   while (k < 6 && !std::isspace(_reqdata[i + k]))
     k++;
-  Logger::log_dbg1(
+  Logger::logDbg1("Request::_readReqline",
       "Request: found this method: '" + _reqdata.substr(i, k) + "'");
   if ((_reqline.method = str2meth(_reqdata.substr(i, k))) == M_UNKNOWN) {
     Logger::log_srv(_vsrv->getName(),
-        "Invalid method in Reqline: '" + data2hexStr(_reqdata.substr(i, k)) +
+        "Invalid method in Reqline: '" +
+            data2hexStr(
+                _reqdata.substr(i, k).data(), _reqdata.substr(i, k).size()) +
             "'");
     return HTTP_400;
   }
@@ -97,7 +110,7 @@ e_HTTPStatus Request::_readReqline()
   k = 0;
   while (k <= MAX_TARGET_LEN && !std::isspace(_reqdata[i + k]))
     k++;
-  Logger::log_dbg1(
+  Logger::logDbg1("Request::_readReqline",
       "Request: found this target URL: '" + _reqdata.substr(i, k) + "'");
   if (k > MAX_TARGET_LEN)
     return HTTP_400;
@@ -116,7 +129,7 @@ e_HTTPStatus Request::_readReqline()
     k++;
   if (i + k > MAX_REQLINE_LEN)
     return HTTP_400;
-  Logger::log_dbg1(
+  Logger::logDbg1("Request::_readReqline",
       "Request: found this httpVer: '" + _reqdata.substr(i, k) + "'");
   _reqline.httpVersion = WsrvLib::str2HTTPVer(_reqdata.substr(i, k));
   if (_reqdata.compare(i + k, 2, CRLF) != 0)
@@ -128,9 +141,31 @@ e_HTTPStatus Request::_readReqline()
 
 // Parse all hdrs lowercasing the field names because we are case-insensitive by
 // RFC. Also we strip any leading or trailing whitespaces from names and values.
+// The hdrs / body separation for POST reqs is also handled in here bc we search
+// fo CRLFX2 anyway and we would have to do this again elsewhere otherwise.
 e_HTTPStatus Request::_parseHeaders()
 {
-  str              onlyHdrs = _reqdata.substr(0, _reqdata.find(CRLFX2) + 2);
+  size_t crlfx2 = _reqdata.find(CRLFX2);
+
+  if (crlfx2 == str::npos)
+    throw std::runtime_error(
+        "(Request::_parseHeaders) somehow said to be finished headers weren't "
+        "finished :/");
+
+  // +2 because we want to keep the CRLF after the last hdr line
+  str onlyHdrs = _reqdata.substr(0, crlfx2 + 2);
+
+  // handle hdrs body separation for POST reqs
+  if (_reqline.method == M_POST) {
+
+    _body.setBodyData(_reqdata.substr(crlfx2).data() + 4,
+        _reqdata.size() - onlyHdrs.size() - 2);
+    Logger::logDbg1("Request::_parseHeaders", "starting to append to _body!");
+  }
+
+  // set free _reqdata as we will not need it anymore.
+  _reqdata.clear();
+
   std::vector<str> hdrLines = splitString(onlyHdrs, CRLF);
 
   // skipping the requline
@@ -179,7 +214,6 @@ e_HTTPStatus Request::_evaluateHdrs()
   if (_reqline.method != M_POST)
     _bodyComplete = true;
 
-  // FIXME: in theory content-length == 0 will be okay but not very useful.
   if (_reqline.method == M_POST) {
 
     if (_headers.count("content-length") == 0) {
@@ -187,8 +221,21 @@ e_HTTPStatus Request::_evaluateHdrs()
       return HTTP_400;
     }
 
-    // TODO
-    // NEXT add handling of req body in here
+    _contentLength = std::atol(_headers["content-length"].c_str());
+
+    if (_contentLength > _matchedRoute->getMaxBodySize()) {
+      Logger::log_srv(_vsrv->getName(),
+          "Requested Content-Length exceeds maxBodySize",
+          WARN);
+      return HTTP_413;
+    }
+
+    // Setting body's capacity to _contentLength as we will ignore anything
+    // above it. If, body's already has been to large here, this will truncate
+    // the data.
+    if (_body.setMaxSize(_contentLength) == KO)
+      throw std::runtime_error(
+          "(Request::_parseHeaders) Could not set maxBodySize!");
   }
 
   return HTTP_200;

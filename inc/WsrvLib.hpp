@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/24 17:31:03 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/13 22:06:20 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/14 11:15:32 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,7 @@ extern bool g_WsrvTesting;
 // type abbreviations
 typedef std::string                 str;
 typedef const std::string           constr;
+typedef uint8_t                     u8;
 typedef uint16_t                    u16;
 typedef uint32_t                    u32;
 typedef std::string::iterator       strIt;
