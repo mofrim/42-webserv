@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/24 17:31:03 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/15 18:05:48 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/15 19:17:27 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -159,4 +159,5 @@ class WsrvLib {
     static str           httpVer2Str(e_HTTPVersion v);
     static e_HTTPStatus  short2HttpStatus(u16 s);
     static e_HTTPStatus  str2HttpStatus(const str& s);
+    static str           getAutoindex(constr& path, constr& route);
 };

@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/09 16:41:56 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/13 15:16:15 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/15 19:24:00 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,7 +45,7 @@ class Route {
     str  getPath() const;
 
     void setAutoindex(bool a);
-    bool getAutoindex() const;
+    bool isAutoindex() const;
 
     void setIndex(const str& s);
     str  getIndex() const;

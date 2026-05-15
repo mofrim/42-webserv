@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/24 17:40:43 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/15 17:37:36 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/15 19:50:46 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -294,3 +294,66 @@ e_HTTPStatus WsrvLib::str2HttpStatus(const str& s)
 
 // global flag used to activate certain debug output.
 bool g_WsrvTesting = false;
+
+str WsrvLib::getAutoindex(constr& path, constr& route)
+{
+  std::set<str> files = listDirFiles(path, true);
+  if (files.empty())
+    return "";
+
+  str slash;
+  if (route != "/")
+    slash = "/";
+
+  str ret =
+
+      "<!DOCTYPE html>\n"
+      "<html>\n"
+      "<head>\n"
+      "<title>Autoindex</title>\n"
+      "<style>"
+      "body{"
+      "background:"
+      "radial-gradient(circle at 20% 20%, rgba(14,165,233,0.35), transparent "
+      "30%),"
+      "radial-gradient(circle at 80% 30%, rgba(168,85,247,0.30), transparent "
+      "30%),"
+      "radial-gradient(circle at 50% 80%, rgba(59, 130, 246, 0.25), "
+      "transparent 35%),"
+      "linear-gradient(135deg, #020617 0%, #0f172a 40%, #111827 100%);"
+      "color: #fff;"
+      "font-family: Arial, Helvetica, sans-serif;"
+      "margin: 100px 100px 0px 100px;"
+      "text-align: left;"
+      "}"
+      ".msg{"
+      "margin:50px 100px 50px 100px;"
+      "padding:12px;"
+      "background-color: yellow;"
+      "border-radius:10px;"
+      "border:4px;"
+      "border-color:black;"
+      "border-style:solid;"
+      "}"
+      "p {text-align: center; font-size: 1.2rem; font-weight: 700;}"
+      "</style>\n"
+      "</head>\n"
+      "<body>\n"
+      "<h1 style=\"text-align: center;\"> Autoindex of '" +
+      route + "'</h1>";
+
+  ret += "<div class=\"msg\">\n";
+
+  for (std::set<str>::iterator it = files.begin(); it != files.end(); ++it)
+    ret +=
+        "<p><a href=\"" + str(route + slash + *it) + "\">" + *it + "</a></p>\n";
+
+  ret +=
+      "</div>\n"
+      "<hr>\n"
+      "<p>m0fr1m's webserv</p>\n"
+      "</body>\n"
+      "</html>\n";
+
+  return ret;
+}

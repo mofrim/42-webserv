@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/09 16:42:51 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/14 22:14:59 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/15 19:24:00 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,7 +73,7 @@ str Route::getPath() const { return _path; }
 
 void Route::setAutoindex(bool a) { _autoindex = a; }
 
-bool Route::getAutoindex() const { return _autoindex; }
+bool Route::isAutoindex() const { return _autoindex; }
 
 // we only set the default file if it does not contain any slashes which might
 // lead to root folder escaping

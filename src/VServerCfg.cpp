@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/25 08:35:42 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/15 18:14:38 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/15 19:24:00 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,7 +89,7 @@ void VServerCfg::printCfg() const
     Logger::logMsg("     + root = " + r.getRoot());
     Logger::logMsg("     + upload = " + r.getUpload());
     Logger::logMsg("     + index = " + r.getIndex());
-    Logger::logMsg("     + autoindex = " + bool2str(r.getAutoindex()));
+    Logger::logMsg("     + autoindex = " + bool2str(r.isAutoindex()));
     Logger::logMsg("     + maxBodySize = " + int2str(r.getMaxBodySize()));
 
     str meths;

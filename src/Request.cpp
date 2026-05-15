@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 23:39:57 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/15 15:57:11 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/15 18:48:56 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -109,11 +109,13 @@ void Request::processReq()
   _statusCode = _respo.generateResponse(*this);
 }
 
-// QUESTION: is the targetPath validated enough when we come here?
+// Match the route from req. After this there will _ALWAYS_ be a route set, if
+// we don't throw exception.
 //
-// std::map stores items weakly ordered by there keys. that is the
+// NOTE std::map stores items weakly ordered by there keys. that is the
 // std::map::begin() iterator will always point to the smallest element if keys
 // are int. coneversely, end() - 1 will be the largest.
+//
 void Request::_matchRoute()
 {
   if (_vsrv == NULL)

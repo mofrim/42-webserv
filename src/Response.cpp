@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/23 19:11:25 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/15 18:26:47 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/15 19:40:56 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -141,9 +141,6 @@ void Response::_genResponse()
   _respoStr += CRLF + _body;
 }
 
-// FIXME: this is not at done yet!
-// TODO: we need to handle real routing in here.
-// FIXME: `root` fields in config should never end in a '/'
 void Response::_getBody200()
 {
   const Route& r = *_matchedRoute;
@@ -163,12 +160,32 @@ void Response::_getBody200()
 
   Logger::logBug("_targetPath: " + _targetPath);
 
-  if (isDir(path) == 1)
-    path += (path[path.size() - 1] == '/' ? "" : "/") + r.getIndex();
+  int isdir = isDir(path);
 
-  Logger::logSrv(_vsrv->getName(), "Trying to serv file: " + path);
+  switch (isdir) {
+    case -1:
+      _status = HTTP_404;
+      _body   = WsrvLib::getDefaultStatusPage(HTTP_404);
+      return;
+    case 0:
+      _readBodyFromFile(path);
+      break;
+    case 1: {
+      str fpath =
+          path + (path[path.size() - 1] == '/' ? "" : "/") + r.getIndex();
+      Logger::logSrv(_vsrv->getName(), "Trying to serve file: " + fpath);
+      _readBodyFromFile(fpath);
 
-  _readBodyFromFile(path);
+      if (_status == HTTP_404 && r.isAutoindex()) {
+        Logger::logBug("AUTOINDEX!!!!");
+        _body = WsrvLib::getAutoindex(path, r.getPath());
+      }
+      if (!_body.empty())
+        _status = HTTP_200;
+      else
+        _body = WsrvLib::getDefaultStatusPage(_status);
+    }
+  }
 }
 
 void Response::_buildRespoHdrs()

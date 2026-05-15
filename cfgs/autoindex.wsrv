@@ -1,0 +1,9 @@
+server {
+  serverName autoindexSrv!
+  listen localhost:1111!
+
+  route / {
+    autoindex on!
+    index bla.html!
+  }
+}
