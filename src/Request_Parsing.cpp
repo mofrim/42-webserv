@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/01 18:46:40 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/14 22:18:44 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/15 15:58:44 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,11 @@ e_HTTPStatus Request::parseReqLine()
     return _statusCode;
   _requestTarget = _reqline.target.getPath();
 
+  Logger::logSrv(_vsrvName,
+      "Reqline: '" + meth2str(_reqline.method) + " " +
+          _reqline.target.getStr() + " " +
+          WsrvLib::httpVer2Str(_reqline.httpVersion) + "'");
+
   // if our client is not virtual immediately evaluate the target path
   if (_vsrv)
     this->evaluateTarget();
@@ -42,8 +47,7 @@ void Request::evaluateTarget()
 
   this->_matchRoute();
 
-  Logger::logBug("MATCHED ROUTE: " + _matchedRoute->getPath());
-  Logger::logBug("TARGET PATH: " + _targetPath);
+  Logger::logSrv(_vsrvName, "Matched Route: " + _matchedRoute->getPath());
 
   // check if method is allowed for this route, if not -> 403
   const std::set<e_Method>& allowedMethods = _matchedRoute->getMethods();
@@ -71,11 +75,11 @@ e_HTTPStatus Request::parseReqHeaders()
 {
   _hdrsParsed = true;
 
-  if ((_statusCode = _parseHeaders()) == HTTP_400) {
+  if ((_statusCode = _parseHeaders()) >= HTTP_400) {
     Logger::logDbg1("Request::_parseHeaders: 400");
     return _statusCode;
   }
-  if ((_statusCode = _evaluateHdrs()) == HTTP_400) {
+  if ((_statusCode = _evaluateHdrs()) >= HTTP_400) {
     Logger::logDbg1("Request::checkHeaders: 400");
     return _statusCode;
   }
@@ -135,8 +139,24 @@ e_HTTPStatus Request::_readReqline()
   if (_reqdata.compare(i + k, 2, CRLF) != 0)
     return HTTP_400;
 
-  // FIXME: add here or somwhere else a NGINX like logmsg
   return HTTP_200;
+}
+
+// convenience func for logging some maybe interesting hdrs
+void Request::_logSelectedHdrs()
+{
+  str logstr("::HDRS:: ");
+  if (_headers.find("host") != _headers.end())
+    logstr += "Host='" + _headers["host"] + "'";
+  if (_headers.find("user-agent") != _headers.end()) {
+    logstr += " -- ";
+    logstr += "UserAgent='" + _headers["user-agent"] + "'";
+  }
+  if (_headers.find("content-type") != _headers.end()) {
+    logstr += " -- ";
+    logstr += "ContentType='" + _headers["content-type"] + "'";
+  }
+  Logger::logSrv(_vsrvName, logstr);
 }
 
 // Parse all hdrs lowercasing the field names because we are case-insensitive by
@@ -156,14 +176,14 @@ e_HTTPStatus Request::_parseHeaders()
   // +2 because we want to keep the CRLF after the last hdr line
   str onlyHdrs = _reqdata.substr(0, crlfx2 + 2);
 
-  Logger::logBug("onlyHdrs size: " + int2str(onlyHdrs.size()));
-  Logger::logBug("reqdata size: " + int2str(_reqdata.size()));
-
-  // handle hdrs body separation for POST reqs
+  // handle hdrs body separation for POST reqs. we also keep track of the
+  // bodySize in main Request class bc we might have to handle socket draining
+  // using it. Therefore we have to track bodySize and compare with
+  // content-length.
   if (_reqline.method == M_POST) {
 
-    _body.setBodyData(_reqdata.substr(crlfx2).data() + 4,
-        _reqdata.size() - onlyHdrs.size() - 2);
+    _bodySize = _reqdata.size() - onlyHdrs.size() - 2;
+    _body.setBodyData(_reqdata.substr(crlfx2).data() + 4, _bodySize);
     Logger::logDbg1("Request::_parseHeaders",
         "starting to append " + int2str(_reqdata.size() - onlyHdrs.size() - 2) +
             " to _body!");
@@ -185,6 +205,7 @@ e_HTTPStatus Request::_parseHeaders()
     tolower(fieldName);
     _headers[fieldName] = fieldValue;
   }
+  _logSelectedHdrs();
   return HTTP_200;
 }
 
@@ -229,10 +250,18 @@ e_HTTPStatus Request::_evaluateHdrs()
 
     _contentLength = std::atol(_headers["content-length"].c_str());
 
+    if (_contentLength > MAX_CONTENT_LENGTH) {
+      Logger::logSrv(_vsrv->getName(),
+          "Request Content-Length exceeds MAX_CONTENT_LENGTH -> 400",
+          WARN);
+      return HTTP_400;
+    }
+
     if (_contentLength > _matchedRoute->getMaxBodySize()) {
       Logger::logSrv(_vsrv->getName(),
           "Requested Content-Length exceeds maxBodySize",
           WARN);
+      _cli->setState(CLI_DRAIN);
       return HTTP_413;
     }
 

@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/14 20:51:06 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/14 22:16:24 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/15 14:56:11 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -136,6 +136,7 @@ bool       Client::isIdling() const { return _state == CLI_IDLE; }
 bool       Client::isReading() const { return _state == CLI_READ; }
 bool       Client::isSending() const { return _state == CLI_SEND; }
 bool       Client::isDisco() const { return _state == CLI_DISCO; }
+bool       Client::isDraining() const { return _state == CLI_DRAIN; }
 
 bool     Client::isTimeout() const { return _timeout; }
 void     Client::setFd(int fd) { _clientFd = fd; }

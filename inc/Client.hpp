@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/14 20:50:12 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/13 10:28:41 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/15 14:55:51 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@
 class VServer;
 
 // the states of the client machine
-typedef enum { CLI_READ, CLI_SEND, CLI_IDLE, CLI_DISCO } e_CliState;
+typedef enum { CLI_READ, CLI_SEND, CLI_IDLE, CLI_DISCO, CLI_DRAIN } e_CliState;
 
 class Client {
   private:
@@ -75,6 +75,7 @@ class Client {
     bool isReading() const;
     bool isSending() const;
     bool isDisco() const;
+    bool isDraining() const;
 
     bool reqHasHostHeader();
 

@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 23:39:07 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/14 20:29:21 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/15 15:03:08 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,6 +46,8 @@ class Request {
     bool         _hdrsParsed;
     bool         _closeConn;
     u32          _contentLength;
+    str          _vsrvName;
+    size_t       _bodySize;
 
     // doing it exactly as proposed in:
     // https://datatracker.ietf.org/doc/html/rfc9112#section-2.2
@@ -71,6 +73,7 @@ class Request {
     e_HTTPStatus                       _readReqline();
     e_HTTPStatus                       _parseHeaders();
     void                               _matchRoute();
+    void                               _logSelectedHdrs();
 
     e_HTTPStatus _evaluateHdrs();
 
@@ -93,7 +96,7 @@ class Request {
     Client      *getCli() const;
     VServer     *getVsrv() const;
     void         setVsrv(VServer *v);
-    e_HTTPStatus getStatusCode() const;
+    e_HTTPStatus getStatus() const;
     void         setStatusCode(e_HTTPStatus code);
     str          getMethodStr() const;
     bool         closeConn() const;

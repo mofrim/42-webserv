@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" conten="width=device-width, initial-scale=1.0">
+    <title>m0fr1m's WebServ Multipart Form Page!</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="grid"></div>
+    <div class="title-card">
+     <h1>A Multipart Form!</h1> 
+    </div>
+    <div class="form-container">
+      <div class="badge">
+        m0fr1m's webserv
+      </div>
+        <h2>A form which allows submitting multiple parts... </h2>
+        <form class="form-group" action="/upload-multipart" method="POST" enctype="multipart/form-data">
+            <label for="name">Name:</label>
+            <input type="text" id="name" name="name" required>
+            <br>
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required>
+            <br>
+            <label for="file">File:</label>
+            <input class="form-button" type="file" id="file" name="file" required>
+            <br>
+            <input class="form-button form-actions" type="submit" value="Submit">
+        </form>
+    </div>
+</body>
+</html>

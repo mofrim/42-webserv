@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/14 17:51:57 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/14 22:15:26 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/15 10:59:16 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,14 +59,15 @@ void Response::_handleSimplePost()
   // isolate mimeType from stuff like encoding and whatnot
   size_t semicolon = contentType.find(';');
   if (semicolon != str::npos)
-    contentType = contentType.substr(semicolon);
+    contentType = contentType.substr(0, semicolon);
   str mimeType = strip(contentType);
 
   Logger::logBug("Got this mimeType: " + mimeType);
 
   if (mimeType == "multipart/form-data" ||
       mimeType == "application/x-www-form-urlencoded")
-    _handleSimplePostForm(upDir, mimeType);
+    // _handleSimplePostForm(upDir, mimeType);
+    _handleSimplePostFile(upDir, mimeType);
   else
     _handleSimplePostFile(upDir, mimeType);
 }
@@ -74,7 +75,7 @@ void Response::_handleSimplePost()
 static str generateFname(constr& dir, constr& ext)
 {
   // TODO this would be really easily made configurable via cfg!
-  // -> add directive defaultUploadName!
+  // -> add directive uploadFilePrefix!
   str           defName("wsrvUpload");
   str           fname;
   std::set<str> files = listDirFiles(dir, false);
@@ -95,6 +96,9 @@ static str generateFname(constr& dir, constr& ext)
 
 void Response::_handleSimplePostFile(constr& upDir, constr& mimeType)
 {
+  Logger::logSrv(
+      _vsrv->getName(), "Handling SimplePostFile for mimeType: " + mimeType);
+
   std::map<str, str>& query = _reqline.target.getQuery();
   str                 ext   = "." + WsrvLib::getExtFromMimeType(mimeType);
   str                 fname;

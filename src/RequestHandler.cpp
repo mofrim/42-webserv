@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 19:13:35 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/14 22:18:43 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/15 15:33:59 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,12 +74,13 @@ void RequestHandler::readRequest()
 
   Request& req = _cli->getReq();
 
-  if (_cli->isReading())
+  // first time we come here cli will be in CLI_IDLE state, so a new Req is
+  // started
+  if (_cli->isReading() || _cli->isDraining())
     req.append(_buffer, bytesRead);
   else {
     Logger::logSrv(_vsrvName, "Starting new Req");
-    _cli->setReq(
-        Request(_cli, _buffer, bytesRead)); // this is why **need** copy ctor!
+    _cli->setReq(Request(_cli, _buffer, bytesRead));
     _cli->setState(CLI_READ);
   }
 
@@ -105,9 +106,10 @@ void RequestHandler::readRequest()
   //  if the hdrs were already parsed, i.e. we are reading a body to some POST
   //  req, we don't do anyhing here.
   if (!req.badRequest() && req.hdrComplete() && !req.hdrsParsed()) {
-    if (req.parseReqHeaders() == HTTP_400)
-      Logger::logDbg1(
-          "RequestHandler::readRequest", "400 from Req::parseHeaders");
+    if (req.parseReqHeaders() >= HTTP_400)
+      Logger::logSrv(_vsrvName,
+          "Req::parseHeaders returned " + int2str(req.getStatus()),
+          WARN);
     else
       _setVirtualServerFromHeader();
   }
@@ -159,7 +161,7 @@ void RequestHandler::writeResponse()
   }
   else {
 
-    statusCode = req.getStatusCode();
+    statusCode = req.getStatus();
     response   = req.getResponseStr();
   }
 
@@ -174,8 +176,8 @@ void RequestHandler::writeResponse()
   ssize_t bytes_sent = send(_cli->getFd(), response.data(), response.size(), 0);
 
   // QUESTION: can we somehow provoke this for testing?
-  if (bytes_sent == -1) {
-    Logger::logErr("Couldn't send response!");
+  if (bytes_sent < 0 || static_cast<size_t>(bytes_sent) != response.size()) {
+    Logger::logErr("Couldn't send (complete) response!");
     return;
   }
 

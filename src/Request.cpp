@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 23:39:57 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/14 22:19:39 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/15 15:57:11 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,39 +21,11 @@
 
 Request::Request() { this->reset(); }
 
-Request::Request(const Request& o)
-{
-  if (this != &o) {
-    _vsrv          = o._vsrv;
-    _cli           = o._cli;
-    _reqdata       = o._reqdata;
-    _respo         = o._respo;
-    _statusCode    = o._statusCode;
-    _reqline       = o._reqline;
-    _headers       = o._headers;
-    _hdrComplete   = o._hdrComplete;
-    _bodyComplete  = o._bodyComplete;
-    _hdrLines      = o._hdrLines;
-    _closeConn     = o._closeConn;
-    _requestTarget = o._requestTarget;
-    _targetPath    = o._targetPath;
-    _matchedRoute  = o._matchedRoute;
-    _isCGI         = o._isCGI;
-    _isSimplePOST  = o._isSimplePOST;
-    _isDELETE      = o._isDELETE;
-    _isRedir       = o._isRedir;
-    _redir         = o._redir;
-    _body          = o._body;
-    _reqlineParsed = o._reqlineParsed;
-    _hdrsParsed    = o._hdrsParsed;
-    _contentLength = o._contentLength;
-  }
-}
-
 Request& Request::operator=(const Request& o)
 {
   if (this != &o) {
     _vsrv          = o._vsrv;
+    _vsrvName      = o._vsrvName;
     _cli           = o._cli;
     _reqdata       = o._reqdata;
     _respo         = o._respo;
@@ -76,9 +48,12 @@ Request& Request::operator=(const Request& o)
     _reqlineParsed = o._reqlineParsed;
     _hdrsParsed    = o._hdrsParsed;
     _contentLength = o._contentLength;
+    _bodySize      = o._bodySize;
   }
   return *this;
 }
+
+Request::Request(const Request& o) { *this = o; }
 
 Request::~Request() {}
 
@@ -91,6 +66,7 @@ Request::Request(Client *cli, const char *reqstr, size_t reqstrLen)
   _vsrv = cli->getVsrv();
   _cli  = cli;
 
+  _vsrvName            = (_vsrv != NULL ? _vsrv->getName() : "__VIRTUAL__");
   _statusCode          = HTTP_200;
   _hdrLines            = _countReqLines(reqstr);
   _hdrComplete         = false;
@@ -107,8 +83,10 @@ Request::Request(Client *cli, const char *reqstr, size_t reqstrLen)
   _hdrsParsed          = false;
   _contentLength       = 0;
   _closeConn           = false;
+  _requestTarget       = "";
+  _bodySize            = 0;
+
   _reqdata.assign(reqstr, reqstrLen);
-  _requestTarget = "";
 }
 
 // There are 2 options when we get here:
@@ -125,6 +103,9 @@ void Request::processReq()
   if (!this->badRequest() && _matchedRoute == NULL)
     this->evaluateTarget();
 
+  if (_vsrv && _statusCode != HTTP_400)
+    _matchRoute();
+
   _statusCode = _respo.generateResponse(*this);
 }
 
@@ -133,11 +114,12 @@ void Request::processReq()
 // std::map stores items weakly ordered by there keys. that is the
 // std::map::begin() iterator will always point to the smallest element if keys
 // are int. coneversely, end() - 1 will be the largest.
-//
-//
-// how to match target == `/miep/index.html` with `/miep`?
 void Request::_matchRoute()
 {
+  if (_vsrv == NULL)
+    throw std::runtime_error(
+        "(Request::_matchRoute) _vsrv == NULL, client still virtual!");
+
   std::map<str, Route>& vsrvRoutes = _vsrv->getRoutes();
 
   // return direct matches immediately
@@ -174,12 +156,23 @@ void Request::_matchRoute()
     _targetPath = _requestTarget.substr(ps);
 }
 
+// also handle the ability to "drain" the socket if the request was already
+// terminated prematurely due to too large content.
 void Request::append(char *s, ssize_t bytesRead)
 {
-  if (_hdrComplete) {
+  if (_cli->isDraining()) {
+    _bodySize += bytesRead;
+    Logger::logBug("draining...");
+    if (_bodySize >= _contentLength) {
+      _cli->setState(CLI_SEND);
+      Logger::logBug("FINISHED DRAINING!");
+    }
+    return;
+  }
+  else if (_hdrComplete) {
     Logger::logDbg2("Appending this to body now:");
     Logger::logDbg2(data2hexStr(s, bytesRead));
-
+    _bodySize += bytesRead;
     switch (_body.appendData(s, bytesRead)) {
       case 1:
         break;
@@ -216,6 +209,7 @@ bool Request::hdrComplete()
 // POST reqs this is the case if Content-Length bytes were read.
 bool Request::reqComplete()
 {
+  // req != POST
   if (_hdrComplete && _bodyComplete)
     return true;
 
@@ -223,7 +217,8 @@ bool Request::reqComplete()
       "bodysiz: " + int2str(_body.getSize()) +
           ", Content-Length: " + int2str(_contentLength));
 
-  if (_hdrComplete && _body.getSize() >= _contentLength) {
+  // req == POST. special treatment for draining situation necessary.
+  if (_hdrComplete && (_bodySize >= _contentLength && !_cli->isDraining())) {
     Logger::logDbg1("Request::reqComplete", "Content-Length reached");
     return true;
   }
@@ -270,6 +265,7 @@ void Request::reset()
   _hdrsParsed          = false;
   _contentLength       = 0;
   _closeConn           = false;
+  _bodySize            = 0;
 
   _reqdata.clear();
   _body.reset();
@@ -301,14 +297,17 @@ u16 Request::_countReqLines(const str& s)
     lineNum++;
     i += 2;
   }
-  Logger::logBug("Found " + int2str(lineNum) + " new lines");
   return lineNum;
 }
 
-// -----------------------------=[ one-liners ]=-----------------------------
-// //
+// --------------------=[ one-liners, more or less... ]=-------------------- //
 
-void Request::setVsrv(VServer *v) { _vsrv = v; }
+void Request::setVsrv(VServer *v)
+{
+  _vsrv = v;
+  if (_vsrv != NULL)
+    _vsrvName = _vsrv->getName();
+}
 
 bool Request::hdrTooBig() const { return _hdrLines > MAX_HEADER_LINES; }
 
@@ -325,7 +324,7 @@ Client *Request::getCli() const { return _cli; }
 
 VServer *Request::getVsrv() const { return _vsrv; }
 
-e_HTTPStatus Request::getStatusCode() const { return _statusCode; }
+e_HTTPStatus Request::getStatus() const { return _statusCode; }
 
 t_RequestLine& Request::getReqline() { return _reqline; }
 
@@ -337,9 +336,13 @@ Route *Request::getMatchedRoute() { return _matchedRoute; }
 
 constr& Request::getTargetPath() const { return _targetPath; }
 
-// iff at any point we end up with a HTTP_400 the header was bad in some way.
-// another cause for badness would be a disallowed method.
-bool Request::badRequest() const { return _statusCode >= HTTP_400; }
+// return true if client is not in draining state and statusCode is somewhere in
+// the error range. Draining state can only be released in Request::append iff
+// we finally surpass the contentLength.
+bool Request::badRequest() const
+{
+  return (!_cli->isDraining() && _statusCode >= HTTP_400);
+}
 
 bool Request::isCGI() const { return _isCGI; }
 

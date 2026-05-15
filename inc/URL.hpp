@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/06 22:32:20 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/14 18:11:04 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/15 11:11:22 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,5 +49,6 @@ class URL {
     std::map<str, str>& getQuery();
     str                 getQueryCSStr() const;
     str                 getQueryStr() const;
+    str                 getStr() const;
     void                clear();
 };

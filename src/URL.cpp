@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/06 22:32:39 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/14 18:11:10 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/15 11:12:09 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -303,3 +303,4 @@ str URL::getQueryStr() const
 
   return ret;
 }
+str URL::getStr() const { return _path + getQueryStr() + _fragment; }

@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:36:43 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/14 22:19:37 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/15 15:13:16 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -220,7 +220,7 @@ void Webserv::run()
         }
         else if (cli->isSending())
           _epoll.modifyClient(currentFd, EPOLLOUT);
-        else if (cli->isReading() || cli->isIdling())
+        else if (cli->isReading() || cli->isIdling() || cli->isDraining())
           _epoll.modifyClient(currentFd, EPOLLIN);
       }
       _timeoutClients();

@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/24 17:40:43 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/14 19:51:59 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/15 13:29:46 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,7 @@ str WsrvLib::_getTemplateWithErrStr(const str& s)
 {
   str ret =
 
+      "<!DOCTYPE html>\n"
       "<html>\n"
       "<head>\n"
       "<title>WebServ Default Error Page</title>\n"
@@ -238,6 +239,18 @@ e_HTTPVersion WsrvLib::str2HTTPVer(const str& s)
   if (s == "HTTP/1.0")
     return HTTPVER_1_0;
   return HTTPVER_UNKNOWN;
+}
+
+str WsrvLib::httpVer2Str(e_HTTPVersion v)
+{
+  switch (v) {
+    case HTTPVER_1_1:
+      return "HTTP/1.1";
+    case HTTPVER_1_0:
+      return "HTTP/1.0";
+    default:
+      return "HTTP/*";
+  }
 }
 
 e_HTTPStatus WsrvLib::short2HttpStatus(u16 s)

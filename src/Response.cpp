@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/23 19:11:25 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/14 22:18:44 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/15 12:34:33 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,7 +64,7 @@ Response::~Response() {}
 // be used later in code
 void Response::_setFieldsFromReq(Request& req)
 {
-  _status       = req.getStatusCode();
+  _status       = req.getStatus();
   _reqline      = req.getReqline();
   _cli          = req.getCli();
   _vsrv         = req.getVsrv();
@@ -88,8 +88,7 @@ e_HTTPStatus Response::generateResponse(Request& req)
 {
   _setFieldsFromReq(req);
 
-  // handle HTTP_400
-
+  // handle status >= HTTP_400
   if (req.badRequest()) {
     Logger::logBug("Response::generateResponse", "Bad Request handling");
     _handleBadRequest();
@@ -272,7 +271,13 @@ void Response::_handleBadRequest()
     return;
   }
 
-  str errPage = _vsrv->getErrPage(_status);
+  str errPage;
+
+  if (_status != HTTP_400 && _matchedRoute != NULL)
+    errPage = _matchedRoute->getErrPage(_status);
+
+  if (errPage.empty())
+    errPage = _vsrv->getErrPage(_status);
 
   if (errPage.empty())
     _body = WsrvLib::getDefaultErrPage(_status);
