@@ -40,6 +40,8 @@ UseTab: Never
 AlignAfterOpenBracket: DontAlign
 ## this helps enforcing the above rule in certain situations.
 AlignOperands: DontAlign
+BreakBeforeBinaryOperators: None
+BreakBeforeTernaryOperators: true
 
 # FIXME: why is this behaving the way it does? 
 TabWidth: 2
@@ -54,8 +56,6 @@ AllowAllArgumentsOnNextLine: true
 AlwaysBreakAfterReturnType: None
 AlwaysBreakAfterDefinitionReturnType: None
 AlwaysBreakBeforeMultilineStrings: true
-BreakBeforeBinaryOperators: None
-BreakBeforeTernaryOperators: true
 BreakStringLiterals: true
 BinPackArguments: false
 # BinPackParameters: BinPack
