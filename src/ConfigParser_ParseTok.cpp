@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/08 21:14:52 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/15 15:50:33 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/15 18:08:20 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -334,7 +334,7 @@ bool ConfigParser::_parseTokBytes(VServerCfg& vcfg)
   if (!isNumStr(val))
     return false;
 
-  u32 bytes = std::atoi(val.c_str());
+  size_t bytes = std::atoi(val.c_str());
   if (bytes > MAX_CONTENT_LENGTH) {
     Logger::logCfgErr(_tokIt->line,
         "maxBodySize >" + int2str(MAX_CONTENT_LENGTH) + " not allowed!");

@@ -1,0 +1,18 @@
+server {
+  serverName v1!
+  listen localhost:1111!
+  root ./www/v1!
+
+  route / {
+    index index.html!
+  }
+  route /moep {
+    redirect 302:/!
+  }
+}
+
+server {
+  serverName v2!
+  listen localhost:1111!
+  root ./www/v2!
+}

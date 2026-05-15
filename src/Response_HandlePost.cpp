@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/14 17:51:57 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/15 10:59:16 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/15 18:14:38 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,10 +66,13 @@ void Response::_handleSimplePost()
 
   if (mimeType == "multipart/form-data" ||
       mimeType == "application/x-www-form-urlencoded")
-    // _handleSimplePostForm(upDir, mimeType);
-    _handleSimplePostFile(upDir, mimeType);
+    _handleSimplePostForm(upDir, mimeType);
   else
     _handleSimplePostFile(upDir, mimeType);
+
+  // select response page
+  if (_status == HTTP_201)
+    _setBodyStatusPage(_respoHeaders["Location"]);
 }
 
 static str generateFname(constr& dir, constr& ext)
@@ -86,10 +89,10 @@ static str generateFname(constr& dir, constr& ext)
     return "";
 
   u32 cnt = 0;
-  fname   = defName + u32ToStr(cnt) + ext;
+  fname   = defName + int2str(cnt) + ext;
   while (files.find(fname) != files.end()) {
     ++cnt;
-    fname = defName + u32ToStr(cnt) + ext;
+    fname = defName + int2str(cnt) + ext;
   }
   return fname;
 }
@@ -143,8 +146,8 @@ void Response::_handleSimplePostFile(constr& upDir, constr& mimeType)
   }
 }
 
-// here i will ignore the query as it might interfer with stuff from form
+// Well... if only i had more time i would if i could impl this :/
 void Response::_handleSimplePostForm(constr& upDir, constr& mimeType)
 {
-  (void)upDir, (void)mimeType;
+  _handleSimplePostFile(upDir, mimeType);
 }

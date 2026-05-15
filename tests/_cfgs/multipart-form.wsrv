@@ -6,8 +6,7 @@ server {
   }
   route /upload-multipart {
     upload /upload-multipart!
-    # root ./www/upload-multipart!
     methods POST GET!
-    maxBodySize 8000000!
+    maxBodySize 1000!
   }
 }

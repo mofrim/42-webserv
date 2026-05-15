@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/24 17:31:03 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/15 15:50:25 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/15 18:05:48 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,7 +40,7 @@ typedef std::string::const_iterator constrIt;
 // -> HTTP_400
 #define MAX_HEADER_LINES 200
 #define MAX_BODY_SIZE 1000000         // 1mb
-#define MAX_CONTENT_LENGTH 1000000000 // 1gb
+#define MAX_CONTENT_LENGTH 5000000000 // 5gb
 
 // https://datatracker.ietf.org/doc/html/rfc9112#section-3
 #define MAX_REQLINE_LEN 8000
@@ -135,8 +135,6 @@ class WsrvLib {
     WsrvLib& operator=(const WsrvLib& other);
     ~WsrvLib();
 
-    static str _getTemplateWithErrStr(const str& s);
-
     static const std::map<str, str> _ext2MimeTypes;
     static std::map<str, str>       _initExt2MimeTypes();
 
@@ -151,7 +149,7 @@ class WsrvLib {
   public:
     static const t_GlobalWsrvSettings WsrvSettings;
 
-    static str getDefaultErrPage(e_HTTPStatus code);
+    static str getDefaultStatusPage(e_HTTPStatus code, constr& opts = "");
     static str getStatusStr(e_HTTPStatus code);
 
     static str getMimeTypeFromPath(const str& p);

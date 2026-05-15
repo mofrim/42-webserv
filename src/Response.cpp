@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/23 19:11:25 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/15 12:34:33 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/15 18:26:47 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,6 +89,7 @@ e_HTTPStatus Response::generateResponse(Request& req)
   _setFieldsFromReq(req);
 
   // handle status >= HTTP_400
+
   if (req.badRequest()) {
     Logger::logBug("Response::generateResponse", "Bad Request handling");
     _handleBadRequest();
@@ -112,6 +113,7 @@ e_HTTPStatus Response::generateResponse(Request& req)
     Logger::logBug("Response::generateResponse", "DELETE Request handling");
     _handleDelete();
   }
+
   // simple GET request
   else {
     Logger::logBug("Response::generateResponse", "Normal GET Request handling");
@@ -147,7 +149,7 @@ void Response::_getBody200()
   const Route& r = *_matchedRoute;
 
   // root will NEVER have a trailing slash by parsing!
-  str path = r.getRoot();
+  str path = r.getRoot() + (r.getPath() == "/" ? "" : r.getPath());
   Logger::logBug("root: " + path);
 
   // At this point there can only be single slashes in _targetPath as they have
@@ -159,9 +161,12 @@ void Response::_getBody200()
       path += "/" + _targetPath;
   }
 
+  Logger::logBug("_targetPath: " + _targetPath);
+
   if (isDir(path) == 1)
     path += (path[path.size() - 1] == '/' ? "" : "/") + r.getIndex();
-  Logger::logDbg1("Response::_getBody: trying to read from file: " + path);
+
+  Logger::logSrv(_vsrv->getName(), "Trying to serv file: " + path);
 
   _readBodyFromFile(path);
 }
@@ -175,7 +180,7 @@ void Response::_buildRespoHdrs()
   _respoHeaders["Date"] = Logger::getLogtime();
 
   _respoHeaders["Content-Type"] =
-      (_status == HTTP_200) ? _mimeType : "text/html";
+      (_status < HTTP_400) ? _mimeType : "text/html";
 
   _respoHeaders["Content-Length"] = int2str(_body.size());
 
@@ -243,7 +248,7 @@ str Response::genDefaultErrResponse(e_HTTPStatus errCode, constr errPage)
   if (!errPage.empty())
     body = errPage;
   else
-    body = WsrvLib::getDefaultErrPage(errCode);
+    body = WsrvLib::getDefaultStatusPage(errCode);
 
   std::map<str, str> hdrs = _buildErrRespoHdrs(errCode, body);
 
@@ -258,8 +263,6 @@ str Response::genDefaultErrResponse(e_HTTPStatus errCode, constr errPage)
   return respostr;
 }
 
-// MASSIVE TODO !!!!!
-
 // Handle the case of bad req. The only thing left to do in here is checking if
 // client is still virtual -> _body = default errpage. If not virtual check if
 // there is an errPage in server scope and try to read it. If that fails -> set
@@ -267,22 +270,10 @@ str Response::genDefaultErrResponse(e_HTTPStatus errCode, constr errPage)
 void Response::_handleBadRequest()
 {
   if (_cli->isVirtual()) {
-    _body = WsrvLib::getDefaultErrPage(_status);
+    _body = WsrvLib::getDefaultStatusPage(_status);
     return;
   }
-
-  str errPage;
-
-  if (_status != HTTP_400 && _matchedRoute != NULL)
-    errPage = _matchedRoute->getErrPage(_status);
-
-  if (errPage.empty())
-    errPage = _vsrv->getErrPage(_status);
-
-  if (errPage.empty())
-    _body = WsrvLib::getDefaultErrPage(_status);
-  else
-    _readBodyFromFile(_vsrv->getRoot() + errPage);
+  _setBodyStatusPage();
 }
 
 // get status page first from matched route secondly from vsrv. fallback to
@@ -292,20 +283,8 @@ void Response::_handleBadRequest()
 // return the corresponding 404 if a status page could not be found.
 void Response::_handleRedir()
 {
-  const e_HTTPStatus& redirCode = _matchedRoute->getRedir().first;
-
-  _status = redirCode;
-
-  str errPage = _matchedRoute->getErrPage(redirCode);
-  if (errPage.empty())
-    errPage = _vsrv->getErrPage(redirCode);
-  else
-    _readBodyFromFile(_matchedRoute->getRoot() + errPage);
-
-  if (errPage.empty())
-    _body = WsrvLib::getDefaultErrPage(redirCode);
-  else
-    _readBodyFromFile(_vsrv->getRoot() + errPage);
+  _status = _matchedRoute->getRedir().first;
+  _setBodyStatusPage();
 }
 
 void Response::_handleCGI() {}
@@ -325,7 +304,7 @@ void Response::_readBodyFromFile(constr& path)
 
   if (!target) {
     _status = HTTP_404;
-    _body   = WsrvLib::getDefaultErrPage(HTTP_404);
+    _body   = WsrvLib::getDefaultStatusPage(HTTP_404);
     return;
   }
 
@@ -338,7 +317,7 @@ void Response::_readBodyFromFile(constr& path)
   // QUESTION: do we still need it here?
   if (length <= 0) {
     _status = HTTP_404;
-    _body   = WsrvLib::getDefaultErrPage(_status);
+    _body   = WsrvLib::getDefaultStatusPage(_status);
     return;
   }
 
@@ -362,7 +341,35 @@ void Response::_readBodyFromFile(constr& path)
     } catch (const std::exception& e) {
       Logger::logErr("Response::_getBody", "Read body too large!");
       _status = HTTP_413;
-      _body   = WsrvLib::getDefaultErrPage(_status);
+      _body   = WsrvLib::getDefaultStatusPage(_status);
       return;
     }
+}
+
+// extracted routine for fetching a desired status page in this order:
+//
+//  1) try to get page from _matchedRoute
+//  2) if ther is none, from server scope
+//  3) last from WsrvLib::getDefaultErrPage.
+//
+// takes an optional arg for specifying a uploaded filename or sth in POST
+// request responses
+//
+// the status code will be taken from objects _status field!
+void Response::_setBodyStatusPage(constr& opts)
+{
+  str statusPage;
+
+  if (_status != HTTP_400 && _matchedRoute != NULL)
+    statusPage = _matchedRoute->getErrPage(_status);
+
+  if (statusPage.empty() && _vsrv != NULL)
+    statusPage = _vsrv->getErrPage(_status);
+  else
+    _readBodyFromFile(_matchedRoute->getRoot() + statusPage);
+
+  if (statusPage.empty())
+    _body = WsrvLib::getDefaultStatusPage(_status, opts);
+  else
+    _readBodyFromFile(_vsrv->getRoot() + statusPage);
 }

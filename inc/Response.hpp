@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/23 19:11:06 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/14 18:03:03 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/15 17:22:06 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,6 +49,7 @@ class Response {
     void _readBodyFromFile(constr& path);
     void _buildRespoHdrs();
     void _genResponse();
+    void _setBodyStatusPage(constr& opts = "");
 
     void _handleBadRequest();
     void _handleRedir();

@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/16 12:11:11 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/14 22:15:25 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/15 18:14:38 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -87,7 +87,7 @@ void VServer::printCfg() const
     Logger::logCfg("     + upload = " + r.getUpload());
     Logger::logCfg("     + index = " + r.getIndex());
     Logger::logCfg("     + autoindex = " + bool2str(r.getAutoindex()));
-    Logger::logCfg("     + maxBodySize = " + u32ToStr(r.getMaxBodySize()));
+    Logger::logCfg("     + maxBodySize = " + int2str(r.getMaxBodySize()));
 
     str meths;
     for (std::set<e_Method>::const_iterator it = r.getMethods().begin();

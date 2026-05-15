@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/24 17:40:43 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/15 13:29:46 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/15 17:37:36 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,37 +29,43 @@ WsrvLib::~WsrvLib() {}
 
 // ------------------------------=[ Methods ]=------------------------------ //
 
-str WsrvLib::_getTemplateWithErrStr(const str& s)
+str WsrvLib::getDefaultStatusPage(e_HTTPStatus code, constr& opts)
 {
   str ret =
 
       "<!DOCTYPE html>\n"
       "<html>\n"
       "<head>\n"
-      "<title>WebServ Default Error Page</title>\n"
+      "<title>WebServ Default Status Page</title>\n"
       "<style>\n"
-      "body {\n"
-      "margin: 100px 100px 0px 100px;\n"
-      "text-align: center;\n"
-      "}\n"
-      ".msg {\n"
-      "margin: 100px;\n"
-      "padding: 6px;\n"
-      "background-color: red;\n"
-      "border-radius: 10px;\n"
-      "border: 4px;\n"
-      "border-color: black;\n"
-      "border-style: solid;\n"
-      "}\n"
+      "body{"
+      "margin: 100px 100px 0px 100px;"
+      "text-align: center;"
+      "}"
+      ".msg{"
+      "margin:100px;"
+      "padding:6px;";
+
+  ret += "background-color:" + str((code < HTTP_400 ? "green;" : "red;"));
+
+  ret +=
+      "border-radius:10px;"
+      "border:4px;"
+      "border-color:black;"
+      "border-style:solid;"
+      "}"
       "</style>\n"
       "</head>\n"
       "<body>\n"
       "<div class=\"msg\">\n"
       "<h1>\n";
 
-  ret += s +
+  ret += getStatusStr(code) + "\n</h1>\n";
 
-      "\n</h1>\n"
+  if (!opts.empty())
+    ret += "<h2><a href=\"" + opts + "\">" + opts + "</a></h2>\n";
+
+  ret +=
       "</div>\n"
       "<hr>\n"
       "<p>m0fr1m's webserv</p>\n"
@@ -67,11 +73,6 @@ str WsrvLib::_getTemplateWithErrStr(const str& s)
       "</html>\n";
 
   return ret;
-}
-
-str WsrvLib::getDefaultErrPage(e_HTTPStatus code)
-{
-  return _getTemplateWithErrStr(getStatusStr(code));
 }
 
 // -------------------=[ initialize relevant data maps ]=------------------- //

@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 23:39:07 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/15 15:03:08 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/15 18:07:06 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,7 +45,7 @@ class Request {
     bool         _reqlineParsed;
     bool         _hdrsParsed;
     bool         _closeConn;
-    u32          _contentLength;
+    size_t       _contentLength;
     str          _vsrvName;
     size_t       _bodySize;
 

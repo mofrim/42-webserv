@@ -1,0 +1,7 @@
+server {
+  serverName webserv!
+  listen localhost:1111!
+  route / {
+    index simple-form-query.html!
+  }
+}
