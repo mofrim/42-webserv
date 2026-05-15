@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/03 11:26:23 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/14 20:37:25 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/15 18:15:11 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,8 +18,6 @@
 #include <vector>
 
 str bool2str(bool n);
-str int2str(int n);
-str u32ToStr(u32 n);
 str char2str(char c);
 
 str      inAddrToStr(const struct in_addr& addr);
@@ -43,8 +41,16 @@ std::vector<str> splitString(
 
 std::vector<str> splitStrWhite(constr& sstr, bool keepEmpty = false);
 
-// -----------------------------=[ Templates ]=-----------------------------
-// //
+// -----------------------------=[ Templates ]=----------------------------- //
+
+// general number to string conversion func
+template <typename T>
+str int2str(T n)
+{
+  std::ostringstream oss;
+  oss << n;
+  return (oss.str());
+}
 
 // a convenience printing function for sets mostly used for logging
 template <typename T>

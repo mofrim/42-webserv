@@ -6,11 +6,9 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/26 10:03:57 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/14 19:04:33 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/15 18:14:52 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
-
-// TODO: add missing conversion functions here.
 
 #include "utils.hpp"
 
@@ -22,20 +20,6 @@
 #include <iomanip>
 #include <iostream>
 #include <sys/stat.h>
-
-str int2str(int n)
-{
-  std::ostringstream oss;
-  oss << n;
-  return (oss.str());
-}
-
-str u32ToStr(u32 n)
-{
-  std::ostringstream oss;
-  oss << n;
-  return (oss.str());
-}
 
 str char2str(char c)
 {
