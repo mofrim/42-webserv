@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 23:39:57 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/15 18:48:56 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/15 23:23:19 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -103,7 +103,10 @@ void Request::processReq()
   if (!this->badRequest() && _matchedRoute == NULL)
     this->evaluateTarget();
 
-  if (_vsrv && _statusCode != HTTP_400)
+  // badRequest() is true for status >= 400. so, for statuses like 500 or 413 it
+  // still would be nice to display the custom statusPage, if any. Therefore ->
+  // match route.
+  if (_vsrv && _statusCode != HTTP_400 && _matchedRoute == NULL)
     _matchRoute();
 
   _statusCode = _respo.generateResponse(*this);

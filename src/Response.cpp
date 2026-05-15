@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/23 19:11:25 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/15 23:14:35 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/15 23:56:21 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -167,27 +167,43 @@ void Response::_getBody200()
       _status = HTTP_404;
       _body   = WsrvLib::getDefaultStatusPage(HTTP_404);
       return;
+
+    // is a file
     case 0:
       _readBodyFromFile(path);
       break;
+
+    // is a dir
     case 1: {
       str fpath =
           path + (path[path.size() - 1] == '/' ? "" : "/") + r.getIndex();
+
       Logger::logSrv(_vsrv->getName(), "Trying to serve file: " + fpath);
-      _readBodyFromFile(fpath);
+
+      // not setting errPage on fail here
+      _readBodyFromFile(fpath, false);
+
+      Logger::logBug("status: " + int2str(_status) +
+          "body size: " + int2str(_body.size()));
 
       if (_status == HTTP_404 && r.isAutoindex()) {
+        Logger::logSrv(
+            _vsrv->getName(), "Trying to serve autoindex for " + path);
         str displayPath = (_targetPath.empty()
                 ? "/"
                 : (_targetPath[0] == '/' ? _targetPath : "/" + _targetPath));
         _body           = WsrvLib::getAutoindex(path, displayPath);
+        if (!_body.empty())
+          _status = HTTP_200;
+        return;
       }
-      if (!_body.empty()) {
-        Logger::logSrv(_vsrv->getName(), "Serving autoindex for " + path);
-        _status = HTTP_200;
+
+      // if we come here reading index file & autoindex both failed. either way
+      // status will be 404 or 413.
+      if (_status != HTTP_200) {
+        _status = HTTP_403;
+        _body   = WsrvLib::getDefaultStatusPage(_status);
       }
-      else
-        _body = WsrvLib::getDefaultStatusPage(_status);
     }
   }
 }
@@ -312,7 +328,7 @@ void Response::_handleCGI() {}
 
 void Response::_handleDelete() {}
 
-void Response::_readBodyFromFile(constr& path)
+void Response::_readBodyFromFile(constr& path, bool setErrPageOnFail)
 {
   _mimeType = WsrvLib::getMimeTypeFromPath(path);
 
@@ -325,7 +341,8 @@ void Response::_readBodyFromFile(constr& path)
 
   if (!target) {
     _status = HTTP_404;
-    _body   = WsrvLib::getDefaultStatusPage(HTTP_404);
+    if (setErrPageOnFail)
+      _body = WsrvLib::getDefaultStatusPage(HTTP_404);
     return;
   }
 
@@ -338,14 +355,13 @@ void Response::_readBodyFromFile(constr& path)
   // QUESTION: do we still need it here?
   if (length <= 0) {
     _status = HTTP_404;
-    _body   = WsrvLib::getDefaultStatusPage(_status);
+    if (setErrPageOnFail)
+      _body = WsrvLib::getDefaultStatusPage(_status);
     return;
   }
 
   Logger::logDbg1("Response::_getBody", "body-length = " + int2str(length));
 
-  // QUESTION: is this really the optimal solution?
-  // FIXME: what about binary data?
   std::vector<char> buffer(length);
 
   // good2know: does not throw but sets the badbit
@@ -362,7 +378,9 @@ void Response::_readBodyFromFile(constr& path)
     } catch (const std::exception& e) {
       Logger::logErr("Response::_getBody", "Read body too large!");
       _status = HTTP_413;
-      _body   = WsrvLib::getDefaultStatusPage(_status);
+      _body.clear();
+      if (setErrPageOnFail)
+        _body = WsrvLib::getDefaultStatusPage(_status);
       return;
     }
 }

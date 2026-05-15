@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/23 19:11:06 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/15 17:22:06 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/15 23:39:49 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,7 +46,7 @@ class Response {
     void _setFieldsFromReq(Request& req);
     void _getBody200();
     void _getBody400();
-    void _readBodyFromFile(constr& path);
+    void _readBodyFromFile(constr& path, bool setErrPageOnFail = true);
     void _buildRespoHdrs();
     void _genResponse();
     void _setBodyStatusPage(constr& opts = "");
