@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/24 17:40:43 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/15 19:50:46 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/15 19:58:51 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -329,13 +329,17 @@ str WsrvLib::getAutoindex(constr& path, constr& route)
       ".msg{"
       "margin:50px 100px 50px 100px;"
       "padding:12px;"
-      "background-color: yellow;"
+      "background: rgba(255, 255, 255, 0.4);"
+      "backdrop-filter: blur(16px);"
       "border-radius:10px;"
       "border:4px;"
-      "border-color:black;"
+      // "border-color:rgba(14, 165, 233, 0.6);"
+      "border-color:rgba(255, 255, 255, 0.3);"
       "border-style:solid;"
       "}"
       "p {text-align: center; font-size: 1.2rem; font-weight: 700;}"
+      "a { transition: color 0.3s ease;}"
+      "a:hover { color: rgba(255, 255, 255, 0.8);}"
       "</style>\n"
       "</head>\n"
       "<body>\n"
