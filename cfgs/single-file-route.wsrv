@@ -1,0 +1,9 @@
+
+server {
+  serverName moep!
+  listen localhost:1111!
+
+  route /index.html {
+    redirect 301:/redir-index.html!
+  }
+}
