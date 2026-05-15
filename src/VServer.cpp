@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/03 12:51:23 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/14 22:15:25 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/15 18:40:12 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -150,7 +150,8 @@ void VServer::_setupSockets(
       continue;
     }
 
-    t_AddrinfoReturn        ipCnameFd;
+    t_AddrinfoReturn ipCnameFd = {.ip = "", .cname = "", .fd = -1};
+
     std::set<u16>::iterator itp = ports.begin();
 
     // THIS MUST BE A WHILE LOOP because of eraseIt + continue being used in it
