@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/24 17:40:43 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/15 19:58:51 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/15 23:12:06 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -295,6 +295,7 @@ e_HTTPStatus WsrvLib::str2HttpStatus(const str& s)
 // global flag used to activate certain debug output.
 bool g_WsrvTesting = false;
 
+// return a nice autoindex page.
 str WsrvLib::getAutoindex(constr& path, constr& route)
 {
   std::set<str> files = listDirFiles(path, true);
@@ -302,16 +303,16 @@ str WsrvLib::getAutoindex(constr& path, constr& route)
     return "";
 
   str slash;
-  if (route != "/")
+  if (!route.empty() && route[route.length() - 1] != '/')
     slash = "/";
 
   str ret =
-
       "<!DOCTYPE html>\n"
       "<html>\n"
       "<head>\n"
       "<title>Autoindex</title>\n"
       "<style>"
+      "html,body{height:100%;}"
       "body{"
       "background:"
       "radial-gradient(circle at 20% 20%, rgba(14,165,233,0.35), transparent "
@@ -322,24 +323,26 @@ str WsrvLib::getAutoindex(constr& path, constr& route)
       "transparent 35%),"
       "linear-gradient(135deg, #020617 0%, #0f172a 40%, #111827 100%);"
       "color: #fff;"
-      "font-family: Arial, Helvetica, sans-serif;"
+      "background-attachment: fixed;"
+      "font-family: Fantasy, Arial, Helvetica, sans-serif;"
       "margin: 100px 100px 0px 100px;"
       "text-align: left;"
       "}"
       ".msg{"
       "margin:50px 100px 50px 100px;"
       "padding:12px;"
-      "background: rgba(255, 255, 255, 0.4);"
-      "backdrop-filter: blur(16px);"
+      "background:rgba(255, 255, 255, 0.35);"
+      "backdrop-filter:blur(16px);"
       "border-radius:10px;"
       "border:4px;"
-      // "border-color:rgba(14, 165, 233, 0.6);"
       "border-color:rgba(255, 255, 255, 0.3);"
       "border-style:solid;"
       "}"
-      "p {text-align: center; font-size: 1.2rem; font-weight: 700;}"
-      "a { transition: color 0.3s ease;}"
-      "a:hover { color: rgba(255, 255, 255, 0.8);}"
+      "p{text-align: center; font-size: 1.2rem; font-weight: 700; margin: "
+      "4px;}"
+      "a {color:rgba(24, 44, 79, 1.0);transition:filter 0.3s ease;}"
+      "a#dir{color:rgba(55, 40, 94, 1.0);}"
+      "a:hover{filter: brightness(2.0);}"
       "</style>\n"
       "</head>\n"
       "<body>\n"
@@ -348,14 +351,17 @@ str WsrvLib::getAutoindex(constr& path, constr& route)
 
   ret += "<div class=\"msg\">\n";
 
-  for (std::set<str>::iterator it = files.begin(); it != files.end(); ++it)
-    ret +=
-        "<p><a href=\"" + str(route + slash + *it) + "\">" + *it + "</a></p>\n";
-
+  for (std::set<str>::iterator it = files.begin(); it != files.end(); ++it) {
+    str id;
+    if (!it->empty() && (*it)[it->size() - 1] == '/')
+      id = " id=\"dir\"";
+    ret += "<p><a href=\"" + str(route + slash + *it) + "\"" + id + ">" + *it +
+        "</a></p>\n";
+  }
   ret +=
       "</div>\n"
       "<hr>\n"
-      "<p>m0fr1m's webserv</p>\n"
+      "<p>mofrim's WebServ</p>\n"
       "</body>\n"
       "</html>\n";
 

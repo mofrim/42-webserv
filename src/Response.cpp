@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/23 19:11:25 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/15 19:40:56 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/15 23:14:35 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -177,11 +177,15 @@ void Response::_getBody200()
       _readBodyFromFile(fpath);
 
       if (_status == HTTP_404 && r.isAutoindex()) {
-        Logger::logBug("AUTOINDEX!!!!");
-        _body = WsrvLib::getAutoindex(path, r.getPath());
+        str displayPath = (_targetPath.empty()
+                ? "/"
+                : (_targetPath[0] == '/' ? _targetPath : "/" + _targetPath));
+        _body           = WsrvLib::getAutoindex(path, displayPath);
       }
-      if (!_body.empty())
+      if (!_body.empty()) {
+        Logger::logSrv(_vsrv->getName(), "Serving autoindex for " + path);
         _status = HTTP_200;
+      }
       else
         _body = WsrvLib::getDefaultStatusPage(_status);
     }
