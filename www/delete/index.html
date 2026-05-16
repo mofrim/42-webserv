@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" conten="width=device-width, initial-scale=1.0">
+    <title>mofrim's WebServ Delete Index</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="grid"></div>
+    <div class="title-card">
+      <div class="badge">
+        m0fr1m's webserv
+      </div>
+     <h1>File Deletion And Creation Forms</h1> 
+    </div>
+    <div class="form-container">
+        <h2>Delete Request Form</h2>
+        <form id="deleteForm" class="form-group">
+            <label for="name">Filename:</label>
+            <input type="text" id="filename" name="filename" required>
+            <br>
+            <input class="form-button form-actions" type="submit" value="Submit">
+        </form>
+
+      <div class="line"></div>
+
+      <h2>Create-File Form</h2>
+      <form id="createForm" class="form-group">
+        <label for="name">Filename:</label>
+        <input type="text" id="filename" name="filename" required>
+        <br>
+        <input class="form-button form-actions" type="submit" value="Submit">
+      </form>
+
+      <p>...to see what is going on in deldir <a href="/deldir">click here</a> </p>
+    </div>
+
+    <!-- Sadly HTML forms do not support sending DELETE requests or POST Requests with query parameters. So i patch this behavior in here. -->
+
+    <script>
+    document.getElementById('deleteForm').addEventListener('submit', function(event) {
+      event.preventDefault();
+
+      const form = event.target;
+      const formData = new FormData(form);
+      const filename = formData.get('filename');
+
+      fetch('/deldir/' + encodeURIComponent(filename), {
+        method: 'DELETE'
+      })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return response.text();
+        })
+        .then(data => {
+          alert('File deleted successfully: ' + data);
+        })
+        .catch(error => {
+          alert('Error deleting file: ' + error);
+        });
+    });
+
+    document.getElementById('createForm').addEventListener('submit', function(event) {
+      event.preventDefault();
+
+      const form = event.target;
+      const formData = new FormData(form);
+      const filename = formData.get('filename');
+
+      fetch('/deldir?filename=' + encodeURIComponent(filename), {
+        method: 'POST'
+      })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return response.text();
+        })
+        .then(data => {
+          alert('File created successfully: ' + data);
+        })
+        .catch(error => {
+          alert('Error creating file: ' + error);
+        });
+    });
+    </script>
+  </body>
+</html>

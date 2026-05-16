@@ -1,0 +1,14 @@
+server {
+  serverName webserv!
+  listen localhost:1111!
+  route / {
+    root ./www/delete!
+}
+  route /deldir {
+    root ./www/delete!
+    upload /deldir!
+    autoindex on!
+    methods POST GET DELETE!
+    maxBodySize 10000000!
+  }
+}

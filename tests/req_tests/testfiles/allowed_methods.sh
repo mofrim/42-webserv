@@ -62,7 +62,7 @@ sendHdrField "DELETE /del HTTP/1.1" 3
 sendHdrField "Host: miep" 3
 finishReq 3
 
-RESPONSE="$(timeout 0.1s cat <&3 2>/dev/null | grep 200)"
+RESPONSE="$(timeout 0.1s cat <&3 2>/dev/null | grep 404)"
 echo "Response:"
 echo "---------"
 echo "${RESPONSE[@]}"
@@ -83,7 +83,7 @@ sendHdrField "DELETE /postdel HTTP/1.1" 3
 sendHdrField "Host: miep" 3
 finishReq 3
 
-RESPONSE="$(timeout 0.1s cat <&3 2>/dev/null | grep 200)"
+RESPONSE="$(timeout 0.1s cat <&3 2>/dev/null | grep 404)"
 echo "Response:"
 echo "---------"
 echo "${RESPONSE[@]}"

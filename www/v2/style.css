@@ -1,25 +1,24 @@
 * {box-sizing: border-box;}
 
 html, body {
-  margin: 0; padding: 0; width: 100%; height: 100%; font-family: Arial, Helvetica, sans-serif;
+  margin: 0; padding: 0; width: 100%;  font-family: Arial, Helvetica, sans-serif;
 }
 
 body {
-  min-height: 100vh;
+  height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
-
   /* justify-content: center; */
   margin-bottom: 5vh;
   margin-top: 5vh;
-
-  overflow: hidden;
+  overflow: auto;
   background:
     radial-gradient(circle at 20% 20%, rgba(14,165,233,0.35), transparent 30%),
     radial-gradient(circle at 80% 30%, rgba(168,85,247,0.30), transparent 30%),
     radial-gradient(circle at 50% 80%, rgba(59, 130, 246, 0.25), transparent 35%),
     linear-gradient(135deg, #020617 0%, #0f172a 40%, #111827 100%);
+  background-attachment: fixed;
   color: #fff;
 }
 .card {
@@ -100,6 +99,10 @@ p {
 
 .card code {
   font-weight: normal;
+}
+
+a {
+  color: #aaa;
 }
 
 img {

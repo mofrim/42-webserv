@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/23 19:11:25 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/16 12:32:07 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/16 14:32:34 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,8 @@
 #include "WsrvLib.hpp"
 #include "utils.hpp"
 
+#include <cerrno>
+#include <cstring>
 #include <fstream>
 
 // --------------------------------=[ OCF ]=-------------------------------- //
@@ -91,32 +93,32 @@ e_HTTPStatus Response::generateResponse(Request& req)
   // handle status >= HTTP_400
 
   if (req.badRequest()) {
-    Logger::logBug("Response::generateResponse", "Bad Request handling");
+    Logger::logSrv(_vsrv->getName(), "Bad Request handling");
     _handleBadRequest();
   }
 
   // hrom here on: only HTTP_200 so far
 
   else if (req.isRedir()) {
-    Logger::logBug("Response::generateResponse", "Redir Request handling");
+    Logger::logSrv(_vsrv->getName(), "Redir Request handling");
     _handleRedir();
   }
   else if (req.isCGI()) {
-    Logger::logBug("Response::generateResponse", "CGI Request handling");
+    Logger::logSrv(_vsrv->getName(), "CGI Request handling");
     _handleCGI();
   }
   else if (req.isSimplePOST()) {
-    Logger::logBug("Response::generateResponse", "SimplePost Request handling");
+    Logger::logSrv(_vsrv->getName(), "SimplePost Request handling");
     _handleSimplePost();
   }
   else if (req.isDELETE()) {
-    Logger::logBug("Response::generateResponse", "DELETE Request handling");
+    Logger::logSrv(_vsrv->getName(), "DELETE Request handling");
     _handleDelete();
   }
 
   // simple GET request
   else {
-    Logger::logBug("Response::generateResponse", "Normal GET Request handling");
+    Logger::logSrv(_vsrv->getName(), "Normal GET Request handling");
     _getBody200();
   }
 
@@ -187,12 +189,18 @@ void Response::_getBody200()
           "body size: " + int2str(_body.size()));
 
       if (_status == HTTP_404 && r.isAutoindex()) {
+
         Logger::logSrv(
             _vsrv->getName(), "Trying to serve autoindex for " + path);
+
+        // kinda hacky construction of the path to use as root for displayed
+        // files. but it works :/
         str displayPath = (_targetPath.empty()
-                ? "/"
+                ? r.getPath()
                 : (_targetPath[0] == '/' ? _targetPath : "/" + _targetPath));
-        _body           = WsrvLib::getAutoindex(path, displayPath);
+
+        _body = WsrvLib::getAutoindex(path, displayPath);
+
         if (!_body.empty())
           _status = HTTP_200;
         return;
@@ -331,7 +339,43 @@ void Response::_handleRedir()
 
 void Response::_handleCGI() {}
 
-void Response::_handleDelete() {}
+void Response::_handleDelete()
+{
+
+  const Route& r = *_matchedRoute;
+
+  // root will NEVER have a trailing slash by parsing!
+  str path = r.getRoot() + (r.getPath() == "/" ? "" : r.getPath());
+  Logger::logBug("root: " + path);
+
+  // At this point there can only be single slashes in _targetPath as they have
+  // been compressed by URL class.
+  if (!_targetPath.empty()) {
+    if (_targetPath[0] == '/')
+      path += _targetPath;
+    else
+      path += "/" + _targetPath;
+  }
+
+  Logger::logSrv(_vsrv->getName(), "Trying to delete '" + path + "'");
+
+  if (std::remove(path.c_str()) != 0) {
+    Logger::logSrv(_vsrv->getName(),
+        "Deletion failed with '" + int2str(errno) + " " + strerror(errno) +
+            "'");
+    if (errno == ENOENT) {
+      _status = HTTP_404;
+    }
+    else if (errno == EACCES || errno == EPERM) {
+      _status = HTTP_403;
+    }
+    else {
+      _status = HTTP_500;
+    }
+  }
+  else
+    _status = HTTP_204;
+}
 
 void Response::_readBodyFromFile(constr& path, bool setErrPageOnFail)
 {
@@ -356,12 +400,17 @@ void Response::_readBodyFromFile(constr& path, bool setErrPageOnFail)
   int length = target.tellg();
   target.seekg(0, target.beg);
 
-  // FIXME: check length
-  // QUESTION: do we still need it here?
   if (length <= 0) {
-    _status = HTTP_404;
-    if (setErrPageOnFail)
-      _body = WsrvLib::getDefaultStatusPage(_status);
+    if (length < 0 || !target) {
+      _status = HTTP_404;
+      if (setErrPageOnFail)
+        _body = WsrvLib::getDefaultStatusPage(_status);
+    }
+    else {
+      _status   = HTTP_200;
+      _mimeType = "text/html";
+      _body     = "Empty File :)";
+    }
     return;
   }
 

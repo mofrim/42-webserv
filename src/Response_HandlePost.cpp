@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/14 17:51:57 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/15 18:14:38 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/16 14:44:58 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -103,10 +103,10 @@ void Response::_handleSimplePostFile(constr& upDir, constr& mimeType)
       _vsrv->getName(), "Handling SimplePostFile for mimeType: " + mimeType);
 
   std::map<str, str>& query = _reqline.target.getQuery();
-  str                 ext   = "." + WsrvLib::getExtFromMimeType(mimeType);
   str                 fname;
 
-  // try to set fname from query
+  // try to set fname from query. if there was one provided we will use it as-is
+  // modulo invalid fname.
   if (!query.empty()) {
     if (query.find("filename") != query.end())
       fname = query["filename"];
@@ -115,17 +115,20 @@ void Response::_handleSimplePostFile(constr& upDir, constr& mimeType)
   }
 
   // try to autogenerate fname
-  if (fname.empty() || !isValidFname(fname))
-    fname = generateFname(upDir, ext);
+  if (fname.empty() || !isValidFname(fname)) {
+    str ext = "." + WsrvLib::getExtFromMimeType(mimeType);
+    fname   = generateFname(upDir, ext);
 
-  // generateFname also failed, so there must be something fishy with the upDir
-  if (fname.empty()) {
-    _status = HTTP_500;
-    return;
-  }
+    // generateFname also failed, so there must be something fishy with the
+    // upDir
+    if (fname.empty()) {
+      _status = HTTP_500;
+      return;
+    }
 
-  if (fname.rfind(ext) == str::npos) {
-    fname += ext;
+    if (fname.rfind(ext) == str::npos) {
+      fname += ext;
+    }
   }
 
   str fullPath = upDir + "/" + fname;
@@ -140,8 +143,10 @@ void Response::_handleSimplePostFile(constr& upDir, constr& mimeType)
   else {
     _status = HTTP_201;
 
-    // FIXME this should only be the path from root
-    _respoHeaders["Location"]     = _matchedRoute->getUpload() + "/" + fname;
+    str up = _matchedRoute->getUpload();
+    if (!up.empty() && up[up.length() - 1] != '/')
+      up += "/";
+    _respoHeaders["Location"]     = up + fname;
     _respoHeaders["Content-Type"] = mimeType;
   }
 }
