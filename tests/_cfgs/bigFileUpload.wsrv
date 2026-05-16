@@ -1,9 +1,10 @@
 server {
   serverName webserv!
   listen localhost:1111!
+  root ../../_www!
   route / {
-    upload ./www/upload!
+    upload /up!
     methods POST GET!
-    maxBodySize 1000000001!
+    maxBodySize 10000!
   }
 }
