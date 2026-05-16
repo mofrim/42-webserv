@@ -197,6 +197,7 @@ std::map<u16, str> WsrvLib::_initStatusCodes()
   s[408] = "Request Timeout";
   s[413] = "Content Too Large";
   s[415] = "Unsupported Media Type";
+  s[418] = "I'm a teapot";
   s[500] = "Internal Server Error";
   s[503] = "Service Unavailable";
   s[504] = "Gateway Timeout";
@@ -362,6 +363,49 @@ str WsrvLib::getAutoindex(constr& path, constr& route)
       "</div>\n"
       "<hr>\n"
       "<p>mofrim's WebServ</p>\n"
+      "</body>\n"
+      "</html>\n";
+
+  return ret;
+}
+
+str WsrvLib::getTeapot()
+{
+  str ret =
+
+      "<!DOCTYPE html>\n"
+      "<html>\n"
+      "<head>\n"
+      "<title>WebServ Default Status Page</title>\n"
+      "<style>\n"
+      "body{"
+      "margin: 100px 100px 0px 100px;"
+      "text-align: center;"
+      "}"
+      ".msg{"
+      "margin:100px;"
+      "padding:6px;";
+
+  ret += "background-color:green;";
+
+  ret +=
+      "border-radius:10px;"
+      "border:4px;"
+      "border-color:black;"
+      "border-style:solid;"
+      "}"
+      "</style>\n"
+      "</head>\n"
+      "<body>\n"
+      "<div class=\"msg\">\n"
+      "<h1>\n";
+
+  ret += getStatusStr(HTTP_418) + "\n</h1>\n";
+
+  ret +=
+      "</div>\n"
+      "<hr>\n"
+      "<p>m0fr1m's webserv</p>\n"
       "</body>\n"
       "</html>\n";
 

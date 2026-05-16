@@ -147,6 +147,12 @@ void Response::_getBody200()
 {
   const Route& r = *_matchedRoute;
 
+  if (_targetPath == "are/you/a/teapot?") {
+    _status = HTTP_418;
+    _body   = WsrvLib::getTeapot();
+    return;
+  }
+
   // root will NEVER have a trailing slash by parsing!
   str path = r.getRoot() + (r.getPath() == "/" ? "" : r.getPath());
   Logger::logBug("root: " + path);

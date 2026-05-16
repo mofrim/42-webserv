@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/24 17:31:03 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/16 13:06:45 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/16 17:40:24 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -118,6 +118,7 @@ enum e_HTTPStatus {
   HTTP_404 = 404,
   HTTP_408 = 408,
   HTTP_413 = 413,
+  HTTP_418 = 418,
   HTTP_500 = 500,
   HTTP_501 = 501,
   HTTP_502 = 502,
@@ -151,6 +152,7 @@ class WsrvLib {
     static const t_GlobalWsrvSettings WsrvSettings;
 
     static str getDefaultStatusPage(e_HTTPStatus code, constr& opts = "");
+    static str getTeapot();
     static str getStatusStr(e_HTTPStatus code);
 
     static str getMimeTypeFromPath(const str& p);
