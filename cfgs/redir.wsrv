@@ -13,8 +13,15 @@ server {
   # own redir. but this happens to nginx too
   route /redir-target {}
 
+  # external redirects we also support!
   route /42 {
-    redirect 301:https://42.fr!
+    redirect 308:https://42.fr!
+  }
+
+  # this simply leads back to root. demonstrates dot-/path-compression once
+  # more.
+  route /back-home {
+    redirect 301:/../../..!
   }
 
   # basic URI parsing is done, so this fails cfg parsing:

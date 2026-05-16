@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/23 19:11:25 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/16 12:07:35 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/16 12:32:07 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -214,7 +214,7 @@ void Response::_buildRespoHdrs()
   _respoHeaders["Server"]    = "m0fr1m's webserv " VERSION;
 
   // FIXME: maybe use sth else here
-  _respoHeaders["Date"] = Logger::getLogtime();
+  _respoHeaders["Date"] = Logger::getLogtime(false);
 
   _respoHeaders["Content-Type"] =
       (_status < HTTP_400) ? _mimeType : "text/html";
