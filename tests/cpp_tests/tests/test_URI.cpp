@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   test_URL.cpp                                       :+:      :+:    :+:   */
+/*   test_URI.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/13 13:06:35 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/11 00:22:20 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/16 11:03:00 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@ struct TestCase {
 
 // test logic goes here, for any failure return (-1) or throw exception.
 // otherwise -> success
-int _test_URL()
+int _test_URI()
 {
   std::vector<TestCase> test_cases;
 
@@ -83,79 +83,144 @@ int _test_URL()
   std::vector<TestCase> maliciousCases;
   maliciousCases.push_back((TestCase){"/foo%00bar", ""});
 
-  print_test_topic("test_URL", "standard stuff");
+  print_test_topic("test_URI", "standard stuff");
   {
     for (std::vector<TestCase>::iterator it = test_cases.begin();
         it != test_cases.end();
         ++it)
     {
-      URL u;
-      if (u.parseTargetURL(it->input) != it->expected_output) {
+      URI u;
+      if (u.parsePath(it->input) != it->expected_output) {
         std::cout << "Test failed for input '" << it->input
                   << "', expected_output '" << it->expected_output
-                  << "' -> output: '" << u.parseTargetURL(it->input) << "'"
+                  << "' -> output: '" << u.parsePath(it->input) << "'"
                   << std::endl;
         return -1;
       }
     }
   }
 
-  print_test_topic("test_URL", "malicious stuff");
+  print_test_topic("test_URI", "malicious stuff");
   {
     for (std::vector<TestCase>::iterator it = maliciousCases.begin();
         it != maliciousCases.end();
         ++it)
     {
-      URL u;
-      if (u.parseTargetURL(it->input) != it->expected_output) {
+      URI u;
+      if (u.parsePath(it->input) != it->expected_output) {
         std::cout << "Test failed for input '" << it->input
                   << "', expected_output '" << it->expected_output
-                  << "' -> output: '" << u.parseTargetURL(it->input) << "'"
+                  << "' -> output: '" << u.parsePath(it->input) << "'"
                   << std::endl;
         return -1;
       }
     }
   }
 
-  print_test_topic("test_URL", "other stuff");
+  print_test_topic("test_URI", "other stuff");
   {
-    URL u("/bla/blub/index.html");
+    URI u("/bla/blub/index.html");
     if (u.getPath() != "/bla/blub/index.html")
       return -1;
-    u.parseTargetURL("bla.blub.de/index.html");
+    u.parsePath("bla.blub.de/index.html");
     if (u.getPath() != "")
       return -1;
-    u.parseTargetURL("?/index.html");
+    u.parsePath("?/index.html");
     if (u.getPath() != "")
       return -1;
-    u.parseTargetURL("////index.html");
+    u.parsePath("////index.html");
     std::cout << "u.getPath(): " << u.getPath() << std::endl;
     if (u.getPath() != "/index.html")
       return -1;
   }
+
+  print_test_topic("test_URI", "real URI parsing!");
+  {
+    URI u;
+    if (u.parseURL("/") != "" && !u.bad())
+      return -1;
+    if (u.parseURL("//") != "" && !u.bad())
+      return -1;
+    if (u.parseURL("") != "" && !u.bad())
+      return -1;
+    if (u.parseURL("http") != "" && !u.bad())
+      return -1;
+    if (u.parseURL("http//") != "" && !u.bad())
+      return -1;
+    if (u.parseURL("http://") != "" && !u.bad())
+      return -1;
+    if (u.parseURL("http:///") != "" && !u.bad())
+      return -1;
+    if (u.parseURL("http://a/") == "" && u.bad())
+      return -1;
+    if (u.parseURL("http://asdasldj.asd.asd.a/") == "" && u.bad())
+      return -1;
+    if (u.parseURL("http://asdasldj..asd.asd.a/") != "" && u.bad())
+      return -1;
+    if (u.parseURL("http://hallo-./") != "" && u.bad())
+      return -1;
+    if (u.parseURL("http://./") != "" && u.bad())
+      return -1;
+    if (u.parseURL("http://this.that.and.those./") != "" && u.bad())
+      return -1;
+    if (u.parseURL("http://surbelkarg:1279172971239723/") != "" || !u.bad())
+      return -1;
+    if (u.parseURL("http://surbelkarg:123/") == "" || u.bad())
+      return -1;
+    if (u.parseURL("http://s:1/") == "" || u.bad())
+      return -1;
+    if (u.parseURL("http://s:/") != "" || !u.bad())
+      return -1;
+    if (u.parseURL("http://s:65535/") == "" || u.bad())
+      return -1;
+    if (u.parseURL("http://s:65536/") != "" || !u.bad())
+      return -1;
+    if (u.parseURL("http://:/") != "" || !u.bad())
+      return -1;
+    if (u.parseURL("http://hkahdsad.:213/") != "" || !u.bad())
+      return -1;
+    if (u.parseURL("http://   :213/") != "" || !u.bad())
+      return -1;
+    if (u.parseURL("http://adshhasd%:213/") != "" || !u.bad())
+      return -1;
+  }
+
+  print_test_topic("test_URI", "getStr()");
+  {
+    URI u("http://42.fr:4231/path/to/sth?jhasdh=jashdash");
+    if (u.bad())
+      std::cout << "bad" << std::endl;
+    std::cout << "u.getStr(): " << u.getStr() << std::endl;
+
+    u.parseURL("http://42.fr:4231/path/to/sth?jhasdh=jashdash&miep=moep");
+    if (u.bad())
+      std::cout << "bad" << std::endl;
+    std::cout << "u.getStr(): " << u.getStr() << std::endl;
+  }
+
   return 0;
 }
 
-void test_URL()
+void test_URI()
 {
   int ret = 0;
-  print_test_section_header("BEGIN URL");
+  print_test_section_header("BEGIN URI");
   try {
-    ret = _test_URL();
+    ret = _test_URI();
   } catch (const std::exception& e) {
-    print_test_section_header("END URL");
+    print_test_section_header("END URI");
     print_test_result(false,
-        "Test \"test_URL\" failed with following exception:\n" +
+        "Test \"test_URI\" failed with following exception:\n" +
             std::string(e.what()));
     g_GlobalResult = KO;
     return;
   }
   if (ret == -1) {
-    print_test_section_header("END URL");
-    print_test_result(false, "Test \"test_URL\" failed with -1");
+    print_test_section_header("END URI");
+    print_test_result(false, "Test \"test_URI\" failed with -1");
     g_GlobalResult = KO;
     return;
   }
-  print_test_section_header("END URL");
-  print_test_result(true, "Test \"test_URL\" succeeded =)");
+  print_test_section_header("END URI");
+  print_test_result(true, "Test \"test_URI\" succeeded =)");
 }

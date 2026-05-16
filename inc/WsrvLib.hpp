@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/24 17:31:03 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/15 19:17:27 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/16 01:17:48 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include "URL.hpp"
+#include "URI.hpp"
 
 #include <map>
 #include <set>
@@ -98,7 +98,7 @@ bool operator==(const t_vsrvInterface& i1, const t_vsrvInterface& i2);
 
 // the request-line
 typedef struct {
-    URL           target;
+    URI           target;
     e_HTTPVersion httpVersion;
     e_Method      method;
 } t_RequestLine;

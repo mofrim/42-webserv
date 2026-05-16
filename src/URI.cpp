@@ -1,16 +1,16 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   URL.cpp                                            :+:      :+:    :+:   */
+/*   URI.cpp                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/06 22:32:39 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/15 11:12:09 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/16 11:02:14 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "URL.hpp"
+#include "URI.hpp"
 #include "utils.hpp"
 
 #include <iostream>
@@ -19,22 +19,19 @@
 
 // --------------------------------=[ OCF ]=-------------------------------- //
 
-URL::URL(): _bad(false), _empty(true) {}
+URI::URI(): _bad(false), _empty(true) {}
 
-URL::URL(const URL& o)
+URI::URI(const URI& o)
 {
-  if (this != &o) {
-    _path     = o._path;
-    _query    = o._query;
-    _fragment = o._fragment;
-    _bad      = o._bad;
-    _empty    = o._empty;
-  }
+  if (this != &o)
+    *this = o;
 }
 
-URL& URL::operator=(const URL& o)
+URI& URI::operator=(const URI& o)
 {
   if (this != &o) {
+    _scheme   = o._scheme;
+    _auth     = o._auth;
     _path     = o._path;
     _query    = o._query;
     _fragment = o._fragment;
@@ -44,11 +41,18 @@ URL& URL::operator=(const URL& o)
   return (*this);
 }
 
-URL::~URL() {}
+URI::~URI() {}
 
 // ------------------------------=[ END OCF ]=------------------------------ //
 
-URL::URL(const str& u) { parseTargetURL(u); }
+URI::URI(const str& u)
+{
+  this->parseURL(u);
+  if (_bad) {
+    std::cout << "parseURL failed!" << std::endl;
+    this->parsePath(u);
+  }
+}
 
 // ---------------------=[ URL parsing static helpers ]=--------------------- //
 
@@ -155,7 +159,7 @@ static str rebuildQueryStr(const std::map<str, str>& params)
 // or the fully sanitized URL string. As side-effects sets all the corresponding
 // fields of the object: _path, _query and _fragment. As we are a server there
 // is no point in supporting fragments but it does not hurt to filter them out.
-str URL::parseTargetURL(const str& target)
+str URI::parsePath(const str& target)
 {
   this->clear();
 
@@ -263,13 +267,28 @@ str URL::parseTargetURL(const str& target)
 
 // ------------------------=[ The usual one-liners ]=------------------------ //
 
-bool                URL::bad() const { return _bad; }
-bool                URL::empty() const { return _empty; }
-str                 URL::getPath() const { return _path; }
-std::map<str, str>& URL::getQuery() { return _query; }
+bool                URI::bad() const { return _bad; }
+bool                URI::empty() const { return _empty; }
+str                 URI::getPath() const { return _path; }
+std::map<str, str>& URI::getQuery() { return _query; }
 
-void URL::clear()
+str URI::getStr() const
 {
+  str ret;
+  if (!_scheme.empty() && !_auth.empty())
+    ret += _scheme + "://" + _auth;
+  ret += _path;
+  if (!_query.empty())
+    ret += "?" + this->getQueryStr();
+  if (!_fragment.empty())
+    ret += "#" + _fragment;
+  return ret;
+}
+
+void URI::clear()
+{
+  _scheme.clear();
+  _auth.clear();
   _path.clear();
   _query.clear();
   _fragment.clear();
@@ -278,7 +297,7 @@ void URL::clear()
 }
 
 // return the query key-value-map as a Comma Separated String
-str URL::getQueryCSStr() const
+str URI::getQueryCSStr() const
 {
   str ret;
 
@@ -291,7 +310,7 @@ str URL::getQueryCSStr() const
 }
 
 // return query string in URL compatible format
-str URL::getQueryStr() const
+str URI::getQueryStr() const
 {
   str ret;
 
@@ -303,4 +322,115 @@ str URL::getQueryStr() const
 
   return ret;
 }
-str URL::getStr() const { return _path + getQueryStr() + _fragment; }
+
+// ----------------------=[ limited URL parsing func ]=---------------------- //
+
+static bool isValidAuthChar(char c, bool portSep)
+{
+  if (portSep)
+    return isdigit(c);
+  return (isalpha(c) || isdigit(c) || c == '.' || c == '-' || c == ':');
+}
+
+// QND chekc if string is valid u16 for port
+bool isU16Str(constr& str)
+{
+  if (str.empty())
+    return false;
+
+  size_t i = 0;
+
+  u32 value = 0;
+  while (i < str.length() && isdigit(str[i])) {
+    u8 digit = str[i] - '0';
+    if (value > (65535 - digit) / 10)
+      return false;
+    value = value * 10 + digit;
+    ++i;
+  }
+
+  if (i < str.length() && !isdigit(str[i]))
+    return false;
+
+  return value <= 65535;
+}
+
+// See:
+// - https://datatracker.ietf.org/doc/html/rfc3986
+// - https://datatracker.ietf.org/doc/html/rfc9110#name-identifiers-in-http
+//
+// NOTE This only a veeeeery reduced form of URL parsing which is not at all RFC
+// compliant!
+str URI::parseURL(constr& u)
+{
+  this->clear();
+
+  if (u.length() < 7) {
+    _bad = true;
+    return "";
+  }
+  if (u.compare(0, 7, "http://") != 0 &&
+      (u.length() >= 8 && u.compare(0, 8, "https://") != 0))
+  {
+    _bad = true;
+    return "";
+  }
+
+  str scheme = u.substr(0, u.find("://"));
+
+  str    auth    = u.substr(u.find("//") + 2);
+  size_t hierEnd = auth.find("/");
+
+  // re-use my path parsing func
+  if (hierEnd != str::npos)
+    this->parsePath(auth.substr(hierEnd));
+
+  auth = auth.substr(0, hierEnd);
+
+  if (auth.length() == 0 || auth.length() > URL_MAX_AUTH_LENGTH) {
+    _bad = true;
+    return "";
+  }
+
+  if (!isalnum(auth[0])) {
+    _bad = true;
+    return "";
+  }
+
+  bool portSep = false;
+
+  // max port: 65535!
+  // no trailing ':' allowed!
+  for (size_t i = 0; i < auth.length() && !_bad; ++i) {
+    if (!isValidAuthChar(auth[i], portSep))
+      _bad = true;
+    if (i + 1 < auth.length())
+      if (!auth.compare(i, 2, "..") || !auth.compare(i, 2, ".-") ||
+          !auth.compare(i, 2, "-.") || !auth.compare(i, 2, ":.") ||
+          !auth.compare(i, 2, ".:") || !auth.compare(i, 2, "-:") ||
+          !auth.compare(i, 2, ":-"))
+        _bad = true;
+    if (auth[i] == ':' && (portSep || i + 1 == auth.length()))
+      _bad = true;
+    else if (auth[i] == ':' && !portSep)
+      portSep = true;
+  }
+
+  if (_bad)
+    return "";
+
+  if (portSep && !isU16Str(auth.substr(auth.rfind(":") + 1))) {
+    _bad = true;
+    return "";
+  }
+
+  if (auth[auth.length() - 1] == '.' || auth[auth.length() - 1] == '-') {
+    _bad = true;
+    return "";
+  }
+
+  _scheme = scheme;
+  _auth   = auth;
+  _empty  = false;
+  return auth;
+}
