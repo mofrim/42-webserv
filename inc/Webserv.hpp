@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:35:29 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/07 14:53:45 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/17 01:56:03 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,11 +33,6 @@ class Webserv {
     bool                 _shutdown_server;
     std::vector<VServer> _vservers;
 
-    // This is the mein Welcome VServer responsible for not yet routed Requests.
-    // I use this to catch Requests to fully virtual servers which only differ
-    // by serverName
-    VServer _Webserv;
-
     // this maps a server-socket fd to a list of vservers.
     std::map< int, std::vector<VServer *> > _vserverFdMap;
 
@@ -49,6 +44,9 @@ class Webserv {
     u16 _numOfClients;
 
     Epoll _epoll;
+
+    // for storing the global env
+    char **_envp;
 
     void _setupServers();
     void _setupSingleServer(std::vector<VServer>::iterator srvIt);
@@ -67,13 +65,12 @@ class Webserv {
     // we do not use them, so keep em private
     Webserv(const Webserv& other);
     Webserv& operator=(const Webserv& other);
-
-    void _handleEventServerless(u32 ev, Client *cli);
+    Webserv();
 
     void _timeoutClients();
 
   public:
-    Webserv();
+    Webserv(char **envp);
     ~Webserv();
 
     void run();

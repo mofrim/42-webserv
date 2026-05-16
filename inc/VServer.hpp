@@ -44,6 +44,8 @@ class VServer {
 
     std::map<int, Client *> _clients;
 
+    char **_envp;
+
     void _setupSockets(std::vector<VServer>::iterator begin,
         std::vector<VServer>::iterator                cur);
 
@@ -65,7 +67,8 @@ class VServer {
     ~VServer();
 
     void init(std::vector<VServer>::iterator begin,
-        std::vector<VServer>::iterator       cur);
+        std::vector<VServer>::iterator       cur,
+        char                               **envp);
 
     Client *addClient(int fd);
     void    addClient(Client *cli);
@@ -98,6 +101,7 @@ class VServer {
 
     void    setRoot(constr& s);
     constr& getRoot() const;
+    char  **getEnvp();
 
     str getErrPage(e_HTTPStatus c);
 

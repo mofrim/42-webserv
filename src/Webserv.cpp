@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:36:43 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/16 22:29:21 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/17 02:03:10 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,9 +22,7 @@
 #include <utils.hpp>
 
 Webserv::Webserv(): _defaultCfg(true), _shutdown_server(false), _numOfClients(0)
-{
-  _Webserv.setServerName("Webserv");
-}
+{}
 
 Webserv::Webserv(const Webserv& other) { (void)other; }
 
@@ -37,11 +35,10 @@ Webserv& Webserv::operator=(const Webserv& other)
 // nothing to be done here, so far..
 Webserv::~Webserv() {}
 
-// TODO: there will be much more to do in here. What?
-//
-// - close sockets
-// - disconnect clients
-// - etc....
+Webserv::Webserv(char **envp):
+  _defaultCfg(true), _shutdown_server(false), _numOfClients(0), _envp(envp)
+{}
+
 void Webserv::shutdownWebserv()
 {
   Logger::logWarn("shutting down webserv...");
@@ -69,7 +66,7 @@ void Webserv::readConfig(const str& cfgFilename)
 
   if (cfgs.empty()) {
     Logger::logWarn(
-        "Webserv::readConfig", "Could not read any vsrvs from cfg!");
+        "Webserv::readConfig", "Could not parse any vsrvs from cfg!");
     return;
   }
 
@@ -93,8 +90,6 @@ void Webserv::_setupServers()
     else
       ++it;
   }
-  Logger::logDbg2("Number of not-failed Servers left after cleanup: " +
-      int2str(_vservers.size()));
   if (_vservers.size() == 0) {
     Logger::logErr("Could not setup any Server!");
     shutdownWebserv();
@@ -106,7 +101,7 @@ void Webserv::_setupSingleServer(std::vector<VServer>::iterator srvIt)
   Logger::logMsg("Trying to setup server '" + srvIt->getName() + "':");
   try {
     // init() needs the _vservers.begin and srvIt
-    srvIt->init(_vservers.begin(), srvIt);
+    srvIt->init(_vservers.begin(), srvIt, _envp);
     for (std::set<int>::const_iterator it = srvIt->getListenFds().begin();
         it != srvIt->getListenFds().end();
         it++)
@@ -187,7 +182,6 @@ void Webserv::run()
       //
       // QUESTION: what if _numOfClients >= MAX_CLIENTS ?!?! we need to handle
       // this!!! Also:
-      // FIXME: clarify how we handle connection keepalive with clients
       else {
         Client  *cli  = _fdClientMap[currentFd];
         VServer *vsrv = cli->getVsrv();
@@ -219,21 +213,6 @@ void Webserv::run()
     }
   }
   _epoll.closeEpollFd();
-}
-
-// For serverless clients there can only be a EPOLLIN event bc it is the first
-// real request that is processed
-// TODO implement this
-//
-// FIXME DEAD CODE ?!?!?!
-// FIXME REMOVE ?!?!?!?
-void Webserv::_handleEventServerless(u32 ev, Client *cli)
-{
-  if (ev & EPOLLIN) {
-    return cli->handleEvent(ev);
-  }
-  Logger::logErr("Webserv::handleEventServerless: srvless event not EPOLLIN!");
-  cli->setState(CLI_DISCO);
 }
 
 // TODO: add special treatment for CGI clients here

@@ -1,4 +1,21 @@
 #!/usr/bin/env bash
 
-read -r name
-echo "Hello <$name> from mofrim's WebServ!"
+CRLF=$'\r\n'
+
+function sendHdrField() {
+	echo -en "$1$CRLF"
+}
+
+function finishReq() {
+	echo -en "$CRLF"
+}
+
+IFS= read -r -d '' name
+
+msg="Hello <$name> from mofrim's WebServ!\n"
+len="${#msg}"
+
+sendHdrField "Content-Type: text/html"
+sendHdrField "Content-Length: $len"
+finishReq
+echo -en "$msg"

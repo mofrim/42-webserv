@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:37:25 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/14 22:13:30 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/17 01:52:59 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,9 +27,9 @@ void shutdownHandler(int signum)
   }
 }
 
-int main(int ac, char **av)
+int main(int ac, char **av, char **envp)
 {
-  Webserv webserv;
+  Webserv webserv(envp);
   g_webserv = &webserv;
 
   if (signal(SIGINT, shutdownHandler) == SIG_ERR) {

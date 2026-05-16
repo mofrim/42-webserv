@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/03 12:51:23 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/16 23:06:36 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/17 02:02:54 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -106,8 +106,9 @@ VServer::VServer(const VServerCfg& cfg)
 
 // Init a server. If initialization fails after call to socket we would be left
 // with a open fd, so we need to close it for proper cleanup
-void VServer::init(
-    std::vector<VServer>::iterator begin, std::vector<VServer>::iterator cur)
+void VServer::init(std::vector<VServer>::iterator begin,
+    std::vector<VServer>::iterator                cur,
+    char                                        **envp)
 {
   try {
     _setupSockets(begin, cur);
@@ -115,6 +116,7 @@ void VServer::init(
     throw;
   }
   Logger::logSrv(_srvName, "initialized!");
+  _envp = envp;
 }
 
 // settings up sockets per server.
@@ -349,3 +351,5 @@ const Route& VServer::matchRoute(constr& target)
 
   return _routes["/"];
 }
+
+char **VServer::getEnvp() { return _envp; }
