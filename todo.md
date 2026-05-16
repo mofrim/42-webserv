@@ -2,12 +2,6 @@
 
 ## current TODOs
 
-
-- [ ] implement autoindex!
-
-- [ ] if autoindex is not on and there is no index in a route which exists and is requested
-via `/route/` then this is forbidden 403
-
 - [ ] pay attention and implement sanitization according to this:
 
       A sender MUST NOT generate a bare CR (a CR character not immediately
@@ -24,37 +18,41 @@ via `/route/` then this is forbidden 403
 
 - [ ] add func comments to hpp *not* to cpp files -> global visibility!
 
-- [ ] show errPage that is configured for a route / server
-
 - [ ] check if all getters return reasonable (const!?) values!
-
 
 - [ ] support URL redirection meaning: `redirect` directive will also take a
   full URL (like https://42.fr) as redir target!
-
-- [ ] if a GET or DELETE req is detected stop reading body from then on. but
-  what if client is sending body?
 
 - [ ] find out what should be handled differently with other HTTP-versions
 
 - [ ] CGI
 
-- [ ] Simple POST
-
 - [ ] DELETE
-
-- [ ] support uploading file to the server using POST method, 
-  + [ ] either without query component (POST /upload HTTP/1.1) resulting in a
-    canonical filename being chosen according to Content-Type, (POST /upload
-    HTTP/1.1 \r\n Content-Type: image/jpeg -> /upload/file000.jpg being
-    created), 
-  + [ ] or with query component (POST /upload?blabla.csv ... -> file is uploaded
-    and stored as `upload-dir/blabla.csv`)
 
 - [ ] add `isatty` based detection to `Logger` class in order to decide on
   colored output
 
-- [ ] rename `Logger` funcs to camelCase!
+- [ ] add more POST tests. especially one big file post test
+
+- [ ] introduce `uploadPrefix` direc in route scope
+
+- [ ] rename direcs like `upload` to `uploadDir` and `listen` -> `interface` and
+  most importantly `errorPage` -> `statusPage`
+
+- [ ] add more POST tests around the form-thingy also highlighting the Firefox
+  413 / 400 on too large requests issue
+
+- [ ] check if a real-file-route behaves as expected. also with a redirect
+
+- [ ] add to URI class possibility to parse full URLs
+
+- [ ] test virtual servers with 0.0.0.0 and more complex things
+
+- [ ] test percent decoding in URIs
+
+- [ ] add a `form-post-with-query.html` showcasing the query string based
+  filename setting.
+
 
 ## DONEs
 
@@ -106,24 +104,25 @@ instructions
       file on the local file system. If there are several matching location
       blocks nginx selects the one with the **longest prefix**.
 
+- [x] rename `Logger` funcs to camelCase!
 
+- [x] if a GET or DELETE req is detected stop reading body from then on. but
+  what if client is sending body?
 
-## more on individual todos...
+- [x] Simple POST
 
-### clarifying the mutliple interface issue
+- [x] implement autoindex!
 
-- we are supposed to handle mutiple interfaces, meaning in the cfg it should be
-  possible to specify something like
+- [x] if autoindex is not on and there is no index in a route which exists and is requested
+via `/route/` then this is forbidden 403
 
-  ```nginx
-  server {
-    server_name bla;
-    # -> will lead to listening on 10.0.0.1:80
-    listen 10.0.0.1; 
-    # standard
-    listen localhost:8080;
-    listen 127.0.0.1:9090;
-    ...
-  ```
-  so, how are we gonna make this work? how do we treat all possible default
-  values and stuff?
+- [x] support uploading file to the server using POST method, 
+
+  + [x] either without query component (POST /upload HTTP/1.1) resulting in a
+    canonical filename being chosen according to Content-Type, (POST /upload
+    HTTP/1.1 \r\n Content-Type: image/jpeg -> /upload/file000.jpg being
+    created), 
+
+  + [x] or with query component (POST /upload?blabla.csv ... -> file is uploaded
+    and stored as `upload-dir/blabla.csv`)
+
