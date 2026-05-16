@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/23 19:11:25 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/16 09:26:36 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/16 12:07:35 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -221,11 +221,16 @@ void Response::_buildRespoHdrs()
 
   _respoHeaders["Content-Length"] = int2str(_body.size());
 
-  if (_req->isRedir())
-    _respoHeaders["Location"] = "http://" + _req->getHeaders()["host"] +
-        _req->getRedir().second + _req->getTargetPath() +
-        (_req->getReqline().target.getQuery().empty() ? "" : "?") +
-        _req->getReqline().target.getQueryStr();
+  if (_req->isRedir()) {
+    const URI& uri = _req->getRedir().second;
+    if (uri.isURL())
+      _respoHeaders["Location"] = uri.getStr();
+    else
+      _respoHeaders["Location"] = "http://" + _req->getHeaders()["host"] +
+          uri.getStr() + _req->getTargetPath() +
+          (_req->getReqline().target.getQuery().empty() ? "" : "?") +
+          _req->getReqline().target.getQueryStr();
+  }
 
   str conn;
   if ((_status >= HTTP_400 && (_status != HTTP_404)) || _closeConn)

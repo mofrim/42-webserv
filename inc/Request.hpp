@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 23:39:07 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/15 18:07:06 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/16 12:02:35 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,7 +58,7 @@ class Request {
     Route *_matchedRoute;
     str    _targetPath; // the target-path minus the route
 
-    std::pair<e_HTTPStatus, str> _redir;
+    std::pair<e_HTTPStatus, URI> _redir;
 
     bool _isCGI;        // CGI requests can be both POST and GET
     bool _isSimplePOST; // simple POST without CGI
@@ -101,7 +101,7 @@ class Request {
     str          getMethodStr() const;
     bool         closeConn() const;
 
-    const std::pair<e_HTTPStatus, str>& getRedir() const;
+    const std::pair<e_HTTPStatus, URI>& getRedir() const;
 
     bool reqError() const;
 

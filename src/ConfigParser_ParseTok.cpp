@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/08 21:14:52 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/15 18:08:20 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/16 12:21:43 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -295,6 +295,12 @@ bool ConfigParser::_parseTokRedir()
   }
 
   _currentRoute.setRedir(code, sp[1]);
+
+  if (_currentRoute.getRedir().second.bad()) {
+    Logger::logCfgErr(
+        _tokIt->line, "Invalid URI '" + sp[1] + "' in redir direc!");
+    return false;
+  }
 
   return true;
 }

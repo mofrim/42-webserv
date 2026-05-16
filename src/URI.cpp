@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/06 22:32:39 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/16 11:02:14 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/16 12:17:02 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -271,6 +271,9 @@ bool                URI::bad() const { return _bad; }
 bool                URI::empty() const { return _empty; }
 str                 URI::getPath() const { return _path; }
 std::map<str, str>& URI::getQuery() { return _query; }
+
+// if _scheme is empty we are merely a path not a full URL
+bool URI::isURL() const { return !_scheme.empty(); }
 
 str URI::getStr() const
 {

@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/09 16:42:51 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/15 19:24:00 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/16 12:20:05 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -151,7 +151,7 @@ bool Route::addMethod(e_Method m) { return _methods.insert(m).second; }
 
 void Route::clearMethods() { _methods.clear(); }
 
-const std::pair<e_HTTPStatus, str>& Route::getRedir() const { return _redir; }
+const std::pair<e_HTTPStatus, URI>& Route::getRedir() const { return _redir; }
 
 void Route::setRedir(e_HTTPStatus s, const str& url)
 {

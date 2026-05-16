@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/09 16:41:56 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/15 19:24:00 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/16 11:57:50 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,7 @@ class Route {
 
     std::map<e_HTTPStatus, str> _errPages;
 
-    std::pair<e_HTTPStatus, str> _redir;
+    std::pair<e_HTTPStatus, URI> _redir;
 
     // Ex.: key = "py", val = "/usr/bin/env python"
     std::map<str, str> _cgi;
@@ -67,7 +67,7 @@ class Route {
     bool addMethod(e_Method m);
     void clearMethods();
 
-    const std::pair<e_HTTPStatus, str>& getRedir() const;
+    const std::pair<e_HTTPStatus, URI>& getRedir() const;
     void setRedir(e_HTTPStatus s, const str& url);
 
     const std::map<str, str>& getCgi() const;

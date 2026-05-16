@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/16 12:11:11 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/15 19:23:59 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/16 12:00:42 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -98,9 +98,9 @@ void VServer::printCfg() const
     }
     Logger::logCfg("     + methods = " + meths);
 
-    const std::pair<e_HTTPStatus, str>& redir = r.getRedir();
+    const std::pair<e_HTTPStatus, URI>& redir = r.getRedir();
     Logger::logCfg(
-        "     + redir = " + int2str(redir.first) + ":" + redir.second);
+        "     + redir = " + int2str(redir.first) + ":" + redir.second.getStr());
 
     str cgistr;
     for (std::map<str, str>::const_iterator it = r.getCgi().begin();

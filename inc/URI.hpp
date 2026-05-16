@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/06 22:32:20 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/16 09:45:14 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/16 12:05:10 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,4 +61,5 @@ class URI {
     str                 getQueryStr() const;
     str                 getStr() const;
     void                clear();
+    bool                isURL() const;
 };

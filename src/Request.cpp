@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 23:39:57 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/15 23:23:19 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/16 12:02:48 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -357,7 +357,7 @@ bool Request::isDELETE() const { return _isDELETE; }
 
 bool Request::isRedir() const { return _isRedir; }
 
-const std::pair<e_HTTPStatus, str>& Request::getRedir() const { return _redir; }
+const std::pair<e_HTTPStatus, URI>& Request::getRedir() const { return _redir; }
 
 // if we have received at least 2 lines or the maximum reqline length was
 // already received we should check at least if the reqline is correct

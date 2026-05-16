@@ -11,7 +11,16 @@ server {
   # Also, if this target did not exist, we would run into a ifinite loop which
   # will be cancancelled by the browser as the `/redir` route will match it's
   # own redir. but this happens to nginx too
-  route /redir-target {
-    root ./www/redir-target!
+  route /redir-target {}
+
+  route /42 {
+    redirect 301:https://42.fr!
   }
+
+  # basic URI parsing is done, so this fails cfg parsing:
+
+  # route /fail {
+  #   redirect 301:htt://42.fr!
+  # }
+
 }
