@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/06 22:32:39 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/16 12:17:02 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/16 12:41:00 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,10 +48,8 @@ URI::~URI() {}
 URI::URI(const str& u)
 {
   this->parseURL(u);
-  if (_bad) {
-    std::cout << "parseURL failed!" << std::endl;
+  if (_bad)
     this->parsePath(u);
-  }
 }
 
 // ---------------------=[ URL parsing static helpers ]=--------------------- //
