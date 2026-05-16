@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 23:39:07 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/16 12:02:35 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/16 18:25:40 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,6 +57,7 @@ class Request {
     str    _requestTarget; // the targetstr from requestline
     Route *_matchedRoute;
     str    _targetPath; // the target-path minus the route
+    URI    _target;
 
     std::pair<e_HTTPStatus, URI> _redir;
 
@@ -133,4 +134,5 @@ class Request {
 
     RequestBody&       getBody();
     std::vector<char>& getBodyData();
+    size_t             getBodySize() const;
 };

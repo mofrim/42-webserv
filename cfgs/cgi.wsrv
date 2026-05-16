@@ -1,0 +1,26 @@
+server {
+  serverName cgiserv!
+  listen localhost:1111!
+  root ./www/cgi!
+
+  route /cgi-bin {
+    autoindex on!
+    index hello.sh!
+    methods GET POST!
+    cgi sh:/usr/bin/env bash!
+  }
+
+  route /cgi-src {
+    autoindex on!
+    methods GET POST!
+  }
+
+  route /cgi-root {
+    autoindex on!
+    methods GET POST!
+  }
+
+  route /cgi-bin/hello.sh {
+    cgi sh:/usr/bin/env bash!
+  }
+}

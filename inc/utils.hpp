@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/03 11:26:23 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/15 18:15:11 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/16 16:26:33 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@ int      setFdNonBlocking(int fd);
 str      getErrStr();
 e_Method str2meth(constr& m);
 str      meth2str(e_Method m);
-int      isDir(constr& path);
+int      getFileType(constr& path);
 str      strip(str str);
 void     tolower(str& s);
 u16      str2u16(constr& s);

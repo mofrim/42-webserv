@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/23 19:11:06 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/15 23:39:49 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/16 19:45:49 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,6 +37,7 @@ class Response {
     str                _body;
     str                _mimeType;
     str                _respoStr;
+    str                _vsrvName;
 
     Route *_matchedRoute;
     str    _targetPath; // the target-path minus the route
@@ -52,13 +53,19 @@ class Response {
     void _setBodyStatusPage(constr& opts = "");
 
     void _handleBadRequest();
-    void _handleRedir();
-    void _handleCGI();
     void _handleSimplePost();
     void _handleSimplePostFile(
         constr& upDir, constr& mimeType = "application/octet-stream");
     void _handleSimplePostForm(constr& upDir, constr& mimeType);
     void _handleDelete();
+    void _handleRedir();
+
+    void               _cgiHandleBadScript(constr& s);
+    std::map<str, str> _cgiEvalScriptPath();
+    str                _cgiDetermineScriptFile();
+    str                _cgiBuildEnv();
+    bool               _cgiRun(constr& s, constr& i);
+    void               _handleCGI();
 
     static std::map<str, str> _buildErrRespoHdrs(
         e_HTTPStatus status, const str& body);

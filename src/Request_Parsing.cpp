@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/01 18:46:40 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/16 09:30:01 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/16 15:25:39 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,7 @@ e_HTTPStatus Request::parseReqLine()
   if ((_statusCode = _readReqline()) == HTTP_400)
     return _statusCode;
   _requestTarget = _reqline.target.getPath();
+  _target        = _reqline.target;
 
   Logger::logSrv(_vsrvName,
       "Reqline: '" + meth2str(_reqline.method) + " " +
@@ -48,6 +49,8 @@ void Request::evaluateTarget()
   this->_matchRoute();
 
   Logger::logSrv(_vsrvName, "Matched Route: " + _matchedRoute->getPath());
+  Logger::logSrv(_vsrvName, "Target Path: " + _targetPath);
+  Logger::logSrv(_vsrvName, "Query: " + _target.getQueryCSStr());
 
   // check if method is allowed for this route, if not -> 403
   const std::set<e_Method>& allowedMethods = _matchedRoute->getMethods();

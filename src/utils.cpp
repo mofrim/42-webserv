@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/26 10:03:57 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/15 18:14:52 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/16 16:26:33 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -93,21 +93,30 @@ str meth2str(e_Method m)
   return "UNKNOWN";
 }
 
-// check if given path is a
-// - dir -> return 1
-// - or a normal file -> return 0
-// - or inexistent -> return -1
-int isDir(const str& path)
+// check if given path is
+//
+//  - inexistent -> return -1
+//  - regular file -> return 0
+//  - dir -> return 1
+//  - link -> return 2 (technically cannot happen with stat)
+//  - sth else -> return -2
+int getFileType(const str& path)
 {
   struct stat sb;
 
-  if (lstat(path.c_str(), &sb) == -1)
+  if (stat(path.c_str(), &sb) == -1)
     return -1;
 
-  if ((sb.st_mode & S_IFMT) == S_IFDIR)
-    return 1;
-
-  return 0;
+  switch (sb.st_mode & S_IFMT) {
+    case S_IFREG:
+      return 0;
+    case S_IFDIR:
+      return 1;
+    case S_IFLNK:
+      return 2;
+    default:
+      return -2;
+  }
 }
 
 // @brief Split string by another delim string.

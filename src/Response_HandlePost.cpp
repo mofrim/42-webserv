@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/14 17:51:57 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/16 14:44:58 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/16 16:26:34 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,7 +45,7 @@ void Response::_handleSimplePost()
   Logger::logBug("upDir: " + upDir);
 
   // if upload dir is not a dir -> 500
-  if (!isDir(upDir))
+  if (!getFileType(upDir))
     _status = HTTP_500;
 
   str contentType = _req->getHeaders()["content-type"];

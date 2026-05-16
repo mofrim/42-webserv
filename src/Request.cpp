@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 23:39:57 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/16 12:02:48 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/16 18:25:57 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,6 +49,7 @@ Request& Request::operator=(const Request& o)
     _hdrsParsed    = o._hdrsParsed;
     _contentLength = o._contentLength;
     _bodySize      = o._bodySize;
+    _target        = o._target;
   }
   return *this;
 }
@@ -279,6 +280,7 @@ void Request::reset()
   _reqline.target.clear();
   _headers.clear();
   _respo.reset();
+  _target.clear();
 }
 
 // READ_BUFSIZE is set to 4096 bytes so half of this is in theory the max num
@@ -374,3 +376,5 @@ RequestBody& Request::getBody() { return _body; }
 std::vector<char>& Request::getBodyData() { return _body.getBodyData(); }
 
 bool Request::hdrsParsed() const { return _hdrsParsed; }
+
+size_t Request::getBodySize() const { return _bodySize; }

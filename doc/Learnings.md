@@ -23,6 +23,8 @@
 
 - [RFC 3986 - URI](https://datatracker.ietf.org/doc/html/rfc3986)
 
+- [RFC 3875 - CGI](https://www.rfc-editor.org/rfc/rfc3875)
+
 
 ## Resources
 

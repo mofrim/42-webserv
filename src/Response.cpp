@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/23 19:11:25 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/16 14:32:34 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/16 17:46:32 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,18 +27,8 @@ Response::Response() { this->reset(); }
 
 Response::Response(const Response& o)
 {
-  if (this != &o) {
-    _status       = o._status;
-    _reqline      = o._reqline;
-    _cli          = o._cli;
-    _vsrv         = o._vsrv;
-    _respoHeaders = o._respoHeaders;
-    _body         = o._body;
-    _mimeType     = o._mimeType;
-    _respoStr     = o._respoStr;
-    _closeConn    = o._closeConn;
-    _req          = o._req;
-  }
+  if (this != &o)
+    *this = o;
 }
 
 Response& Response::operator=(const Response& o)
@@ -54,6 +44,7 @@ Response& Response::operator=(const Response& o)
     _respoStr     = o._respoStr;
     _closeConn    = o._closeConn;
     _req          = o._req;
+    _vsrvName     = o._vsrvName;
   }
   return (*this);
 }
@@ -73,6 +64,7 @@ void Response::_setFieldsFromReq(Request& req)
   _closeConn    = req.closeConn();
   _matchedRoute = req.getMatchedRoute();
   _targetPath   = req.getTargetPath();
+  _vsrvName     = req.getVsrv()->getName();
   _req          = &req;
 }
 
@@ -93,32 +85,32 @@ e_HTTPStatus Response::generateResponse(Request& req)
   // handle status >= HTTP_400
 
   if (req.badRequest()) {
-    Logger::logSrv(_vsrv->getName(), "Bad Request handling");
+    Logger::logSrv(_vsrvName, "Bad Request handling");
     _handleBadRequest();
   }
 
   // hrom here on: only HTTP_200 so far
 
   else if (req.isRedir()) {
-    Logger::logSrv(_vsrv->getName(), "Redir Request handling");
+    Logger::logSrv(_vsrvName, "Redir Request handling");
     _handleRedir();
   }
   else if (req.isCGI()) {
-    Logger::logSrv(_vsrv->getName(), "CGI Request handling");
+    Logger::logSrv(_vsrvName, "CGI Request handling");
     _handleCGI();
   }
   else if (req.isSimplePOST()) {
-    Logger::logSrv(_vsrv->getName(), "SimplePost Request handling");
+    Logger::logSrv(_vsrvName, "SimplePost Request handling");
     _handleSimplePost();
   }
   else if (req.isDELETE()) {
-    Logger::logSrv(_vsrv->getName(), "DELETE Request handling");
+    Logger::logSrv(_vsrvName, "DELETE Request handling");
     _handleDelete();
   }
 
   // simple GET request
   else {
-    Logger::logSrv(_vsrv->getName(), "Normal GET Request handling");
+    Logger::logSrv(_vsrvName, "Normal GET Request handling");
     _getBody200();
   }
 
@@ -168,9 +160,12 @@ void Response::_getBody200()
 
   Logger::logBug("_targetPath: " + _targetPath);
 
-  int isdir = isDir(path);
+  int isdir = getFileType(path);
 
   switch (isdir) {
+    case 2:
+    case -2:
+      Logger::logWarn("stat() encountered some weird file or symlink");
     case -1:
       _status = HTTP_404;
       _body   = WsrvLib::getDefaultStatusPage(HTTP_404);
@@ -186,7 +181,7 @@ void Response::_getBody200()
       str fpath =
           path + (path[path.size() - 1] == '/' ? "" : "/") + r.getIndex();
 
-      Logger::logSrv(_vsrv->getName(), "Trying to serve file: " + fpath);
+      Logger::logSrv(_vsrvName, "Trying to serve file: " + fpath);
 
       // not setting errPage on fail here
       _readBodyFromFile(fpath, false);
@@ -196,8 +191,7 @@ void Response::_getBody200()
 
       if (_status == HTTP_404 && r.isAutoindex()) {
 
-        Logger::logSrv(
-            _vsrv->getName(), "Trying to serve autoindex for " + path);
+        Logger::logSrv(_vsrvName, "Trying to serve autoindex for " + path);
 
         // kinda hacky construction of the path to use as root for displayed
         // files. but it works :/
@@ -273,6 +267,7 @@ void Response::reset()
   _mimeType.clear();
   _respoStr.clear();
   _targetPath.clear();
+  _vsrvName.clear();
 }
 
 // helper function for generating the response for a failes Req.
@@ -343,8 +338,6 @@ void Response::_handleRedir()
   _setBodyStatusPage();
 }
 
-void Response::_handleCGI() {}
-
 void Response::_handleDelete()
 {
 
@@ -363,10 +356,10 @@ void Response::_handleDelete()
       path += "/" + _targetPath;
   }
 
-  Logger::logSrv(_vsrv->getName(), "Trying to delete '" + path + "'");
+  Logger::logSrv(_vsrvName, "Trying to delete '" + path + "'");
 
   if (std::remove(path.c_str()) != 0) {
-    Logger::logSrv(_vsrv->getName(),
+    Logger::logSrv(_vsrvName,
         "Deletion failed with '" + int2str(errno) + " " + strerror(errno) +
             "'");
     if (errno == ENOENT) {

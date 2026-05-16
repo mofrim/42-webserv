@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/24 17:40:43 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/16 14:53:18 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/16 17:42:20 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -104,6 +104,8 @@ std::map<str, str> WsrvLib::_initExt2MimeTypes()
   m["svg"]         = "image/svg+xml";
   m["ttf"]         = "font/ttf";
   m["txt"]         = "text/plain";
+  m["sh"]          = "text/plain";
+  m["py"]          = "text/plain";
   m["wav"]         = "audio/wav";
   m["woff"]        = "font/woff";
   m["woff2"]       = "font/woff2";
