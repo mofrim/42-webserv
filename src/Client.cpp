@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/14 20:51:06 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/15 14:56:11 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/16 22:58:50 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,7 @@ Client::Client():
 Client::Client(const Client& o) { (void)o; }
 
 Client::Client(int fd, VServer *vsrv, const str& addr, in_port_t port):
-  _clientFd(fd), _addr(addr), _port(ntohs(port)), _timeout(false),
+  _clientFd(fd), _addr(addr), _port(ntohs(port)), _vsrvPort(0), _timeout(false),
   _lastActive(time(NULL)), _vsrv(vsrv), _reqHandler(this), _state(CLI_IDLE)
 {
   _ifaceFdStr = addr + ":" + int2str(_port) + ":fd=" + int2str(fd);
@@ -148,5 +148,9 @@ str      Client::getAddr() const { return _addr; }
 u16      Client::getPort() const { return _port; }
 void     Client::timeout() { _timeout = true; }
 bool     Client::isVirtual() const { return _vsrv == NULL; }
+
+void Client::setVsrvPort(u16 port) { _vsrvPort = port; }
+
+u16 Client::getVsrvPort() const { return _vsrvPort; }
 
 std::vector<VServer *>& Client::getPotentialVsrvs() { return _potentialVsrvs; }

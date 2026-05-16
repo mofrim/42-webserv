@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 23:39:07 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/16 18:25:40 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/16 22:58:01 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,6 +49,9 @@ class Request {
     str          _vsrvName;
     size_t       _bodySize;
 
+    str _host;
+    u16 _hostPort;
+
     // doing it exactly as proposed in:
     // https://datatracker.ietf.org/doc/html/rfc9112#section-2.2
     t_RequestLine      _reqline;
@@ -79,7 +82,6 @@ class Request {
     e_HTTPStatus _evaluateHdrs();
 
   public:
-    // TODO: decide which ctors we really use here & privatize unused
     Request();
     Request(const Request& other);
     Request(Client *cli, const char *reqstr, size_t reqstrLen);
@@ -135,4 +137,10 @@ class Request {
     RequestBody&       getBody();
     std::vector<char>& getBodyData();
     size_t             getBodySize() const;
+
+    void setHost(str host);
+    str  getHost() const;
+
+    void setHostPort(u16 p);
+    u16  getHostPort() const;
 };

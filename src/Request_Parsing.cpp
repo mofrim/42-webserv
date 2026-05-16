@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/01 18:46:40 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/16 15:25:39 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/16 23:18:32 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -274,6 +274,17 @@ e_HTTPStatus Request::_evaluateHdrs()
     if (_body.setMaxSize(_contentLength) == KO)
       throw std::runtime_error(
           "(Request::_parseHeaders) Could not set maxBodySize!");
+  }
+
+  // set host and hostPort (which is the servers addr and port) from hdrs
+  if (!_headers["host"].empty()) {
+    std::vector<str> hspl = splitString(_headers["host"], ":");
+    if (hspl.size() == 2) {
+      if (str2u16(hspl[1]) != _hostPort)
+        _hostPort = str2u16(strip(hspl[2]));
+    }
+    if (hspl.size() >= 1)
+      _host = strip(hspl[0]);
   }
 
   return HTTP_200;

@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/03 12:51:23 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/15 18:40:12 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/16 23:06:36 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -282,15 +282,13 @@ Client *VServer::addClient(int fd)
   std::string hostname(inAddrToStr(client_addr.sin_addr));
   Client *newCli = new Client(client_fd, this, hostname, client_addr.sin_port);
 
-  // FIXME: rewrite this more simply
-  // std::pair<std::map<int, Client *>::iterator, bool> insertReturn =
-  //     _clients.insert(std::pair<int, Client *>(client_fd, newCli));
-  // if (insertReturn.second == false)
-  //   throw(ServerException(
-  //       "could not insert new client into Server's _clients map"));
-  // return (insertReturn.first->second);
+  if (newCli == NULL)
+    throw std::runtime_error(
+        "(VServer::addClient) Could not allocate new Client!");
 
-  // DONE: but is this really safe like this?
+  // set server port in new client
+  newCli->setVsrvPort(_fdIfaceMap[fd].second);
+
   _clients[client_fd] = newCli;
   return (newCli);
 }

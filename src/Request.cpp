@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 23:39:57 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/16 18:25:57 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/16 23:13:45 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,6 +50,8 @@ Request& Request::operator=(const Request& o)
     _contentLength = o._contentLength;
     _bodySize      = o._bodySize;
     _target        = o._target;
+    _hostPort      = o._hostPort;
+    _host          = o._host;
   }
   return *this;
 }
@@ -86,6 +88,7 @@ Request::Request(Client *cli, const char *reqstr, size_t reqstrLen)
   _closeConn           = false;
   _requestTarget       = "";
   _bodySize            = 0;
+  _hostPort            = _cli->getVsrvPort();
 
   _reqdata.assign(reqstr, reqstrLen);
 }
@@ -272,6 +275,7 @@ void Request::reset()
   _contentLength       = 0;
   _closeConn           = false;
   _bodySize            = 0;
+  _hostPort            = 0;
 
   _reqdata.clear();
   _body.reset();
@@ -281,6 +285,7 @@ void Request::reset()
   _headers.clear();
   _respo.reset();
   _target.clear();
+  _host.clear();
 }
 
 // READ_BUFSIZE is set to 4096 bytes so half of this is in theory the max num
@@ -378,3 +383,11 @@ std::vector<char>& Request::getBodyData() { return _body.getBodyData(); }
 bool Request::hdrsParsed() const { return _hdrsParsed; }
 
 size_t Request::getBodySize() const { return _bodySize; }
+
+void Request::setHost(str host) { _host = host; }
+
+str Request::getHost() const { return _host; }
+
+void Request::setHostPort(u16 p) { _hostPort = p; }
+
+u16 Request::getHostPort() const { return _hostPort; }

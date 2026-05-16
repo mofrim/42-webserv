@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 19:13:35 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/15 15:33:59 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/16 23:09:06 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -198,8 +198,6 @@ RequestHandler::ReqHandlerException::ReqHandlerException(
 
 void RequestHandler::setVsrvName(const str& n) { _vsrvName = n; }
 
-// FIXME: maybe change logging to dbg1 for prod
-// TODO: split away a possible 'https://' or port part, aka: isolate the fqdn
 void RequestHandler::_setVirtualServerFromHeader()
 {
   if (_vsrvName == "__VIRTUAL__") {
@@ -207,7 +205,15 @@ void RequestHandler::_setVirtualServerFromHeader()
     std::map<str, str>& hdrs = _cli->getReq().getHeaders();
 
     if (hdrs.find("host") != hdrs.end()) {
-      str host = hdrs["host"];
+      u16              port = 0;
+      str              host;
+      std::vector<str> hsplit = splitString(hdrs["host"], ":");
+      if (hsplit.size() == 2)
+        port = str2u16(hsplit[1]);
+      if (hsplit.size() >= 1)
+        host = hsplit[0];
+      else
+        host = hdrs["host"];
 
       for (std::vector<VServer *>::iterator it =
                _cli->getPotentialVsrvs().begin();
@@ -218,6 +224,7 @@ void RequestHandler::_setVirtualServerFromHeader()
         if ((*it)->getName() == host) {
           Logger::logDbg0("Found matching VServer for host = " + host);
           _cli->setVsrv(*it);
+          _cli->setVsrvPort(port);
           (*it)->addClient(_cli);
           _vsrvName = host;
           return;
