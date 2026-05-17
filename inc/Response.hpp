@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/23 19:11:06 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/17 00:41:39 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/17 11:19:26 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,8 +64,7 @@ class Response {
     std::map<str, str>  _cgiEvalScriptPath();
     std::pair<str, int> _cgiDetermineScriptFile();
     char              **_cgiBuildEnv(std::map<str, str> cgiParams);
-    bool                _cgiRun(std::map<str, str> cgiParams);
-    bool                _handleCGI();
+    e_HTTPStatus        _cgiSetup(std::map<str, str> cgiParams);
 
     static std::map<str, str> _buildErrRespoHdrs(
         e_HTTPStatus status, const str& body);
@@ -77,6 +76,7 @@ class Response {
 
     e_HTTPStatus generateResponse(Request& req);
     str          getRespoStr() const;
+    e_HTTPStatus handleCGI(Request& req);
 
     void reset();
 

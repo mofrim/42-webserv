@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/17 10:36:30 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/17 10:40:03 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/17 11:20:13 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-bool Response::_cgiRun(std::map<str, str> cgiParams)
+e_HTTPStatus Response::_cgiSetup(std::map<str, str> cgiParams)
 {
   str cgiExec   = cgiParams["EXEC"];
   str cgiScript = cgiParams["SCRIPT_FILENAME"];
@@ -38,7 +38,7 @@ bool Response::_cgiRun(std::map<str, str> cgiParams)
 
   if (pipe(stdinPipe) == -1 || pipe(stdoutPipe) == -1) {
     Logger::logBug("CGI: pipe() failed!");
-    return KO;
+    return HTTP_500;
   }
 
   // Just to make it easier to keep track of their use ;)
@@ -71,7 +71,7 @@ bool Response::_cgiRun(std::map<str, str> cgiParams)
     close(stdinPipe[1]);
     close(stdoutPipe[0]);
     close(stdoutPipe[1]);
-    return KO;
+    return HTTP_500;
   }
 
   // the child
@@ -95,7 +95,9 @@ bool Response::_cgiRun(std::map<str, str> cgiParams)
     exit(1);
   }
 
-  // The parent
+  // |=--------------------------=[ The parent ]=--------------------------=| //
+
+  _cli->setState(CLI_CGIWRITE);
 
   close(stdinPipe[0]);  // Close unused read end
   close(stdoutPipe[1]); // Close unused write end
@@ -107,14 +109,14 @@ bool Response::_cgiRun(std::map<str, str> cgiParams)
   if (write(parentWriteFd,
           _req->getBody().getBodyDataAsStr().c_str(),
           _req->getBodyData().size()) == -1)
-    return KO;
+    return HTTP_500;
 
   Logger::logBug("...now waiting");
 
   waitpid(pid, &status, WNOHANG);
   if (WEXITSTATUS(status) != 0) {
     Logger::logBug("CGI: execve() failed!");
-    return KO;
+    return HTTP_500;
   }
 
   close(stdinPipe[1]);
@@ -144,5 +146,5 @@ bool Response::_cgiRun(std::map<str, str> cgiParams)
   }
   _body = body;
   close(stdoutPipe[0]);
-  return OK;
+  return HTTP_200;
 }

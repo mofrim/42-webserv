@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/14 20:50:12 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/17 10:41:55 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/17 10:44:43 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,16 @@ class VServer;
 class Webserv;
 
 // the states of the client machine
-typedef enum { CLI_READ, CLI_SEND, CLI_IDLE, CLI_DISCO, CLI_DRAIN } e_CliState;
+typedef enum {
+  CLI_READ,
+  CLI_SEND,
+  CLI_IDLE,
+  CLI_DISCO,
+  CLI_DRAIN,
+  CLI_CGIWRITE,
+  CLI_CGIWAIT,
+  CLI_CGIREAD
+} e_CliState;
 
 class Client {
   private:

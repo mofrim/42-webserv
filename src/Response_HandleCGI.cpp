@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/16 14:54:57 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/17 10:38:18 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/17 11:23:57 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,20 +22,23 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-bool Response::_handleCGI()
+e_HTTPStatus Response::handleCGI(Request& req)
 {
-  // Route& r = *_matchedRoute;
 
-  // first: scriptName, second: interpreter
+  _setFieldsFromReq(req);
+
+  // evaluate the script path and try to find the real fspath to the script
+  // file. if everything is fine cgiParams will already hold some env vars we
+  // can use in cgiSetup. If it fails _status will be set to some error status.
   std::map<str, str> cgiParams = _cgiEvalScriptPath();
   if (cgiParams.empty())
-    return KO;
+    return _status;
 
   // yes! if we made it here we are kind of good to go!
 
   Logger::logBug("CGI: cgiScript = " + cgiParams["SCRIPT_NAME"]);
 
-  return this->_cgiRun(cgiParams);
+  return this->_cgiSetup(cgiParams);
 }
 
 // extracted Routine for handling script files that somehow cannot be accessed

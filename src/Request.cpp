@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 23:39:57 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/16 23:13:45 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/17 11:24:43 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -113,7 +113,14 @@ void Request::processReq()
   if (_vsrv && _statusCode != HTTP_400 && _matchedRoute == NULL)
     _matchRoute();
 
-  _statusCode = _respo.generateResponse(*this);
+  // for CGI requests that are already bad don't do anything CGI related
+  if (this->isCGI() && !this->badRequest()) {
+    _statusCode = _respo.handleCGI(*this);
+    if (this->badRequest())
+      _statusCode = _respo.generateResponse(*this);
+  }
+  else
+    _statusCode = _respo.generateResponse(*this);
 }
 
 // Match the route from req. After this there will _ALWAYS_ be a route set, if

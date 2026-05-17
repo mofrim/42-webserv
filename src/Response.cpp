@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/23 19:11:25 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/17 02:26:23 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/17 11:00:40 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -82,8 +82,6 @@ e_HTTPStatus Response::generateResponse(Request& req)
 {
   _setFieldsFromReq(req);
 
-  bool cgiReturn = true;
-
   // handle status >= HTTP_400
 
   if (req.badRequest()) {
@@ -96,10 +94,6 @@ e_HTTPStatus Response::generateResponse(Request& req)
   else if (req.isRedir()) {
     Logger::logSrv(_vsrvName, "Redir Request handling");
     _handleRedir();
-  }
-  else if (req.isCGI()) {
-    Logger::logSrv(_vsrvName, "CGI Request handling");
-    cgiReturn = _handleCGI();
   }
   else if (req.isSimplePOST()) {
     Logger::logSrv(_vsrvName, "SimplePost Request handling");
@@ -114,11 +108,6 @@ e_HTTPStatus Response::generateResponse(Request& req)
   else {
     Logger::logSrv(_vsrvName, "Normal GET Request handling");
     _getBody200();
-  }
-
-  if (req.isCGI() && cgiReturn == KO) {
-    _status = HTTP_500;
-    _body   = WsrvLib::getDefaultStatusPage(HTTP_500);
   }
 
   _buildRespoHdrs();
