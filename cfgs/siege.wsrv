@@ -1,0 +1,12 @@
+server {
+  serverName localhost!
+  listen localhost:1111!
+  route / {
+    index siege-index.html!
+  }
+  route /index.html {
+  }
+  route /empty {
+    index siege-index-empty.html!
+  }
+}
