@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/16 14:54:57 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/17 02:37:42 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/17 10:38:18 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,6 @@
 
 #include <cstdlib>
 #include <cstring>
-#include <iostream>
 #include <sys/wait.h>
 #include <unistd.h>
 
@@ -167,115 +166,6 @@ std::map<str, str> Response::_cgiEvalScriptPath()
   return cgiParams;
 }
 
-bool Response::_cgiRun(std::map<str, str> cgiParams)
-{
-  str cgiExec   = cgiParams["EXEC"];
-  str cgiScript = cgiParams["SCRIPT_FILENAME"];
-
-  cgiParams.erase("EXEC");
-
-  char **envp = _cgiBuildEnv(cgiParams);
-  if (!envp)
-    throw std::runtime_error("(Response::_cgiBuildEnv) allocation failed!");
-
-  char **p = envp;
-
-  Logger::logBug("Response::_cgiRun", "Build this env:");
-  while (*p) {
-    Logger::logBug(str(*p));
-    p++;
-  }
-
-  // Names a child-centric: read end of stdinPipe, i.e., stdinPipe[0] will be
-  // child's STDIN, the parent will write to stdinPipe[1]. Likewise for
-  // stdoutPipe.
-  int stdinPipe[2];
-  int stdoutPipe[2];
-
-  if (pipe(stdinPipe) == -1 || pipe(stdoutPipe) == -1) {
-    Logger::logBug("CGI: pipe() failed!");
-    return KO;
-  }
-
-  Logger::logBug("CGI: forking " + cgiExec);
-  Logger::logBug("CGI: with this script " + cgiScript);
-
-  int status;
-
-  pid_t pid = fork();
-
-  if (pid == -1) {
-    Logger::logBug("CGI: fork() failed!");
-    return KO;
-  }
-
-  // the child
-  if (pid == 0) {
-
-    close(stdinPipe[1]);
-    close(stdoutPipe[0]);
-
-    dup2(stdinPipe[0], STDIN_FILENO);   // Redirect stdin
-    dup2(stdoutPipe[1], STDOUT_FILENO); // Redirect stdout
-
-    close(stdinPipe[0]);
-    close(stdoutPipe[1]);
-
-    char *argv[] = {
-        const_cast<char *>(cgiExec.c_str()),
-        const_cast<char *>(cgiScript.c_str()),
-        NULL};
-    execve(cgiExec.c_str(), argv, envp);
-    exit(1);
-  }
-  else if (pid > 0) {
-    // Parent process
-    close(stdinPipe[0]);  // Close unused read end
-    close(stdoutPipe[1]); // Close unused write end
-    //
-    Logger::logBug("Hello from parent!");
-    Logger::logBug(
-        "body: " + str(_req->getBodyData().begin(), _req->getBodyData().end()));
-    if (write(stdinPipe[1],
-            _req->getBody().getBodyDataAsStr().c_str(),
-            _req->getBodyData().size()) == -1)
-      return KO;
-    Logger::logBug("...now waiting");
-    waitpid(pid, &status, WNOHANG);
-    if (WEXITSTATUS(status) != 0) {
-      Logger::logBug("CGI: execve() failed!");
-      return KO;
-    }
-    close(stdinPipe[1]);
-    char buffer[READ_BUFSIZE + 1];
-    str  body;
-    int  ret;
-    while ((ret = read(stdoutPipe[0], buffer, READ_BUFSIZE)) > 0) {
-      buffer[ret] = '\0';
-      body += buffer;
-    }
-    Logger::logBug("BODY FROM SCRIPT:" + body);
-    if (body.find("\r\n\r\n") != std::string::npos) {
-      std::string        headers = body.substr(0, body.find("\r\n\r\n"));
-      std::istringstream iss(headers);
-      std::string        line;
-      while (std::getline(iss, line)) {
-        size_t pos = line.find(": ");
-        if (pos != std::string::npos) {
-          std::string key    = line.substr(0, pos);
-          std::string value  = line.substr(pos + 2);
-          _respoHeaders[key] = value;
-        }
-      }
-      body = body.substr(body.find("\r\n\r\n") + 4);
-    }
-    _body = body;
-    close(stdoutPipe[0]);
-    return OK;
-  }
-  return OK;
-}
-
 // https://www.rfc-editor.org/rfc/rfc3875#page-10
 char **Response::_cgiBuildEnv(std::map<str, str> cgiParams)
 {
@@ -293,27 +183,29 @@ char **Response::_cgiBuildEnv(std::map<str, str> cgiParams)
   env["SERVER_PROTOCOL"] = WsrvLib::httpVer2Str(_req->getReqline().httpVersion);
   env["SERVER_SOFTWARE"] = "mofrim's WebServ";
 
-  char **globalEnvp    = _vsrv->getEnvp();
-  size_t globalEnvSize = 0;
+  // get PATH from global env...
+  // this is surely not optimal from a opssec perspective, but convenient for
+  // script execution
+
+  char **globalEnvp = _vsrv->getEnvp();
+  str    _globalEnvPATH;
   if (globalEnvp != NULL) {
     char **p = globalEnvp;
     while (*p) {
-      ++globalEnvSize;
+      str cur(*p);
+      if (cur.length() > 4 && !cur.compare(0, 4, "PATH"))
+        _globalEnvPATH = cur;
       ++p;
     }
   }
-  char **envp = new char *[env.size() + globalEnvSize + 1];
+
+  char **envp = new char *[env.size() + !_globalEnvPATH.empty() + 1];
   if (!envp)
     throw std::runtime_error("(Response::_cgiBuildEnv) allocation failed!");
 
   size_t envIdx = 0;
-  while (envIdx < globalEnvSize) {
-    envp[envIdx] = globalEnvp[envIdx];
-    envIdx++;
-  }
 
-  for (std::map<str, str>::const_iterator it = env.begin();
-      it != env.end() && envIdx < env.size() + globalEnvSize;
+  for (std::map<str, str>::const_iterator it = env.begin(); it != env.end();
       ++it, ++envIdx)
   {
     str itmString = it->first + "=" + it->second;
@@ -323,11 +215,16 @@ char **Response::_cgiBuildEnv(std::map<str, str> cgiParams)
     //     These  functions  copy the string pointed to by src, into a string at
     //     the buffer pointed to by dst.  The programmer is responsible for
     //     allocating  a  destination buffer  large  enough, that is,
-    //     strlen(src) + 1.
+    //     strlen(src) + 1... -> NUL-byte!!!
     envp[envIdx] = new char[itmString.size() + 1];
     if (!envp[envIdx])
       throw std::runtime_error("(Response::_cgiBuildEnv) allocation failed!");
     strcpy(envp[envIdx], itmString.c_str());
+  }
+  if (!_globalEnvPATH.empty()) {
+    envp[envIdx] = new char[_globalEnvPATH.size() + 1];
+    strcpy(envp[envIdx], _globalEnvPATH.c_str());
+    ++envIdx;
   }
   envp[envIdx] = NULL;
 
