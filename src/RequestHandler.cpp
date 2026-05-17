@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 19:13:35 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/16 23:09:06 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/17 09:06:32 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,6 +52,7 @@ RequestHandler::RequestHandler(Client *cli): _cli(cli)
 void RequestHandler::readRequest()
 {
   std::memset(_buffer, 0, READ_BUFSIZE);
+
   ssize_t bytesRead = read(_cli->getFd(), _buffer, READ_BUFSIZE);
 
   Logger::logSrv(_vsrvName,
@@ -175,6 +176,7 @@ void RequestHandler::writeResponse()
 
   ssize_t bytes_sent = send(_cli->getFd(), response.data(), response.size(), 0);
 
+  // keep on sending if non-blocking send did fail.
   // QUESTION: can we somehow provoke this for testing?
   if (bytes_sent < 0 || static_cast<size_t>(bytes_sent) != response.size()) {
     Logger::logErr("Couldn't send (complete) response!");
@@ -242,10 +244,4 @@ void RequestHandler::_setVirtualServerFromHeader()
 
     _cli->getReq().evaluateTarget();
   }
-}
-
-str RequestHandler::_getErrPage(e_HTTPStatus c)
-{
-  (void)c;
-  return "";
 }
