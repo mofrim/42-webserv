@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/16 14:54:57 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/17 22:00:59 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/18 01:04:24 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,8 +35,6 @@ e_HTTPStatus Response::handleCGI(Request& req)
 
   // yes! if we made it here we are kind of good to go!
 
-  Logger::logBug("CGI: cgiScript = " + cgiParams["SCRIPT_NAME"]);
-
   return this->_cgiSetup(cgiParams);
 }
 
@@ -48,8 +46,8 @@ void Response::_cgiHandleBadScript(constr& s)
   else
     _status = HTTP_404;
   _body = WsrvLib::getDefaultStatusPage(_status);
-  Logger::logBug("CGI script " + s + " access errno: " + int2str(errno) + " " +
-      strerror(errno) + " -> " + int2str(_status));
+  Logger::logDbg1("CGI script " + s + " access " + getErrnoStr() + " -> " +
+      int2str(_status));
 }
 
 // the idea is the following:

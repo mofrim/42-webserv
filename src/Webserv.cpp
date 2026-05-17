@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:36:43 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/18 00:11:18 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/18 01:05:59 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -188,10 +188,7 @@ void Webserv::run()
 
         if (cli->isDoingCGI()) {
           if (currentFd == cli->getFd() && ev & (EPOLLIN | EPOLLERR | EPOLLHUP))
-          {
-            Logger::logBug("ha!");
             cli->setState(CLI_DISCO_CGI);
-          }
           else
             cli->handleEventCGI(ev);
         }
@@ -284,7 +281,7 @@ void Webserv::removeCgiFdFromEpoll(int fd)
 // what is to be done in here?
 void Webserv::_handleDiscoCGI(Client *cli, VServer *vsrv)
 {
-  Logger::logBug("Handling DISCO CGI!!!!!");
+  Logger::logSrv(vsrv->getName(), "Handling CGI Disco!");
   Response& respo = cli->getReq().getRespo();
   respo.cgiKillProcess();
   respo.cgiCleanupFds();
@@ -296,6 +293,5 @@ void Webserv::_handleDiscoCGI(Client *cli, VServer *vsrv)
   vsrv->deleteClient(cliFd);
 
   _fdClientMap.erase(cliFd);
-  Logger::logBug("_fdClientMap.size() = " + int2str(_fdClientMap.size()));
   _numOfClients--;
 }

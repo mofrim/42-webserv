@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/14 20:51:06 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/17 23:42:13 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/18 00:44:01 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -117,11 +117,11 @@ void Client::handleEvent(u32 ev)
 
 void Client::handleEventCGI(u32 ev)
 {
-  if (ev & (EPOLLERR | EPOLLHUP)) {
-    Logger::logBug("EPOLEEEEEEEEEEEEERRRRRRRRRR");
-    _state = CLI_DISCO_CGI;
-    return;
-  }
+  // if (ev & (EPOLLERR | EPOLLHUP)) {
+  //   Logger::logBug("EPOLEEEEEEEEEEEEERRRRRRRRRR");
+  //   _state = CLI_DISCO_CGI;
+  //   return;
+  // }
 
   switch (_state) {
     case CLI_CGIWRITE:

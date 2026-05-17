@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/17 10:36:30 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/17 23:49:45 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/18 00:58:21 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,8 @@ e_HTTPStatus Response::_cgiSetup(std::map<str, str> cgiParams)
   str cgiExec   = cgiParams["EXEC"];
   str cgiScript = cgiParams["SCRIPT_FILENAME"];
 
+  Logger::logSrv(_vsrvName, "CGI: Exec=" + cgiExec + ", Script=" + cgiScript);
+
   cgiParams.erase("EXEC");
 
   // Names a child-centric: read end of stdinPipe, i.e., stdinPipe[0] will be
@@ -35,7 +37,7 @@ e_HTTPStatus Response::_cgiSetup(std::map<str, str> cgiParams)
   int stdoutPipe[2];
 
   if (pipe(stdinPipe) == -1 || pipe(stdoutPipe) == -1) {
-    Logger::logBug("CGI: pipe() failed!");
+    Logger::logErr("Response::_cgiSetup", "pipe() failed!");
     return HTTP_500;
   }
 
@@ -47,44 +49,51 @@ e_HTTPStatus Response::_cgiSetup(std::map<str, str> cgiParams)
   if (setFdNonBlocking(_cgiParentWriteFd) == -1 ||
       setFdNonBlocking(_cgiParentReadFd) == -1)
   {
-    Logger::logErr("Reponse::_cgiSetup", "CGI: fork() failed!");
+    Logger::logErr("Reponse::_cgiSetup", "fcntl() failed!");
     close(stdinPipe[0]), close(stdinPipe[1]), close(stdoutPipe[0]),
         close(stdoutPipe[1]);
     return HTTP_500;
   }
-
-  Logger::logBug("CGI: forking " + cgiExec);
-  Logger::logBug("CGI: with this script " + cgiScript);
 
   // -----------------------------=[ fork! ]=------------------------------ //
 
   _cgiPid = fork();
 
   if (_cgiPid == -1) {
-    Logger::logBug("CGI: fork() failed!");
+    Logger::logErr("Reponse::_cgiSetup", "CGI: fork() failed!");
     close(stdinPipe[0]), close(stdinPipe[1]), close(stdoutPipe[0]),
         close(stdoutPipe[1]);
     return HTTP_500;
   }
 
   // ----------------------------=[ the child ]=---------------------------- //
+
   if (_cgiPid == 0) {
 
     close(stdinPipe[1]);
     close(stdoutPipe[0]);
-
     dup2(stdinPipe[0], STDIN_FILENO);
     dup2(stdoutPipe[1], STDOUT_FILENO);
-
     close(stdinPipe[0]);
     close(stdoutPipe[1]);
 
     char **envp = _cgiBuildEnv(cgiParams);
-    if (!envp)
-      throw std::runtime_error("(Response::_cgiBuildEnv) allocation failed!");
 
-    char *argv[] = {strdup(cgiExec.c_str()), strdup(cgiScript.c_str()), NULL};
+    // being almost completely C++ish here ;)
+    char *argv[] = {
+        new char[cgiExec.length() + 1], new char[cgiScript.length() + 1], NULL};
+    strcpy(argv[0], cgiExec.c_str());
+    strcpy(argv[1], cgiScript.c_str());
+
     execve(cgiExec.c_str(), argv, envp);
+
+    char **p = envp;
+    while (*p) {
+      delete[] *p;
+      ++p;
+    }
+    delete[] envp, delete[] argv[0], delete[] argv[1];
+
     exit(1);
   }
 
@@ -104,9 +113,8 @@ e_HTTPStatus Response::_cgiSetup(std::map<str, str> cgiParams)
 
 void Response::cgiWrite()
 {
-  Logger::logBug("Hello from parent! Trying to write...");
-  Logger::logBug(
-      "body: " + str(_req->getBodyData().begin(), _req->getBodyData().end()));
+  Logger::logDbg2("(Response::cgiWrite) writing body:\n" +
+      str(_req->getBodyData().begin(), _req->getBodyData().end()));
 
   ssize_t bytesWritten = 0;
 
@@ -116,7 +124,6 @@ void Response::cgiWrite()
 
   if (bytesWritten >= 0) {
     if (static_cast<size_t>(bytesWritten) == _req->getBodyData().size()) {
-      Logger::logBug("CGI: writing done!");
       _cli->setState(CLI_CGIWDONE);
       _cli->delCgiFromEpoll(_cgiParentWriteFd);
       close(_cgiParentWriteFd);
@@ -167,11 +174,11 @@ bool Response::cgiWait()
       if ((WIFEXITED(status) && WEXITSTATUS(status) != 0) || !WIFEXITED(status))
       {
         if (WIFEXITED(status))
-          Logger::logBug("CGI: execve() failed with status " +
+          Logger::logDbg1("CGI: execve() failed with status " +
               int2str(WEXITSTATUS(status)));
 
         if (WIFSIGNALED(status))
-          Logger::logBug(
+          Logger::logDbg1(
               "CGI: execve() failed with status " + int2str(WTERMSIG(status)));
 
         _status = HTTP_500;
@@ -211,23 +218,24 @@ void Response::cgiRead()
   _cgiBody += buffer;
 }
 
+// FIXME make this a bit more sophisticated!
 void Response::cgiProcessBody()
 {
-  Logger::logBug("Response::cgiProcessBody", "BODY FROM SCRIPT:\n" + _cgiBody);
+  Logger::logDbg1("Response::cgiProcessBody", "BODY FROM SCRIPT:\n" + _cgiBody);
 
-  if (_cgiBody.find("\r\n\r\n") != std::string::npos) {
-    std::string        headers = _cgiBody.substr(0, _cgiBody.find("\r\n\r\n"));
+  if (_cgiBody.find(CRLFX2) != std::string::npos) {
+    str                headers = _cgiBody.substr(0, _cgiBody.find(CRLFX2));
     std::istringstream iss(headers);
-    std::string        line;
+    str                line;
     while (std::getline(iss, line)) {
       size_t pos = line.find(": ");
       if (pos != std::string::npos) {
-        std::string key    = line.substr(0, pos);
-        std::string value  = line.substr(pos + 2);
+        str key            = line.substr(0, pos);
+        str value          = line.substr(pos + 2);
         _respoHeaders[key] = value;
       }
     }
-    _body   = _cgiBody.substr(_cgiBody.find("\r\n\r\n") + 4);
+    _body   = _cgiBody.substr(_cgiBody.find(CRLFX2) + 4);
     _status = HTTP_200;
   }
   else

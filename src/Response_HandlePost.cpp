@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/14 17:51:57 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/16 16:26:34 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/18 01:04:50 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,8 +42,6 @@ void Response::_handleSimplePost()
   // append upDir to routes root!
   upDir = _matchedRoute->getRoot() + upDir;
 
-  Logger::logBug("upDir: " + upDir);
-
   // if upload dir is not a dir -> 500
   if (!getFileType(upDir))
     _status = HTTP_500;
@@ -61,8 +59,6 @@ void Response::_handleSimplePost()
   if (semicolon != str::npos)
     contentType = contentType.substr(0, semicolon);
   str mimeType = strip(contentType);
-
-  Logger::logBug("Got this mimeType: " + mimeType);
 
   if (mimeType == "multipart/form-data" ||
       mimeType == "application/x-www-form-urlencoded")
@@ -82,8 +78,6 @@ static str generateFname(constr& dir, constr& ext)
   str           defName("wsrvUpload");
   str           fname;
   std::set<str> files = listDirFiles(dir, false);
-
-  Logger::logBug("files: " + getStrSetAsStr(files));
 
   if (files.empty())
     return "";
