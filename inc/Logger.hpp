@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/24 20:49:55 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/16 12:28:14 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/17 19:05:04 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,6 +34,9 @@
 #define BCYA "\e[1;96m"
 #define BGRY "\e[1;97m"
 #define BWHT "\e[1;98m"
+
+// special
+#define BUG "\e[38;5;164m"
 
 enum { LOG_INFO = 0, LOG_DEBUG = 1, LOG_BRUTAL = 2 };
 

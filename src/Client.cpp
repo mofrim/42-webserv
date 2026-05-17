@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/14 20:51:06 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/17 16:08:41 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/17 23:42:13 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -105,11 +105,11 @@ void Client::handleEvent(u32 ev)
   if (ev & (EPOLLIN | EPOLLOUT)) {
     this->setLastActive();
     if (ev & EPOLLIN) {
-      Logger::logMsg("Got EPOLLIN!");
+      Logger::logMsg("Got EPOLLIN on client " + getIfaceFdStr());
       _reqHandler.readRequest();
     }
     if (ev & EPOLLOUT) {
-      Logger::logMsg("Got EPOLLOUT!");
+      Logger::logMsg("Got EPOLLOUT on client " + getIfaceFdStr());
       _reqHandler.writeResponse();
     }
   }
@@ -117,20 +117,29 @@ void Client::handleEvent(u32 ev)
 
 void Client::handleEventCGI(u32 ev)
 {
+  if (ev & (EPOLLERR | EPOLLHUP)) {
+    Logger::logBug("EPOLEEEEEEEEEEEEERRRRRRRRRR");
+    _state = CLI_DISCO_CGI;
+    return;
+  }
+
   switch (_state) {
     case CLI_CGIWRITE:
       if (ev & EPOLLOUT) {
         this->setLastActive();
         _req.getRespo().cgiWrite();
       }
-      _req.getRespo().cgiWait();
-      return;
+      if (_req.getRespo().cgiWait() == KO)
+        break;
+      else
+        return;
     case CLI_CGIWDONE:
     case CLI_CGIWAIT:
-      _req.getRespo().cgiWait();
-      return;
+      if (_req.getRespo().cgiWait() == KO)
+        break;
+      else
+        return;
     case CLI_CGIREAD:
-      Logger::logBug("Client::handleEventCGI called with CLI_CGIREAD");
       if (ev & EPOLLIN) {
         this->setLastActive();
         _req.getRespo().cgiRead();
@@ -140,8 +149,10 @@ void Client::handleEventCGI(u32 ev)
   }
 
   if (_state == CLI_CGIKO || _state == CLI_CGIOK) {
-    if (_state == CLI_CGIKO)
+    if (_state == CLI_CGIKO) {
+      _req.getRespo().cgiCleanupFds();
       _req.setStatusCode(_req.getRespo().getStatus());
+    }
     else
       _req.getRespo().cgiProcessBody();
 
@@ -190,7 +201,7 @@ void Client::addCgiToEpoll(int fdWrite, int fdRead)
 
 void Client::delCgiFromEpoll(int fd) { _webserv->removeCgiFdFromEpoll(fd); }
 
-bool Client::isCgi() const
+bool Client::isDoingCGI() const
 {
   return _state == CLI_CGIWRITE || _state == CLI_CGIREAD ||
       _state == CLI_CGIWDONE || _state == CLI_CGIWAIT || _state == CLI_CGIKO ||

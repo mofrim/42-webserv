@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/24 20:52:55 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/17 13:43:31 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/17 19:03:03 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -150,14 +150,13 @@ void Logger::logReqRes(const str& srvName, const str& resreq, const str& data)
 // use this for bug hunting
 void Logger::logBug(const str& msg)
 {
-  std::cout << BPUR << "[BUG] " << msg << RST << std::endl;
+  std::cout << BUG << "[BUG] " << msg << RST << std::endl;
 }
 
 // use this for bug hunting
 void Logger::logBug(constr& pre, const str& msg)
 {
-  std::cout << BPUR << "[BUG] " << "(" << pre << ") " << msg << RST
-            << std::endl;
+  std::cout << BUG << "[BUG] " << "(" << pre << ") " << msg << RST << std::endl;
 }
 
 void Logger::drawCycleSep()

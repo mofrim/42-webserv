@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:36:43 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/17 17:54:54 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/18 00:11:18 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -144,7 +144,7 @@ void Webserv::run()
       throw(WebservRunException("epoll_wait failed"));
 
     // DEBUG
-    // _epoll.printReadylist();
+    _epoll.printReadylist();
 
     for (int eventIdx = 0; eventIdx < nfds; ++eventIdx) {
       int currentFd = _epoll.getEventFd(eventIdx);
@@ -186,12 +186,21 @@ void Webserv::run()
         if ((cli->isIdling() || cli->isReading()) && (ev & EPOLLOUT))
           continue;
 
-        if (cli->isCgi())
-          cli->handleEventCGI(ev);
+        if (cli->isDoingCGI()) {
+          if (currentFd == cli->getFd() && ev & (EPOLLIN | EPOLLERR | EPOLLHUP))
+          {
+            Logger::logBug("ha!");
+            cli->setState(CLI_DISCO_CGI);
+          }
+          else
+            cli->handleEventCGI(ev);
+        }
         else
           cli->handleEvent(ev);
 
-        if (cli->isDisco()) {
+        if (cli->getState() == CLI_DISCO_CGI)
+          _handleDiscoCGI(cli, vsrv);
+        else if (cli->isDisco()) {
           _epoll.removeClient(currentFd);
           if (vsrv)
             vsrv->deleteClient(currentFd);
@@ -220,16 +229,17 @@ void Webserv::_timeoutClients()
 {
   time_t now = time(NULL);
 
-  std::map< int, Client * >::iterator it = _fdClientMap.begin();
+  std::map<int, Client *>::iterator it = _fdClientMap.begin();
+
   while (it != _fdClientMap.end()) {
     Client *cli = it->second;
-    if (cli->isCgi()) {
+    if (cli->isDoingCGI()) {
       if (difftime(now, cli->getLastActive()) > WsrvLib::Settings.cgiTimeout) {
         Logger::logDbg1("Timing out CGI client..." + cli->getIfaceFdStr());
         cli->timeout();
         _epoll.modifyClient(cli->getFd(), EPOLLOUT);
         cli->setState(CLI_SEND);
-        cli->getReq().getRespo().cgiShutdown();
+        cli->getReq().getRespo().cgiCleanupFds();
       }
     }
     else if (difftime(now, cli->getLastActive()) > WsrvLib::Settings.reqTimeout)
@@ -239,7 +249,7 @@ void Webserv::_timeoutClients()
       _epoll.modifyClient(cli->getFd(), EPOLLOUT);
       cli->setState(CLI_SEND);
     }
-    it++;
+    ++it;
   }
 }
 
@@ -269,4 +279,23 @@ void Webserv::removeCgiFdFromEpoll(int fd)
     _fdClientMap.erase(fd);
     _epoll.removeClient(fd);
   }
+}
+
+// what is to be done in here?
+void Webserv::_handleDiscoCGI(Client *cli, VServer *vsrv)
+{
+  Logger::logBug("Handling DISCO CGI!!!!!");
+  Response& respo = cli->getReq().getRespo();
+  respo.cgiKillProcess();
+  respo.cgiCleanupFds();
+
+  int cliFd = cli->getFd();
+
+  // this order is very important!
+  _epoll.removeClient(cliFd);
+  vsrv->deleteClient(cliFd);
+
+  _fdClientMap.erase(cliFd);
+  Logger::logBug("_fdClientMap.size() = " + int2str(_fdClientMap.size()));
+  _numOfClients--;
 }

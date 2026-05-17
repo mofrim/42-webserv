@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 19:13:35 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/17 14:53:02 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/17 22:41:17 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -105,7 +105,7 @@ void RequestHandler::readRequest()
   //
   //  if the hdrs were already parsed, i.e. we are reading a body to some POST
   //  req, we don't do anyhing here.
-  if (!req.badRequest() && req.hdrComplete() && !req.hdrsParsed()) {
+  if (!req.badRequest() && !req.hdrsParsed() && req.hdrComplete()) {
     if (req.parseReqHeaders() >= HTTP_400)
       Logger::logSrv(_vsrvName,
           "Req::parseHeaders returned " + int2str(req.getStatus()),
@@ -153,8 +153,8 @@ void RequestHandler::writeResponse()
     Logger::logDbg1("RequestHandler: 408 due to timeout");
     statusCode = HTTP_408;
 
-    if (_cli->isCgi())
-      req.getRespo().cgiShutdown();
+    if (_cli->isDoingCGI())
+      req.getRespo().cgiCleanupFds();
 
     if (_cli->isVirtual())
       response = Response::genDefaultErrResponse(statusCode);

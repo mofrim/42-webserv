@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/23 19:11:25 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/17 18:57:01 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/18 00:22:35 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -150,7 +150,6 @@ void Response::_getBody200()
 
   // root will NEVER have a trailing slash by parsing!
   str path = r.getRoot() + (r.getPath() == "/" ? "" : r.getPath());
-  Logger::logBug("root: " + path);
 
   // At this point there can only be single slashes in _targetPath as they have
   // been compressed by URL class.
@@ -160,8 +159,6 @@ void Response::_getBody200()
     else
       path += "/" + _targetPath;
   }
-
-  Logger::logBug("_targetPath: " + _targetPath);
 
   int isdir = getFileType(path);
 
@@ -188,9 +185,6 @@ void Response::_getBody200()
 
       // not setting errPage on fail here
       _readBodyFromFile(fpath, false);
-
-      Logger::logBug("status: " + int2str(_status) +
-          "body size: " + int2str(_body.size()));
 
       if (_status == HTTP_404 && r.isAutoindex()) {
 

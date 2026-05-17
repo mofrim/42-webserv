@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/17 10:36:30 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/17 16:06:31 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/17 23:49:45 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,13 +56,6 @@ e_HTTPStatus Response::_cgiSetup(std::map<str, str> cgiParams)
   Logger::logBug("CGI: forking " + cgiExec);
   Logger::logBug("CGI: with this script " + cgiScript);
 
-  // Logger::logBug("This is the env:");
-  // char **p = envp;
-  // while (*p) {
-  //   Logger::logBug(str(*p));
-  //   ++p;
-  // }
-
   // -----------------------------=[ fork! ]=------------------------------ //
 
   _cgiPid = fork();
@@ -104,6 +97,8 @@ e_HTTPStatus Response::_cgiSetup(std::map<str, str> cgiParams)
   close(stdinPipe[0]);
   close(stdoutPipe[1]);
 
+  Logger::logDbg1("Response::_cgiSetup", "Done!");
+
   return HTTP_200;
 }
 
@@ -121,6 +116,7 @@ void Response::cgiWrite()
 
   if (bytesWritten >= 0) {
     if (static_cast<size_t>(bytesWritten) == _req->getBodyData().size()) {
+      Logger::logBug("CGI: writing done!");
       _cli->setState(CLI_CGIWDONE);
       _cli->delCgiFromEpoll(_cgiParentWriteFd);
       close(_cgiParentWriteFd);
@@ -133,7 +129,7 @@ void Response::cgiWrite()
   }
 }
 
-void Response::cgiWait()
+bool Response::cgiWait()
 {
   int status  = 0;
   int waitRet = 0;
@@ -163,19 +159,29 @@ void Response::cgiWait()
       else {
         _status = HTTP_500;
         _cli->setState(CLI_CGIKO);
+        return KO;
       }
       break;
     default:
       Logger::logDbg1("Response::cgiWait", "Child done!");
       if ((WIFEXITED(status) && WEXITSTATUS(status) != 0) || !WIFEXITED(status))
       {
-        Logger::logBug("CGI: execve() failed!");
+        if (WIFEXITED(status))
+          Logger::logBug("CGI: execve() failed with status " +
+              int2str(WEXITSTATUS(status)));
+
+        if (WIFSIGNALED(status))
+          Logger::logBug(
+              "CGI: execve() failed with status " + int2str(WTERMSIG(status)));
+
         _status = HTTP_500;
         _cli->setState(CLI_CGIKO);
+        return KO;
       }
       else
         _cli->setState(CLI_CGIREAD);
   }
+  return OK;
 }
 
 // FIXME make this binary-data-proof
@@ -228,10 +234,45 @@ void Response::cgiProcessBody()
     _status = HTTP_500;
 }
 
-void Response::cgiShutdown()
+void Response::cgiCleanupFds()
 {
   _cli->delCgiFromEpoll(_cgiParentWriteFd);
   _cli->delCgiFromEpoll(_cgiParentReadFd);
   close(_cgiParentWriteFd);
   close(_cgiParentReadFd);
+}
+
+void Response::cgiKillProcess()
+{
+  int wret = waitpid(_cgiPid, 0, WNOHANG);
+  if (wret == 0)
+    kill(_cgiPid, SIGTERM);
+  else if (wret == -1) {
+    Logger::logDbg1("Response::cgiKillProcess", "waitpid -1");
+    return;
+  }
+  else {
+    Logger::logDbg1("Response::cgiKillProcess", "waitpid > 0");
+    return;
+  }
+
+  // FIXME REMOVEME!
+  usleep(500);
+
+  if (waitpid(_cgiPid, 0, WNOHANG) == _cgiPid) {
+    Logger::logDbg1("Response::cgiKillProcess", "killed with SIGTERM");
+    return;
+  }
+  else
+    kill(_cgiPid, SIGKILL);
+
+  wret = waitpid(_cgiPid, 0, WNOHANG) == _cgiPid;
+
+  if (wret == _cgiPid) {
+    Logger::logDbg1("Response::cgiKillProcess", "killed with SIGKILL");
+    return;
+  }
+  else
+    Logger::logDbg1(
+        "Response::cgiKillProcess", "giving up killing CGI process");
 }

@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:35:29 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/17 13:36:00 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/17 23:43:55 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,6 +68,8 @@ class Webserv {
     Webserv();
 
     void _timeoutClients();
+
+    void _handleDiscoCGI(Client *cli, VServer *vsrv);
 
   public:
     Webserv(char **envp);

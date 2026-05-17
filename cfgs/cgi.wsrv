@@ -4,7 +4,6 @@ server {
   root ./www/cgi!
 
   route /cgi-bin {
-    autoindex on!
     index hello.sh!
     methods GET POST!
     cgi sh:/usr/bin/env bash!
@@ -28,6 +27,6 @@ server {
 
   route /cgi-bin/hello.sh {
     cgi sh:/nix/store/i27rhb3nr65rkrwz36bchkwmav6ggsmn-bash-5.3p9/bin/bash!
-    methods POST!
+    methods POST GET!
   }
 }

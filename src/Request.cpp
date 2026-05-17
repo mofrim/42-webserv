@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 23:39:57 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/17 13:18:19 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/17 21:46:02 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -103,6 +103,12 @@ Request::Request(Client *cli, const char *reqstr, size_t reqstrLen)
 void Request::processReq()
 {
 
+  // filter out virtual clients immediately!
+  if (_vsrv == NULL) {
+    _statusCode = _respo.generateResponse(*this);
+    return;
+  }
+
   // should already be done until here, but better safe then deref NULL
   if (!this->badRequest() && _matchedRoute == NULL)
     this->evaluateTarget();
@@ -110,7 +116,7 @@ void Request::processReq()
   // badRequest() is true for status >= 400. so, for statuses like 500 or 413 it
   // still would be nice to display the custom statusPage, if any. Therefore ->
   // match route.
-  if (_vsrv && _statusCode != HTTP_400 && _matchedRoute == NULL)
+  if (_statusCode != HTTP_400 && _matchedRoute == NULL)
     _matchRoute();
 
   // for CGI requests that are already bad don't do anything CGI related

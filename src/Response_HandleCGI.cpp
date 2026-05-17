@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/16 14:54:57 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/17 11:23:57 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/17 22:00:59 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,6 @@
 
 e_HTTPStatus Response::handleCGI(Request& req)
 {
-
   _setFieldsFromReq(req);
 
   // evaluate the script path and try to find the real fspath to the script
@@ -180,7 +179,7 @@ char **Response::_cgiBuildEnv(std::map<str, str> cgiParams)
   env["QUERY_STRING"]      = _req->getReqline().target.getQueryStr();
   env["REMOTE_ADDR"]       = _cli->getAddr();
   env["REMOTE_HOST"]       = _cli->getIfaceFdStr();
-  env["REQUEST_METHOD"]    = _req->getMethod();
+  env["REQUEST_METHOD"]    = meth2str(_req->getMethod());
   env["SERVER_NAME"]       = _req->getHost();
   env["SERVER_PORT"]       = int2str(_req->getHostPort());
   env["SERVER_PROTOCOL"] = WsrvLib::httpVer2Str(_req->getReqline().httpVersion);
