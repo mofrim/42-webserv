@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/26 10:03:57 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/16 16:26:33 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/17 14:53:45 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,9 +67,6 @@ str getAddrPortStr4(const struct sockaddr_in& addr)
   ret += ":" + int2str(ntohs(addr.sin_port));
   return (ret);
 }
-
-// wrapper for getting the error string for current errno
-str getErrStr() { return str(strerror(errno)); }
 
 e_Method str2meth(const str& m)
 {
@@ -285,3 +282,5 @@ std::set<str> listDirFiles(constr& directoryPath, bool dirSlash)
 
   return files;
 }
+
+str getErrnoStr() { return str(int2str(errno) + " - " + strerror(errno)); }

@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/14 20:50:12 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/17 10:44:43 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/17 13:53:07 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,8 +31,11 @@ typedef enum {
   CLI_DISCO,
   CLI_DRAIN,
   CLI_CGIWRITE,
+  CLI_CGIWDONE,
   CLI_CGIWAIT,
-  CLI_CGIREAD
+  CLI_CGIREAD,
+  CLI_CGIKO,
+  CLI_CGIOK
 } e_CliState;
 
 class Client {
@@ -94,6 +97,7 @@ class Client {
     bool isSending() const;
     bool isDisco() const;
     bool isDraining() const;
+    bool isCgi() const;
 
     void                    setPotentialVsrvs(std::vector<VServer *> vv);
     std::vector<VServer *>& getPotentialVsrvs();
@@ -101,6 +105,8 @@ class Client {
     static Client *newVirtualCli(Webserv *w, int listenFd);
 
     void handleEvent(u32 ev);
+    void handleEventCGI(u32 ev);
 
     void addCgiToEpoll(int fdWrite, int fdRead);
+    void delCgiFromEpoll(int fd);
 };

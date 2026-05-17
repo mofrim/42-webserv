@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/23 19:11:06 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/17 11:19:26 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/17 13:46:44 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 #include "WsrvLib.hpp"
 
 #include <map>
+#include <sys/wait.h>
 
 class Request;
 class Client;
@@ -60,6 +61,13 @@ class Response {
     void _handleDelete();
     void _handleRedir();
 
+    // -------------------------------=[ CGI ]=------------------------------ //
+
+    int   _cgiParentWriteFd;
+    int   _cgiParentReadFd;
+    pid_t _cgiPid;
+    str   _cgiBody;
+
     void                _cgiHandleBadScript(constr& s);
     std::map<str, str>  _cgiEvalScriptPath();
     std::pair<str, int> _cgiDetermineScriptFile();
@@ -78,7 +86,15 @@ class Response {
     str          getRespoStr() const;
     e_HTTPStatus handleCGI(Request& req);
 
+    void cgiWrite();
+    void cgiWait();
+    void cgiRead();
+    void cgiProcessBody();
+    void cgiShutdown();
+
     void reset();
+
+    e_HTTPStatus getStatus() const;
 
     static str genDefaultErrResponse(e_HTTPStatus errCode, constr errPage = "");
 };

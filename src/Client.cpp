@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/14 20:51:06 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/17 10:41:59 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/17 16:08:41 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -82,7 +82,7 @@ Client *Client::newVirtualCli(Webserv *wsrv, int listenFd)
     if (errno == EAGAIN || errno == EWOULDBLOCK)
       Logger::logErr("accept failed with EAGAIN || WOULDBLOCK");
     else
-      Logger::logErr("accept failed: " + getErrStr());
+      Logger::logErr("accept failed: " + getErrnoStr());
   }
 
   if (setFdNonBlocking(client_fd) == -1) {
@@ -112,6 +112,41 @@ void Client::handleEvent(u32 ev)
       Logger::logMsg("Got EPOLLOUT!");
       _reqHandler.writeResponse();
     }
+  }
+}
+
+void Client::handleEventCGI(u32 ev)
+{
+  switch (_state) {
+    case CLI_CGIWRITE:
+      if (ev & EPOLLOUT) {
+        this->setLastActive();
+        _req.getRespo().cgiWrite();
+      }
+      _req.getRespo().cgiWait();
+      return;
+    case CLI_CGIWDONE:
+    case CLI_CGIWAIT:
+      _req.getRespo().cgiWait();
+      return;
+    case CLI_CGIREAD:
+      Logger::logBug("Client::handleEventCGI called with CLI_CGIREAD");
+      if (ev & EPOLLIN) {
+        this->setLastActive();
+        _req.getRespo().cgiRead();
+      }
+    default:
+      break;
+  }
+
+  if (_state == CLI_CGIKO || _state == CLI_CGIOK) {
+    if (_state == CLI_CGIKO)
+      _req.setStatusCode(_req.getRespo().getStatus());
+    else
+      _req.getRespo().cgiProcessBody();
+
+    _req.getRespo().generateResponse(_req);
+    _req.setCGIdone();
   }
 }
 
@@ -151,4 +186,13 @@ std::vector<VServer *>& Client::getPotentialVsrvs() { return _potentialVsrvs; }
 void Client::addCgiToEpoll(int fdWrite, int fdRead)
 {
   _webserv->addCgiCliToEpoll(this, fdWrite, fdRead);
+}
+
+void Client::delCgiFromEpoll(int fd) { _webserv->removeCgiFdFromEpoll(fd); }
+
+bool Client::isCgi() const
+{
+  return _state == CLI_CGIWRITE || _state == CLI_CGIREAD ||
+      _state == CLI_CGIWDONE || _state == CLI_CGIWAIT || _state == CLI_CGIKO ||
+      _state == CLI_CGIOK;
 }

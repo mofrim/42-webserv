@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/14 23:12:17 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/17 10:27:06 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/17 14:54:55 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,10 +14,10 @@
 #include "Logger.hpp"
 #include "utils.hpp"
 
+#include <cstring>
 #include <unistd.h>
 
-////////////////////////////////////////////////////////////////////////////////
-/// OCF
+// --------------------------------=[ OCF ]=-------------------------------- //
 
 Epoll::Epoll(): _nfds(0) {}
 
@@ -81,7 +81,7 @@ void Epoll::addClient(int cfd, u32 event)
   if (epoll_ctl(_epoll_fd, EPOLL_CTL_ADD, cfd, &client_ev) == -1) {
     Logger::logErr("epoll_ctl failed");
     close(cfd);
-    throw(EpollException("adding client to epoll failed"));
+    throw EpollException("adding client to epoll failed");
   }
 }
 
@@ -94,7 +94,7 @@ void Epoll::modifyClient(int cfd, uint32_t events)
   ev.events  = events;
   ev.data.fd = cfd;
   if (epoll_ctl(_epoll_fd, EPOLL_CTL_MOD, cfd, &ev) == -1) {
-    throw(EpollException("epoll_ctl: EPOLL_CTL_MOD failed"));
+    throw EpollException("epoll_ctl: EPOLL_CTL_MOD failed");
   }
 }
 
@@ -103,7 +103,8 @@ void Epoll::modifyClient(int cfd, uint32_t events)
 void Epoll::removeClient(int cfd)
 {
   if (epoll_ctl(_epoll_fd, EPOLL_CTL_DEL, cfd, 0) == -1)
-    throw(EpollException("removing client from epoll failed"));
+    throw EpollException("removing clientFd " + int2str(cfd) +
+        " from epoll failed with: " + getErrnoStr());
 }
 
 // wrapper for closing the epoll fd.

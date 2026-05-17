@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/23 19:11:25 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/17 11:00:40 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/17 13:06:43 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,17 +34,21 @@ Response::Response(const Response& o)
 Response& Response::operator=(const Response& o)
 {
   if (this != &o) {
-    _status       = o._status;
-    _reqline      = o._reqline;
-    _cli          = o._cli;
-    _vsrv         = o._vsrv;
-    _respoHeaders = o._respoHeaders;
-    _body         = o._body;
-    _mimeType     = o._mimeType;
-    _respoStr     = o._respoStr;
-    _closeConn    = o._closeConn;
-    _req          = o._req;
-    _vsrvName     = o._vsrvName;
+    _status           = o._status;
+    _reqline          = o._reqline;
+    _cli              = o._cli;
+    _vsrv             = o._vsrv;
+    _respoHeaders     = o._respoHeaders;
+    _body             = o._body;
+    _mimeType         = o._mimeType;
+    _respoStr         = o._respoStr;
+    _closeConn        = o._closeConn;
+    _req              = o._req;
+    _vsrvName         = o._vsrvName;
+    _cgiParentWriteFd = o._cgiParentWriteFd;
+    _cgiParentReadFd  = o._cgiParentReadFd;
+    _cgiPid           = o._cgiPid;
+    _cgiBody          = o._cgiBody;
   }
   return (*this);
 }
@@ -89,27 +93,28 @@ e_HTTPStatus Response::generateResponse(Request& req)
     _handleBadRequest();
   }
 
-  // hrom here on: only HTTP_200 so far
+  if (!req.isCGI()) {
+    // hrom here on: only HTTP_200 so far
 
-  else if (req.isRedir()) {
-    Logger::logSrv(_vsrvName, "Redir Request handling");
-    _handleRedir();
-  }
-  else if (req.isSimplePOST()) {
-    Logger::logSrv(_vsrvName, "SimplePost Request handling");
-    _handleSimplePost();
-  }
-  else if (req.isDELETE()) {
-    Logger::logSrv(_vsrvName, "DELETE Request handling");
-    _handleDelete();
-  }
+    if (req.isRedir()) {
+      Logger::logSrv(_vsrvName, "Redir Request handling");
+      _handleRedir();
+    }
+    else if (req.isSimplePOST()) {
+      Logger::logSrv(_vsrvName, "SimplePost Request handling");
+      _handleSimplePost();
+    }
+    else if (req.isDELETE()) {
+      Logger::logSrv(_vsrvName, "DELETE Request handling");
+      _handleDelete();
+    }
 
-  // simple GET request
-  else {
-    Logger::logSrv(_vsrvName, "Normal GET Request handling");
-    _getBody200();
+    // simple GET request
+    else {
+      Logger::logSrv(_vsrvName, "Normal GET Request handling");
+      _getBody200();
+    }
   }
-
   _buildRespoHdrs();
   _genResponse();
 
@@ -256,6 +261,9 @@ void Response::reset()
   _matchedRoute        = NULL;
   _reqline.method      = M_UNKNOWN;
   _req                 = NULL;
+  _cgiParentWriteFd    = -1;
+  _cgiParentReadFd     = -1;
+  _cgiPid              = -1;
 
   _reqline.target.clear();
   _respoHeaders.clear();
@@ -264,6 +272,7 @@ void Response::reset()
   _respoStr.clear();
   _targetPath.clear();
   _vsrvName.clear();
+  _cgiBody.clear();
 }
 
 // helper function for generating the response for a failes Req.
@@ -461,3 +470,5 @@ void Response::_setBodyStatusPage(constr& opts)
   else
     _readBodyFromFile(_vsrv->getRoot() + statusPage);
 }
+
+e_HTTPStatus Response::getStatus() const { return _status; }

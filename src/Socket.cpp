@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/28 07:26:35 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/14 22:13:04 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/17 14:53:34 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -129,7 +129,7 @@ void Socket::printAddrlist(const str& addr, u16 port)
               INET6_ADDRSTRLEN) != NULL)
         out += "  ai_addr: " + std::string(ip) + ", ";
       else
-        out += "  ai_addr: " + getErrStr() + ", ";
+        out += "  ai_addr: " + getErrnoStr() + ", ";
 
       port = ntohs(((struct sockaddr_in *)ap->ai_addr)->sin_port);
       out += "port: " + int2str(port) + "\n";
@@ -141,7 +141,7 @@ void Socket::printAddrlist(const str& addr, u16 port)
               INET6_ADDRSTRLEN) != NULL)
         out += "  ai_addr: " + str(ip) + ", ";
       else
-        out += "  ai_addr: " + getErrStr() + ", ";
+        out += "  ai_addr: " + getErrnoStr() + ", ";
 
       port = ntohs(((struct sockaddr_in6 *)ap->ai_addr)->sin6_port);
       out += "port: " + int2str(port) + "\n";
@@ -218,7 +218,7 @@ t_AddrinfoReturn Socket::bindSocket(const str& addr, u16 port)
       -1)
   {
     Logger::logErr("bindSocket: socket failed for (" + addr + ":" +
-        int2str(port) + ") with: " + getErrStr());
+        int2str(port) + ") with: " + getErrnoStr());
     freeaddrinfo(ai);
     return (t_AddrinfoReturn){"0", addr, -1};
   }
@@ -226,7 +226,7 @@ t_AddrinfoReturn Socket::bindSocket(const str& addr, u16 port)
   int opt = 1;
   if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) == -1) {
     Logger::logErr("bindSocket: setsockopt failed for (" + addr + ":" +
-        int2str(port) + ") with: " + getErrStr());
+        int2str(port) + ") with: " + getErrnoStr());
     close(fd);
     freeaddrinfo(ai);
     return (t_AddrinfoReturn){"0", addr, -1};
@@ -234,7 +234,7 @@ t_AddrinfoReturn Socket::bindSocket(const str& addr, u16 port)
 
   if (bind(fd, ai->ai_addr, ai->ai_addrlen) == -1) {
     Logger::logErr("bindSocket: bind failed for (" + addr + ":" +
-        int2str(port) + ") with: " + getErrStr());
+        int2str(port) + ") with: " + getErrnoStr());
     close(fd);
     freeaddrinfo(ai);
     return (t_AddrinfoReturn){"0", addr, -1};

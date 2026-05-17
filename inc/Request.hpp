@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 23:39:07 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/16 22:58:01 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/17 13:18:23 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -129,6 +129,7 @@ class Request {
     bool isSimplePOST() const;
     bool isDELETE() const;
     bool isRedir() const;
+    void setCGIdone();
 
     bool reqlineReceived() const;
     bool reqlineParsed() const;
@@ -143,4 +144,6 @@ class Request {
 
     void setHostPort(u16 p);
     u16  getHostPort() const;
+
+    Response& getRespo();
 };

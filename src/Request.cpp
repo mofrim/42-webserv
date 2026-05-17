@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 23:39:57 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/17 11:24:43 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/17 13:18:19 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -398,3 +398,7 @@ str Request::getHost() const { return _host; }
 void Request::setHostPort(u16 p) { _hostPort = p; }
 
 u16 Request::getHostPort() const { return _hostPort; }
+
+Response& Request::getRespo() { return _respo; }
+
+void Request::setCGIdone() { _isCGI = false; }

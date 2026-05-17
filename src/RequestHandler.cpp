@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 19:13:35 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/17 09:06:32 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/17 14:53:02 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,8 +67,7 @@ void RequestHandler::readRequest()
       Logger::logSrv(
           _vsrvName, "Client disco -> closing client " + _cli->getIfaceFdStr());
     else
-      Logger::logErr(
-          "Read failed, errno: " + int2str(errno) + " = " + getErrStr());
+      Logger::logErr("Read failed, errno: " + getErrnoStr());
     _cli->setState(CLI_DISCO);
     return;
   }
@@ -153,6 +152,9 @@ void RequestHandler::writeResponse()
 
     Logger::logDbg1("RequestHandler: 408 due to timeout");
     statusCode = HTTP_408;
+
+    if (_cli->isCgi())
+      req.getRespo().cgiShutdown();
 
     if (_cli->isVirtual())
       response = Response::genDefaultErrResponse(statusCode);

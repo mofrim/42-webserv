@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:36:43 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/17 10:27:51 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/17 16:12:23 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -188,7 +188,10 @@ void Webserv::run()
         if ((cli->isIdling() || cli->isReading()) && (ev & EPOLLOUT))
           continue;
 
-        cli->handleEvent(ev);
+        if (cli->isCgi())
+          cli->handleEventCGI(ev);
+        else
+          cli->handleEvent(ev);
 
         if (cli->isDisco()) {
           _epoll.removeClient(currentFd);
@@ -203,6 +206,10 @@ void Webserv::run()
           _epoll.modifyClient(currentFd, EPOLLOUT);
         else if (cli->isReading() || cli->isIdling() || cli->isDraining())
           _epoll.modifyClient(currentFd, EPOLLIN);
+        else if (cli->getState() == CLI_CGIOK) {
+          cli->setState(CLI_SEND);
+          _epoll.modifyClient(cli->getFd(), EPOLLOUT);
+        }
       }
       _timeoutClients();
       Logger::drawCycleSep();
@@ -219,7 +226,17 @@ void Webserv::_timeoutClients()
   std::map< int, Client * >::iterator it = _fdClientMap.begin();
   while (it != _fdClientMap.end()) {
     Client *cli = it->second;
-    if (difftime(now, cli->getLastActive()) > WsrvLib::WsrvSettings.reqTimeout)
+    if (cli->isCgi() &&
+        difftime(now, cli->getLastActive()) > WsrvLib::WsrvSettings.reqTimeout)
+    {
+      Logger::logDbg1("Timing out CGI client..." + cli->getIfaceFdStr());
+      cli->timeout();
+      _epoll.modifyClient(cli->getFd(), EPOLLOUT);
+      cli->setState(CLI_SEND);
+      cli->getReq().getRespo().cgiShutdown();
+    }
+    else if (difftime(now, cli->getLastActive()) >
+        WsrvLib::WsrvSettings.reqTimeout)
     {
       cli->timeout();
       _epoll.modifyClient(cli->getFd(), EPOLLOUT);
@@ -245,6 +262,16 @@ void Webserv::addCgiCliToEpoll(Client *cli, int fdWrite, int fdRead)
 {
   _fdClientMap[fdWrite] = cli;
   _fdClientMap[fdRead]  = cli;
+  Logger::logBug(
+      "CGI: trying to fds " + int2str(fdWrite) + " & " + int2str(fdRead));
   _epoll.addClient(fdWrite, EPOLLOUT);
   _epoll.addClient(fdRead, EPOLLIN);
+}
+
+void Webserv::removeCgiFdFromEpoll(int fd)
+{
+  if (_fdClientMap.find(fd) != _fdClientMap.end()) {
+    _fdClientMap.erase(fd);
+    _epoll.removeClient(fd);
+  }
 }

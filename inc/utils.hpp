@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/03 11:26:23 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/16 16:26:33 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/17 14:54:00 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,6 @@ str char2str(char c);
 str      inAddrToStr(const struct in_addr& addr);
 str      getAddrPortStr4(const struct sockaddr_in& addr);
 int      setFdNonBlocking(int fd);
-str      getErrStr();
 e_Method str2meth(constr& m);
 str      meth2str(e_Method m);
 int      getFileType(constr& path);
@@ -33,6 +32,7 @@ u16      str2u16(constr& s);
 str      data2hexStr(const char *s, size_t len);
 bool     isValidFnameChar(char c);
 bool     isValidFname(const str& s);
+str      getErrnoStr();
 
 std::set<str> listDirFiles(constr& directoryPath, bool dirSlash = true);
 
