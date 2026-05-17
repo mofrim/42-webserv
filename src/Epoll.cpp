@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/14 23:12:17 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/14 22:19:37 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/17 10:27:06 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,10 +73,10 @@ int Epoll::wait()
 }
 
 // Add a client's fd to epoll interest list
-void Epoll::addClient(int cfd)
+void Epoll::addClient(int cfd, u32 event)
 {
   struct epoll_event client_ev;
-  client_ev.events  = EPOLLIN;
+  client_ev.events  = event;
   client_ev.data.fd = cfd;
   if (epoll_ctl(_epoll_fd, EPOLL_CTL_ADD, cfd, &client_ev) == -1) {
     Logger::logErr("epoll_ctl failed");

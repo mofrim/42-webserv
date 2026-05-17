@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:36:43 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/17 02:03:10 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/17 10:27:51 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@
 #include "Webserv.hpp"
 
 // FIXME: remove cause sleep is not an allowed function!
-#include <errno.h>
+#include <cerrno>
 #include <iostream>
 #include <unistd.h>
 #include <utils.hpp>
@@ -162,10 +162,9 @@ void Webserv::run()
 
         Client *cli;
         if (vsrvs.size() == 1)
-          cli = vsrvs[0]->addClient(currentFd);
+          cli = vsrvs[0]->addClient(this, currentFd);
         else {
-          Logger::logErr("MULTISERVER BRANCH CALLED!!!");
-          if ((cli = Client::newVirtualCli(currentFd)) == NULL) {
+          if ((cli = Client::newVirtualCli(this, currentFd)) == NULL) {
             Logger::logWarn(
                 "Webserv::run: Client::newCliServerless returned NULL");
             continue;
@@ -179,9 +178,6 @@ void Webserv::run()
       }
 
       // 2) existing connection
-      //
-      // QUESTION: what if _numOfClients >= MAX_CLIENTS ?!?! we need to handle
-      // this!!! Also:
       else {
         Client  *cli  = _fdClientMap[currentFd];
         VServer *vsrv = cli->getVsrv();
@@ -242,3 +238,13 @@ Webserv::WebservInitException::WebservInitException(const std::string& msg):
 Webserv::WebservRunException::WebservRunException(const std::string& msg):
   std::runtime_error("WebservRunException: " + msg)
 {}
+
+// --------------------------------=[ CGI ]=-------------------------------- //
+
+void Webserv::addCgiCliToEpoll(Client *cli, int fdWrite, int fdRead)
+{
+  _fdClientMap[fdWrite] = cli;
+  _fdClientMap[fdRead]  = cli;
+  _epoll.addClient(fdWrite, EPOLLOUT);
+  _epoll.addClient(fdRead, EPOLLIN);
+}

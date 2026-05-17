@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/14 20:50:12 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/16 22:59:14 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/17 10:24:35 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,12 +21,16 @@
 #include <vector>
 
 class VServer;
+class Webserv;
 
 // the states of the client machine
 typedef enum { CLI_READ, CLI_SEND, CLI_IDLE, CLI_DISCO, CLI_DRAIN } e_CliState;
 
 class Client {
   private:
+    // only for CGI i had to add this >:(
+    Webserv *_webserv;
+
     int    _clientFd;
     str    _addr;
     u16    _port;
@@ -44,14 +48,15 @@ class Client {
 
     Client(const Client& other);
     Client& operator=(const Client& other);
+    Client();
 
     e_CliState _state;
 
   public:
-    Client();
     ~Client();
 
-    Client(int fd, VServer *vsrv, const str& addr, in_port_t port);
+    Client(
+        Webserv *wsrv, int fd, VServer *vsrv, const str& addr, in_port_t port);
 
     void       setFd(int fd);
     int        getFd() const;
@@ -86,8 +91,10 @@ class Client {
     void                    setPotentialVsrvs(std::vector<VServer *> vv);
     std::vector<VServer *>& getPotentialVsrvs();
 
-    static Client *newVirtualCli(int listenFd);
+    static Client *newVirtualCli(Webserv *w, int listenFd);
 
     void handleEvent(u32 ev);
     void handleEventServerless(u32 ev);
+
+    void addCgiToEpoll(int fdWrite, int fdRead);
 };

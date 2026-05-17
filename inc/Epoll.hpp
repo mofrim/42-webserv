@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/14 23:11:35 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/04/27 20:28:30 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/17 10:26:53 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,7 +39,7 @@ class Epoll {
 
     void setup(const std::vector<VServer>& servers);
     int  wait();
-    void addClient(int cfd);
+    void addClient(int cfd, u32 event = EPOLLIN);
     void modifyClient(int cfd, uint32_t events);
     void removeClient(int cfd);
     void closeEpollFd();

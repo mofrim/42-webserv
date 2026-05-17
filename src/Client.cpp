@@ -6,13 +6,14 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/14 20:51:06 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/16 22:58:50 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/17 10:24:24 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Client.hpp"
 #include "Logger.hpp"
 #include "VServer.hpp"
+#include "Webserv.hpp"
 #include "utils.hpp"
 
 #include <sys/epoll.h>
@@ -26,9 +27,11 @@ Client::Client():
 
 Client::Client(const Client& o) { (void)o; }
 
-Client::Client(int fd, VServer *vsrv, const str& addr, in_port_t port):
-  _clientFd(fd), _addr(addr), _port(ntohs(port)), _vsrvPort(0), _timeout(false),
-  _lastActive(time(NULL)), _vsrv(vsrv), _reqHandler(this), _state(CLI_IDLE)
+Client::Client(
+    Webserv *wsrv, int fd, VServer *vsrv, const str& addr, in_port_t port):
+  _webserv(wsrv), _clientFd(fd), _addr(addr), _port(ntohs(port)), _vsrvPort(0),
+  _timeout(false), _lastActive(time(NULL)), _vsrv(vsrv), _reqHandler(this),
+  _state(CLI_IDLE)
 {
   _ifaceFdStr = addr + ":" + int2str(_port) + ":fd=" + int2str(fd);
   if (vsrv)
@@ -68,7 +71,7 @@ void Client::setPotentialVsrvs(std::vector<VServer *> vv)
 // door of pure virtual servers
 //
 // FIXME: avoid this codedup with VServer::addClient
-Client *Client::newVirtualCli(int listenFd)
+Client *Client::newVirtualCli(Webserv *wsrv, int listenFd)
 {
   struct sockaddr_in client_addr;
   socklen_t          client_addr_len = sizeof(client_addr);
@@ -88,7 +91,8 @@ Client *Client::newVirtualCli(int listenFd)
   }
 
   str     hostname(inAddrToStr(client_addr.sin_addr));
-  Client *newCli = new Client(client_fd, NULL, hostname, client_addr.sin_port);
+  Client *newCli =
+      new Client(wsrv, client_fd, NULL, hostname, client_addr.sin_port);
 
   Logger::logSrv(
       "ServerLess", "Client connected from " + newCli->getIfaceFdStr());
@@ -154,3 +158,10 @@ void Client::setVsrvPort(u16 port) { _vsrvPort = port; }
 u16 Client::getVsrvPort() const { return _vsrvPort; }
 
 std::vector<VServer *>& Client::getPotentialVsrvs() { return _potentialVsrvs; }
+
+// --------------------------------=[ CGI ]=-------------------------------- //
+
+void Client::addCgiToEpoll(int fdWrite, int fdRead)
+{
+  _webserv->addCgiCliToEpoll(this, fdWrite, fdRead);
+}

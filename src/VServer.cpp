@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/03 12:51:23 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/17 02:02:54 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/17 10:13:37 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -258,7 +258,7 @@ int VServer::_isActiveIface(const str& addr, u16 port) const
 // `second` member is a bool flag indicating wether a new element could be
 // inserted or not. if the key already exists the new element can not be
 // inserted.
-Client *VServer::addClient(int fd)
+Client *VServer::addClient(Webserv *wsrv, int fd)
 {
   if (_listenFds.find(fd) == _listenFds.end())
     throw(ServerException("server_fds = " + getSetAsStr(_listenFds) +
@@ -282,7 +282,8 @@ Client *VServer::addClient(int fd)
     throw(ServerException("could not set new clients fd non-blocking"));
 
   std::string hostname(inAddrToStr(client_addr.sin_addr));
-  Client *newCli = new Client(client_fd, this, hostname, client_addr.sin_port);
+  Client     *newCli =
+      new Client(wsrv, client_fd, this, hostname, client_addr.sin_port);
 
   if (newCli == NULL)
     throw std::runtime_error(

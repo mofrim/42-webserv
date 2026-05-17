@@ -70,7 +70,7 @@ class VServer {
         std::vector<VServer>::iterator       cur,
         char                               **envp);
 
-    Client *addClient(int fd);
+    Client *addClient(Webserv *wsrv, int fd);
     void    addClient(Client *cli);
 
     void deleteClient(int fd);
