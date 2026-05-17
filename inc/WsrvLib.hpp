@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/24 17:31:03 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/16 17:40:24 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/17 16:26:53 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -128,6 +128,7 @@ typedef struct {
     const u16 maxClients;
     const u16 connKeepaliveTimeout;
     const u16 reqTimeout;
+    const u16 cgiTimeout;
 } t_GlobalWsrvSettings;
 
 class WsrvLib {
@@ -149,7 +150,7 @@ class WsrvLib {
     static t_GlobalWsrvSettings _initWsrvSettings();
 
   public:
-    static const t_GlobalWsrvSettings WsrvSettings;
+    static const t_GlobalWsrvSettings Settings;
 
     static str getDefaultStatusPage(e_HTTPStatus code, constr& opts = "");
     static str getTeapot();

@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/26 10:03:57 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/17 14:53:45 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/17 17:14:19 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,9 +39,8 @@ str bool2str(bool n)
 // our own inet_ntoa function as by subject.pdf we figured that we shouldn't use
 // the std function.
 //
-// converts ip-addr from network byte order (big endian) to string.
-// TODO: make portable. is there some constant we can check for the used
-// network-byte-order and host-byte-order?
+// converts ip-addr from network byte order (big endian) to string. non-portable
+// little-endian version
 str inAddrToStr(const struct in_addr& addr)
 {
   str ret("");
@@ -283,4 +282,7 @@ std::set<str> listDirFiles(constr& directoryPath, bool dirSlash)
   return files;
 }
 
-str getErrnoStr() { return str(int2str(errno) + " - " + strerror(errno)); }
+str getErrnoStr()
+{
+  return str("errno: \"#" + int2str(errno) + " " + strerror(errno) + "\"");
+}

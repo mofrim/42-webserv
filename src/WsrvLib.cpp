@@ -6,9 +6,8 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/24 17:40:43 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/16 17:42:20 by fmaurer          ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
+/*   Updated: 2026/05/17 16:27:09 by fmaurer          ###   ########.fr       */
+/*                                                                            */ /* ************************************************************************** */
 
 #include "WsrvLib.hpp"
 #include "utils.hpp"
@@ -221,12 +220,15 @@ str WsrvLib::getStatusStr(e_HTTPStatus code)
 t_GlobalWsrvSettings WsrvLib::_initWsrvSettings()
 {
   t_GlobalWsrvSettings s = {
-      .maxClients = 1000, .connKeepaliveTimeout = 60, .reqTimeout = 5};
+      .maxClients           = 1000,
+      .connKeepaliveTimeout = 60,
+      .reqTimeout           = 5,
+      .cgiTimeout           = 60};
 
   return s;
 }
 
-const t_GlobalWsrvSettings WsrvLib::WsrvSettings = _initWsrvSettings();
+const t_GlobalWsrvSettings WsrvLib::Settings = _initWsrvSettings();
 
 // two vsrvInterfaces are the same iff their ip and cname match
 bool operator==(const t_vsrvInterface& i1, const t_vsrvInterface& i2)

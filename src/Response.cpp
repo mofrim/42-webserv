@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/23 19:11:25 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/17 13:06:43 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/17 18:03:32 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,6 +49,7 @@ Response& Response::operator=(const Response& o)
     _cgiParentReadFd  = o._cgiParentReadFd;
     _cgiPid           = o._cgiPid;
     _cgiBody          = o._cgiBody;
+    _method           = o._method;
   }
   return (*this);
 }
@@ -69,6 +70,7 @@ void Response::_setFieldsFromReq(Request& req)
   _matchedRoute = req.getMatchedRoute();
   _targetPath   = req.getTargetPath();
   _vsrvName     = req.getVsrv()->getName();
+  _method       = req.getMethod();
   _req          = &req;
 }
 
@@ -116,14 +118,14 @@ e_HTTPStatus Response::generateResponse(Request& req)
     }
   }
   _buildRespoHdrs();
-  _genResponse();
+  _buildResponseStr();
 
   return _status;
 }
 
 // @brief This is the core function for generating the final respostr. Extracted
 // this in order to avoid codedup in genErrResponse().
-void Response::_genResponse()
+void Response::_buildResponseStr()
 {
   for (std::map<str, str>::reverse_iterator it = _respoHeaders.rbegin();
       it != _respoHeaders.rend();
@@ -264,6 +266,7 @@ void Response::reset()
   _cgiParentWriteFd    = -1;
   _cgiParentReadFd     = -1;
   _cgiPid              = -1;
+  _method              = M_UNKNOWN;
 
   _reqline.target.clear();
   _respoHeaders.clear();

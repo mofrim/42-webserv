@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/23 19:11:06 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/17 13:46:44 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/17 18:05:03 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,6 +39,7 @@ class Response {
     str                _mimeType;
     str                _respoStr;
     str                _vsrvName;
+    e_Method           _method;
 
     Route *_matchedRoute;
     str    _targetPath; // the target-path minus the route
@@ -50,7 +51,7 @@ class Response {
     void _getBody400();
     void _readBodyFromFile(constr& path, bool setErrPageOnFail = true);
     void _buildRespoHdrs();
-    void _genResponse();
+    void _buildResponseStr();
     void _setBodyStatusPage(constr& opts = "");
 
     void _handleBadRequest();
@@ -87,7 +88,7 @@ class Response {
     e_HTTPStatus handleCGI(Request& req);
 
     void cgiWrite();
-    void cgiWait();
+    bool cgiWait();
     void cgiRead();
     void cgiProcessBody();
     void cgiShutdown();
