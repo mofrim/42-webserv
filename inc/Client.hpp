@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/14 20:50:12 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/17 10:24:35 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/17 10:41:55 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,15 +86,12 @@ class Client {
     bool isDisco() const;
     bool isDraining() const;
 
-    bool reqHasHostHeader();
-
     void                    setPotentialVsrvs(std::vector<VServer *> vv);
     std::vector<VServer *>& getPotentialVsrvs();
 
     static Client *newVirtualCli(Webserv *w, int listenFd);
 
     void handleEvent(u32 ev);
-    void handleEventServerless(u32 ev);
 
     void addCgiToEpoll(int fdWrite, int fdRead);
 };

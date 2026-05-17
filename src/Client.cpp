@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/14 20:51:06 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/17 10:24:24 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/17 10:41:59 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -113,19 +113,6 @@ void Client::handleEvent(u32 ev)
       _reqHandler.writeResponse();
     }
   }
-}
-
-void Client::handleEventServerless(u32 ev)
-{
-  if (ev & EPOLLIN) {
-    this->setLastActive();
-    _reqHandler.readRequest();
-  }
-}
-
-bool Client::reqHasHostHeader()
-{
-  return _req.getHeaders().find("Host") != _req.getHeaders().end();
 }
 
 // ----------------------=[ One-liner Getter-Setters ]=---------------------- //
