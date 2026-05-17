@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/23 19:11:25 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/17 18:03:32 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/17 18:57:01 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -95,7 +95,7 @@ e_HTTPStatus Response::generateResponse(Request& req)
     _handleBadRequest();
   }
 
-  if (!req.isCGI()) {
+  else if (!req.isCGI()) {
     // hrom here on: only HTTP_200 so far
 
     if (req.isRedir()) {

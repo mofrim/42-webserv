@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/23 19:11:06 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/17 18:05:03 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/17 18:54:15 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -88,7 +88,7 @@ class Response {
     e_HTTPStatus handleCGI(Request& req);
 
     void cgiWrite();
-    bool cgiWait();
+    void cgiWait();
     void cgiRead();
     void cgiProcessBody();
     void cgiShutdown();
