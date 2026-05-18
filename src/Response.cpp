@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/23 19:11:25 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/18 01:03:32 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/18 21:12:00 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,11 +65,11 @@ void Response::_setFieldsFromReq(Request& req)
   _status       = req.getStatus();
   _reqline      = req.getReqline();
   _cli          = req.getCli();
-  _vsrv         = req.getVsrv();
+  _vsrv         = req.getCli()->getVsrv();
   _closeConn    = req.closeConn();
   _matchedRoute = req.getMatchedRoute();
   _targetPath   = req.getTargetPath();
-  _vsrvName     = req.getVsrv()->getName();
+  _vsrvName     = req.getVsrvName();
   _method       = req.getMethod();
   _req          = &req;
 }
@@ -165,8 +165,9 @@ void Response::_getBody200()
   switch (isdir) {
     case 2:
     case -2:
-      Logger::logWarn("stat() encountered some weird file or symlink");
     case -1:
+      if (isdir == 2 || isdir == -2)
+        Logger::logWarn("stat() encountered some weird file or symlink");
       _status = HTTP_404;
       _body   = WsrvLib::getDefaultStatusPage(HTTP_404);
       return;

@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 23:39:07 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/17 13:18:23 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/18 21:14:34 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,6 @@ class Client;
 
 class Request {
   private:
-    VServer    *_vsrv;
     Client     *_cli;
     str         _reqdata;
     Response    _respo;
@@ -97,8 +96,8 @@ class Request {
     e_Method     getMethod();
     constr&      getReqstr() const;
     Client      *getCli() const;
-    VServer     *getVsrv() const;
-    void         setVsrv(VServer *v);
+    str          getVsrvName() const;
+    void         setVsrvName(constr& name);
     e_HTTPStatus getStatus() const;
     void         setStatusCode(e_HTTPStatus code);
     str          getMethodStr() const;

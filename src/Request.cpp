@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 23:39:57 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/17 21:46:02 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/18 21:23:55 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,6 @@ Request::Request() { this->reset(); }
 Request& Request::operator=(const Request& o)
 {
   if (this != &o) {
-    _vsrv          = o._vsrv;
     _vsrvName      = o._vsrvName;
     _cli           = o._cli;
     _reqdata       = o._reqdata;
@@ -66,10 +65,15 @@ Request::~Request() {}
 // RequestHandler::read_request
 Request::Request(Client *cli, const char *reqstr, size_t reqstrLen)
 {
-  _vsrv = cli->getVsrv();
-  _cli  = cli;
+  _cli = cli;
 
-  _vsrvName            = (_vsrv != NULL ? _vsrv->getName() : "__VIRTUAL__");
+  // safe-setting the _vsrvName
+  if (_cli->isVirtual())
+    _vsrvName = "__VIRTUAL__";
+  else
+    _vsrvName =
+        (_cli->getVsrv() != NULL ? _cli->getVsrv()->getName() : "__VIRTUAL__");
+
   _statusCode          = HTTP_200;
   _hdrLines            = _countReqLines(reqstr);
   _hdrComplete         = false;
@@ -104,7 +108,7 @@ void Request::processReq()
 {
 
   // filter out virtual clients immediately!
-  if (_vsrv == NULL) {
+  if (_cli->getVsrv() == NULL) {
     _statusCode = _respo.generateResponse(*this);
     return;
   }
@@ -138,11 +142,11 @@ void Request::processReq()
 //
 void Request::_matchRoute()
 {
-  if (_vsrv == NULL)
+  if (_cli->getVsrv() == NULL)
     throw std::runtime_error(
         "(Request::_matchRoute) _vsrv == NULL, client still virtual!");
 
-  std::map<str, Route>& vsrvRoutes = _vsrv->getRoutes();
+  std::map<str, Route>& vsrvRoutes = _cli->getVsrv()->getRoutes();
 
   // return direct matches immediately
   if (vsrvRoutes.find(_requestTarget) != vsrvRoutes.end()) {
@@ -199,9 +203,8 @@ void Request::append(char *s, ssize_t bytesRead)
       case 1:
         break;
       case 0:
-        Logger::logSrv(_vsrv->getName(),
-            "(RequestBody::appendData) truncating body data!",
-            WARN);
+        Logger::logSrv(
+            _vsrvName, "(RequestBody::appendData) truncating body data!", WARN);
         break;
       default:
         Logger::logErr(
@@ -268,7 +271,6 @@ str Request::getMethodStr() const
   }
 }
 
-// WARN make sure this is bullet-proof and nothing is missed-out!
 void Request::reset()
 {
   _statusCode          = HTTP_200;
@@ -327,12 +329,7 @@ u16 Request::_countReqLines(const str& s)
 
 // --------------------=[ one-liners, more or less... ]=-------------------- //
 
-void Request::setVsrv(VServer *v)
-{
-  _vsrv = v;
-  if (_vsrv != NULL)
-    _vsrvName = _vsrv->getName();
-}
+void Request::setVsrvName(constr& name) { _vsrvName = name; }
 
 bool Request::hdrTooBig() const { return _hdrLines > MAX_HEADER_LINES; }
 
@@ -347,7 +344,7 @@ const str& Request::getReqstr() const { return _reqdata; }
 
 Client *Request::getCli() const { return _cli; }
 
-VServer *Request::getVsrv() const { return _vsrv; }
+str Request::getVsrvName() const { return _vsrvName; }
 
 e_HTTPStatus Request::getStatus() const { return _statusCode; }
 

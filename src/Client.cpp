@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/14 20:51:06 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/18 00:44:01 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/18 21:15:57 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 #include "Webserv.hpp"
 #include "utils.hpp"
 
+#include <cerrno>
 #include <sys/epoll.h>
 #include <unistd.h>
 // --------------------------------=[ OCF ]=-------------------------------- //
@@ -34,11 +35,17 @@ Client::Client(
   _state(CLI_IDLE)
 {
   _ifaceFdStr = addr + ":" + int2str(_port) + ":fd=" + int2str(fd);
-  if (vsrv)
+  if (vsrv) {
     _reqHandler.setVsrvName(vsrv->getName());
-  else
+    _virtual = false;
+  }
+  else {
     _reqHandler.setVsrvName("__VIRTUAL__");
+    _virtual = true;
+  }
 }
+
+// NEXT make virtual clients handling really virtual
 
 // not used
 Client& Client::operator=(const Client& o)
@@ -58,7 +65,10 @@ Client::~Client()
 void Client::setVsrv(VServer *v)
 {
   _vsrv = v;
-  _req.setVsrv(v);
+  if (v != NULL)
+    _req.setVsrvName(v->getName());
+  else
+    _req.setVsrvName("__VIRTUAL__");
 }
 
 void Client::setPotentialVsrvs(std::vector<VServer *> vv)
@@ -94,8 +104,8 @@ Client *Client::newVirtualCli(Webserv *wsrv, int listenFd)
   Client *newCli =
       new Client(wsrv, client_fd, NULL, hostname, client_addr.sin_port);
 
-  Logger::logSrv(
-      "ServerLess", "Client connected from " + newCli->getIfaceFdStr());
+  Logger::logSrv("__VIRTUAL__",
+      "New virtual client connected from " + newCli->getIfaceFdStr());
 
   return newCli;
 }
@@ -117,33 +127,49 @@ void Client::handleEvent(u32 ev)
 
 void Client::handleEventCGI(u32 ev)
 {
-  // if (ev & (EPOLLERR | EPOLLHUP)) {
-  //   Logger::logBug("EPOLEEEEEEEEEEEEERRRRRRRRRR");
-  //   _state = CLI_DISCO_CGI;
-  //   return;
-  // }
+  if (ev & EPOLLERR) {
+    Logger::logSrv(
+        _vsrv->getName(), "Got EPOLLERR from client " + getIfaceFdStr());
+    _state = CLI_CGIKO;
+  }
+
+  if (ev & EPOLLHUP) {
+    Logger::logSrv(
+        _vsrv->getName(), "Got EPOLLHUP from client " + getIfaceFdStr());
+    _state = CLI_CGICDONE;
+  }
 
   switch (_state) {
-    case CLI_CGIWRITE:
+    case CLI_CGIRW:
       if (ev & EPOLLOUT) {
         this->setLastActive();
         _req.getRespo().cgiWrite();
       }
-      if (_req.getRespo().cgiWait() == KO)
-        break;
-      else
-        return;
-    case CLI_CGIWDONE:
-    case CLI_CGIWAIT:
-      if (_req.getRespo().cgiWait() == KO)
-        break;
-      else
-        return;
-    case CLI_CGIREAD:
-      if (ev & EPOLLIN) {
+      else if (ev & EPOLLIN) {
         this->setLastActive();
         _req.getRespo().cgiRead();
       }
+      if (_state == CLI_CGIOK || _state == CLI_CGIKO ||
+          _req.getRespo().cgiWait() == KO)
+      {
+        Logger::logBug("break");
+        break;
+      }
+      else {
+        Logger::logBug("state: " + int2str(_state));
+        return;
+      }
+    case CLI_CGICDONE:
+    case CLI_CGIREAD:
+      if (ev & (EPOLLIN | EPOLLHUP)) {
+        this->setLastActive();
+        _req.getRespo().cgiRead();
+      }
+      if (_state == CLI_CGIOK || _state == CLI_CGIKO ||
+          _req.getRespo().cgiWait() == KO)
+        break;
+      else
+        return;
     default:
       break;
   }
@@ -163,9 +189,21 @@ void Client::handleEventCGI(u32 ev)
 
 // ----------------------=[ One-liner Getter-Setters ]=---------------------- //
 
-Request&   Client::getReq() { return _req; }
-void       Client::setReq(const Request& r) { _req = r; }
-void       Client::resetReq() { _req.reset(); }
+Request& Client::getReq() { return _req; }
+void     Client::setReq(const Request& r) { _req = r; }
+
+// reset the request object and, if cli is virtual, set reqhandlers server name
+// to __VIRTUAL__ as we don't know where the next request is going to.
+void Client::resetReq()
+{
+  _req.reset();
+
+  if (_virtual) {
+    _reqHandler.setVsrvName("__VIRTUAL__");
+    _req.setVsrvName("__VIRTUAL__");
+  }
+}
+
 str        Client::getIfaceFdStr() const { return _ifaceFdStr; }
 e_CliState Client::getState() const { return _state; }
 void       Client::setState(e_CliState s) { _state = s; }
@@ -184,7 +222,7 @@ VServer *Client::getVsrv() const { return _vsrv; }
 str      Client::getAddr() const { return _addr; }
 u16      Client::getPort() const { return _port; }
 void     Client::timeout() { _timeout = true; }
-bool     Client::isVirtual() const { return _vsrv == NULL; }
+bool     Client::isVirtual() const { return _virtual; }
 
 void Client::setVsrvPort(u16 port) { _vsrvPort = port; }
 
@@ -201,9 +239,8 @@ void Client::addCgiToEpoll(int fdWrite, int fdRead)
 
 void Client::delCgiFromEpoll(int fd) { _webserv->removeCgiFdFromEpoll(fd); }
 
-bool Client::isDoingCGI() const
+bool Client::isCGIing() const
 {
-  return _state == CLI_CGIWRITE || _state == CLI_CGIREAD ||
-      _state == CLI_CGIWDONE || _state == CLI_CGIWAIT || _state == CLI_CGIKO ||
-      _state == CLI_CGIOK;
+  return _state == CLI_CGIREAD || _state == CLI_CGIRW || _state == CLI_CGIKO ||
+      _state == CLI_CGIOK || _state == CLI_CGICDONE;
 }

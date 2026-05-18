@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/17 10:36:30 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/18 00:58:21 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/18 12:11:17 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,7 @@
 
 #include <cstdlib>
 #include <cstring>
+#include <iostream>
 #include <sys/wait.h>
 #include <unistd.h>
 
@@ -79,11 +80,33 @@ e_HTTPStatus Response::_cgiSetup(std::map<str, str> cgiParams)
 
     char **envp = _cgiBuildEnv(cgiParams);
 
-    // being almost completely C++ish here ;)
-    char *argv[] = {
-        new char[cgiExec.length() + 1], new char[cgiScript.length() + 1], NULL};
-    strcpy(argv[0], cgiExec.c_str());
-    strcpy(argv[1], cgiScript.c_str());
+    // handling possible cgiExecs like `/usr/bin/env bash`
+    // NOTE: cgiScript is assumed to don't have any whitespaces
+    std::vector<str> argvSplit = splitStrWhite(cgiExec);
+    if (argvSplit.size() > 1) {
+      cgiExec = argvSplit[0];
+      argvSplit.push_back(cgiScript);
+    }
+
+    char **argv = new char *[argvSplit.size() + 1];
+    if (argv == NULL)
+      exit(1);
+    for (size_t i = 0; i < argvSplit.size(); ++i) {
+      argv[i] = new char[argvSplit[i].size() + 1];
+      if (argv[i] == NULL)
+        exit(1);
+      strcpy(argv[i], argvSplit[i].c_str());
+    }
+    argv[argvSplit.size()] = NULL;
+
+    std::cerr << argv[0] << argv[1] << std::endl;
+
+    // // being almost completely C++ish here ;)
+    // char *argv[] = {
+    //     new char[cgiExec.length() + 1], new char[cgiScript.length() + 1],
+    //     NULL};
+    // strcpy(argv[0], cgiExec.c_str());
+    // strcpy(argv[1], cgiScript.c_str());
 
     execve(cgiExec.c_str(), argv, envp);
 
@@ -92,14 +115,21 @@ e_HTTPStatus Response::_cgiSetup(std::map<str, str> cgiParams)
       delete[] *p;
       ++p;
     }
-    delete[] envp, delete[] argv[0], delete[] argv[1];
+    delete[] envp;
+
+    p = argv;
+    while (*p) {
+      delete[] *p;
+      ++p;
+    }
+    delete[] argv;
 
     exit(1);
   }
 
   // |=--------------------------=[ the parent ]=--------------------------=| //
 
-  _cli->setState(CLI_CGIWRITE);
+  _cli->setState(CLI_CGIRW);
   _cli->addCgiToEpoll(_cgiParentWriteFd, _cgiParentReadFd);
 
   // close ununsed fds
@@ -123,8 +153,10 @@ void Response::cgiWrite()
       _req->getBodyData().size());
 
   if (bytesWritten >= 0) {
+
     if (static_cast<size_t>(bytesWritten) == _req->getBodyData().size()) {
-      _cli->setState(CLI_CGIWDONE);
+      Logger::logDbg2("Response::cgiWrite", "Done writing body to pipe!");
+      _cli->setState(CLI_CGIREAD);
       _cli->delCgiFromEpoll(_cgiParentWriteFd);
       close(_cgiParentWriteFd);
     }
@@ -138,6 +170,10 @@ void Response::cgiWrite()
 
 bool Response::cgiWait()
 {
+
+  if (_cli->getState() == CLI_CGICDONE)
+    return OK;
+
   int status  = 0;
   int waitRet = 0;
 
@@ -152,17 +188,17 @@ bool Response::cgiWait()
 
   switch (waitRet) {
     case 0:
-      Logger::logDbg1("Response::cgiWait", "Child not yet done...");
-      if (_cli->getState() == CLI_CGIWDONE)
-        _cli->setState(CLI_CGIWAIT);
-      else
-        _cli->setState(CLI_CGIWRITE);
+      Logger::logDbg2("Response::cgiWait", "Child not yet done...");
       break;
     case -1:
       Logger::logDbg1(
           "Response::cgiWait", "waitpid -> -1, errno: " + getErrnoStr());
       if (errno == EAGAIN)
         break;
+      else if (errno == ECHILD) {
+        _cli->setState(CLI_CGICDONE);
+        break;
+      }
       else {
         _status = HTTP_500;
         _cli->setState(CLI_CGIKO);
@@ -186,7 +222,7 @@ bool Response::cgiWait()
         return KO;
       }
       else
-        _cli->setState(CLI_CGIREAD);
+        _cli->setState(CLI_CGICDONE);
   }
   return OK;
 }
@@ -205,7 +241,10 @@ void Response::cgiRead()
   if (bytesRead < 0)
     return;
 
-  if (bytesRead == 0 || bytesRead < READ_BUFSIZE) {
+  if ((bytesRead == 0 || bytesRead < READ_BUFSIZE) &&
+      _cli->getState() == CLI_CGICDONE)
+  {
+    Logger::logDbg1("Response::cgiRead", "Done! Sending Response...");
     buffer[bytesRead] = '\0';
     _cgiBody += buffer;
     _cli->setState(CLI_CGIOK);
@@ -221,7 +260,7 @@ void Response::cgiRead()
 // FIXME make this a bit more sophisticated!
 void Response::cgiProcessBody()
 {
-  Logger::logDbg1("Response::cgiProcessBody", "BODY FROM SCRIPT:\n" + _cgiBody);
+  Logger::logDbg2("Response::cgiProcessBody", "BODY FROM SCRIPT:\n" + _cgiBody);
 
   if (_cgiBody.find(CRLFX2) != std::string::npos) {
     str                headers = _cgiBody.substr(0, _cgiBody.find(CRLFX2));

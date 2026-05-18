@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/25 08:35:42 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/16 18:42:23 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/18 17:17:22 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -200,14 +200,13 @@ void VServerCfg::setRoot(str r) { _root = r; }
 
 str VServerCfg::getRoot() const { return _root; }
 
-// TODO ...or do even need this? Is there more to be done here?
 bool VServerCfg::checkEnsureCfg()
 {
-
   // add at least default route bc nginx does it too!
   if (_routes.find("/") == _routes.end())
     _routes["/"] = Route();
 
+  // insert settings from server scope if empty
   for (std::map<str, Route>::iterator it = _routes.begin(); it != _routes.end();
       ++it)
   {

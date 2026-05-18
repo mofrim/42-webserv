@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/14 23:12:17 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/18 10:58:40 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/18 11:49:03 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -132,6 +132,10 @@ str Epoll::_getEventStr(const uint32_t& ev) const
     return str("EPOLLIN");
   if (ev & EPOLLOUT)
     return str("EPOLLOUT");
+  if (ev & EPOLLERR)
+    return str("EPOLLERR");
+  if (ev & EPOLLHUP)
+    return str("EPOLLHUP");
   return str("UNKNOWN EVENT");
 }
 

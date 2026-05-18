@@ -71,7 +71,8 @@ class VServer {
         char                               **envp);
 
     Client *addClient(Webserv *wsrv, int fd);
-    void    addClient(Client *cli);
+    void    addVirtualClient(Client *cli);
+    size_t  removeVirtualClient(Client *cli);
 
     void deleteClient(int fd);
 

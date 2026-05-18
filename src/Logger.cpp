@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/24 20:52:55 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/17 19:03:03 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/18 20:40:27 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,9 @@ Logger::~Logger() {}
 
 // return current time. optional param bool turns adding brackets to returned
 // str on/off.
+//
+// NOTE this is a stripped down version for better readability during eval. in
+// prod i would prefer something like `%FT%H:%M:%S%z` as date string
 str Logger::getLogtime(bool brackets)
 {
   char       timestamp[101];
@@ -39,9 +42,9 @@ str Logger::getLogtime(bool brackets)
   time(&current_time);
   timeinfo = localtime(&current_time);
   if (brackets)
-    strftime(timestamp, 1000, "[%FT%H:%M:%S%z]", timeinfo);
+    strftime(timestamp, 1000, "[%H:%M:%S]", timeinfo);
   else
-    strftime(timestamp, 1000, "%FT%H:%M:%S%z", timeinfo);
+    strftime(timestamp, 1000, "%H:%M:%S", timeinfo);
 
   return (str(timestamp));
 }
@@ -118,6 +121,15 @@ void Logger::logDbg2(const str& msg)
   if (LOGLEVEL >= LOG_BRUTAL) {
     str logtime = getLogtime();
     std::cout << BWHT << logtime << " " << msg << RST << std::endl;
+  }
+}
+
+void Logger::logDbg2(const str& pre, const str& msg)
+{
+  if (LOGLEVEL >= LOG_BRUTAL) {
+    str logtime = getLogtime();
+    std::cout << BWHT << logtime << " (" << pre << ") " << msg << RST
+              << std::endl;
   }
 }
 

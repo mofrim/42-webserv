@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/03 12:51:23 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/17 14:53:38 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/18 19:54:12 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -296,7 +296,14 @@ Client *VServer::addClient(Webserv *wsrv, int fd)
   return (newCli);
 }
 
-void VServer::addClient(Client *cli) { _clients[cli->getFd()] = cli; }
+// add a vritual client to server. used in Request::readRequest()
+void VServer::addVirtualClient(Client *cli) { _clients[cli->getFd()] = cli; }
+
+// remove a vritual client to server. used in Request::readRequest()
+size_t VServer::removeVirtualClient(Client *cli)
+{
+  return _clients.erase(cli->getFd());
+}
 
 // remove all traces of a client from the Server _and_ close the socket. things
 // to be cleaned up:

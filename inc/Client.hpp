@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/14 20:50:12 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/17 22:41:17 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/18 19:56:22 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,6 @@
 class VServer;
 class Webserv;
 
-// the states of the client machine
 typedef enum {
   CLI_READ,
   CLI_SEND,
@@ -31,10 +30,9 @@ typedef enum {
   CLI_DISCO,
   CLI_DISCO_CGI,
   CLI_DRAIN,
-  CLI_CGIWRITE,
-  CLI_CGIWDONE,
-  CLI_CGIWAIT,
+  CLI_CGIRW,
   CLI_CGIREAD,
+  CLI_CGICDONE,
   CLI_CGIKO,
   CLI_CGIOK
 } e_CliState;
@@ -51,6 +49,7 @@ class Client {
     str    _ifaceFdStr;
     bool   _timeout;
     time_t _lastActive;
+    bool   _virtual;
 
     Request _req;
 
@@ -98,7 +97,7 @@ class Client {
     bool isSending() const;
     bool isDisco() const;
     bool isDraining() const;
-    bool isDoingCGI() const;
+    bool isCGIing() const;
 
     void                    setPotentialVsrvs(std::vector<VServer *> vv);
     std::vector<VServer *>& getPotentialVsrvs();

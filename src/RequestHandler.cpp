@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 19:13:35 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/17 22:41:17 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/18 21:31:48 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,14 +17,13 @@
 #include "utils.hpp"
 
 #include <cstring>
-#include <errno.h>
 #include <unistd.h>
 
-// -- OCF --
+// --------------------------------=[ OCF ]=-------------------------------- //
 
 RequestHandler::RequestHandler() {}
 
-RequestHandler::RequestHandler(const RequestHandler& other) { (void)other; }
+RequestHandler::RequestHandler(const RequestHandler& o) { (void)o; }
 
 RequestHandler& RequestHandler::operator=(const RequestHandler& o)
 {
@@ -33,7 +32,8 @@ RequestHandler& RequestHandler::operator=(const RequestHandler& o)
 }
 
 RequestHandler::~RequestHandler() {}
-// -- OCF end --
+
+// ------------------------------=[ the rest ]=------------------------------ //
 
 RequestHandler::RequestHandler(Client *cli): _cli(cli)
 {
@@ -67,7 +67,9 @@ void RequestHandler::readRequest()
       Logger::logSrv(
           _vsrvName, "Client disco -> closing client " + _cli->getIfaceFdStr());
     else
-      Logger::logErr("Read failed, errno: " + getErrnoStr());
+      // Dear evalutor. I _AM_ checking errno here, but only for _LOGGING_ not
+      // for "adjusting server behavior".
+      Logger::logErr("Read failed with: " + getErrnoStr() + " -> disco!");
     _cli->setState(CLI_DISCO);
     return;
   }
@@ -153,10 +155,10 @@ void RequestHandler::writeResponse()
     Logger::logDbg1("RequestHandler: 408 due to timeout");
     statusCode = HTTP_408;
 
-    if (_cli->isDoingCGI())
+    if (_cli->isCGIing())
       req.getRespo().cgiCleanupFds();
 
-    if (_cli->isVirtual())
+    if (_cli->isVirtual() && _cli->getVsrv() == NULL)
       response = Response::genDefaultErrResponse(statusCode);
     else
       // TODO add proper errorPage from server scope getting here
@@ -204,7 +206,7 @@ void RequestHandler::setVsrvName(const str& n) { _vsrvName = n; }
 
 void RequestHandler::_setVirtualServerFromHeader()
 {
-  if (_vsrvName == "__VIRTUAL__") {
+  if (_cli->isVirtual()) {
 
     std::map<str, str>& hdrs = _cli->getReq().getHeaders();
 
@@ -219,17 +221,31 @@ void RequestHandler::_setVirtualServerFromHeader()
       else
         host = hdrs["host"];
 
+      // client requesting to the same virtual server as before?
+      if (_cli->getVsrv() != NULL && host == _cli->getVsrv()->getName()) {
+        _cli->getReq().evaluateTarget();
+        return;
+      }
+
+      // client requesting to a different vsrv
+      else if (_cli->getVsrv() != NULL) {
+        if (_cli->getVsrv()->removeVirtualClient(_cli) == 0)
+          throw std::runtime_error(
+              "(RequestHandler::_setVirtualServerFromHeader) failed to remove "
+              "cli from prev vsrv");
+      }
+
       for (std::vector<VServer *>::iterator it =
                _cli->getPotentialVsrvs().begin();
           it != _cli->getPotentialVsrvs().end();
           it++)
       {
-        Logger::logDbg0("checking this potential server: " + (*it)->getName());
         if ((*it)->getName() == host) {
-          Logger::logDbg0("Found matching VServer for host = " + host);
+          Logger::logSrv(
+              "__VIRTUAL__", "Found matching VServer for host = " + host);
           _cli->setVsrv(*it);
           _cli->setVsrvPort(port);
-          (*it)->addClient(_cli);
+          (*it)->addVirtualClient(_cli);
           _vsrvName = host;
           return;
         }
@@ -241,7 +257,7 @@ void RequestHandler::_setVirtualServerFromHeader()
 
     VServer *srv = _cli->getPotentialVsrvs()[0];
     _cli->setVsrv(srv);
-    srv->addClient(_cli);
+    srv->addVirtualClient(_cli);
     _vsrvName = srv->getName();
 
     _cli->getReq().evaluateTarget();

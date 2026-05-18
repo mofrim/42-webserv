@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/01 18:46:40 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/16 23:18:32 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/18 21:10:53 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,7 @@ e_HTTPStatus Request::parseReqLine()
           WsrvLib::httpVer2Str(_reqline.httpVersion) + "'");
 
   // if our client is not virtual immediately evaluate the target path
-  if (_vsrv)
+  if (!_cli->isVirtual())
     this->evaluateTarget();
 
   return _statusCode;
@@ -42,7 +42,7 @@ e_HTTPStatus Request::parseReqLine()
 
 void Request::evaluateTarget()
 {
-  if (_vsrv == NULL)
+  if (_cli->getVsrv() == NULL)
     throw std::runtime_error(
         "(Request::_evaluateTarget) virtual client cannot eval target!");
 
@@ -55,7 +55,7 @@ void Request::evaluateTarget()
   // check if method is allowed for this route, if not -> 403
   const std::set<e_Method>& allowedMethods = _matchedRoute->getMethods();
   if (allowedMethods.find(_reqline.method) == allowedMethods.end()) {
-    Logger::logSrv(_vsrv->getName(),
+    Logger::logSrv(_vsrvName,
         "forbidden meth " + meth2str(_reqline.method) + " for route " +
             _matchedRoute->getPath());
     _statusCode = HTTP_403;
@@ -105,7 +105,7 @@ e_HTTPStatus Request::_readReqline()
   Logger::logDbg1("Request::_readReqline",
       "Request: found this method: '" + _reqdata.substr(i, k) + "'");
   if ((_reqline.method = str2meth(_reqdata.substr(i, k))) == M_UNKNOWN) {
-    Logger::logSrv(_vsrv->getName(),
+    Logger::logSrv(_vsrvName,
         "Invalid method in Reqline: '" +
             data2hexStr(
                 _reqdata.substr(i, k).data(), _reqdata.substr(i, k).size()) +
@@ -198,10 +198,11 @@ e_HTTPStatus Request::_parseHeaders()
   std::vector<str> hdrLines = splitString(onlyHdrs, CRLF);
 
   // skipping the requline
+  // apllying RFC MUST rule here: no CR anywhere in the header!
   std::vector<str>::iterator it = hdrLines.begin() + 1;
-  for (; it != hdrLines.end(); it++) {
+  for (; it != hdrLines.end(); ++it) {
     size_t colonPos = it->find(":");
-    if (colonPos == str::npos)
+    if (colonPos == str::npos || it->find("\n") != str::npos)
       return HTTP_400;
     str fieldName  = strip(it->substr(0, colonPos));
     str fieldValue = strip(it->substr(colonPos + 1, str::npos));
@@ -221,7 +222,7 @@ e_HTTPStatus Request::_evaluateHdrs()
 
       // RFC MUST for HTTP/1.1
       if (_headers.count("host") == 0) {
-        Logger::logSrv(_vsrv->getName(), "GET Req without Host header", WARN);
+        Logger::logSrv(_vsrvName, "GET Req without Host header", WARN);
         return HTTP_400;
       }
       if (_headers.count("connection") > 0 && _headers["connection"] == "close")
@@ -247,23 +248,22 @@ e_HTTPStatus Request::_evaluateHdrs()
   if (_reqline.method == M_POST) {
 
     if (_headers.count("content-length") == 0) {
-      Logger::logSrv(_vsrv->getName(), "No content with POST req", WARN);
+      Logger::logSrv(_vsrvName, "No content with POST req", WARN);
       return HTTP_400;
     }
 
     _contentLength = std::atol(_headers["content-length"].c_str());
 
     if (_contentLength > MAX_CONTENT_LENGTH) {
-      Logger::logSrv(_vsrv->getName(),
+      Logger::logSrv(_vsrvName,
           "Request Content-Length exceeds MAX_CONTENT_LENGTH -> 400",
           WARN);
       return HTTP_400;
     }
 
     if (_contentLength > _matchedRoute->getMaxBodySize()) {
-      Logger::logSrv(_vsrv->getName(),
-          "Requested Content-Length exceeds maxBodySize",
-          WARN);
+      Logger::logSrv(
+          _vsrvName, "Requested Content-Length exceeds maxBodySize", WARN);
       _cli->setState(CLI_DRAIN);
       return HTTP_413;
     }

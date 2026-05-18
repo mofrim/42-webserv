@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/24 20:49:55 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/17 19:05:04 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/18 11:32:36 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -84,6 +84,8 @@ class Logger {
     static void logDbg1(const str& pre, const str& msg);
 
     static void logDbg2(const str& msg);
+    static void logDbg2(const str& pre, const str& msg);
+
     static void logBug(const str& msg);
     static void logBug(constr& pre, const str& msg);
     static str  getLogtime(bool brackets = true);

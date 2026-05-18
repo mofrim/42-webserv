@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:36:43 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/18 10:54:40 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/18 20:22:54 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -164,7 +164,7 @@ void Webserv::run()
         else {
           if ((cli = Client::newVirtualCli(this, currentFd)) == NULL) {
             Logger::logWarn(
-                "Webserv::run: Client::newCliServerless returned NULL");
+                "Webserv::run", "Client::newVirtualCli returned NULL");
             continue;
           }
           cli->setPotentialVsrvs(vsrvs);
@@ -186,16 +186,14 @@ void Webserv::run()
           continue;
 
         Client *cli = _fdClientMap[currentFd];
-
-        VServer *vsrv = cli->getVsrv();
-        u32      ev   = _epoll.getEvent(eventIdx);
+        u32     ev  = _epoll.getEvent(eventIdx);
 
         // skip cli if event is EPOLLOUT but the client has got nothing to send
         // or is still reading a request
         if ((cli->isIdling() || cli->isReading()) && (ev & EPOLLOUT))
           continue;
 
-        if (cli->isDoingCGI()) {
+        if (cli->isCGIing()) {
           if (currentFd == cli->getFd() && ev & (EPOLLIN | EPOLLERR | EPOLLHUP))
             cli->setState(CLI_DISCO_CGI);
           else
@@ -205,11 +203,11 @@ void Webserv::run()
           cli->handleEvent(ev);
 
         if (cli->getState() == CLI_DISCO_CGI)
-          _handleDiscoCGI(cli, vsrv);
+          _handleDiscoCGI(cli, cli->getVsrv());
         else if (cli->isDisco()) {
           _epoll.removeClient(currentFd);
-          if (vsrv)
-            vsrv->deleteClient(currentFd);
+          if (cli->getVsrv())
+            cli->getVsrv()->deleteClient(currentFd);
           else
             delete cli;
           _numOfClients--;
@@ -239,7 +237,7 @@ void Webserv::_timeoutClients()
 
   while (it != _fdClientMap.end()) {
     Client *cli = it->second;
-    if (cli->isDoingCGI()) {
+    if (cli->isCGIing()) {
       if (difftime(now, cli->getLastActive()) > WsrvLib::Settings.cgiTimeout) {
         Logger::logDbg1("Timing out CGI client..." + cli->getIfaceFdStr());
         cli->timeout();
