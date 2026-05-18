@@ -413,3 +413,11 @@ pass on the file which has to be opened to `_getBody` (so far...).
    errorPage's path is returned.
 
 So, how and where do i inject the errorPage into the Response?
+
+## 2026-05-18
+
+### 00:44 - the last battle of CGI
+
+learned sth again! if on pipe fds the connection is closed, meaning, the pipe is
+closed on one end this triggers `EPOLLERR` or `EPOLLHUP` as an event on the
+pipes fd. For socket-fds this is most likely a sign of disconnection.

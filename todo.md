@@ -20,9 +20,6 @@
 
 - [ ] check if all getters return reasonable (const!?) values!
 
-- [ ] support URL redirection meaning: `redirect` directive will also take a
-  full URL (like https://42.fr) as redir target!
-
 - [ ] find out what should be handled differently with other HTTP-versions
 
 - [ ] CGI
@@ -125,4 +122,7 @@ via `/route/` then this is forbidden 403
 
   + [x] or with query component (POST /upload?blabla.csv ... -> file is uploaded
     and stored as `upload-dir/blabla.csv`)
+
+- [x] support URL redirection meaning: `redirect` directive will also take a
+  full URL (like https://42.fr) as redir target!
 
