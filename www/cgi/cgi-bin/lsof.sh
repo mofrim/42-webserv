@@ -10,14 +10,15 @@ function finishReq() {
 	echo -en "$CRLF"
 }
 
-IFS= read -r -d '' name
-
-sleep 30s
-
-msg="Hello <$name> from mofrim's WebServ!\n"
+msg="$(lsof -c webserv)"
 len="${#msg}"
+echo "len = $len" 1>&2
 
-sendHdrField "Content-Type: text/html"
+
+sendHdrField "Content-Type: text/plain"
 sendHdrField "Content-Length: $len"
 finishReq
+
+# sleep 10s
+
 echo -en "$msg"
