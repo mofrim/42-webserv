@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/26 10:03:57 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/18 09:09:39 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/18 22:17:28 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -234,14 +234,17 @@ void tolower(str& s)
 u16 str2u16(const str& s) { return static_cast<u16>(atoi(s.c_str())); }
 
 // print a given std::string's raw bytes as double digit hex numbers prefixed by
-// `\x` like nginx does with non-sense input
+// `\x` like nginx does with non-sense input. printable chars are just printed.
 str data2hexStr(const char *s, size_t len)
 {
   std::ostringstream oss;
   for (size_t i = 0; i < len; ++i) {
-    oss << "\\x" << std::hex << std::setw(2) << std::uppercase
-        << std::setfill('0')
-        << static_cast<int>(static_cast<unsigned char>(s[i]));
+    if (isprint(s[i]))
+      oss << s[i];
+    else
+      oss << "\\x" << std::hex << std::setw(2) << std::uppercase
+          << std::setfill('0')
+          << static_cast<int>(static_cast<unsigned char>(s[i]));
   }
   return oss.str();
 }
