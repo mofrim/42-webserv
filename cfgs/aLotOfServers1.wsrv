@@ -1,0 +1,503 @@
+server {
+  serverName webserv1!
+  listen localhost:1111!
+  root www!
+}
+
+server {
+  serverName webserv2!
+  listen localhost:1112!
+  root www!
+}
+
+server {
+  serverName webserv3!
+  listen localhost:1113!
+  root www!
+}
+
+server {
+  serverName webserv4!
+  listen localhost:1114!
+  root www!
+}
+
+server {
+  serverName webserv5!
+  listen localhost:1115!
+  root www!
+}
+
+server {
+  serverName webserv6!
+  listen localhost:1116!
+  root www!
+}
+
+server {
+  serverName webserv7!
+  listen localhost:1117!
+  root www!
+}
+
+server {
+  serverName webserv8!
+  listen localhost:1118!
+  root www!
+}
+
+server {
+  serverName webserv9!
+  listen localhost:1119!
+  root www!
+}
+
+server {
+  serverName webserv10!
+  listen localhost:1120!
+  root www!
+}
+
+server {
+  serverName webserv11!
+  listen localhost:1121!
+  root www!
+}
+
+server {
+  serverName webserv12!
+  listen localhost:1122!
+  root www!
+}
+
+server {
+  serverName webserv13!
+  listen localhost:1123!
+  root www!
+}
+
+server {
+  serverName webserv14!
+  listen localhost:1124!
+  root www!
+}
+
+server {
+  serverName webserv15!
+  listen localhost:1125!
+  root www!
+}
+
+server {
+  serverName webserv16!
+  listen localhost:1126!
+  root www!
+}
+
+server {
+  serverName webserv17!
+  listen localhost:1127!
+  root www!
+}
+
+server {
+  serverName webserv18!
+  listen localhost:1128!
+  root www!
+}
+
+server {
+  serverName webserv19!
+  listen localhost:1129!
+  root www!
+}
+
+server {
+  serverName webserv20!
+  listen localhost:1130!
+  root www!
+}
+
+server {
+  serverName webserv21!
+  listen localhost:1131!
+  root www!
+}
+
+server {
+  serverName webserv22!
+  listen localhost:1132!
+  root www!
+}
+
+server {
+  serverName webserv23!
+  listen localhost:1133!
+  root www!
+}
+
+server {
+  serverName webserv24!
+  listen localhost:1134!
+  root www!
+}
+
+server {
+  serverName webserv25!
+  listen localhost:1135!
+  root www!
+}
+
+server {
+  serverName webserv26!
+  listen localhost:1136!
+  root www!
+}
+
+server {
+  serverName webserv27!
+  listen localhost:1137!
+  root www!
+}
+
+server {
+  serverName webserv28!
+  listen localhost:1138!
+  root www!
+}
+
+server {
+  serverName webserv29!
+  listen localhost:1139!
+  root www!
+}
+
+server {
+  serverName webserv30!
+  listen localhost:1140!
+  root www!
+}
+
+server {
+  serverName webserv31!
+  listen localhost:1141!
+  root www!
+}
+
+server {
+  serverName webserv32!
+  listen localhost:1142!
+  root www!
+}
+
+server {
+  serverName webserv33!
+  listen localhost:1143!
+  root www!
+}
+
+server {
+  serverName webserv34!
+  listen localhost:1144!
+  root www!
+}
+
+server {
+  serverName webserv35!
+  listen localhost:1145!
+  root www!
+}
+
+server {
+  serverName webserv36!
+  listen localhost:1146!
+  root www!
+}
+
+server {
+  serverName webserv37!
+  listen localhost:1147!
+  root www!
+}
+
+server {
+  serverName webserv38!
+  listen localhost:1148!
+  root www!
+}
+
+server {
+  serverName webserv39!
+  listen localhost:1149!
+  root www!
+}
+
+server {
+  serverName webserv40!
+  listen localhost:1150!
+  root www!
+}
+
+server {
+  serverName webserv41!
+  listen localhost:1151!
+  root www!
+}
+
+server {
+  serverName webserv42!
+  listen localhost:1152!
+  root www!
+}
+
+server {
+  serverName webserv43!
+  listen localhost:1153!
+  root www!
+}
+
+server {
+  serverName webserv44!
+  listen localhost:1154!
+  root www!
+}
+
+server {
+  serverName webserv45!
+  listen localhost:1155!
+  root www!
+}
+
+server {
+  serverName webserv46!
+  listen localhost:1156!
+  root www!
+}
+
+server {
+  serverName webserv47!
+  listen localhost:1157!
+  root www!
+}
+
+server {
+  serverName webserv48!
+  listen localhost:1158!
+  root www!
+}
+
+server {
+  serverName webserv49!
+  listen localhost:1159!
+  root www!
+}
+
+server {
+  serverName webserv50!
+  listen localhost:1160!
+  root www!
+}
+
+server {
+  serverName webserv51!
+  listen localhost:1161!
+  root www!
+}
+
+server {
+  serverName webserv52!
+  listen localhost:1162!
+  root www!
+}
+
+server {
+  serverName webserv53!
+  listen localhost:1163!
+  root www!
+}
+
+server {
+  serverName webserv54!
+  listen localhost:1164!
+  root www!
+}
+
+server {
+  serverName webserv55!
+  listen localhost:1165!
+  root www!
+}
+
+server {
+  serverName webserv56!
+  listen localhost:1166!
+  root www!
+}
+
+server {
+  serverName webserv57!
+  listen localhost:1167!
+  root www!
+}
+
+server {
+  serverName webserv58!
+  listen localhost:1168!
+  root www!
+}
+
+server {
+  serverName webserv59!
+  listen localhost:1169!
+  root www!
+}
+
+server {
+  serverName webserv60!
+  listen localhost:1170!
+  root www!
+}
+
+server {
+  serverName webserv61!
+  listen localhost:1171!
+  root www!
+}
+
+server {
+  serverName webserv62!
+  listen localhost:1172!
+  root www!
+}
+
+server {
+  serverName webserv63!
+  listen localhost:1173!
+  root www!
+}
+
+server {
+  serverName webserv64!
+  listen localhost:1174!
+  root www!
+}
+
+server {
+  serverName webserv65!
+  listen localhost:1175!
+  root www!
+}
+
+server {
+  serverName webserv66!
+  listen localhost:1176!
+  root www!
+}
+
+server {
+  serverName webserv67!
+  listen localhost:1177!
+  root www!
+}
+
+server {
+  serverName webserv68!
+  listen localhost:1178!
+  root www!
+}
+
+server {
+  serverName webserv69!
+  listen localhost:1179!
+  root www!
+}
+
+server {
+  serverName webserv70!
+  listen localhost:1180!
+  root www!
+}
+
+server {
+  serverName webserv71!
+  listen localhost:1181!
+  root www!
+}
+
+server {
+  serverName webserv72!
+  listen localhost:1182!
+  root www!
+}
+
+server {
+  serverName webserv73!
+  listen localhost:1183!
+  root www!
+}
+
+server {
+  serverName webserv74!
+  listen localhost:1184!
+  root www!
+}
+
+server {
+  serverName webserv75!
+  listen localhost:1185!
+  root www!
+}
+
+server {
+  serverName webserv76!
+  listen localhost:1186!
+  root www!
+}
+
+server {
+  serverName webserv77!
+  listen localhost:1187!
+  root www!
+}
+
+server {
+  serverName webserv78!
+  listen localhost:1188!
+  root www!
+}
+
+server {
+  serverName webserv79!
+  listen localhost:1189!
+  root www!
+}
+
+server {
+  serverName webserv80!
+  listen localhost:1190!
+  root www!
+}
+
+server {
+  serverName webserv81!
+  listen localhost:1191!
+  root www!
+}
+
+server {
+  serverName webserv82!
+  listen localhost:1192!
+  root www!
+}
+
+server {
+  serverName webserv83!
+  listen localhost:1193!
+  root www!
+}
+
+server {
+  serverName webserv84!
+  listen localhost:1194!
+  root www!
+}

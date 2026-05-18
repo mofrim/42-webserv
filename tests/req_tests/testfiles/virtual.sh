@@ -54,16 +54,32 @@ if [ -z "$RESPONSE" ]; then
 	exit 1;
 fi
 
-# exec 3<&-
-# exec 3<>/dev/tcp/"$hostname"/"$port"
+# -------------------------=[ other virtual server ]=------------------------- #
 
 sendHdrField "GET / HTTP/1.1" 3
 sendHdrField "Host: v2" 3
 finishReq 3
 
+RESPONSE="$(timeout 0.1s cat <&3 | grep 'Welcome to V2')"
+echo "Response:"
+echo "---------"
+echo "${RESPONSE[@]}"
 
-# RESPONSE="$(timeout 0.1s cat <&3 | grep 'Welcome to V2')"
-RESPONSE="$(timeout 0.1s cat <&3)"
+if [ -z "$RESPONSE" ]; then
+	# SIGINT kill webserv
+	if [ $# -eq 2 ]; then
+		pkill -INT webserv
+	fi
+	exit 1;
+fi
+
+# -----------------=[ not a virtual server but wrong iface ]=----------------- #
+
+sendHdrField "GET / HTTP/1.1" 3
+sendHdrField "Host: vNot" 3
+finishReq 3
+
+RESPONSE="$(timeout 0.1s cat <&3 | grep 'Welcome to V1')"
 echo "Response:"
 echo "---------"
 echo "${RESPONSE[@]}"
