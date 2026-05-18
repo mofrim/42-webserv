@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/14 23:11:35 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/17 10:26:53 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/18 10:57:57 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@
 #include <vector>
 
 // max num of events epoll will manage in one epoll_wait loop
-#define MAX_EVENTS 64
+#define MAX_EVENTS 1000
 #define EPOLL_TIMEOUT_MS 500
 
 class Epoll {

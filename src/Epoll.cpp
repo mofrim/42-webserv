@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/14 23:12:17 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/17 14:54:55 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/18 10:58:40 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,6 +45,9 @@ void Epoll::setup(const std::vector<VServer>& vservers)
   if (_epoll_fd == -1)
     throw(EpollException("epoll_create failed"));
 
+  // if (setFdCloexec(_epoll_fd) == -1)
+  //   throw EpollException("Could not set FD_CLOEXEC on _epoll_fd");
+
   for (size_t k = 0; k < vservers.size(); k++) {
     listenFds = vservers[k].getListenFds();
     for (std::set<int>::iterator itListen = listenFds.begin();
@@ -68,7 +71,7 @@ void Epoll::setup(const std::vector<VServer>& vservers)
 // ready fds in _nfds vor usage in printEvents f.ex.
 int Epoll::wait()
 {
-  _nfds = epoll_wait(_epoll_fd, _events, MAX_EVENTS, 500);
+  _nfds = epoll_wait(_epoll_fd, _events, MAX_EVENTS, EPOLL_TIMEOUT_MS);
   return (_nfds);
 }
 
