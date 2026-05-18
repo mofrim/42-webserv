@@ -1,0 +1,10 @@
+server {
+  serverName webserv!
+  listen 192.168.2.143:1111!
+}
+
+server {
+  serverName webserv!
+  listen 0.0.0.0:1111!
+}
+
