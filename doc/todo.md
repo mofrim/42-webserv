@@ -2,13 +2,6 @@
 
 ## current TODOs
 
-- [ ] pay attention and implement sanitization according to this:
-
-      A sender MUST NOT generate a bare CR (a CR character not immediately
-      followed by LF) within any protocol elements other than the content. A
-      recipient of such a bare CR MUST consider that element to be invalid or
-      replace each bare CR with SP before processing the element or forwarding
-      the message.
 
 - [ ] and this:
 
@@ -18,13 +11,8 @@
 
 - [ ] add func comments to hpp *not* to cpp files -> global visibility!
 
-- [ ] check if all getters return reasonable (const!?) values!
 
 - [ ] find out what should be handled differently with other HTTP-versions
-
-- [ ] CGI
-
-- [ ] DELETE
 
 - [ ] add `isatty` based detection to `Logger` class in order to decide on
   colored output
@@ -39,16 +27,14 @@
 - [ ] add more POST tests around the form-thingy also highlighting the Firefox
   413 / 400 on too large requests issue
 
-- [ ] check if a real-file-route behaves as expected. also with a redirect
-
-- [ ] add to URI class possibility to parse full URLs
-
 - [ ] test virtual servers with 0.0.0.0 and more complex things
 
 - [ ] test percent decoding in URIs
 
 - [ ] add a `form-post-with-query.html` showcasing the query string based
   filename setting.
+
+- [ ] add maximum body to CGI bodies
 
 
 ## DONEs
@@ -126,3 +112,20 @@ via `/route/` then this is forbidden 403
 - [x] support URL redirection meaning: `redirect` directive will also take a
   full URL (like https://42.fr) as redir target!
 
+- [x] check if a real-file-route behaves as expected. also with a redirect
+
+- [x] add to URI class possibility to parse full URLs
+
+- [x] CGI
+
+- [x] DELETE
+
+- [x] check if all getters return reasonable (const!?) values!
+
+- [x] pay attention and implement sanitization according to this:
+
+      A sender MUST NOT generate a bare CR (a CR character not immediately
+      followed by LF) within any protocol elements other than the content. A
+      recipient of such a bare CR MUST consider that element to be invalid or
+      replace each bare CR with SP before processing the element or forwarding
+      the message.
