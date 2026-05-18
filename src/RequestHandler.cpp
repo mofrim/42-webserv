@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 19:13:35 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/18 21:42:55 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/18 21:51:28 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -171,10 +171,10 @@ void RequestHandler::writeResponse()
     response   = req.getResponseStr();
   }
 
-  Logger::logSrv(_cli->getVsrv()->getName(),
+  Logger::logSrv(_vsrvName,
       "Sending Response (" + int2str(statusCode) + ") to " +
           _cli->getIfaceFdStr());
-  Logger::logReqRes(_cli->getVsrv()->getName(), "Response", response);
+  Logger::logReqRes(_vsrvName, "Response", response);
 
   if (response.empty())
     throw ReqHandlerException("Cannot write response! Nothing to write!");
@@ -194,7 +194,7 @@ void RequestHandler::writeResponse()
   else
     _cli->setState(CLI_IDLE);
 
-  Logger::logSrv(_cli->getVsrv()->getName(), "Response successfully sent!");
+  Logger::logSrv(_vsrvName, "Response successfully sent!");
 
   _cli->resetReq();
 }
