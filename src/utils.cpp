@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/26 10:03:57 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/17 17:14:19 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/18 09:09:39 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,6 +55,18 @@ int setFdNonBlocking(int fd)
 {
   int flags = fcntl(fd, F_GETFL);
   return (fcntl(fd, F_SETFL, flags | O_NONBLOCK));
+}
+
+// sets the FD_CLOEXEC flag on a fd. returns 0 on success, -1 otherwise.
+int setFdCloexec(int fd)
+{
+  int flags = fcntl(fd, F_GETFD);
+  if (flags == -1)
+    return -1;
+  flags |= FD_CLOEXEC;
+  if (fcntl(fd, F_SETFD, flags) == -1)
+    return -1;
+  return 0;
 }
 
 // returns a string of format "localhost:1234" or "42.42.42.1:23" for valid IPv4
@@ -171,7 +183,7 @@ std::vector<str> splitStrWhite(const str& sstr, bool keepEmpty)
       sub = sstr.substr(i, k - i);
     if (!sub.empty() || keepEmpty)
       ret.push_back(sub);
-    while (isspace(sstr[k]))
+    while (k < sstr.size() && isspace(sstr[k]))
       ++k;
     i = k;
   }
@@ -282,6 +294,7 @@ std::set<str> listDirFiles(constr& directoryPath, bool dirSlash)
   return files;
 }
 
+// return a nicely formatted errno string
 str getErrnoStr()
 {
   return str("errno: \"#" + int2str(errno) + " " + strerror(errno) + "\"");

@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/03 11:26:23 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/17 14:54:00 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/18 08:48:16 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,19 +20,24 @@
 str bool2str(bool n);
 str char2str(char c);
 
-str      inAddrToStr(const struct in_addr& addr);
-str      getAddrPortStr4(const struct sockaddr_in& addr);
-int      setFdNonBlocking(int fd);
+str inAddrToStr(const struct in_addr& addr);
+str getAddrPortStr4(const struct sockaddr_in& addr);
+
+int setFdNonBlocking(int fd);
+int setFdCloexec(int fd);
+
+// TODO put them in WsrvLib
 e_Method str2meth(constr& m);
 str      meth2str(e_Method m);
-int      getFileType(constr& path);
-str      strip(str str);
-void     tolower(str& s);
-u16      str2u16(constr& s);
-str      data2hexStr(const char *s, size_t len);
-bool     isValidFnameChar(char c);
-bool     isValidFname(const str& s);
-str      getErrnoStr();
+
+int  getFileType(constr& path);
+str  strip(str str);
+void tolower(str& s);
+u16  str2u16(constr& s);
+str  data2hexStr(const char *s, size_t len);
+bool isValidFnameChar(char c);
+bool isValidFname(const str& s);
+str  getErrnoStr();
 
 std::set<str> listDirFiles(constr& directoryPath, bool dirSlash = true);
 
@@ -119,8 +124,8 @@ str getSetAsStr(const std::set< std::pair<T1, T2> >& s)
 //
 // well in C++11 std::map::erase and std::set::erase return an iterator to the
 // next elem after erasure. in C++98 they don't. that is a problem because like
-// that is kind of difficult to safely iterate over a container while possibly
-// deleting elems from it.
+// that it is kind of difficult to safely iterate over a container while
+// possibly deleting elems from it.
 template <typename T>
 typename T::iterator eraseIt(T& conti, typename T::iterator it)
 {
