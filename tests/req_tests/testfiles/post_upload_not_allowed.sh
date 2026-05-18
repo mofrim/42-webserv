@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# check case insensitive handling of headers
+# a normal post request with accurate body size
 
 # ---------------------------=[ test boilerplate ]=--------------------------- #
 
@@ -35,13 +35,16 @@ fi
 
 exec 3<>/dev/tcp/"$hostname"/"$port"
 
-# ------------------------------=[ test logic ]=------------------------------ #
+# ------------------------=[ test logic starts here ]=------------------------ #
 
-sendHdrField "GET / HTTP/1.1" 3
-sendHdrField "host: moep" 3
+sendHdrField "POST / HTTP/1.1" 3
+sendHdrField "Host: miep" 3
+sendHdrField "Content-Length: 22" 3
 finishReq 3
 
-RESPONSE="$(timeout 0.1s cat <&3 | grep 200)"
+echo -n "body not allowed here!" >&3 2>/dev/null
+
+RESPONSE="$(timeout 0.1s cat <&3 | grep 403)"
 echo "Response:"
 echo "---------"
 echo "${RESPONSE[@]}"
@@ -52,6 +55,7 @@ exec 3<&-
 if [ $# -eq 2 ]; then
 	pkill -INT webserv
 fi
+
 
 if [ -z "$RESPONSE" ]; then
 	exit 1;

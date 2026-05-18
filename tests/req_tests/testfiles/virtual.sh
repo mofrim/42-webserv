@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# check case insensitive handling of headers
+# template
 
 # ---------------------------=[ test boilerplate ]=--------------------------- #
 
@@ -29,19 +29,41 @@ if [ $# -eq 3 ]; then
 else
 	hostname="$1"
 	port="$2"
-	$webserv $cfgDir/simplest.wsrv > /dev/null &
+	$webserv $cfgDir/virtual.wsrv > /dev/null &
 	sleep 0.1s
 fi
 
 exec 3<>/dev/tcp/"$hostname"/"$port"
 
-# ------------------------------=[ test logic ]=------------------------------ #
+# ------------------------=[ test logic starts here ]=------------------------ #
 
 sendHdrField "GET / HTTP/1.1" 3
-sendHdrField "host: moep" 3
+sendHdrField "Host: v1" 3
 finishReq 3
 
-RESPONSE="$(timeout 0.1s cat <&3 | grep 200)"
+RESPONSE="$(timeout 0.1s cat <&3 | grep 'Welcome to V1')"
+echo "Response:"
+echo "---------"
+echo "${RESPONSE[@]}"
+
+if [ -z "$RESPONSE" ]; then
+	# SIGINT kill webserv
+	if [ $# -eq 2 ]; then
+		pkill -INT webserv
+	fi
+	exit 1;
+fi
+
+# exec 3<&-
+# exec 3<>/dev/tcp/"$hostname"/"$port"
+
+sendHdrField "GET / HTTP/1.1" 3
+sendHdrField "Host: v2" 3
+finishReq 3
+
+
+# RESPONSE="$(timeout 0.1s cat <&3 | grep 'Welcome to V2')"
+RESPONSE="$(timeout 0.1s cat <&3)"
 echo "Response:"
 echo "---------"
 echo "${RESPONSE[@]}"

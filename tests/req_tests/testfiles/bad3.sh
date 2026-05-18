@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# check case insensitive handling of headers
+# there shall be no isolated CRs in any header field
 
 # ---------------------------=[ test boilerplate ]=--------------------------- #
 
@@ -38,10 +38,10 @@ exec 3<>/dev/tcp/"$hostname"/"$port"
 # ------------------------------=[ test logic ]=------------------------------ #
 
 sendHdrField "GET / HTTP/1.1" 3
-sendHdrField "host: moep" 3
+sendHdrField "Host: miep\n" 3
 finishReq 3
 
-RESPONSE="$(timeout 0.1s cat <&3 | grep 200)"
+RESPONSE="$(timeout 0.1s cat <&3 | grep 400)"
 echo "Response:"
 echo "---------"
 echo "${RESPONSE[@]}"
@@ -53,6 +53,7 @@ if [ $# -eq 2 ]; then
 	pkill -INT webserv
 fi
 
+# fail if we got a response
 if [ -z "$RESPONSE" ]; then
 	exit 1;
 fi

@@ -1,25 +1,17 @@
 server {
   serverName v1!
   listen localhost:1111!
-  maxBodySize 1000000!
-  root ../../_www!
-  errorPage 404:/bla/404.html!
-  errorPage 400:/bla/400.html!
-
-  route / {
-    index index.html!
-    autoindex off!
-    methods GET POST!
-  }
-
-  route /moep {
-    redirect 302:/!
-  }
+  root ../../_www/v1!
 }
+
 server {
   serverName v2!
   listen localhost:1111!
+  root ../../_www/v2!
+}
 
-  route /kalle {
-  }
+server {
+  serverName vNot!
+  listen localhost:1112!
+  root ../../_www/vNot!
 }
