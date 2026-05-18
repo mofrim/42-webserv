@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 19:13:35 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/18 21:31:48 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/18 21:42:55 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,7 +69,8 @@ void RequestHandler::readRequest()
     else
       // Dear evalutor. I _AM_ checking errno here, but only for _LOGGING_ not
       // for "adjusting server behavior".
-      Logger::logErr("Read failed with: " + getErrnoStr() + " -> disco!");
+      Logger::logWarn(
+          "_vsrvName", "Read failed, " + getErrnoStr() + " -> disco!");
     _cli->setState(CLI_DISCO);
     return;
   }
