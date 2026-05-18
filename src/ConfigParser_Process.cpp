@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/08 16:14:27 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/14 22:14:59 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/18 17:52:20 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,12 +14,13 @@
 #include "Logger.hpp"
 #include "utils.hpp"
 
-#include <iostream>
-
-// FIXME is this save?
 void ConfigParser::_advanceTillSrvEnd()
 {
-  while (_tokIt != _tokens.end() &&
+  // using TOK_NULL here because we will have one more increment by the for-inc
+  // which would bring us to _tokens.end() if we reached the end of cfg.
+  // otherwise we might skip the _tokens.end() accidentely and run into a
+  // segfault
+  while (_tokIt->type != TOK_NULL &&
       !(_scope.top() == S_SERVER && _tokIt->type == TOK_BEND))
   {
     if (_scope.top() == S_ROUTE && _tokIt->type == TOK_BEND)
@@ -92,6 +93,7 @@ bool ConfigParser::_parseVServer(VServerCfg& vcfg)
   _tokIt += 2;
 
   bool success = true;
+
   // the main loop. parsing the vsrv cfg as long as we hit the next '}' in the
   // server-scope or reach the end of _tokens where a TOK_NULL waits.
   while (!((_scope.top() == S_SERVER && _tokIt->type == TOK_BEND) ||
@@ -117,36 +119,31 @@ bool ConfigParser::_parseVServer(VServerCfg& vcfg)
       throw;
     }
 
-    // FIXME: should not fail when only route fails?! am i right?!? ah, okay i
-    // wanted to be strict here.
-    if (!success)
+    if (!success) {
       return false;
+    }
 
     if (!_isMetaToken())
       throw std::runtime_error("Expected meta-token got sth else here!");
 
     _skipFooTokens();
-    if (_tokIt->type == TOK_BEND) {
 
-      // FIXME: what happens if route is not complete?!?!
-      // when is this the case? when will i have to discard a route due to
-      // misconfiguration?
-      if (_scope.top() == S_ROUTE && success) {
-        vcfg.addRoute(_currentRoute);
-        _currentRoute.reset();
-      }
-
+    // finish the current route
+    if (_tokIt->type == TOK_BEND && _scope.top() == S_ROUTE) {
+      vcfg.addRoute(_currentRoute);
+      _currentRoute.reset();
       _scope.pop();
       ++_tokIt;
     }
   }
+  _scope.pop();
   return true;
 }
 
 // ----------------=[ Parsing dispatchers for both scopes ]=---------------- //
 
 // The general idea goes like that: when we reach one of the dispatcher
-// functions _tokIt will point to a direc (if not sth bad has hapenned ->
+// functions _tokIt will point to a direc (if not sth bad has hapened ->
 // throw). Then we dispatch to the individual parsing functions which itself
 // advance _tokIt one token to the directives value. This value is parsed and
 // success is returned. Then, to skip the recently parsed token, **the
@@ -175,8 +172,11 @@ bool ConfigParser::_parseServerDirec(VServerCfg& vcfg)
     case DIR_ROOT:
       success = _parseTokFspath(vcfg);
       break;
-    default:
+    default: {
+      Logger::logWarn(
+          "ConfigParser::_parseServerDirec", "Encountered unexpected direc!");
       return false;
+    }
   }
   ++_tokIt;
   return success;
@@ -213,8 +213,11 @@ bool ConfigParser::_parseRouteDirec(VServerCfg& vcfg)
     case DIR_CGI:
       success = _parseTokCgi();
       break;
-    default:
+    default: {
+      Logger::logWarn(
+          "ConfigParser::_parseRouteDirec", "Encountered unexpected direc!");
       return false;
+    }
   }
   ++_tokIt;
   return success;
