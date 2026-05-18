@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/13 13:06:35 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/10 22:59:54 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/18 08:31:12 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,34 @@ int _test_Utils()
   {
     str              s("");
     std::vector<str> sp = splitStrWhite(s);
+    for (std::vector<str>::iterator it = sp.begin(); it != sp.end(); ++it)
+      std::cout << "sp: '" << *it << "'" << std::endl;
+  }
+
+  // TODO make this real test cases
+  print_test_topic("test_utils", "splitStrWhite");
+  {
+    str s("/usr/bin/bash");
+    std::cout << "splitStrWhite of '" << s << "':" << std::endl;
+    std::vector<str> sp = splitStrWhite(s);
+    for (std::vector<str>::iterator it = sp.begin(); it != sp.end(); ++it)
+      std::cout << "sp: '" << *it << "'" << std::endl;
+
+    s = "/usr/bin/env bash";
+    std::cout << "splitStrWhite of '" << s << "':" << std::endl;
+    sp = splitStrWhite(s);
+    for (std::vector<str>::iterator it = sp.begin(); it != sp.end(); ++it)
+      std::cout << "sp: '" << *it << "'" << std::endl;
+
+    s = "miep\tmoep\n";
+    std::cout << "splitStrWhite of '" << s << "':" << std::endl;
+    sp = splitStrWhite(s);
+    for (std::vector<str>::iterator it = sp.begin(); it != sp.end(); ++it)
+      std::cout << "sp: '" << *it << "'" << std::endl;
+
+    s = "  \t\n\v\f";
+    std::cout << "splitStrWhite of '" << s << "':" << std::endl;
+    sp = splitStrWhite(s);
     for (std::vector<str>::iterator it = sp.begin(); it != sp.end(); ++it)
       std::cout << "sp: '" << *it << "'" << std::endl;
   }

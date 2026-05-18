@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/13 13:06:35 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/16 09:25:10 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/18 08:29:44 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,14 +23,14 @@ int _test_WsrvLib()
     std::cout << moep << std::endl;
   }
 
-  print_test_topic("test_WsrvLib", "WsrvSettings");
+  print_test_topic("test_WsrvLib", "Settings");
   {
-    std::cout << "WsrvLib::WsrvSettings.connKeepaliveTimeout: "
-              << WsrvLib::WsrvSettings.connKeepaliveTimeout << std::endl;
-    std::cout << "WsrvLib::WsrvSettings.reqTimeout: "
-              << WsrvLib::WsrvSettings.reqTimeout << std::endl;
-    std::cout << "WsrvLib::WsrvSettings.maxClients: "
-              << WsrvLib::WsrvSettings.maxClients << std::endl;
+    std::cout << "WsrvLib::Settings.connKeepaliveTimeout: "
+              << WsrvLib::Settings.connKeepaliveTimeout << std::endl;
+    std::cout << "WsrvLib::Settings.reqTimeout: "
+              << WsrvLib::Settings.reqTimeout << std::endl;
+    std::cout << "WsrvLib::Settings.maxClients: "
+              << WsrvLib::Settings.maxClients << std::endl;
   }
   return (0);
 }

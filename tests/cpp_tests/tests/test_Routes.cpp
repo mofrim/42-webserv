@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/13 13:06:35 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/13 23:24:45 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/18 08:28:59 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,7 @@ int _test_Routes()
     cfg.addInterface("127.0.0.1", 2222);
 
     VServer s(cfg);
-    s.init(dummy.begin(), dummy.begin());
+    s.init(dummy.begin(), dummy.begin(), NULL);
     s.printCfg();
   }
 
@@ -61,7 +61,7 @@ int _test_Routes()
     cfg.addInterface("127.0.0.1", 2222);
 
     VServer s(cfg);
-    s.init(dummy.begin(), dummy.begin());
+    s.init(dummy.begin(), dummy.begin(), NULL);
     s.printCfg();
   }
 
