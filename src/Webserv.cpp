@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:36:43 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/18 01:05:59 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/18 10:54:40 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -177,7 +177,16 @@ void Webserv::run()
 
       // 2) existing connection
       else {
-        Client  *cli  = _fdClientMap[currentFd];
+
+        // there can be racing conditions that may lead to ending up with a
+        // already deleted Client in the ready-list. here, we make very sure,
+        // that we never deref NULL in that case!
+        if (_fdClientMap.find(currentFd) == _fdClientMap.end() ||
+            _fdClientMap[currentFd] == NULL)
+          continue;
+
+        Client *cli = _fdClientMap[currentFd];
+
         VServer *vsrv = cli->getVsrv();
         u32      ev   = _epoll.getEvent(eventIdx);
 
