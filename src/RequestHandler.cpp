@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 19:13:35 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/19 15:12:07 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/19 17:26:53 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -152,9 +152,11 @@ void RequestHandler::writeResponse()
   // that is reqComplete == false.
   Request& req = _cli->getReq();
 
+  // handle timeout
   if (_cli->isTimeout()) {
 
-    Logger::logDbg1("RequestHandler: 408 due to timeout");
+    Logger::logDbg1(
+        "RequestHandler", "Sending 408 to client " + _cli->getIfaceFdStr());
     statusCode = HTTP_408;
 
     if (_cli->isCGIing())
@@ -164,7 +166,7 @@ void RequestHandler::writeResponse()
       response = Response::genDefaultErrResponse(statusCode);
     else if (_cli->getVsrv() != NULL && req.getMatchedRoute() != NULL) {
       req.setStatusCode(statusCode);
-      req.getRespo().setBodyStatusPage();
+      req.processReq();
       response = req.getResponseStr();
     }
     else

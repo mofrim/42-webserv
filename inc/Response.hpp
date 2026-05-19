@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/23 19:11:06 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/19 15:10:10 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/19 17:48:39 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,6 @@
 
 // 2^14 bytes should be enough, no?
 #define CGI_READBUFSIZE 16384
-// #define CGI_READBUFSIZE 65536
 
 class Request;
 class Client;
@@ -56,6 +55,11 @@ class Response {
     void _readBodyFromFile(constr& path, bool setErrPageOnFail = true);
     void _buildRespoHdrs();
     void _buildResponseStr();
+    bool _respoHdrHas(constr& hdr);
+    void _setBodyStatusPage(constr& opts = "");
+
+    static std::map<str, str> _buildErrRespoHdrs(
+        e_HTTPStatus status, const str& body);
 
     void _handleBadRequest();
     void _handleSimplePost();
@@ -81,11 +85,6 @@ class Response {
     char              **_cgiBuildEnv(std::map<str, str> cgiParams);
     e_HTTPStatus        _cgiSetup(std::map<str, str> cgiParams);
 
-    static std::map<str, str> _buildErrRespoHdrs(
-        e_HTTPStatus status, const str& body);
-
-    bool _respoHdrHas(constr& hdr);
-
   public:
     Response();
     Response& operator=(const Response& other);
@@ -110,5 +109,4 @@ class Response {
     void         setStatus(e_HTTPStatus s);
 
     static str genDefaultErrResponse(e_HTTPStatus errCode, constr errPage = "");
-    void       setBodyStatusPage(constr& opts = "");
 };
