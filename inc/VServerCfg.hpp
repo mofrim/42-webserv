@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/25 08:01:29 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/16 18:42:13 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/19 13:04:55 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,7 @@ class VServerCfg {
     // keys for _routes should be the _path prop of a Route.
     std::map<str, Route> _routes;
 
+    // FIXME: remove!!!! DEAD CODE!!!!
     // to keep an overview which directives where set from cfg file.
     std::map<str, bool> _setDirecs;
     void                _initSetDirecs();

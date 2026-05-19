@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/24 17:40:43 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/17 16:27:09 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/19 15:13:23 by fmaurer          ###   ########.fr       */
 /*                                                                            */ /* ************************************************************************** */
 
 #include "WsrvLib.hpp"
@@ -264,6 +264,10 @@ e_HTTPStatus WsrvLib::short2HttpStatus(u16 s)
   switch (s) {
     case 200:
       return HTTP_200;
+    case 201:
+      return HTTP_201;
+    case 204:
+      return HTTP_204;
     case 300:
       return HTTP_300;
     case 301:
@@ -274,12 +278,16 @@ e_HTTPStatus WsrvLib::short2HttpStatus(u16 s)
       return HTTP_308;
     case 400:
       return HTTP_400;
+    case 403:
+      return HTTP_403;
     case 404:
       return HTTP_404;
     case 408:
       return HTTP_408;
     case 413:
       return HTTP_413;
+    case 418:
+      return HTTP_418;
     case 500:
       return HTTP_500;
     case 501:

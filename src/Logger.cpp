@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/24 20:52:55 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/19 08:16:08 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/19 14:21:29 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -169,7 +169,7 @@ void Logger::logBug(constr& pre, const str& msg)
 
 void Logger::drawCycleSep()
 {
-  if (LOGLEVEL == LOG_BRUTAL)
+  if (LOGLEVEL >= LOG_DEBUG)
     std::cout
         << YLO
         << "\n  --------------------- epoll cycle ---------------------\n\n"

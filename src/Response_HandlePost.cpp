@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/14 17:51:57 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/18 01:04:50 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/19 13:30:30 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,7 +68,7 @@ void Response::_handleSimplePost()
 
   // select response page
   if (_status == HTTP_201)
-    _setBodyStatusPage(_respoHeaders["Location"]);
+    setBodyStatusPage(_respoHeaders["Location"]);
 }
 
 static str generateFname(constr& dir, constr& ext)

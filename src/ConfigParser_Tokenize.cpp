@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/07 20:08:59 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/14 22:16:25 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/19 12:48:06 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -308,7 +308,7 @@ str ConfigParser::_direc2str(e_Direcs d) const
       return "redirect";
     case DIR_CGI:
       return "cgi";
-    case DIR_INVALID:
+    default:
       return "INVALID";
   }
 }
@@ -342,7 +342,7 @@ ConfigParser::e_TokType ConfigParser::_nextTokFromDirec(e_Direcs direc)
       return TOK_REDIR;
     case DIR_CGI:
       return TOK_CGI;
-    case DIR_INVALID:
+    default:
       return TOK_NULL;
   }
 }
@@ -382,7 +382,7 @@ str ConfigParser::_toktype2str(e_TokType t) const
       return "CGI";
     case TOK_REDIR:
       return "REDIR";
-    case TOK_NULL:
+    default:
       return "NULL";
   }
 }

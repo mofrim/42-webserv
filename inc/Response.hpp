@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/23 19:11:06 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/19 11:45:54 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/19 15:10:10 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,7 +56,6 @@ class Response {
     void _readBodyFromFile(constr& path, bool setErrPageOnFail = true);
     void _buildRespoHdrs();
     void _buildResponseStr();
-    void _setBodyStatusPage(constr& opts = "");
 
     void _handleBadRequest();
     void _handleSimplePost();
@@ -108,6 +107,8 @@ class Response {
     void reset();
 
     e_HTTPStatus getStatus() const;
+    void         setStatus(e_HTTPStatus s);
 
     static str genDefaultErrResponse(e_HTTPStatus errCode, constr errPage = "");
+    void       setBodyStatusPage(constr& opts = "");
 };

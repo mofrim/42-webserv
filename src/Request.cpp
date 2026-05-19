@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 23:39:57 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/19 11:25:27 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/19 15:10:59 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -333,7 +333,11 @@ void Request::setVsrvName(constr& name) { _vsrvName = name; }
 
 bool Request::hdrTooBig() const { return _hdrLines > MAX_HEADER_LINES; }
 
-void Request::setStatusCode(e_HTTPStatus code) { _statusCode = code; }
+void Request::setStatusCode(e_HTTPStatus code)
+{
+  _statusCode = code;
+  _respo.setStatus(code);
+}
 
 bool Request::reqError() const { return _statusCode >= HTTP_400; }
 

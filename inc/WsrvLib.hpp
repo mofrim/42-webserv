@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/24 17:31:03 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/18 20:39:04 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/19 15:14:19 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,8 +39,11 @@ typedef std::string::const_iterator constrIt;
 // maximum number of headers. nginx has this set to 1000 per default. above that
 // -> HTTP_400
 #define MAX_HEADER_LINES 200
+
+// ... definitely a TODO to make them configurable in global scope in cfg
 #define MAX_BODY_SIZE 1000000         // 1mb
 #define MAX_CONTENT_LENGTH 5000000000 // 5gb
+#define MAX_CGI_BODY_LENGTH 500000000 // 500m
 
 // https://datatracker.ietf.org/doc/html/rfc9112#section-3
 #define MAX_REQLINE_LEN 8000

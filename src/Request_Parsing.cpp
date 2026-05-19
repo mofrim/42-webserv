@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/01 18:46:40 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/19 11:12:35 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/19 12:18:21 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,9 +48,9 @@ void Request::evaluateTarget()
 
   this->_matchRoute();
 
-  Logger::logSrv(_vsrvName, "Matched Route: " + _matchedRoute->getPath());
-  Logger::logSrv(_vsrvName, "Target Path: " + _targetPath);
-  Logger::logSrv(_vsrvName, "Query: " + _target.getQueryCSStr());
+  Logger::logSrv(_vsrvName, "-> Matched Route: " + _matchedRoute->getPath());
+  Logger::logSrv(_vsrvName, "-> Target Path: " + _targetPath);
+  Logger::logSrv(_vsrvName, "-> Query: " + _target.getQueryCSStr());
 
   // check if method is allowed for this route, if not -> 403
   const std::set<e_Method>& allowedMethods = _matchedRoute->getMethods();
@@ -148,7 +148,7 @@ e_HTTPStatus Request::_readReqline()
 // convenience func for logging some maybe interesting hdrs
 void Request::_logSelectedHdrs()
 {
-  str logstr("::HDRS:: ");
+  str logstr("-> Some Hdrs: ");
   if (_headers.find("host") != _headers.end())
     logstr += "Host='" + _headers["host"] + "'";
   if (_headers.find("user-agent") != _headers.end()) {

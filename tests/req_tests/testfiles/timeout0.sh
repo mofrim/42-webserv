@@ -30,7 +30,8 @@ if [ $# -eq 3 ]; then
 else
 	hostname="$1"
 	port="$2"
-	$webserv $cfgDir/simplest.wsrv > /dev/null &
+	# $webserv $cfgDir/simplest.wsrv > /dev/null &
+	$webserv $cfgDir/simplest.wsrv &
 	sleep 0.1s
 fi
 

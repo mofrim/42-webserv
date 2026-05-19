@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/06 22:32:39 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/16 12:41:00 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/19 12:44:45 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -342,11 +342,14 @@ bool isU16Str(constr& str)
   size_t i = 0;
 
   u32 value = 0;
+  u8  digit = 0;
+  u32 next  = 0;
   while (i < str.length() && isdigit(str[i])) {
-    u8 digit = str[i] - '0';
-    if (value > (65535 - digit) / 10)
+    digit = str[i] - '0';
+    next  = value * 10 + digit;
+    if (next > 65535)
       return false;
-    value = value * 10 + digit;
+    value = next;
     ++i;
   }
 

@@ -1,0 +1,10 @@
+server {
+  serverName webserv!
+  listen localhost:1111!
+  errorPage 404:/errPages/404.html!
+  errorPage 403:/errPages/403.html!
+
+  route / {
+    index index-error.html!
+  }
+}

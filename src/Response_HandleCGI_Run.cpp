@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/17 10:36:30 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/19 11:55:03 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/19 15:02:21 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 #include "Response.hpp"
 #include "utils.hpp"
 
+#include <cerrno>
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
@@ -253,6 +254,16 @@ void Response::cgiRead()
     close(_cgiParentReadFd);
     return;
   }
+
+  if (_cgiBody.size() + bytesRead > MAX_CGI_BODY_LENGTH) {
+    Logger::logSrv(
+        _vsrvName, "CGI Body exceeding MAX_CGI_BODY_LENGTH. Baaad CGI!");
+    _status = HTTP_502;
+    _cli->setState(CLI_CGIKO);
+    _cli->delCgiFromEpoll(_cgiParentReadFd);
+    close(_cgiParentReadFd);
+  }
+
   _cgiBody.append(_cgiReadBuffer, bytesRead);
 }
 
@@ -302,7 +313,6 @@ void Response::cgiProcessBody()
   // just pass on cgiBody as a pointer here. But this is left for future
   // optimization!
   size_t bodySize = _cgiBody.size() - headers.size() - 2;
-  Logger::logBug("bodysisasdsf: " + int2str(bodySize));
   _req->setBodySize(bodySize);
   _body.assign(_cgiBody.substr(crlfx2).data() + 4, bodySize);
   _status = HTTP_200;
@@ -330,8 +340,8 @@ void Response::cgiKillProcess()
     return;
   }
 
-  // FIXME REMOVEME!
-  usleep(500);
+  // FIXME: REMOVEME!
+  usleep(50);
 
   if (waitpid(_cgiPid, 0, WNOHANG) == _cgiPid) {
     Logger::logDbg1("Response::cgiKillProcess", "killed with SIGTERM");

@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/23 19:11:25 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/19 12:06:20 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/19 15:10:26 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -147,7 +147,7 @@ void Response::_getBody200()
 
   if (_targetPath == "are/you/a/teapot?") {
     _status = HTTP_418;
-    _body   = WsrvLib::getTeapot();
+    setBodyStatusPage();
     return;
   }
 
@@ -172,7 +172,7 @@ void Response::_getBody200()
       if (isdir == 2 || isdir == -2)
         Logger::logWarn("stat() encountered some weird file or symlink");
       _status = HTTP_404;
-      _body   = WsrvLib::getDefaultStatusPage(HTTP_404);
+      setBodyStatusPage();
       return;
 
     // is a file
@@ -211,7 +211,7 @@ void Response::_getBody200()
       // status will be 404 or 413.
       if (_status != HTTP_200) {
         _status = HTTP_403;
-        _body   = WsrvLib::getDefaultStatusPage(_status);
+        setBodyStatusPage();
       }
     }
   }
@@ -338,7 +338,7 @@ void Response::_handleBadRequest()
     _body = WsrvLib::getDefaultStatusPage(_status);
     return;
   }
-  _setBodyStatusPage();
+  setBodyStatusPage();
 }
 
 // get status page first from matched route secondly from vsrv. fallback to
@@ -349,7 +349,7 @@ void Response::_handleBadRequest()
 void Response::_handleRedir()
 {
   _status = _matchedRoute->getRedir().first;
-  _setBodyStatusPage();
+  setBodyStatusPage();
 }
 
 void Response::_handleDelete()
@@ -461,11 +461,11 @@ void Response::_readBodyFromFile(constr& path, bool setErrPageOnFail)
 // request responses
 //
 // the status code will be taken from objects _status field!
-void Response::_setBodyStatusPage(constr& opts)
+void Response::setBodyStatusPage(constr& opts)
 {
   str statusPage;
 
-  if (_status != HTTP_400 && _matchedRoute != NULL)
+  if (_matchedRoute != NULL)
     statusPage = _matchedRoute->getErrPage(_status);
 
   if (statusPage.empty() && _vsrv != NULL)
@@ -480,6 +480,8 @@ void Response::_setBodyStatusPage(constr& opts)
 }
 
 e_HTTPStatus Response::getStatus() const { return _status; }
+
+void Response::setStatus(e_HTTPStatus s) { _status = s; }
 
 bool Response::_respoHdrHas(constr& hdr)
 {

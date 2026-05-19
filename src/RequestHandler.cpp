@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 19:13:35 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/19 08:45:40 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/19 15:12:07 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -162,8 +162,12 @@ void RequestHandler::writeResponse()
 
     if (_cli->isVirtual() && _cli->getVsrv() == NULL)
       response = Response::genDefaultErrResponse(statusCode);
+    else if (_cli->getVsrv() != NULL && req.getMatchedRoute() != NULL) {
+      req.setStatusCode(statusCode);
+      req.getRespo().setBodyStatusPage();
+      response = req.getResponseStr();
+    }
     else
-      // TODO add proper errorPage from server scope getting here
       response = Response::genDefaultErrResponse(statusCode);
   }
   else {
