@@ -1,3 +1,4 @@
+core
 compile_commands.json
 **/*.o
 obj/
