@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/24 20:52:55 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/18 20:40:27 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/19 08:16:08 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -143,18 +143,14 @@ void Logger::logSrv(const str& srvName, const str& msg, e_LogType logtype)
   }
 }
 
-// for logging response and requests
-// is being from level LOG_DEBUG (== 1) on
-//
-// FIXME: refac to take Client as first param. and maybe even whole response bc
-// we might want to print the headers seperate from the body
+// for logging response and requests in BRUTAL loglevel
 void Logger::logReqRes(const str& srvName, const str& resreq, const str& data)
 {
   if (LOGLEVEL >= LOG_BRUTAL) {
     str logtime = getLogtime();
     std::cout << GRY << logtime << GRN << " (" << srvName << ") " << BGRY
               << resreq << ":" << BGRY << "\n---" << std::endl;
-    std::cout << data;
+    std::cout << data2hexStr(data.data(), data.size());
     std::cout << "\n---" << RST << std::endl;
   }
 }

@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/17 10:36:30 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/18 12:11:17 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/19 11:55:03 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,8 @@ e_HTTPStatus Response::_cgiSetup(std::map<str, str> cgiParams)
 {
   str cgiExec   = cgiParams["EXEC"];
   str cgiScript = cgiParams["SCRIPT_FILENAME"];
+
+  _cgiWriteBodySize = _req->getBodyData().size();
 
   Logger::logSrv(_vsrvName, "CGI: Exec=" + cgiExec + ", Script=" + cgiScript);
 
@@ -83,10 +85,9 @@ e_HTTPStatus Response::_cgiSetup(std::map<str, str> cgiParams)
     // handling possible cgiExecs like `/usr/bin/env bash`
     // NOTE: cgiScript is assumed to don't have any whitespaces
     std::vector<str> argvSplit = splitStrWhite(cgiExec);
-    if (argvSplit.size() > 1) {
+    if (argvSplit.size() > 1)
       cgiExec = argvSplit[0];
-      argvSplit.push_back(cgiScript);
-    }
+    argvSplit.push_back(cgiScript);
 
     char **argv = new char *[argvSplit.size() + 1];
     if (argv == NULL)
@@ -100,13 +101,6 @@ e_HTTPStatus Response::_cgiSetup(std::map<str, str> cgiParams)
     argv[argvSplit.size()] = NULL;
 
     std::cerr << argv[0] << argv[1] << std::endl;
-
-    // // being almost completely C++ish here ;)
-    // char *argv[] = {
-    //     new char[cgiExec.length() + 1], new char[cgiScript.length() + 1],
-    //     NULL};
-    // strcpy(argv[0], cgiExec.c_str());
-    // strcpy(argv[1], cgiScript.c_str());
 
     execve(cgiExec.c_str(), argv, envp);
 
@@ -143,32 +137,39 @@ e_HTTPStatus Response::_cgiSetup(std::map<str, str> cgiParams)
 
 void Response::cgiWrite()
 {
+  if (_cgiWriteBodySize == 0) {
+    Logger::logDbg2("Response::cgiWrite", "No body to write!");
+    _cli->setState(CLI_CGIREAD);
+    _cli->delCgiFromEpoll(_cgiParentWriteFd);
+    close(_cgiParentWriteFd);
+  }
+
   Logger::logDbg2("(Response::cgiWrite) writing body:\n" +
-      str(_req->getBodyData().begin(), _req->getBodyData().end()));
+      data2hexStr(&_req->getBodyData()[_cgiBytesWritten],
+          _cgiWriteBodySize - _cgiBytesWritten));
 
-  ssize_t bytesWritten = 0;
-
-  bytesWritten = write(_cgiParentWriteFd,
-      _req->getBody().getBodyDataAsStr().c_str(),
-      _req->getBodyData().size());
+  ssize_t bytesWritten = write(_cgiParentWriteFd,
+      &_req->getBodyData()[_cgiBytesWritten],
+      _cgiWriteBodySize - _cgiBytesWritten);
 
   if (bytesWritten >= 0) {
-
-    if (static_cast<size_t>(bytesWritten) == _req->getBodyData().size()) {
+    if (static_cast<size_t>(bytesWritten) == _cgiWriteBodySize) {
       Logger::logDbg2("Response::cgiWrite", "Done writing body to pipe!");
       _cli->setState(CLI_CGIREAD);
       _cli->delCgiFromEpoll(_cgiParentWriteFd);
       close(_cgiParentWriteFd);
     }
     else {
-      Logger::logWarn("Response::cgiWrite", "Failed to write complete body!");
+      Logger::logWarn("Response::cgiWrite", "Failed to write body!");
       _cli->setState(CLI_CGIKO);
       _status = HTTP_500;
     }
   }
 }
 
-bool Response::cgiWait()
+// this function is responsible for reaping the child process and reporting back
+// the exit status or any error
+bool Response::cgiEvalChildState()
 {
 
   if (_cli->getState() == CLI_CGICDONE)
@@ -188,34 +189,39 @@ bool Response::cgiWait()
 
   switch (waitRet) {
     case 0:
-      Logger::logDbg2("Response::cgiWait", "Child not yet done...");
+      Logger::logDbg2("Response::cgiEvalChildState", "Child not yet done...");
       break;
     case -1:
-      Logger::logDbg1(
-          "Response::cgiWait", "waitpid -> -1, errno: " + getErrnoStr());
+      Logger::logDbg1("Response::cgiEvalChildState",
+          "waitpid -> -1, errno: " + getErrnoStr());
       if (errno == EAGAIN)
         break;
+      // FIXME is this correct in any case???
       else if (errno == ECHILD) {
+        Logger::logDbg1("Response::cgiEvalChildState",
+            "waitpid -> -1, errno: " + getErrnoStr());
         _cli->setState(CLI_CGICDONE);
         break;
       }
       else {
+        Logger::logDbg1("Response::cgiEvalChildState",
+            "waitpid -> -1, errno: " + getErrnoStr());
         _status = HTTP_500;
         _cli->setState(CLI_CGIKO);
         return KO;
       }
       break;
     default:
-      Logger::logDbg1("Response::cgiWait", "Child done!");
+      Logger::logDbg1("Response::cgiEvalChildState", "Child done!");
       if ((WIFEXITED(status) && WEXITSTATUS(status) != 0) || !WIFEXITED(status))
       {
         if (WIFEXITED(status))
-          Logger::logDbg1("CGI: execve() failed with status " +
-              int2str(WEXITSTATUS(status)));
+          Logger::logDbg1("Response::cgiEvalChildState",
+              "execve() failed with status " + int2str(WEXITSTATUS(status)));
 
         if (WIFSIGNALED(status))
-          Logger::logDbg1(
-              "CGI: execve() failed with status " + int2str(WTERMSIG(status)));
+          Logger::logDbg1("Response::cgiEvalChildState",
+              "execve() signaled with signal " + int2str(WTERMSIG(status)));
 
         _status = HTTP_500;
         _cli->setState(CLI_CGIKO);
@@ -227,58 +233,79 @@ bool Response::cgiWait()
   return OK;
 }
 
-// FIXME make this binary-data-proof
 void Response::cgiRead()
 {
-  Logger::logDbg1("Response::cgiRead", "Reading...");
-  char    buffer[READ_BUFSIZE + 1];
   ssize_t bytesRead = 0;
 
-  bytesRead = read(_cgiParentReadFd, buffer, READ_BUFSIZE);
+  bytesRead = read(_cgiParentReadFd, _cgiReadBuffer, CGI_READBUFSIZE);
 
-  Logger::logDbg1("Response::cgiRead", "bytesRead = " + int2str(bytesRead));
+  Logger::logDbg2("Response::cgiRead", "bytesRead = " + int2str(bytesRead));
 
   if (bytesRead < 0)
     return;
 
-  if ((bytesRead == 0 || bytesRead < READ_BUFSIZE) &&
-      _cli->getState() == CLI_CGICDONE)
-  {
-    Logger::logDbg1("Response::cgiRead", "Done! Sending Response...");
-    buffer[bytesRead] = '\0';
-    _cgiBody += buffer;
+  if (bytesRead == 0) {
+    Logger::logDbg1("Response::cgiRead",
+        "bytesRead == 0 -> done! Read " + int2str(_cgiBody.size()) + " bytes");
+    _cgiBody.append(_cgiReadBuffer, bytesRead);
     _cli->setState(CLI_CGIOK);
     _cli->delCgiFromEpoll(_cgiParentReadFd);
     close(_cgiParentReadFd);
     return;
   }
-
-  buffer[bytesRead] = '\0';
-  _cgiBody += buffer;
+  _cgiBody.append(_cgiReadBuffer, bytesRead);
 }
 
-// FIXME make this a bit more sophisticated!
 void Response::cgiProcessBody()
 {
-  Logger::logDbg2("Response::cgiProcessBody", "BODY FROM SCRIPT:\n" + _cgiBody);
+  Logger::logDbg2("Response::cgiProcessBody",
+      "BODY FROM SCRIPT:\n" + data2hexStr(_cgiBody.data(), _cgiBody.size()));
 
-  if (_cgiBody.find(CRLFX2) != std::string::npos) {
-    str                headers = _cgiBody.substr(0, _cgiBody.find(CRLFX2));
-    std::istringstream iss(headers);
-    str                line;
-    while (std::getline(iss, line)) {
-      size_t pos = line.find(": ");
-      if (pos != std::string::npos) {
-        str key            = line.substr(0, pos);
-        str value          = line.substr(pos + 2);
-        _respoHeaders[key] = value;
-      }
-    }
-    _body   = _cgiBody.substr(_cgiBody.find(CRLFX2) + 4);
-    _status = HTTP_200;
+  size_t crlfx2 = _cgiBody.find(CRLFX2);
+
+  if (crlfx2 == str::npos) {
+    _status = HTTP_502;
+    return;
   }
-  else
-    _status = HTTP_500;
+
+  // we have got a valid header!
+
+  str              headers  = _cgiBody.substr(0, crlfx2 + 2);
+  std::vector<str> hdrLines = splitString(headers, CRLF);
+
+  if (hdrLines.size() == 0) {
+    _status = HTTP_502;
+    return;
+  }
+
+  for (size_t i = 0; i < hdrLines.size(); ++i) {
+    str&   line = hdrLines[i];
+    size_t pos  = line.find(":");
+    if (pos != std::string::npos && pos + 1 < line.size()) {
+      str key            = strip(line.substr(0, pos));
+      str value          = strip(line.substr(pos + 1));
+      _respoHeaders[key] = value;
+    }
+    else {
+      _status = HTTP_502;
+      return;
+    }
+  }
+
+  // RFC says: content-type is a MUST!
+  if (!_respoHdrHas("Content-Type")) {
+    _status = HTTP_502;
+    return;
+  }
+
+  // PERF this is mem mgmt technically a bit painful to do. it'd be better to
+  // just pass on cgiBody as a pointer here. But this is left for future
+  // optimization!
+  size_t bodySize = _cgiBody.size() - headers.size() - 2;
+  Logger::logBug("bodysisasdsf: " + int2str(bodySize));
+  _req->setBodySize(bodySize);
+  _body.assign(_cgiBody.substr(crlfx2).data() + 4, bodySize);
+  _status = HTTP_200;
 }
 
 void Response::cgiCleanupFds()

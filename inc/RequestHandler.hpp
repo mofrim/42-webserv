@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 19:12:58 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/17 09:03:07 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/19 08:39:52 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,9 @@ class RequestHandler {
 
     char _buffer[READ_BUFSIZE];
 
+    size_t _respoBytesSent;
+    size_t _respoSize;
+
     // unused
     RequestHandler(const RequestHandler& o);
     RequestHandler& operator=(const RequestHandler& o);
@@ -42,6 +45,8 @@ class RequestHandler {
     void writeResponse();
 
     void setVsrvName(const str& n);
+
+    void reset();
 
     class ReqHandlerException: public std::runtime_error {
       public:

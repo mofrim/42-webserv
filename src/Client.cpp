@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/14 20:51:06 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/18 21:15:57 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/19 09:46:47 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -125,48 +125,54 @@ void Client::handleEvent(u32 ev)
   }
 }
 
-void Client::handleEventCGI(u32 ev)
+void Client::handleEventCGI(u32 ev, int fd)
 {
   if (ev & EPOLLERR) {
     Logger::logSrv(
         _vsrv->getName(), "Got EPOLLERR from client " + getIfaceFdStr());
     _state = CLI_CGIKO;
+    _req.cgiEvalChildState();
   }
 
   if (ev & EPOLLHUP) {
-    Logger::logSrv(
-        _vsrv->getName(), "Got EPOLLHUP from client " + getIfaceFdStr());
-    _state = CLI_CGICDONE;
+    if (_req.cgiIsWriteFd(fd) && _state == CLI_CGIRW) {
+      Logger::logSrv(_vsrv->getName(),
+          "EPOLLHUP from client " + getIfaceFdStr() +
+              " while still writing to pipe!");
+      _state = CLI_CGIKO;
+    }
+    else if (_req.cgiIsReadFd(fd) && _state == CLI_CGIREAD) {
+      Logger::logSrv(_vsrv->getName(),
+          "EPOLLHUP from client " + getIfaceFdStr() +
+              " while still reading from pipe!");
+      if (_req.cgiEvalChildState() == KO)
+        _state = CLI_CGIKO;
+    }
   }
 
   switch (_state) {
     case CLI_CGIRW:
       if (ev & EPOLLOUT) {
         this->setLastActive();
-        _req.getRespo().cgiWrite();
+        _req.cgiWrite();
       }
       else if (ev & EPOLLIN) {
         this->setLastActive();
-        _req.getRespo().cgiRead();
+        _req.cgiRead();
       }
       if (_state == CLI_CGIOK || _state == CLI_CGIKO ||
-          _req.getRespo().cgiWait() == KO)
-      {
-        Logger::logBug("break");
+          _req.cgiEvalChildState() == KO)
         break;
-      }
-      else {
-        Logger::logBug("state: " + int2str(_state));
+      else
         return;
-      }
     case CLI_CGICDONE:
     case CLI_CGIREAD:
       if (ev & (EPOLLIN | EPOLLHUP)) {
         this->setLastActive();
-        _req.getRespo().cgiRead();
+        _req.cgiRead();
       }
       if (_state == CLI_CGIOK || _state == CLI_CGIKO ||
-          _req.getRespo().cgiWait() == KO)
+          _req.cgiEvalChildState() == KO)
         break;
       else
         return;
@@ -176,11 +182,11 @@ void Client::handleEventCGI(u32 ev)
 
   if (_state == CLI_CGIKO || _state == CLI_CGIOK) {
     if (_state == CLI_CGIKO) {
-      _req.getRespo().cgiCleanupFds();
+      _req.cgiCleanupFds();
       _req.setStatusCode(_req.getRespo().getStatus());
     }
     else
-      _req.getRespo().cgiProcessBody();
+      _req.cgiProcessBody();
 
     _req.getRespo().generateResponse(_req);
     _req.setCGIdone();

@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/23 19:11:06 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/17 22:56:28 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/19 11:45:54 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,10 @@
 
 #include <map>
 #include <sys/wait.h>
+
+// 2^14 bytes should be enough, no?
+#define CGI_READBUFSIZE 16384
+// #define CGI_READBUFSIZE 65536
 
 class Request;
 class Client;
@@ -64,10 +68,13 @@ class Response {
 
     // -------------------------------=[ CGI ]=------------------------------ //
 
-    int   _cgiParentWriteFd;
-    int   _cgiParentReadFd;
-    pid_t _cgiPid;
-    str   _cgiBody;
+    int    _cgiParentWriteFd;
+    int    _cgiParentReadFd;
+    pid_t  _cgiPid;
+    str    _cgiBody;
+    size_t _cgiBytesWritten;
+    size_t _cgiWriteBodySize;
+    char   _cgiReadBuffer[CGI_READBUFSIZE];
 
     void                _cgiHandleBadScript(constr& s);
     std::map<str, str>  _cgiEvalScriptPath();
@@ -78,6 +85,8 @@ class Response {
     static std::map<str, str> _buildErrRespoHdrs(
         e_HTTPStatus status, const str& body);
 
+    bool _respoHdrHas(constr& hdr);
+
   public:
     Response();
     Response& operator=(const Response& other);
@@ -85,14 +94,16 @@ class Response {
 
     e_HTTPStatus generateResponse(Request& req);
     str          getRespoStr() const;
-    e_HTTPStatus handleCGI(Request& req);
 
-    void cgiWrite();
-    bool cgiWait();
-    void cgiRead();
-    void cgiProcessBody();
-    void cgiCleanupFds();
-    void cgiKillProcess();
+    e_HTTPStatus handleCGI(Request& req);
+    void         cgiWrite();
+    bool         cgiEvalChildState();
+    void         cgiRead();
+    void         cgiProcessBody();
+    void         cgiCleanupFds();
+    void         cgiKillProcess();
+    bool         cgiIsWriteFd(int fd) const;
+    bool         cgiIsRead(int fd) const;
 
     void reset();
 

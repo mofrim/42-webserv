@@ -42,7 +42,7 @@ sendHdrField "GET / HTTP/1.1" 3
 sendHdrField "host: moep" 3
 tmpfile=$(mktemp)
 timeout 7s cat <&3 > $tmpfile &
-sleep 6 && curl "$1:$2" &> /dev/null
+sleep 6 && curl "$hostname:$port" &> /dev/null
 
 exec 3<&-
 

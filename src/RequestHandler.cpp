@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 19:13:35 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/18 21:51:28 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/19 08:45:40 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@
 
 // --------------------------------=[ OCF ]=-------------------------------- //
 
-RequestHandler::RequestHandler() {}
+RequestHandler::RequestHandler(): _respoBytesSent(0), _respoSize(0) {}
 
 RequestHandler::RequestHandler(const RequestHandler& o) { (void)o; }
 
@@ -35,7 +35,8 @@ RequestHandler::~RequestHandler() {}
 
 // ------------------------------=[ the rest ]=------------------------------ //
 
-RequestHandler::RequestHandler(Client *cli): _cli(cli)
+RequestHandler::RequestHandler(Client *cli):
+  _cli(cli), _respoBytesSent(0), _respoSize(0)
 {
   if (cli->getVsrv())
     _vsrvName = cli->getVsrv()->getName();
@@ -166,7 +167,6 @@ void RequestHandler::writeResponse()
       response = Response::genDefaultErrResponse(statusCode);
   }
   else {
-
     statusCode = req.getStatus();
     response   = req.getResponseStr();
   }
@@ -179,12 +179,31 @@ void RequestHandler::writeResponse()
   if (response.empty())
     throw ReqHandlerException("Cannot write response! Nothing to write!");
 
-  ssize_t bytes_sent = send(_cli->getFd(), response.data(), response.size(), 0);
+  _respoSize = response.size();
 
-  // keep on sending if non-blocking send did fail.
-  // QUESTION: can we somehow provoke this for testing?
-  if (bytes_sent < 0 || static_cast<size_t>(bytes_sent) != response.size()) {
-    Logger::logErr("Couldn't send (complete) response!");
+  // using MSG_NOSIGNAL here which has the same effect as signal(SIGPIPE,
+  // SIG_IGN) but on a per-call basis. Baam!
+  ssize_t bytesSent = send(_cli->getFd(),
+      response.data() + _respoBytesSent,
+      _respoSize - _respoBytesSent,
+      MSG_NOSIGNAL);
+
+  if (bytesSent < 0) {
+    Logger::logSrv(
+        _vsrvName, "Sending response failed! Client gone? " + getErrnoStr());
+    _cli->setState(CLI_DISCO);
+    _cli->resetReq();
+    this->reset();
+    return;
+  }
+
+  _respoBytesSent += bytesSent;
+
+  if (_respoBytesSent < response.size()) {
+    Logger::logSrv(_vsrvName, "Couldn't send complete response!");
+    Logger::logSrv(_vsrvName,
+        int2str(_respoBytesSent) + " of " + int2str(_respoSize) +
+            " bytes sent");
     return;
   }
 
@@ -194,9 +213,11 @@ void RequestHandler::writeResponse()
   else
     _cli->setState(CLI_IDLE);
 
-  Logger::logSrv(_vsrvName, "Response successfully sent!");
+  Logger::logSrv(_vsrvName,
+      "Response successfully sent! Bytes sent = " + int2str(_respoBytesSent));
 
   _cli->resetReq();
+  this->reset();
 }
 
 RequestHandler::ReqHandlerException::ReqHandlerException(
@@ -263,4 +284,10 @@ void RequestHandler::_setVirtualServerFromHeader()
 
     _cli->getReq().evaluateTarget();
   }
+}
+
+void RequestHandler::reset()
+{
+  _respoSize      = 0;
+  _respoBytesSent = 0;
 }

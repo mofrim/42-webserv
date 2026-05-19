@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/01 18:46:40 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/18 21:10:53 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/19 11:12:35 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -206,7 +206,7 @@ e_HTTPStatus Request::_parseHeaders()
       return HTTP_400;
     str fieldName  = strip(it->substr(0, colonPos));
     str fieldValue = strip(it->substr(colonPos + 1, str::npos));
-    tolower(fieldName);
+    toLowerInPlace(fieldName);
     _headers[fieldName] = fieldValue;
   }
   _logSelectedHdrs();

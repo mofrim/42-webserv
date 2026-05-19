@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -e
+
 CRLF=$'\r\n'
 
 function sendHdrField() {
@@ -10,15 +12,16 @@ function finishReq() {
 	echo -en "$CRLF"
 }
 
-msg="$(lsof -c webserv)"
+msg="$(lsof)"
 len="${#msg}"
-echo "len = $len" 1>&2
-
+echo "msglen = $len" 1>&2
+echo "pipe-max-size: $(cat /proc/sys/fs/pipe-max-size)" 1>&2
 
 sendHdrField "Content-Type: text/plain"
 sendHdrField "Content-Length: $len"
 finishReq
 
-# sleep 10s
+echo "$msg" > lsof-out.dat
 
-echo -en "$msg"
+echo "$msg"
+

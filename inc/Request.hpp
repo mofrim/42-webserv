@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 23:39:07 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/18 21:14:34 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/19 11:25:08 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -137,6 +137,7 @@ class Request {
     RequestBody&       getBody();
     std::vector<char>& getBodyData();
     size_t             getBodySize() const;
+    void               setBodySize(size_t s);
 
     void setHost(str host);
     str  getHost() const;
@@ -145,4 +146,14 @@ class Request {
     u16  getHostPort() const;
 
     Response& getRespo();
+
+    // CGI wrappers
+    void cgiWrite();
+    bool cgiEvalChildState();
+    void cgiRead();
+    void cgiProcessBody();
+    void cgiCleanupFds();
+    void cgiKillProcess();
+    bool cgiIsWriteFd(int fd) const;
+    bool cgiIsReadFd(int fd) const;
 };

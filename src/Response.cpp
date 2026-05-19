@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/23 19:11:25 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/18 21:12:00 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/19 12:06:20 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,6 +50,9 @@ Response& Response::operator=(const Response& o)
     _cgiPid           = o._cgiPid;
     _cgiBody          = o._cgiBody;
     _method           = o._method;
+
+    _cgiBytesWritten  = o._cgiBytesWritten;
+    _cgiWriteBodySize = o._cgiWriteBodySize;
   }
   return (*this);
 }
@@ -219,33 +222,39 @@ void Response::_buildRespoHdrs()
   _respoHeaders["Startline"] = "HTTP/1.1 " + WsrvLib::getStatusStr(_status);
   _respoHeaders["Server"]    = "m0fr1m's webserv " VERSION;
 
-  // FIXME: maybe use sth else here
-  _respoHeaders["Date"] = Logger::getLogtime(false);
+  if (!_respoHdrHas("Date"))
+    _respoHeaders["Date"] = Logger::getLogtime(false);
 
-  _respoHeaders["Content-Type"] =
-      (_status < HTTP_400) ? _mimeType : "text/html";
+  if (!_respoHdrHas("Content-Type"))
+    _respoHeaders["Content-Type"] =
+        (_status < HTTP_400) ? _mimeType : "text/html";
 
-  _respoHeaders["Content-Length"] = int2str(_body.size());
+  if (!_respoHdrHas("Content-Length"))
+    _respoHeaders["Content-Length"] = int2str(_body.size());
 
-  if (_req->isRedir()) {
-    const URI& uri = _req->getRedir().second;
-    if (uri.isURL())
-      _respoHeaders["Location"] = uri.getStr();
+  if (!_respoHdrHas("Location"))
+    if (_req->isRedir()) {
+      const URI& uri = _req->getRedir().second;
+      if (uri.isURL())
+        _respoHeaders["Location"] = uri.getStr();
+      else
+        _respoHeaders["Location"] = "http://" + _req->getHeaders()["host"] +
+            uri.getStr() + _req->getTargetPath() +
+            (_req->getReqline().target.getQuery().empty() ? "" : "?") +
+            _req->getReqline().target.getQueryStr();
+    }
+
+  if (!_respoHdrHas("Connection")) {
+    str conn;
+    if ((_status >= HTTP_400 && (_status != HTTP_404)) || _closeConn)
+      conn = "close";
     else
-      _respoHeaders["Location"] = "http://" + _req->getHeaders()["host"] +
-          uri.getStr() + _req->getTargetPath() +
-          (_req->getReqline().target.getQuery().empty() ? "" : "?") +
-          _req->getReqline().target.getQueryStr();
+      conn = "keep-alive";
+    _respoHeaders["Connection"] = conn;
   }
 
-  str conn;
-  if ((_status >= HTTP_400 && (_status != HTTP_404)) || _closeConn)
-    conn = "close";
-  else
-    conn = "keep-alive";
-  _respoHeaders["Connection"] = conn;
-
-  _respoHeaders["Accept-Ranges"] = "none";
+  if (!_respoHdrHas("Accept-Ranges"))
+    _respoHeaders["Accept-Ranges"] = "none";
 }
 
 str Response::getRespoStr() const { return _respoStr; }
@@ -262,6 +271,8 @@ void Response::reset()
   _cgiParentReadFd     = -1;
   _cgiPid              = -1;
   _method              = M_UNKNOWN;
+  _cgiBytesWritten     = 0;
+  _cgiWriteBodySize    = 0;
 
   _reqline.target.clear();
   _respoHeaders.clear();
@@ -469,3 +480,9 @@ void Response::_setBodyStatusPage(constr& opts)
 }
 
 e_HTTPStatus Response::getStatus() const { return _status; }
+
+bool Response::_respoHdrHas(constr& hdr)
+{
+  return _respoHeaders.find(hdr) != _respoHeaders.end() &&
+      !_respoHeaders[hdr].empty();
+}

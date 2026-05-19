@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/14 20:50:12 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/18 19:56:22 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/19 06:44:26 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -105,7 +105,7 @@ class Client {
     static Client *newVirtualCli(Webserv *w, int listenFd);
 
     void handleEvent(u32 ev);
-    void handleEventCGI(u32 ev);
+    void handleEventCGI(u32 ev, int fd);
 
     void addCgiToEpoll(int fdWrite, int fdRead);
     void delCgiFromEpoll(int fd);

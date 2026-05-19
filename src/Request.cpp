@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 23:39:57 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/18 21:23:55 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/19 11:25:27 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -394,6 +394,8 @@ bool Request::hdrsParsed() const { return _hdrsParsed; }
 
 size_t Request::getBodySize() const { return _bodySize; }
 
+void Request::setBodySize(size_t s) { _bodySize = s; }
+
 void Request::setHost(str host) { _host = host; }
 
 str Request::getHost() const { return _host; }
@@ -405,3 +407,14 @@ u16 Request::getHostPort() const { return _hostPort; }
 Response& Request::getRespo() { return _respo; }
 
 void Request::setCGIdone() { _isCGI = false; }
+
+// CGI wrappers
+
+void Request::cgiWrite() { _respo.cgiWrite(); }
+bool Request::cgiEvalChildState() { return _respo.cgiEvalChildState(); }
+void Request::cgiRead() { _respo.cgiRead(); }
+void Request::cgiProcessBody() { _respo.cgiProcessBody(); }
+void Request::cgiCleanupFds() { _respo.cgiCleanupFds(); }
+void Request::cgiKillProcess() { _respo.cgiKillProcess(); }
+bool Request::cgiIsWriteFd(int fd) const { return _respo.cgiIsWriteFd(fd); }
+bool Request::cgiIsReadFd(int fd) const { return _respo.cgiIsRead(fd); }

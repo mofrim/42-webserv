@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/03 11:26:23 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/18 08:48:16 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/19 11:09:43 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,8 @@ str      meth2str(e_Method m);
 
 int  getFileType(constr& path);
 str  strip(str str);
-void tolower(str& s);
+void toLowerInPlace(str& s);
+str  toLower(str s);
 u16  str2u16(constr& s);
 str  data2hexStr(const char *s, size_t len);
 bool isValidFnameChar(char c);

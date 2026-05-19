@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/26 10:03:57 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/18 22:17:28 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/19 11:11:56 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -224,10 +224,20 @@ str strip(str s)
 
 // an in-place tolower function because internally we will work case-insensitive
 // with header fields
-void tolower(str& s)
+void toLowerInPlace(str& s)
 {
   for (size_t i = 0; i < s.size(); i++)
     s[i] = std::tolower(s[i]);
+}
+
+// a not-in-place tolower
+str toLower(str s)
+{
+  str low;
+  low.resize(s.size());
+  for (size_t i = 0; i < s.size(); i++)
+    low[i] = std::tolower(s[i]);
+  return low;
 }
 
 // veeery simple conversion to u16 without any overflow checking.
