@@ -36,6 +36,8 @@
 
 - [ ] add maximum body to CGI bodies
 
+- [ ] de-uglify the golbal var!
+
 
 ## DONEs
 
