@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/16 14:54:57 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/19 06:33:13 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/19 12:12:54 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@
 #include "VServer.hpp"
 #include "utils.hpp"
 
+#include <cerrno>
 #include <cstdlib>
 #include <cstring>
 #include <sys/wait.h>
