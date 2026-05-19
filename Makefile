@@ -6,7 +6,7 @@
 #    By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/12/01 11:45:58 by fmaurer           #+#    #+#              #
-#    Updated: 2026/05/17 10:38:03 by fmaurer          ###   ########.fr        #
+#    Updated: 2026/05/19 20:03:01 by fmaurer          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -52,7 +52,6 @@ CPP			= c++
 
 # compiler flags
 CFLAGS	= -Wall -Werror -Wextra -std=c++98
-CFLAGS	+= -g
 IFLAGS	= -I $(INC_DIR)
 
 ifeq ($(DBG),0)
@@ -152,4 +151,4 @@ re-run: re run
 
 .PHONY: all clean fclean re bear run cpptests cpptests-run cpptests-clean \
 	cpptests-bear shelltests debug debug-run run1 run2 re-run dbg1 dbg2 dbg1-re \
-	dbg2-re
+	dbg2-re cfg_tests req_tests valfull val
