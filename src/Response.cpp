@@ -461,6 +461,8 @@ void Response::_readBodyFromFile(constr& path, bool setErrPageOnFail)
 // request responses
 //
 // the status code will be taken from objects _status field!
+//
+// NOTE This virtual-client-safe! Meaning protected against deref NULL
 void Response::_setBodyStatusPage(constr& opts)
 {
   str statusPage;
@@ -470,13 +472,14 @@ void Response::_setBodyStatusPage(constr& opts)
 
   if (statusPage.empty() && _vsrv != NULL)
     statusPage = _vsrv->getErrPage(_status);
-  else
-    _readBodyFromFile(_matchedRoute->getRoot() + statusPage);
 
+  // all the above failed possibly due to !_matchedRoute and !_vsrv
   if (statusPage.empty())
     _body = WsrvLib::getDefaultStatusPage(_status, opts);
+
+  // we got a path to statusPage.. but never deref NULL!
   else
-    _readBodyFromFile(_vsrv->getRoot() + statusPage);
+    _readBodyFromFile((_vsrv != NULL ? _vsrv->getRoot() : "") + statusPage);
 }
 
 e_HTTPStatus Response::getStatus() const { return _status; }
