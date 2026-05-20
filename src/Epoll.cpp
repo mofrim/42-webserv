@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/14 23:12:17 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/18 11:49:03 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/20 07:57:46 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,13 +40,13 @@ void Epoll::setup(const std::vector<VServer>& vservers)
 {
   std::set<int> listenFds;
 
-  // arg for epoll_create only has to be a positive number, so...
-  _epoll_fd = epoll_create(42);
+  // A small but very important step in the program: create the epoll fd! This
+  // will initialize evreything epoll-related on kernel level. As this fd should
+  // not leak to any child processes FD_CLOEXEC is being set.
+  _epoll_fd = epoll_create1(EPOLL_CLOEXEC);
+
   if (_epoll_fd == -1)
     throw(EpollException("epoll_create failed"));
-
-  // if (setFdCloexec(_epoll_fd) == -1)
-  //   throw EpollException("Could not set FD_CLOEXEC on _epoll_fd");
 
   for (size_t k = 0; k < vservers.size(); k++) {
     listenFds = vservers[k].getListenFds();
