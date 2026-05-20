@@ -6,7 +6,7 @@
 #    By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/12/01 11:45:58 by fmaurer           #+#    #+#              #
-#    Updated: 2026/05/19 20:03:01 by fmaurer          ###   ########.fr        #
+#    Updated: 2026/05/20 15:30:50 by fmaurer          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -93,6 +93,12 @@ run1: fclean
 	make DBG=1
 	./$(NAME)
 
+dbg0:
+	make DBG=0
+
+dbg0-re: fclean
+	make DBG=0
+
 dbg1:
 	make DBG=1
 
@@ -151,4 +157,4 @@ re-run: re run
 
 .PHONY: all clean fclean re bear run cpptests cpptests-run cpptests-clean \
 	cpptests-bear shelltests debug debug-run run1 run2 re-run dbg1 dbg2 dbg1-re \
-	dbg2-re cfg_tests req_tests valfull val
+	dbg2-re cfg_tests req_tests valfull val dbg0 dbg0-re
