@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" conten="width=device-width, initial-scale=1.0">
+    <title>Redir Target - Params</title>
+    <link rel="stylesheet" href="./style.css">
+  </head>
+  <body>
+    <div class="grid"></div>
+    <div class="card">
+      <div class="badge">
+        m0fr1m's WebServ
+      </div>
+      <h1>Congrats!</h1>
+      <h2>You reached <code> &lsaquo;redir-target/params.html&rsaquo;</code></h2>
+      <p>Well done!</p>
+      <div class="line"></div>
+      <h2>Params, if any:</h2>
+      <div id="params"></div>
+    </div>
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const params = Object.fromEntries(urlParams.entries());
+        const paramsDiv = document.getElementById('params');
+        for (const [key, value] of Object.entries(params)) {
+            paramsDiv.innerHTML += `<p><strong>${key}:</strong> ${value}</p>`;
+        }
+    </script>
+  </body>
+</html>
+
+
