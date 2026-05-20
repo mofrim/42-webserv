@@ -6,13 +6,14 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/06 22:32:20 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/16 12:05:10 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/20 11:28:32 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
 #include <map>
+#include <stdint.h>
 #include <string>
 
 // setting a bit of arbitrary max URL-authority length here. but i realy
@@ -22,6 +23,7 @@
 // forward typedef as WsrvLib.hpp can not be included here
 typedef std::string       str;
 typedef const std::string constr;
+typedef uint16_t          u16;
 
 // URL class
 //
@@ -37,6 +39,8 @@ class URI {
   private:
     str                _scheme;
     str                _auth;
+    str                _host;
+    u16                _port;
     str                _path;
     std::map<str, str> _query;
     str                _fragment;
@@ -62,4 +66,7 @@ class URI {
     str                 getStr() const;
     void                clear();
     bool                isURL() const;
+    u16                 getPort() const;
+    str                 getHost() const;
+    str                 getAuth() const;
 };

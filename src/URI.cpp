@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/06 22:32:39 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/19 12:44:45 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/20 11:36:05 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@
 
 // --------------------------------=[ OCF ]=-------------------------------- //
 
-URI::URI(): _bad(false), _empty(true) {}
+URI::URI(): _port(0), _bad(false), _empty(true) {}
 
 URI::URI(const URI& o)
 {
@@ -37,6 +37,8 @@ URI& URI::operator=(const URI& o)
     _fragment = o._fragment;
     _bad      = o._bad;
     _empty    = o._empty;
+    _host     = o._host;
+    _port     = o._port;
   }
   return (*this);
 }
@@ -383,13 +385,13 @@ str URI::parseURL(constr& u)
   str scheme = u.substr(0, u.find("://"));
 
   str    auth    = u.substr(u.find("//") + 2);
-  size_t hierEnd = auth.find("/");
+  size_t authEnd = auth.find("/");
 
   // re-use my path parsing func
-  if (hierEnd != str::npos)
-    this->parsePath(auth.substr(hierEnd));
+  if (authEnd != str::npos)
+    this->parsePath(auth.substr(authEnd));
 
-  auth = auth.substr(0, hierEnd);
+  auth = auth.substr(0, authEnd);
 
   if (auth.length() == 0 || auth.length() > URL_MAX_AUTH_LENGTH) {
     _bad = true;
@@ -423,9 +425,15 @@ str URI::parseURL(constr& u)
   if (_bad)
     return "";
 
-  if (portSep && !isU16Str(auth.substr(auth.rfind(":") + 1))) {
-    _bad = true;
-    return "";
+  // substr + 1 will not overflow as this was already filtered out above!
+  if (portSep) {
+    str portStr = auth.substr(auth.rfind(":") + 1);
+    if (!isU16Str(portStr) || str2u16(portStr) == 0) {
+      _bad = true;
+      return "";
+    }
+    _host = auth.substr(auth.find(':'));
+    _port = str2u16(portStr);
   }
 
   if (auth[auth.length() - 1] == '.' || auth[auth.length() - 1] == '-') {
@@ -438,3 +446,9 @@ str URI::parseURL(constr& u)
   _empty  = false;
   return auth;
 }
+
+u16 URI::getPort() const { return _port; }
+
+str URI::getHost() const { return _host; }
+
+str URI::getAuth() const { return _auth; }

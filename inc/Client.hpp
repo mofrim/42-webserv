@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/14 20:50:12 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/19 06:44:26 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/20 12:05:19 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -109,4 +109,5 @@ class Client {
 
     void addCgiToEpoll(int fdWrite, int fdRead);
     void delCgiFromEpoll(int fd);
+    bool isWsrvVsrvName(constr& s) const;
 };

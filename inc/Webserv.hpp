@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:35:29 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/17 23:43:55 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/20 11:59:45 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,6 +81,8 @@ class Webserv {
 
     void addCgiCliToEpoll(Client *cli, int fdWrite, int fdRead);
     void removeCgiFdFromEpoll(int fd);
+
+    bool isVsrvName(constr& s) const;
 
     class WebservInitException: public std::runtime_error {
       public:

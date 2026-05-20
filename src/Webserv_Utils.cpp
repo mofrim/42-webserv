@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/16 11:54:27 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/14 22:16:25 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/20 12:02:53 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -96,4 +96,16 @@ void Webserv::_initDefaultCfg()
   VServer dsrv1(cfg1);
 
   _vservers.push_back(dsrv1);
+}
+
+// check if param str is one of our vsrvs by name! This is used in vhost redir
+// in Response::buildRespoHdrs
+bool Webserv::isVsrvName(constr& s) const
+{
+  for (std::vector<VServer>::const_iterator it = _vservers.begin();
+      it != _vservers.end();
+      ++it)
+    if (it->getName() == s)
+      return true;
+  return false;
 }

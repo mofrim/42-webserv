@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/13 13:06:35 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/16 11:03:00 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/20 11:55:27 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -182,6 +182,20 @@ int _test_URI()
     if (u.parseURL("http://   :213/") != "" || !u.bad())
       return -1;
     if (u.parseURL("http://adshhasd%:213/") != "" || !u.bad())
+      return -1;
+    if (u.parseURL("http://adshhasd:213") == "" && u.getPort() != 213)
+      return -1;
+    if (u.parseURL("http://adshhasd:as213") != "")
+      return -1;
+    if (u.parseURL("http://adshhasd:213") == "" && u.getHost() != "adshhasd")
+      return -1;
+    if (u.parseURL("http://adshhasd") == "" && u.getHost() != u.getAuth())
+      return -1;
+    if (u.parseURL("http://adshhasd:123") == "" && u.getHost() != u.getAuth())
+      return -1;
+    if (u.parseURL("http://adshhasd:123") == "" && u.getPort() != 123)
+      return -1;
+    if (u.parseURL("http://adshhasd:0") != "")
       return -1;
   }
 

@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/14 20:51:06 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/20 09:30:57 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/20 12:06:10 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -235,6 +235,8 @@ void Client::setVsrvPort(u16 port) { _vsrvPort = port; }
 u16 Client::getVsrvPort() const { return _vsrvPort; }
 
 std::vector<VServer *>& Client::getPotentialVsrvs() { return _potentialVsrvs; }
+
+bool Client::isWsrvVsrvName(constr& s) const { return _webserv->isVsrvName(s); }
 
 // --------------------------------=[ CGI ]=-------------------------------- //
 
