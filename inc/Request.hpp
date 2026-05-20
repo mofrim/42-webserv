@@ -6,15 +6,11 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 23:39:07 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/19 11:25:08 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/20 13:45:33 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
-
-// TODO:
-//
-// - implement timeout
 
 #include "RequestBody.hpp"
 #include "Response.hpp"
