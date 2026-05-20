@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 23:39:57 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/19 15:10:59 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/20 09:30:56 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -109,7 +109,7 @@ void Request::processReq()
 
   // filter out virtual clients immediately!
   if (_cli->getVsrv() == NULL) {
-    _statusCode = _respo.generateResponse(*this);
+    _statusCode = _respo.buildResponse(*this);
     return;
   }
 
@@ -127,14 +127,14 @@ void Request::processReq()
   if (this->isCGI() && !this->badRequest()) {
     _statusCode = _respo.handleCGI(*this);
     if (this->badRequest())
-      _statusCode = _respo.generateResponse(*this);
+      _statusCode = _respo.buildResponse(*this);
   }
   else
-    _statusCode = _respo.generateResponse(*this);
+    _statusCode = _respo.buildResponse(*this);
 }
 
 // Match the route from req. After this there will _ALWAYS_ be a route set, if
-// we don't throw exception.
+// we don't throw exception. On fallback this be the default route '/'
 //
 // NOTE std::map stores items weakly ordered by there keys. that is the
 // std::map::begin() iterator will always point to the smallest element if keys

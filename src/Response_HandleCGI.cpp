@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/16 14:54:57 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/19 12:12:54 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/20 08:06:55 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,7 +69,11 @@ std::pair<str, int> Response::_cgiDetermineScriptFile()
   // check if _matchedRoute's path is already the script-file!
 
   cgiScript = r.getRoot() + r.getPath();
-  ft        = getFileType(cgiScript);
+
+  Logger::logDbg1("Response::_cgiDetermineScriptFile",
+      "Trying this script path: " + cgiScript);
+
+  ft = getFileType(cgiScript);
   if (ft == 0)
     return std::make_pair(cgiScript, 1);
   else if (ft < 0)
@@ -81,6 +85,10 @@ std::pair<str, int> Response::_cgiDetermineScriptFile()
     if (endSeg != str::npos)
       firstSeg = _targetPath.substr(0, endSeg);
   }
+
+  Logger::logDbg1("Response::_cgiDetermineScriptFile",
+      "Trying this script path: " + cgiScript);
+
   cgiScript = r.getRoot() + r.getPath() + firstSeg;
   ft        = getFileType(cgiScript);
   if (ft == 0)
@@ -89,7 +97,11 @@ std::pair<str, int> Response::_cgiDetermineScriptFile()
     return std::make_pair(cgiScript, -1);
 
   cgiScript = r.getRoot() + r.getPath() + _targetPath;
-  ft        = getFileType(cgiScript);
+
+  Logger::logDbg1("Response::_cgiDetermineScriptFile",
+      "Trying this script path: " + cgiScript);
+
+  ft = getFileType(cgiScript);
   if (ft == 0)
     return std::make_pair(cgiScript, 3);
 

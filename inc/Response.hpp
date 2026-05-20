@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/23 19:11:06 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/19 17:48:39 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/20 09:30:56 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,7 +61,6 @@ class Response {
     static std::map<str, str> _buildErrRespoHdrs(
         e_HTTPStatus status, const str& body);
 
-    void _handleBadRequest();
     void _handleSimplePost();
     void _handleSimplePostFile(
         constr& upDir, constr& mimeType = "application/octet-stream");
@@ -90,7 +89,7 @@ class Response {
     Response& operator=(const Response& other);
     ~Response();
 
-    e_HTTPStatus generateResponse(Request& req);
+    e_HTTPStatus buildResponse(Request& req);
     str          getRespoStr() const;
 
     e_HTTPStatus handleCGI(Request& req);

@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/23 19:11:25 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/19 17:47:18 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/20 09:30:56 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -87,7 +87,7 @@ void Response::_setFieldsFromReq(Request& req)
 //     is finding the corresponding error page from vsrv BUT keep in mind that
 //     client could be virtual!
 //
-e_HTTPStatus Response::generateResponse(Request& req)
+e_HTTPStatus Response::buildResponse(Request& req)
 {
   _setFieldsFromReq(req);
 
@@ -95,7 +95,7 @@ e_HTTPStatus Response::generateResponse(Request& req)
 
   if (req.badRequest()) {
     Logger::logSrv(_vsrvName, "Bad Request handling");
-    _handleBadRequest();
+    _setBodyStatusPage();
   }
 
   else if (!req.isCGI()) {
@@ -326,19 +326,6 @@ str Response::genDefaultErrResponse(e_HTTPStatus errCode, constr errPage)
       respostr += it->first + ": " + it->second + CRLF;
   respostr += CRLF + body;
   return respostr;
-}
-
-// Handle the case of bad req. The only thing left to do in here is checking if
-// client is still virtual -> _body = default errpage. If not virtual check if
-// there is an errPage in server scope and try to read it. If that fails -> set
-// status 404 and return default 404. Else return default 400.
-void Response::_handleBadRequest()
-{
-  if (_cli->isVirtual()) {
-    _body = WsrvLib::getDefaultStatusPage(_status);
-    return;
-  }
-  _setBodyStatusPage();
 }
 
 // get status page first from matched route secondly from vsrv. fallback to

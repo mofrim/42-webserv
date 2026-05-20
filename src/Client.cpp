@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/14 20:51:06 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/19 09:46:47 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/20 09:30:57 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -188,7 +188,7 @@ void Client::handleEventCGI(u32 ev, int fd)
     else
       _req.cgiProcessBody();
 
-    _req.getRespo().generateResponse(_req);
+    _req.getRespo().buildResponse(_req);
     _req.setCGIdone();
   }
 }
