@@ -2,12 +2,22 @@ server {
   serverName v1!
   listen localhost:1111!
   root ../../_www/v1!
+
+  route /post {
+    methods POST GET DELETE!
+    upload /post!
+  }
 }
 
 server {
   serverName v2!
   listen localhost:1111!
   root ../../_www/v2!
+
+  route /post {
+    methods POST GET DELETE!
+    upload /post!
+  }
 }
 
 server {
