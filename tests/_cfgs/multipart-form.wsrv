@@ -1,9 +1,11 @@
 server {
   serverName webserv!
   listen localhost:1111!
+
   route / {
     index multipart-form.html!
   }
+
   route /upload-multipart {
     upload /upload-multipart!
     methods POST GET!

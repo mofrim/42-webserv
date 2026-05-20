@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/14 10:18:32 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/14 22:13:31 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/20 17:35:38 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,7 +39,6 @@ RequestBody::~RequestBody() {}
 // -------------------------------=[ other ]=------------------------------- //
 
 // assign raw bytes to bodyData
-// FIXME ooh, these exceptions. how could i really handle them?!
 void RequestBody::setBodyData(const char *data, size_t len)
 {
   try {
@@ -64,7 +63,6 @@ str RequestBody::getBodyDataAsStr()
 std::vector<char>& RequestBody::getBodyData() { return _bodyData; }
 
 // append raw bytes to bodyData
-// FIXME ooh, these exceptions. how could i really handle them?!
 // returns 1 on success, 0 if data was truncated, -1 if insert to _bodyData
 // failed.
 int RequestBody::appendData(const char *dat, size_t len)
