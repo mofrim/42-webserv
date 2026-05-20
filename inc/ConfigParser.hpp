@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/26 08:52:11 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/14 21:51:59 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/20 10:52:33 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -119,7 +119,7 @@ class ConfigParser {
     bool _parseTokName(VServerCfg& vcfg);  // serverName
     bool _parseTokRoute();                 // route
     bool _parseTokIface(VServerCfg& vcfg); // listen
-    bool _parseTokError(VServerCfg& vcfg); // errorPage FIXME  which root?!
+    bool _parseTokError(VServerCfg& vcfg); // errorPage
 
     // ----------------------=[ Route Scope Parsing ]=----------------------- //
 
