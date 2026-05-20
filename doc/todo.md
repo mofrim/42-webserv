@@ -38,6 +38,8 @@
 
 - [ ] de-uglify the golbal var!
 
+- [ ] what about routes with both CGI and upload?!?!?
+
 
 ## DONEs
 
