@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/01 18:46:40 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/19 12:18:21 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/20 15:37:08 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -261,7 +261,9 @@ e_HTTPStatus Request::_evaluateHdrs()
       return HTTP_400;
     }
 
-    if (_contentLength > _matchedRoute->getMaxBodySize()) {
+    if (_matchedRoute != NULL &&
+        _contentLength > _matchedRoute->getMaxBodySize())
+    {
       Logger::logSrv(
           _vsrvName, "Requested Content-Length exceeds maxBodySize", WARN);
       _cli->setState(CLI_DRAIN);
@@ -278,10 +280,11 @@ e_HTTPStatus Request::_evaluateHdrs()
 
   // set host and hostPort (which is the servers addr and port) from hdrs
   if (!_headers["host"].empty()) {
+    Logger::logBug("header(host): " + _headers["host"]);
     std::vector<str> hspl = splitString(_headers["host"], ":");
     if (hspl.size() == 2) {
       if (str2u16(hspl[1]) != _hostPort)
-        _hostPort = str2u16(strip(hspl[2]));
+        _hostPort = str2u16(strip(hspl[1]));
     }
     if (hspl.size() >= 1)
       _host = strip(hspl[0]);
