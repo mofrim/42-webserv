@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/14 17:51:57 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/19 17:47:18 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/20 17:29:59 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -140,8 +140,7 @@ void Response::_handleSimplePostFile(constr& upDir, constr& mimeType)
     str up = _matchedRoute->getUpload();
     if (!up.empty() && up[up.length() - 1] != '/')
       up += "/";
-    _respoHeaders["Location"]     = up + fname;
-    _respoHeaders["Content-Type"] = mimeType;
+    _respoHeaders["Location"] = up + fname;
   }
 }
 
