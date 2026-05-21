@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/14 20:51:06 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/20 12:06:10 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/20 23:14:30 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -144,7 +144,7 @@ void Client::handleEventCGI(u32 ev, int fd)
     else if (_req.cgiIsReadFd(fd) && _state == CLI_CGIREAD) {
       Logger::logSrv(_vsrv->getName(),
           "EPOLLHUP from client " + getIfaceFdStr() +
-              " while still reading from pipe!");
+              " while reading from pipe.");
       if (_req.cgiEvalChildState() == KO)
         _state = CLI_CGIKO;
     }
@@ -183,12 +183,13 @@ void Client::handleEventCGI(u32 ev, int fd)
   if (_state == CLI_CGIKO || _state == CLI_CGIOK) {
     if (_state == CLI_CGIKO) {
       _req.cgiCleanupFds();
-      _req.setStatusCode(_req.getRespo().getStatus());
+      _req.setStatusFromRespo();
     }
     else
       _req.cgiProcessBody();
 
-    _req.getRespo().buildResponse(_req);
+    _req.setStatusFromRespo();
+    _req.buildResponse();
     _req.setCGIdone();
   }
 }

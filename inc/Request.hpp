@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 23:39:07 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/20 13:45:33 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/20 23:10:55 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -142,6 +142,8 @@ class Request {
     u16  getHostPort() const;
 
     Response& getRespo();
+    void      setStatusFromRespo();
+    void      buildResponse();
 
     // CGI wrappers
     void cgiWrite();
