@@ -5,89 +5,171 @@
     <meta name="viewport" conten="width=device-width, initial-scale=1.0">
     <title>mofrim's WebServ Delete Index</title>
     <link rel="stylesheet" href="style.css">
-</head>
-<body>
+  </head>
+  <body>
     <div class="grid"></div>
     <div class="title-card">
       <div class="badge">
         m0fr1m's webserv
       </div>
-     <h1>mofrim's WebServ CGI Dashboard</h1> 
+      <h1>WebServ CGI Dashboard</h1> 
     </div>
     <div class="form-container">
-        <h2>CG-I</h2>
-        <form id="deleteForm" class="form-group">
-            <label for="name">Filename:</label>
-            <input type="text" id="filename" name="filename" required>
-            <br>
-            <input class="form-button form-actions" type="submit" value="Submit">
-        </form>
+
+      <h1>rot13.py</h1>
+      <form id="rot13" class="form-group" action="/cgi-bin/rot13.py" method="POST">
+        <label for="text">Input text:</label>
+        <textarea name="userInput" rows="5" cols="40" required></textarea>
+        <br>
+        <!-- <input class="form-button form-actions" type="submit" value="Submit"> -->
+        <button class="form-button form-actions" type="submit">Send</button>
+      </form>
+      <p>Tip: also try with big input like <code>shuf -i 1-10000 -n 3000000 -r | tr -d '\n'</code> or <code>tr -dc '[:print:]' < /dev/urandom | head -c 10000</code> ;)</p>
+      <h2>Response:</h2>
+      <!-- <div id="response" style="white-space: pre-wrap;"></div> -->
+      <div class="form-group">
+        <textarea id="response" class="form-group" readonly style="width: 100%; margin-top: 10px;"></textarea>
+        <button id="copy" class="form-button tight" onclick="copyToClipboard()">📋 Copy</button>
+      </div>
 
 
-      <h2>Create-File Form</h2>
-      <form id="createForm" class="form-group">
-        <label for="name">Filename:</label>
-        <input type="text" id="filename" name="filename" required>
+      <div class="line"></div>
+
+      <h1>env.sh</h1>
+      <form id="envForm" class="form-group" action="/cgi-bin/env.sh" method="GET">
+        <label for="name">Params:</label>
+        <input type="text" id="envParams" name="params" required>
         <br>
         <input class="form-button form-actions" type="submit" value="Submit">
       </form>
 
+      <!-- <div class="line"></div> -->
+      <!---->
+      <!-- <h2>CG-I</h2> -->
+      <!-- <form id="deleteForm" class="form-group"> -->
+      <!--   <label for="name">Filename:</label> -->
+      <!--   <input type="text" id="filename" name="filename" required> -->
+      <!--   <br> -->
+      <!--   <input class="form-button form-actions" type="submit" value="Submit"> -->
+      <!-- </form> -->
+
       <div class="line"></div>
 
-      <p>Checkout the source files of cgi-scripts <a href="/cgi-bin">here</a>!</p>
-      <p>See what's going on in <a href="/cgi-root">cgi-root</a>!</p>
+      <button class="form-button bigTxt tight moreMargin"><a href="/cgi-bin/lsof.sh">lsof.sh!</a></button>
+
+      <div class="line"></div>
+
+      <p class="medTxt">Checkout the source files of cgi-scripts <a href="/cgi-src">here</a>!</p>
     </div>
 
-    <!-- Sadly HTML forms do not support sending DELETE requests or POST Requests with query parameters. So i patch this behavior in here. -->
-
     <script>
-    document.getElementById('deleteForm').addEventListener('submit', function(event) {
-      event.preventDefault();
 
-      const form = event.target;
-      const formData = new FormData(form);
-      const filename = formData.get('filename');
+function sendRaw() {
+  fetch("/cgi-bin/process.cgi", {
+    method: "POST",
+    body: document.getElementById("rawText").value,
+    headers: { "Content-Type": "text/plain" }
+  });
+}
 
-      fetch('/deldir/' + encodeURIComponent(filename), {
-        method: 'DELETE'
-      })
-        .then(response => {
-          if (!response.ok) {
-            throw new Error('Network response was not ok');
-          }
-          return response.text();
-        })
-        .then(data => {
-          alert('File deleted successfully: ' + data);
-        })
-        .catch(error => {
-          alert('Error deleting file: ' + error);
-        });
+document.getElementById("rot13").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const form = e.target;
+  const text = form.userInput.value;
+  const responseDiv = document.getElementById("response");
+
+  responseDiv.textContent = "Loading...";
+
+  try {
+    const response = await fetch(form.action, {
+      method: "POST",
+      body: text,
+      headers: { "Content-Type": "text/plain" }
     });
+    const result = await response.text();
+    responseDiv.textContent = result;
+  } catch (error) {
+    responseDiv.textContent = "Error: " + error.message;
+  }
+});
 
-    document.getElementById('createForm').addEventListener('submit', function(event) {
-      event.preventDefault();
 
-      const form = event.target;
-      const formData = new FormData(form);
-      const filename = formData.get('filename');
+function copyToClipboard() {
+  const responseField = document.getElementById("response");
+  responseField.select();
+  navigator.clipboard.writeText(responseField.value)
+    .then(() => alert("Copied!"))
+    .catch(() => alert("Failed to copy"));
+}
 
-      fetch('/deldir?filename=' + encodeURIComponent(filename), {
-        method: 'POST'
-      })
-        .then(response => {
-          if (!response.ok) {
-            throw new Error('Network response was not ok');
-          }
-          return response.text();
-        })
-        .then(data => {
-          alert('File created successfully: ' + data);
-        })
-        .catch(error => {
-          alert('Error creating file: ' + error);
-        });
-    });
+
+// Sadly HTML forms do not support sending DELETE requests or POST Requests with
+// query parameters. So i patch this behavior in here.
+
+// document.getElementById('deleteForm').addEventListener('submit', function(event) {
+//   event.preventDefault();
+//
+//   const form = event.target;
+//   const formData = new FormData(form);
+//   const filename = formData.get('filename');
+//
+//   fetch('/deldir/' + encodeURIComponent(filename), {
+//     method: 'DELETE'
+//   })
+//     .then(response => {
+//       if (!response.ok) {
+//         throw new Error('Network response was not ok');
+//       }
+//       return response.text();
+//     })
+//     .then(data => {
+//       alert('File deleted successfully: ' + data);
+//     })
+//     .catch(error => {
+//       alert('Error deleting file: ' + error);
+//     });
+// });
+
+// document.getElementById('createForm').addEventListener('submit', function(event) {
+//   event.preventDefault();
+//
+//   const form = event.target;
+//   const formData = new FormData(form);
+//   const filename = formData.get('filename');
+//
+//   fetch('/deldir?filename=' + encodeURIComponent(filename), {
+//     method: 'POST'
+//   })
+//     .then(response => {
+//       if (!response.ok) {
+//         throw new Error('Network response was not ok');
+//       }
+//       return response.text();
+//     })
+//     .then(data => {
+//       alert('File created successfully: ' + data);
+//     })
+//     .catch(error => {
+//       alert('Error creating file: ' + error);
+//     });
+// });
+
+// this does not allow the displaying of the rot'ed txt ;(
+
+// document.getElementById("rot13").addEventListener("submit", async (e) => {
+//   e.preventDefault();
+//   const form = e.target;
+//   const text = form.userInput.value;
+//
+//   await fetch(form.action, {
+//     method: "POST",
+//     body: text,
+//     headers: { "Content-Type": "text/plain" }
+//   });
+//   // form.reset();
+//   // alert("Sent!");
+// });
+
     </script>
   </body>
 </html>

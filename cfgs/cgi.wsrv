@@ -7,6 +7,7 @@ server {
     index hello.sh!
     methods GET POST!
     cgi sh:/usr/bin/env bash!
+    cgi py:/nix/store/0r6k8xa2kgqyp3r4v2w7yrb80ma2iawm-python3-3.13.12/bin/python3!
   }
 
   route /cgi-src {
@@ -16,7 +17,7 @@ server {
 
   route /cgi-root {
     autoindex on!
-    methods GET POST!
+    methods GET POST DELETE!
   }
 
   route /forbidden-cgi {
