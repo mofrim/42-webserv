@@ -40,7 +40,7 @@ exec 3<>/dev/tcp/"$hostname"/"$port"
 sendHdrField "GET / HTTP/1.1" 3
 finishReq 3
 
-RESPONSE="$(timeout 0.1s cat <&3 | grep 300)"
+RESPONSE="$(timeout 0.1s cat <&3 | grep 400)"
 echo "Response:"
 echo "---------"
 echo "${RESPONSE[@]}"
