@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/17 10:36:30 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/19 15:02:21 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/20 23:00:41 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -247,7 +247,7 @@ void Response::cgiRead()
 
   if (bytesRead == 0) {
     Logger::logDbg1("Response::cgiRead",
-        "bytesRead == 0 -> done! Read " + int2str(_cgiBody.size()) + " bytes");
+        "got EOF -> done! Read " + int2str(_cgiBody.size()) + " bytes");
     _cgiBody.append(_cgiReadBuffer, bytesRead);
     _cli->setState(CLI_CGIOK);
     _cli->delCgiFromEpoll(_cgiParentReadFd);
