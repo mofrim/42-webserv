@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/25 08:35:42 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/18 17:17:22 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/21 09:55:45 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -218,6 +218,14 @@ bool VServerCfg::checkEnsureCfg()
 
     if (r.getRoot().empty())
       r.setRoot(_root);
+
+    // being paternalistic here.. but you sometimes need to protect the users
+    // from themselves!
+    if (!r.getCgi().empty() && r.getRedir().first != HTTP_0) {
+      Logger::logWarn("VServerCfg::checkEnsureCfg",
+          "Redirect & CGI in one route is a no-no!");
+      return false;
+    }
   }
   return true;
 }
