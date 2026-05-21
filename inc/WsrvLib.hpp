@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/24 17:31:03 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/19 15:14:19 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/21 20:34:19 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,7 +49,10 @@ typedef std::string::const_iterator constrIt;
 #define MAX_REQLINE_LEN 8000
 #define MAX_TARGET_LEN 7886
 
-#define READ_BUFSIZE 4096
+// using double page-size here for big file upload optimization. check system
+// page size using `getconf PAGESIZE`. default is 4096
+#define READ_BUFSIZE 8192
+
 #define MAX_CLIENTS 1000
 #define DEFAULT_SRV_NAME "localhost"
 #define DEFAULT_PORT 1111
