@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:37:25 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/17 01:52:59 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/21 17:01:03 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,12 +19,12 @@
 
 Webserv *g_webserv = NULL;
 
-void shutdownHandler(int signum)
+volatile sig_atomic_t g_killme = 0;
+
+void signalHandler(int signum)
 {
   (void)signum;
-  if (g_webserv) {
-    g_webserv->shutdownWebserv();
-  }
+  g_killme = 1;
 }
 
 int main(int ac, char **av, char **envp)
@@ -32,8 +32,13 @@ int main(int ac, char **av, char **envp)
   Webserv webserv(envp);
   g_webserv = &webserv;
 
-  if (signal(SIGINT, shutdownHandler) == SIG_ERR) {
+  if (signal(SIGINT, signalHandler) == SIG_ERR) {
     Logger::logErr("setting signal handler failed");
+    return 1;
+  }
+
+  if (signal(SIGPIPE, SIG_IGN) == SIG_ERR) {
+    Logger::logErr("Ignoring SIGPIPE did not work out as expected!");
     return 1;
   }
 

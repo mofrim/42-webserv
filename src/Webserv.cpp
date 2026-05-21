@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:36:43 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/19 06:45:01 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/21 17:02:50 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,8 @@
 #include <cerrno>
 #include <unistd.h>
 #include <utils.hpp>
+
+extern volatile sig_atomic_t g_killme;
 
 Webserv::Webserv(): _defaultCfg(true), _shutdown_server(false), _numOfClients(0)
 {}
@@ -138,7 +140,7 @@ void Webserv::run()
   _epoll.setup(_vservers);
 
   // the main loop
-  while (_shutdown_server == false) {
+  while (g_killme == 0) {
     int nfds = _epoll.wait();
     if (nfds == -1 && errno != EINTR)
       throw(WebservRunException("epoll_wait failed"));
