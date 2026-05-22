@@ -1,0 +1,12 @@
+server {
+  serverName cgiserv!
+  listen localhost:1111!
+  root ../../_www/cgi!
+
+  route / {
+    index hello.sh!
+    methods GET POST!
+    cgi sh:/usr/bin/env bash!
+    cgi py:/nix/store/0r6k8xa2kgqyp3r4v2w7yrb80ma2iawm-python3-3.13.12/bin/python3!
+  }
+}

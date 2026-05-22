@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-set -e
-
 CRLF=$'\r\n'
 
 function sendHdrField() {
@@ -12,7 +10,17 @@ function finishReq() {
 	echo -en "$CRLF"
 }
 
+
 msg="$(lsof -c webserv)"
+
+if [ -z "$msg" ]; then
+	msg="$(lsof -p $(pidof valgrind))"
+fi
+
+if [ -z "$msg" ]; then
+	exit 1
+fi
+
 len="${#msg}"
 # echo "msglen = $len" 1>&2
 # echo "pipe-max-size: $(cat /proc/sys/fs/pipe-max-size)" 1>&2

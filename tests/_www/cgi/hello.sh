@@ -12,10 +12,10 @@ function finishReq() {
 
 IFS= read -r -d '' name
 
-msg="Hello <$name> from mofrim's WebServ!\n"
+msg="Hello <$name> from mofrim's WebServ test!\n"
 len="${#msg}"
 
-sendHdrField "Content-Type: text/html"
+sendHdrField "Content-Type: text/plain"
 sendHdrField "Content-Length: $len"
 finishReq
 echo -en "$msg"

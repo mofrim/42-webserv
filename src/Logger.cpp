@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/24 20:52:55 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/19 14:21:29 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/22 13:12:48 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -150,7 +150,10 @@ void Logger::logReqRes(const str& srvName, const str& resreq, const str& data)
     str logtime = getLogtime();
     std::cout << GRY << logtime << GRN << " (" << srvName << ") " << BGRY
               << resreq << ":" << BGRY << "\n---" << std::endl;
-    std::cout << data2hexStr(data.data(), data.size());
+    if (resreq != "Processing Request")
+      std::cout << data2hexStr(data.data(), data.size());
+    else
+      std::cout << data;
     std::cout << "\n---" << RST << std::endl;
   }
 }
