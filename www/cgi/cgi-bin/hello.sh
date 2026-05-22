@@ -16,6 +16,6 @@ msg="Hello <$name> from mofrim's WebServ!\n"
 len="${#msg}"
 
 sendHdrField "Content-Type: text/html"
-sendHdrField "Content-Length: $len"
+sendHdrField "Content-Length: $((len - 1))"
 finishReq
 echo -en "$msg"
