@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/24 17:40:43 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/20 23:05:12 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/21 21:18:17 by fmaurer          ###   ########.fr       */
 /*                                                                            */ /* ************************************************************************** */
 
 #include "WsrvLib.hpp"
@@ -200,6 +200,7 @@ std::map<u16, str> WsrvLib::_initStatusCodes()
   s[415] = "Unsupported Media Type";
   s[418] = "I'm a teapot";
   s[500] = "Internal Server Error";
+  s[501] = "Not Implemented";
   s[502] = "Bad Gateway";
   s[503] = "Service Unavailable";
   s[504] = "Gateway Timeout";
@@ -224,7 +225,7 @@ t_GlobalWsrvSettings WsrvLib::_initWsrvSettings()
       .maxClients           = 1000,
       .connKeepaliveTimeout = 60,
       .reqTimeout           = 5,
-      .cgiTimeout           = 60};
+      .cgiTimeout           = 5};
 
   return s;
 }

@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/24 17:31:03 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/21 20:34:19 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/21 21:17:43 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@
 #include <stdint.h>
 #include <string>
 
-#define VERSION "v0.6"
+#define VERSION "v0.9.2"
 
 extern bool g_WsrvTesting;
 
@@ -128,6 +128,7 @@ enum e_HTTPStatus {
   HTTP_500 = 500,
   HTTP_501 = 501,
   HTTP_502 = 502,
+  HTTP_504 = 504,
 };
 
 typedef struct {
