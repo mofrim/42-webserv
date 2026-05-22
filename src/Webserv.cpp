@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:36:43 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/21 17:02:50 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/22 15:35:11 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@
 #include <unistd.h>
 #include <utils.hpp>
 
+// the shutdown flag declared in main.cpp
 extern volatile sig_atomic_t g_killme;
 
 Webserv::Webserv(): _defaultCfg(true), _shutdown_server(false), _numOfClients(0)

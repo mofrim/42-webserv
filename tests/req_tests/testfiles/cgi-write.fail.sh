@@ -43,7 +43,7 @@ sendHdrField "POST /write.fail.sh HTTP/1.1" 3
 sendHdrField "Host: miep" 3
 sendHdrField "Content-Length: 200000" 3
 finishReq 3
-dd if=/dev/random bs=200000 count=1 >&3
+dd if=/dev/random bs=200000 count=1 >&3 2>/dev/null
 
 RESPONSE="$(timeout 0.1s cat <&3 | grep 502)"
 echo "Response:"

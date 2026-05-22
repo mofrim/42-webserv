@@ -11,11 +11,4 @@ function finishReq() {
 }
 
 msg="$(head -n 2)"
-echo "msg: $msg" 1>&2
 exit 1
-
-
-# sendHdrField "Content-Type: text/plain"
-# sendHdrField "Content-Length: $len"
-# finishReq
-# echo -en "$msg"

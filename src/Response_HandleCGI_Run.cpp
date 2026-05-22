@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/17 10:36:30 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/22 15:31:25 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/22 15:47:22 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -100,8 +100,6 @@ e_HTTPStatus Response::_cgiSetup(std::map<str, str> cgiParams)
       strcpy(argv[i], argvSplit[i].c_str());
     }
     argv[argvSplit.size()] = NULL;
-
-    std::cerr << argv[0] << argv[1] << std::endl;
 
     execve(cgiExec.c_str(), argv, envp);
 

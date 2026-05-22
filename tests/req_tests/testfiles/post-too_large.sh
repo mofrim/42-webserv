@@ -43,7 +43,7 @@ sendHdrField "Content-Length: 10001" 3
 finishReq 3
 dd if=/dev/random bs=10001 count=1 >&3 2>/dev/null
 
-RESPONSE="$(timeout 0.1s cat <&3 | grep 413)"
+RESPONSE="$(timeout 0.1s cat <&3 2>/dev/null | grep 413)"
 echo "Response:"
 echo "---------"
 echo "${RESPONSE[@]}"
