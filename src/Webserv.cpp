@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:36:43 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/22 15:35:11 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/22 22:04:08 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,12 +40,6 @@ Webserv::Webserv(char **envp):
   _defaultCfg(true), _shutdown_server(false), _numOfClients(0), _envp(envp)
 {}
 
-void Webserv::shutdownWebserv()
-{
-  Logger::logWarn("shutting down webserv...");
-  _shutdown_server = true;
-}
-
 // the Idea is: keep the existence of the Config object limited to this method.
 // After this method there should be only the vector<VServer> which then holds
 // all the data.
@@ -78,7 +72,7 @@ void Webserv::readConfig(const str& cfgFilename)
 }
 
 // The main routine for setting up the servers listed in the Config.
-void Webserv::_setupServers()
+bool Webserv::_setupServers()
 {
   if (_defaultCfg)
     _initDefaultCfg();
@@ -93,8 +87,9 @@ void Webserv::_setupServers()
   }
   if (_vservers.size() == 0) {
     Logger::logErr("Could not setup any Server!");
-    shutdownWebserv();
+    return KO;
   }
+  return OK;
 }
 
 void Webserv::_setupSingleServer(std::vector<VServer>::iterator srvIt)
@@ -116,12 +111,6 @@ void Webserv::_setupSingleServer(std::vector<VServer>::iterator srvIt)
     srvIt->printCfg();
 }
 
-// nothing to do here so far...
-void Webserv::_shutdownAllServers()
-{
-  Logger::logMsg("Bye-bye from m0fr1m's webserv!");
-}
-
 // TODO: figure out the best timeout for epoll_wait. For now -1 is okay. but
 // even a small timeout like 10ms might be okay. what are the benefits here?
 //
@@ -137,7 +126,9 @@ void Webserv::_shutdownAllServers()
 // called the syscall exits)
 void Webserv::run()
 {
-  _setupServers();
+  if (_setupServers() == KO)
+    return;
+
   _epoll.setup(_vservers);
 
   // the main loop

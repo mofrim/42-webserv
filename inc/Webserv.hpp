@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:35:29 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/20 11:59:45 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/22 22:04:17 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,10 +48,9 @@ class Webserv {
     // for storing the global env
     char **_envp;
 
-    void _setupServers();
+    bool _setupServers();
     void _setupSingleServer(std::vector<VServer>::iterator srvIt);
     void _setupEpoll();
-    void _shutdownAllServers();
 
     // utils
     bool _isServerFd(int fd) const;
@@ -77,7 +76,6 @@ class Webserv {
 
     void run();
     void readConfig(const str& cfgFilename);
-    void shutdownWebserv();
 
     void addCgiCliToEpoll(Client *cli, int fdWrite, int fdRead);
     void removeCgiFdFromEpoll(int fd);
