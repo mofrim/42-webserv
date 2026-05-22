@@ -29,7 +29,7 @@ if [ $# -eq 3 ]; then
 else
 	hostname="$1"
 	port="$2"
-	$webserv $cfgDir/simplest.wsrv > /dev/null &
+	$webserv $cfgDir/cgi.wsrv > /dev/null &
 	sleep 0.1s
 fi
 
@@ -37,9 +37,13 @@ exec 3<>/dev/tcp/"$hostname"/"$port"
 
 # ------------------------=[ test logic starts here ]=------------------------ #
 
-sendHdrField "GET / HTTP/1.1" 3
+sendHdrField "POST /write.fail.sh HTTP/1.1" 3
 sendHdrField "Host: miep" 3
+sendHdrField "Content-Length: 18" 3
 finishReq 3
+echo "line1" >&3
+echo "line2" >&3
+echo "line3" >&3
 
 RESPONSE="$(timeout 0.1s cat <&3)"
 echo "Response:"

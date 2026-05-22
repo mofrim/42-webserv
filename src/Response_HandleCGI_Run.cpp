@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/17 10:36:30 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/22 13:26:06 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/22 15:31:25 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -162,11 +162,11 @@ void Response::cgiWrite()
       _cli->delCgiFromEpoll(_cgiParentWriteFd);
       close(_cgiParentWriteFd);
     }
-    else {
-      Logger::logWarn("Response::cgiWrite", "Failed to write body!");
-      _cli->setState(CLI_CGIKO);
-      _status = HTTP_500;
-    }
+  }
+  else {
+    Logger::logWarn("Response::cgiWrite", "Failed to write body!");
+    _cli->setState(CLI_CGIKO);
+    _status = HTTP_502;
   }
 }
 
@@ -226,7 +226,7 @@ bool Response::cgiEvalChildState()
           Logger::logDbg1("Response::cgiEvalChildState",
               "execve() signaled with signal " + int2str(WTERMSIG(status)));
 
-        _status = HTTP_500;
+        _status = HTTP_502;
         _cli->setState(CLI_CGIKO);
         return KO;
       }

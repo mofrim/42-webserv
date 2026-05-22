@@ -140,6 +140,7 @@ void Client::handleEventCGI(u32 ev, int fd)
           "EPOLLHUP from client " + getIfaceFdStr() +
               " while still writing to pipe!");
       _state = CLI_CGIKO;
+      _req.cgiEvalChildState();
     }
     else if (_req.cgiIsReadFd(fd) && _state == CLI_CGIREAD) {
       Logger::logSrv(_vsrv->getName(),

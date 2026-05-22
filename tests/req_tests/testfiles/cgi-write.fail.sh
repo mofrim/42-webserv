@@ -37,14 +37,15 @@ exec 3<>/dev/tcp/"$hostname"/"$port"
 
 # ------------------------=[ test logic starts here ]=------------------------ #
 
-msg="Mofrimix Hackerix"
-sendHdrField "POST /hello.sh HTTP/1.1" 3
-sendHdrField "Host: localhost" 3
-sendHdrField "Content-Length: ${#msg}" 3
-finishReq 3
-echo -en "$msg" >&3
+# simulate a failure during Response::cgiWrite
 
-RESPONSE="$(timeout 0.1s cat <&3)"
+sendHdrField "POST /write.fail.sh HTTP/1.1" 3
+sendHdrField "Host: miep" 3
+sendHdrField "Content-Length: 200000" 3
+finishReq 3
+dd if=/dev/random bs=200000 count=1 >&3
+
+RESPONSE="$(timeout 0.1s cat <&3 | grep 502)"
 echo "Response:"
 echo "---------"
 echo "${RESPONSE[@]}"
