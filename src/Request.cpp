@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 23:39:57 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/20 23:12:30 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/22 13:25:44 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -344,7 +344,14 @@ bool Request::reqError() const { return _statusCode >= HTTP_400; }
 // should connection be closed?
 bool Request::closeConn() const { return _closeConn; }
 
-const str& Request::getReqstr() const { return _reqdata; }
+str Request::getReqstr() const
+{
+  str ret = _getReqlineAsStr() + "\n";
+  ret += getHdrsAsStr();
+  ret += "\n";
+  ret += getBodyDataAsStr();
+  return ret;
+}
 
 Client *Request::getCli() const { return _cli; }
 
@@ -392,11 +399,41 @@ bool Request::reqlineParsed() const { return _reqlineParsed; }
 
 RequestBody& Request::getBody() { return _body; }
 
-std::vector<char>& Request::getBodyData() { return _body.getBodyData(); }
+const char *Request::getBodyRawData(size_t idx) const
+{
+  return &_body.getBodyData()[idx];
+}
+
+str Request::getBodyDataAsStr() const
+{
+  return data2hexStr(_body.getBodyData(), _body.getSize());
+}
+
+str Request::getHdrsAsStr() const
+{
+  std::ostringstream oss;
+
+  if (_headers.empty())
+    return "";
+
+  for (std::map<str, str>::const_iterator it = _headers.begin();
+      it != _headers.end();
+      ++it)
+  {
+    oss << it->first << ": " << it->second << std::endl;
+  }
+  return oss.str();
+}
+
+str Request::_getReqlineAsStr() const
+{
+  return meth2str(_reqline.method) + " " + _reqline.target.getStr() + " " +
+      WsrvLib::httpVer2Str(_reqline.httpVersion);
+}
 
 bool Request::hdrsParsed() const { return _hdrsParsed; }
 
-size_t Request::getBodySize() const { return _bodySize; }
+size_t Request::getBodySize() const { return _body.getSize(); }
 
 void Request::setBodySize(size_t s) { _bodySize = s; }
 

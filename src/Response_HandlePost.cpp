@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/14 17:51:57 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/20 17:29:59 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/22 11:14:39 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -130,7 +130,7 @@ void Response::_handleSimplePostFile(constr& upDir, constr& mimeType)
   std::ofstream outfile(fullPath.c_str());
 
   if (outfile)
-    outfile.write(&_req->getBodyData()[0], _req->getBody().getSize());
+    outfile.write(_req->getBodyRawData(), _req->getBodySize());
 
   if (!outfile)
     _status = HTTP_500;

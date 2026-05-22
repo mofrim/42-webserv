@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/17 10:36:30 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/20 23:00:41 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/22 13:26:06 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,7 @@ e_HTTPStatus Response::_cgiSetup(std::map<str, str> cgiParams)
   str cgiExec   = cgiParams["EXEC"];
   str cgiScript = cgiParams["SCRIPT_FILENAME"];
 
-  _cgiWriteBodySize = _req->getBodyData().size();
+  _cgiWriteBodySize = _req->getBodySize();
 
   Logger::logSrv(_vsrvName, "CGI: Exec=" + cgiExec + ", Script=" + cgiScript);
 
@@ -145,12 +145,14 @@ void Response::cgiWrite()
     close(_cgiParentWriteFd);
   }
 
-  Logger::logDbg2("(Response::cgiWrite) writing body:\n" +
-      data2hexStr(&_req->getBodyData()[_cgiBytesWritten],
+  Logger::logDbg2("(Response::cgiWrite) writing body (" +
+      int2str(_cgiBytesWritten) + "/" + int2str(_cgiWriteBodySize) + "/" +
+      int2str(_req->getBodySize()) + "):\n" +
+      data2hexStr(_req->getBodyRawData(_cgiBytesWritten),
           _cgiWriteBodySize - _cgiBytesWritten));
 
   ssize_t bytesWritten = write(_cgiParentWriteFd,
-      &_req->getBodyData()[_cgiBytesWritten],
+      _req->getBodyRawData(_cgiBytesWritten),
       _cgiWriteBodySize - _cgiBytesWritten);
 
   if (bytesWritten >= 0) {
@@ -326,37 +328,76 @@ void Response::cgiCleanupFds()
   close(_cgiParentReadFd);
 }
 
+// well, the correct solution here would be to register the clients pid to epoll
+// using something like pidfd_open syscall to create a epoll-monitorable object
+// from the child's pid. but this is not included in the allowed functions! for
+// more background:
+//
+// https://unixism.net/2021/02/making-signals-less-painful-under-linux/
+//
+// ... and of course pidfd_open(2) ;)
+//
 void Response::cgiKillProcess()
 {
   int wret = waitpid(_cgiPid, 0, WNOHANG);
-  if (wret == 0)
-    kill(_cgiPid, SIGTERM);
+  int kret = 0;
+  if (wret == 0) {
+    Logger::logDbg1(
+        "Response::cgiKillProcess", "Trying to kill child with SIGTERM...");
+    kret = kill(_cgiPid, SIGTERM);
+    if (kret == -1 && errno == ESRCH) {
+      Logger::logDbg1("Response::cgiKillProcess", "kill == -1, child is gone!");
+      return;
+    }
+  }
   else if (wret == -1) {
-    Logger::logDbg1("Response::cgiKillProcess", "waitpid -1");
+    Logger::logDbg1(
+        "Response::cgiKillProcess", "waitpid == -1, child is gone!");
     return;
   }
   else {
-    Logger::logDbg1("Response::cgiKillProcess", "waitpid > 0");
+    Logger::logDbg1("Response::cgiKillProcess", "waitpid > 0, child exited!");
     return;
   }
 
-  // FIXME: REMOVEME!
-  usleep(50);
+  // FIXME REMOVEME!
+  usleep(500);
 
-  if (waitpid(_cgiPid, 0, WNOHANG) == _cgiPid) {
-    Logger::logDbg1("Response::cgiKillProcess", "killed with SIGTERM");
-    return;
-  }
-  else
-    kill(_cgiPid, SIGKILL);
-
-  wret = waitpid(_cgiPid, 0, WNOHANG) == _cgiPid;
-
-  if (wret == _cgiPid) {
-    Logger::logDbg1("Response::cgiKillProcess", "killed with SIGKILL");
-    return;
-  }
-  else
+  wret = waitpid(_cgiPid, 0, WNOHANG);
+  if (wret == 0) {
     Logger::logDbg1(
-        "Response::cgiKillProcess", "giving up killing CGI process");
+        "Response::cgiKillProcess", "Trying to kill child with SIGKILL...");
+    kret = kill(_cgiPid, SIGKILL);
+    if (kret == -1 && errno == ESRCH) {
+      Logger::logDbg1("Response::cgiKillProcess", "kill == -1, child is gone!");
+      return;
+    }
+  }
+  else if (wret == -1) {
+    Logger::logDbg1(
+        "Response::cgiKillProcess", "waitpid == -1, child is gone!");
+    return;
+  }
+  else {
+    Logger::logDbg1("Response::cgiKillProcess", "waitpid > 0, child exited!");
+    return;
+  }
+
+  // BUG this is blocking the whole server!!!!
+  usleep(1000);
+
+  wret = waitpid(_cgiPid, 0, WNOHANG);
+  switch (wret) {
+    case 0:
+      break;
+    case -1:
+      Logger::logDbg1(
+          "Response::cgiKillProcess", "waitpid == -1, child is gone!");
+      return;
+    default:
+      Logger::logDbg1("Response::cgiKillProcess", "waitpid > 0, child exited!");
+      return;
+  }
+
+  Logger::logDbg1("Response::cgiKillProcess", "giving up killing CGI process");
 }

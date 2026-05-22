@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 23:39:07 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/20 23:10:55 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/22 13:25:11 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,6 +65,7 @@ class Request {
     bool _isRedir;      // if route is a redir route
 
     u16 _countReqLines(const str& nstr);
+    str _getReqlineAsStr() const;
 
     // Parsing related
     std::vector< std::pair<str, str> > _splitHdr();
@@ -75,6 +76,7 @@ class Request {
     void                               _logSelectedHdrs();
 
     e_HTTPStatus _evaluateHdrs();
+    e_HTTPStatus _initializeBody(constr& onlyHdrs, size_t crlfx2);
 
   public:
     Request();
@@ -90,7 +92,7 @@ class Request {
     void append(char *s, ssize_t readBytes);
 
     e_Method     getMethod();
-    constr&      getReqstr() const;
+    str          getReqstr() const;
     Client      *getCli() const;
     str          getVsrvName() const;
     void         setVsrvName(constr& name);
@@ -130,10 +132,12 @@ class Request {
     bool reqlineParsed() const;
     bool hdrsParsed() const;
 
-    RequestBody&       getBody();
-    std::vector<char>& getBodyData();
-    size_t             getBodySize() const;
-    void               setBodySize(size_t s);
+    RequestBody& getBody();
+    const char  *getBodyRawData(size_t idx = 0) const;
+    str          getBodyDataAsStr() const;
+    size_t       getBodySize() const;
+    void         setBodySize(size_t s);
+    str          getHdrsAsStr() const;
 
     void setHost(str host);
     str  getHost() const;

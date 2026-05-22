@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/01 18:46:40 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/20 15:37:08 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/22 13:18:16 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,10 +28,7 @@ e_HTTPStatus Request::parseReqLine()
   _requestTarget = _reqline.target.getPath();
   _target        = _reqline.target;
 
-  Logger::logSrv(_vsrvName,
-      "Reqline: '" + meth2str(_reqline.method) + " " +
-          _reqline.target.getStr() + " " +
-          WsrvLib::httpVer2Str(_reqline.httpVersion) + "'");
+  Logger::logSrv(_vsrvName, "Reqline: '" + _getReqlineAsStr() + "'");
 
   // if our client is not virtual immediately evaluate the target path
   if (!_cli->isVirtual())
@@ -179,22 +176,6 @@ e_HTTPStatus Request::_parseHeaders()
   // +2 because we want to keep the CRLF after the last hdr line
   str onlyHdrs = _reqdata.substr(0, crlfx2 + 2);
 
-  // handle hdrs body separation for POST reqs. we also keep track of the
-  // bodySize in main Request class bc we might have to handle socket draining
-  // using it. Therefore we have to track bodySize and compare with
-  // content-length.
-  if (_reqline.method == M_POST) {
-
-    _bodySize = _reqdata.size() - onlyHdrs.size() - 2;
-    _body.setBodyData(_reqdata.substr(crlfx2).data() + 4, _bodySize);
-    Logger::logDbg1("Request::_parseHeaders",
-        "starting to append " + int2str(_reqdata.size() - onlyHdrs.size() - 2) +
-            " to _body!");
-  }
-
-  // set free _reqdata as we will not need it anymore.
-  _reqdata.clear();
-
   std::vector<str> hdrLines = splitString(onlyHdrs, CRLF);
 
   // skipping the requline
@@ -209,7 +190,63 @@ e_HTTPStatus Request::_parseHeaders()
     toLowerInPlace(fieldName);
     _headers[fieldName] = fieldValue;
   }
+
+  // handle hdrs body separation for POST reqs. we also keep track of the
+  // bodySize in main Request class bc we might have to handle socket draining
+  // using it. Therefore we have to track bodySize and compare with
+  // content-length.
+  e_HTTPStatus initBodyRet = HTTP_200;
+  if (_reqline.method == M_POST)
+    initBodyRet = _initializeBody(onlyHdrs, crlfx2);
+  if (initBodyRet != HTTP_200)
+    return initBodyRet;
+
+  // set free _reqdata as we will not need it anymore.
+  _reqdata.clear();
+
   _logSelectedHdrs();
+  return HTTP_200;
+}
+
+// seperate the POST body from the headers so far read into _reqdata. Do some
+// checks if content-length hdr field was set appropriately.
+e_HTTPStatus Request::_initializeBody(constr& onlyHdrs, size_t crlfx2)
+{
+
+  if (_headers.count("content-length") == 0) {
+    Logger::logSrv(_vsrvName, "No content with POST req", WARN);
+    return HTTP_400;
+  }
+
+  _contentLength = std::atol(_headers["content-length"].c_str());
+
+  if (_contentLength > MAX_CONTENT_LENGTH) {
+    Logger::logSrv(_vsrvName,
+        "Request Content-Length exceeds MAX_CONTENT_LENGTH -> 400",
+        WARN);
+    return HTTP_400;
+  }
+
+  if (_matchedRoute != NULL && _contentLength > _matchedRoute->getMaxBodySize())
+  {
+    Logger::logSrv(
+        _vsrvName, "Requested Content-Length exceeds maxBodySize", WARN);
+    _cli->setState(CLI_DRAIN);
+    return HTTP_413;
+  }
+
+  // Setting body's capacity to _contentLength as we will ignore anything
+  // above it. If, body's already has been too large here, this will truncate
+  // the data.
+  if (_body.setMaxSize(_contentLength) == KO)
+    throw std::runtime_error(
+        "(Request::_parseHeaders) Could not set maxBodySize!");
+
+  _bodySize = _reqdata.size() - onlyHdrs.size() - 2;
+  _body.appendData(_reqdata.substr(crlfx2).data() + 4, _bodySize);
+  Logger::logDbg1("Request::_parseHeaders",
+      "initialized body with " + int2str(_bodySize) + " bytes!");
+
   return HTTP_200;
 }
 
@@ -244,39 +281,6 @@ e_HTTPStatus Request::_evaluateHdrs()
   // the Request::reqComplete will return true bc _hdrComplete is already true
   if (_reqline.method != M_POST)
     _bodyComplete = true;
-
-  if (_reqline.method == M_POST) {
-
-    if (_headers.count("content-length") == 0) {
-      Logger::logSrv(_vsrvName, "No content with POST req", WARN);
-      return HTTP_400;
-    }
-
-    _contentLength = std::atol(_headers["content-length"].c_str());
-
-    if (_contentLength > MAX_CONTENT_LENGTH) {
-      Logger::logSrv(_vsrvName,
-          "Request Content-Length exceeds MAX_CONTENT_LENGTH -> 400",
-          WARN);
-      return HTTP_400;
-    }
-
-    if (_matchedRoute != NULL &&
-        _contentLength > _matchedRoute->getMaxBodySize())
-    {
-      Logger::logSrv(
-          _vsrvName, "Requested Content-Length exceeds maxBodySize", WARN);
-      _cli->setState(CLI_DRAIN);
-      return HTTP_413;
-    }
-
-    // Setting body's capacity to _contentLength as we will ignore anything
-    // above it. If, body's already has been to large here, this will truncate
-    // the data.
-    if (_body.setMaxSize(_contentLength) == KO)
-      throw std::runtime_error(
-          "(Request::_parseHeaders) Could not set maxBodySize!");
-  }
 
   // set host and hostPort (which is the servers addr and port) from hdrs
   if (!_headers["host"].empty()) {
