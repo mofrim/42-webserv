@@ -185,3 +185,19 @@ From the [main resource](https://en.wikipedia.org/wiki/Common_Gateway_Interface)
 
 So, do i need to take anything here into account for my request handling
 routine? It doesn't feel like.
+
+### how a CGI session can end
+
+1) Client disconnects prematurely
+
+  - Child might be still running.
+  - Which state? Say, `CLI_CGITERM`
+  - pipefds still open, meaning: if SIGTERM is successful we will get EPOLLHUP
+    on one of them.
+  - if not: nothing happens! and we will have to check manually this we could do
+    outside of the usual if-else-branch in Webserv::run! But this would also
+    imply we would need to have a routine there for handling the complete
+    finishing process of cgi clients.
+  -  after all, we could always handle the cgi-pipe-fd-cleanup independently
+     from the rest of the cgi processing.
+  - there's no hard "need" for closing the pipefds in cgiWrite & cgiRead
