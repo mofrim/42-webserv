@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/14 23:12:17 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/26 10:08:16 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/26 10:22:22 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -126,7 +126,7 @@ int Epoll::getEventFd(int event_idx) const
 
 u32 Epoll::getEvent(int event_idx) const { return (_events[event_idx].events); }
 
-str Epoll::_getEventStr(const uint32_t& ev) const
+str Epoll::getEventStr(const uint32_t& ev)
 {
   str ret;
 
@@ -138,7 +138,7 @@ str Epoll::_getEventStr(const uint32_t& ev) const
     ret += str("EPOLLERR ");
   if (ev & EPOLLHUP)
     ret += str("EPOLLHUP ");
-  return ret;
+  return strip(ret);
 }
 
 void Epoll::printReadylist() const
@@ -148,7 +148,7 @@ void Epoll::printReadylist() const
     Logger::logDbg2("Printing Events in the epoll-ready-list:");
     for (int i = 0; i < _nfds; i++)
       Logger::logDbg2("  fd: " + int2str(_events[i].data.fd) +
-          ", event: " + _getEventStr(_events[i].events));
+          ", event: " + getEventStr(_events[i].events));
   }
 }
 
