@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/17 10:36:30 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/22 15:47:22 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/26 15:19:35 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,6 +74,9 @@ e_HTTPStatus Response::_cgiSetup(std::map<str, str> cgiParams)
 
   if (_cgiPid == 0) {
 
+    // make the CGI child process its own process group
+    setpgid(0, 0);
+
     close(stdinPipe[1]);
     close(stdoutPipe[0]);
     dup2(stdinPipe[0], STDIN_FILENO);
@@ -137,15 +140,15 @@ e_HTTPStatus Response::_cgiSetup(std::map<str, str> cgiParams)
 void Response::cgiWrite()
 {
   if (_cgiWriteBodySize == 0) {
-    Logger::logDbg2("Response::cgiWrite", "No body to write!");
+
+    Logger::logDbg1("Response::cgiWrite", "No body to write!");
     _cli->setState(CLI_CGIREAD);
     _cli->delCgiFromEpoll(_cgiParentWriteFd);
+
     close(_cgiParentWriteFd);
   }
 
-  Logger::logDbg2("(Response::cgiWrite) writing body (" +
-      int2str(_cgiBytesWritten) + "/" + int2str(_cgiWriteBodySize) + "/" +
-      int2str(_req->getBodySize()) + "):\n" +
+  Logger::logDbg2("(Response::cgiWrite) writing body :\n" +
       data2hexStr(_req->getBodyRawData(_cgiBytesWritten),
           _cgiWriteBodySize - _cgiBytesWritten));
 
@@ -154,15 +157,22 @@ void Response::cgiWrite()
       _cgiWriteBodySize - _cgiBytesWritten);
 
   if (bytesWritten >= 0) {
-    if (static_cast<size_t>(bytesWritten) == _cgiWriteBodySize) {
-      Logger::logDbg2("Response::cgiWrite", "Done writing body to pipe!");
+    _cgiBytesWritten += bytesWritten;
+    if (static_cast<size_t>(_cgiBytesWritten) == _cgiWriteBodySize) {
+
+      Logger::logDbg1("Response::cgiWrite", "Done writing body to pipe!");
+
       _cli->setState(CLI_CGIREAD);
       _cli->delCgiFromEpoll(_cgiParentWriteFd);
       close(_cgiParentWriteFd);
     }
+    else
+      Logger::logDbg1("Response::cgiWrite",
+          "Wrote " + int2str(_cgiBytesWritten) + " of " +
+              int2str(_cgiWriteBodySize) + " bytes to child");
   }
   else {
-    Logger::logWarn("Response::cgiWrite", "Failed to write body!");
+    Logger::logDbg1("Response::cgiWrite", "Failed to write body!");
     _cli->setState(CLI_CGIKO);
     _status = HTTP_502;
   }
@@ -170,11 +180,19 @@ void Response::cgiWrite()
 
 // this function is responsible for reaping the child process and reporting back
 // the exit status or any error
-bool Response::cgiEvalChildState()
+// returns:
+//
+//   * -1 or CHILD_RUNNING if the child process is still running
+//   * 0 - 255, the exit status of a child that exited
+//   * 4242 or CHILD_GONE when the child process is gone
+//
+// so, if we want to check for an error with the child process we can test for
+// return > 0.
+int Response::cgiEvalChildState()
 {
 
   if (_cli->getState() == CLI_CGICDONE)
-    return OK;
+    return 0;
 
   int status  = 0;
   int waitRet = 0;
@@ -185,53 +203,37 @@ bool Response::cgiEvalChildState()
   // changed; if WNOHANG was specified and one or more child(ren) specified by
   // pid exist, but  have  not yet changed state, then 0 is returned.  On
   // failure, -1 is returned.
-  //
   waitRet = waitpid(_cgiPid, &status, WNOHANG);
 
   switch (waitRet) {
     case 0:
       Logger::logDbg2("Response::cgiEvalChildState", "Child not yet done...");
-      break;
+      return CHILD_RUNNING;
     case -1:
       Logger::logDbg1("Response::cgiEvalChildState",
           "waitpid -> -1, errno: " + getErrnoStr());
-      if (errno == EAGAIN)
-        break;
-      // FIXME is this correct in any case???
-      else if (errno == ECHILD) {
-        Logger::logDbg1("Response::cgiEvalChildState",
-            "waitpid -> -1, errno: " + getErrnoStr());
-        _cli->setState(CLI_CGICDONE);
-        break;
-      }
-      else {
-        Logger::logDbg1("Response::cgiEvalChildState",
-            "waitpid -> -1, errno: " + getErrnoStr());
-        _status = HTTP_500;
-        _cli->setState(CLI_CGIKO);
-        return KO;
-      }
-      break;
+      _status = HTTP_500;
+      return CHILD_GONE;
     default:
       Logger::logDbg1("Response::cgiEvalChildState", "Child done!");
       if ((WIFEXITED(status) && WEXITSTATUS(status) != 0) || !WIFEXITED(status))
       {
-        if (WIFEXITED(status))
+        if (WIFEXITED(status)) {
           Logger::logDbg1("Response::cgiEvalChildState",
               "execve() failed with status " + int2str(WEXITSTATUS(status)));
+          _status = HTTP_502;
+          return WEXITSTATUS(status);
+        }
 
-        if (WIFSIGNALED(status))
+        if (WIFSIGNALED(status)) {
           Logger::logDbg1("Response::cgiEvalChildState",
               "execve() signaled with signal " + int2str(WTERMSIG(status)));
-
-        _status = HTTP_502;
-        _cli->setState(CLI_CGIKO);
-        return KO;
+          _status = HTTP_502;
+          return WTERMSIG(status);
+        }
       }
-      else
-        _cli->setState(CLI_CGICDONE);
   }
-  return OK;
+  return 0;
 }
 
 void Response::cgiRead()
@@ -242,26 +244,25 @@ void Response::cgiRead()
 
   Logger::logDbg2("Response::cgiRead", "bytesRead = " + int2str(bytesRead));
 
-  if (bytesRead < 0)
-    return;
+  if (bytesRead < 0) {
+    Logger::logSrv(_vsrvName, "CGI: Reading failed!");
+    _status = HTTP_502;
+    _cli->setState(CLI_CGIKO);
+  }
 
   if (bytesRead == 0) {
     Logger::logDbg1("Response::cgiRead",
         "got EOF -> done! Read " + int2str(_cgiBody.size()) + " bytes");
     _cgiBody.append(_cgiReadBuffer, bytesRead);
     _cli->setState(CLI_CGIOK);
-    _cli->delCgiFromEpoll(_cgiParentReadFd);
-    close(_cgiParentReadFd);
     return;
   }
 
   if (_cgiBody.size() + bytesRead > MAX_CGI_BODY_LENGTH) {
     Logger::logSrv(
-        _vsrvName, "CGI Body exceeding MAX_CGI_BODY_LENGTH. Baaad CGI!");
+        _vsrvName, "CGI: cgiBody exceeding MAX_CGI_BODY_LENGTH. Baaad CGI!");
     _status = HTTP_502;
     _cli->setState(CLI_CGIKO);
-    _cli->delCgiFromEpoll(_cgiParentReadFd);
-    close(_cgiParentReadFd);
   }
 
   _cgiBody.append(_cgiReadBuffer, bytesRead);
@@ -324,78 +325,4 @@ void Response::cgiCleanupFds()
   _cli->delCgiFromEpoll(_cgiParentReadFd);
   close(_cgiParentWriteFd);
   close(_cgiParentReadFd);
-}
-
-// well, the correct solution here would be to register the clients pid to epoll
-// using something like pidfd_open syscall to create a epoll-monitorable object
-// from the child's pid. but this is not included in the allowed functions! for
-// more background:
-//
-// https://unixism.net/2021/02/making-signals-less-painful-under-linux/
-//
-// ... and of course pidfd_open(2) ;)
-//
-void Response::cgiKillProcess()
-{
-  int wret = waitpid(_cgiPid, 0, WNOHANG);
-  int kret = 0;
-  if (wret == 0) {
-    Logger::logDbg1(
-        "Response::cgiKillProcess", "Trying to kill child with SIGTERM...");
-    kret = kill(_cgiPid, SIGTERM);
-    if (kret == -1 && errno == ESRCH) {
-      Logger::logDbg1("Response::cgiKillProcess", "kill == -1, child is gone!");
-      return;
-    }
-  }
-  else if (wret == -1) {
-    Logger::logDbg1(
-        "Response::cgiKillProcess", "waitpid == -1, child is gone!");
-    return;
-  }
-  else {
-    Logger::logDbg1("Response::cgiKillProcess", "waitpid > 0, child exited!");
-    return;
-  }
-
-  // FIXME REMOVEME!
-  usleep(500);
-
-  wret = waitpid(_cgiPid, 0, WNOHANG);
-  if (wret == 0) {
-    Logger::logDbg1(
-        "Response::cgiKillProcess", "Trying to kill child with SIGKILL...");
-    kret = kill(_cgiPid, SIGKILL);
-    if (kret == -1 && errno == ESRCH) {
-      Logger::logDbg1("Response::cgiKillProcess", "kill == -1, child is gone!");
-      return;
-    }
-  }
-  else if (wret == -1) {
-    Logger::logDbg1(
-        "Response::cgiKillProcess", "waitpid == -1, child is gone!");
-    return;
-  }
-  else {
-    Logger::logDbg1("Response::cgiKillProcess", "waitpid > 0, child exited!");
-    return;
-  }
-
-  // BUG this is blocking the whole server!!!!
-  usleep(1000);
-
-  wret = waitpid(_cgiPid, 0, WNOHANG);
-  switch (wret) {
-    case 0:
-      break;
-    case -1:
-      Logger::logDbg1(
-          "Response::cgiKillProcess", "waitpid == -1, child is gone!");
-      return;
-    default:
-      Logger::logDbg1("Response::cgiKillProcess", "waitpid > 0, child exited!");
-      return;
-  }
-
-  Logger::logDbg1("Response::cgiKillProcess", "giving up killing CGI process");
 }

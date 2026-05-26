@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/16 14:54:57 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/20 08:06:55 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/26 13:26:04 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -247,3 +247,5 @@ char **Response::_cgiBuildEnv(std::map<str, str> cgiParams)
 bool Response::cgiIsWriteFd(int fd) const { return fd == _cgiParentWriteFd; }
 
 bool Response::cgiIsRead(int fd) const { return fd == _cgiParentReadFd; }
+
+pid_t Response::cgiGetCpid() const { return _cgiPid; }

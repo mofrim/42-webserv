@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 23:39:07 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/22 13:25:11 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/26 15:28:40 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -150,12 +150,12 @@ class Request {
     void      buildResponse();
 
     // CGI wrappers
-    void cgiWrite();
-    bool cgiEvalChildState();
-    void cgiRead();
-    void cgiProcessBody();
-    void cgiCleanupFds();
-    void cgiKillProcess();
-    bool cgiIsWriteFd(int fd) const;
-    bool cgiIsReadFd(int fd) const;
+    void  cgiWrite();
+    int   cgiEvalChildState();
+    void  cgiRead();
+    void  cgiProcessBody();
+    void  cgiCleanupFds();
+    bool  cgiIsWriteFd(int fd) const;
+    bool  cgiIsReadFd(int fd) const;
+    pid_t cgiGetCpid() const;
 };

@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/14 10:18:32 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/22 12:56:16 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/22 22:04:50 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,8 +76,6 @@ int RequestBody::appendData(const char *dat, size_t len)
   } catch (const std::exception& e) {
     ret = -1;
   }
-  Logger::logBug(
-      "bodies CONTAINER REAL size after appending: " + int2str(_size));
   return ret;
 }
 

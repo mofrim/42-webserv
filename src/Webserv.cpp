@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:36:43 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/22 22:04:08 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/26 15:59:15 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -135,10 +135,10 @@ void Webserv::run()
   while (g_killme == 0) {
     int nfds = _epoll.wait();
     if (nfds == -1 && errno != EINTR)
-      throw(WebservRunException("epoll_wait failed"));
+      throw WebservRunException("epoll_wait failed");
 
-    // DEBUG
-    _epoll.printReadylist();
+    if (LOGLEVEL == LOG_BRUTAL)
+      _epoll.printReadylist();
 
     for (int eventIdx = 0; eventIdx < nfds; ++eventIdx) {
       int currentFd = _epoll.getEventFd(eventIdx);
@@ -166,7 +166,6 @@ void Webserv::run()
         _fdClientMap[cli->getFd()] = cli;
         _epoll.addClient(cli->getFd());
         _numOfClients++;
-        Logger::drawCycleSep();
       }
 
       // 2) existing connection
@@ -217,8 +216,9 @@ void Webserv::run()
         }
       }
       _timeoutClients();
-      Logger::drawCycleSep();
     }
+    if (processCgiKillQueue() == OK || nfds > 0)
+      Logger::drawCycleSep();
   }
   _epoll.closeEpollFd();
 }
@@ -232,12 +232,17 @@ void Webserv::_timeoutClients()
   while (it != _fdClientMap.end()) {
     Client *cli = it->second;
     if (cli->isCGIing()) {
+      // Logger::logBug(
+      //     "checking cgi client timeout: " + it->second->getIfaceFdStr());
+      // Logger::logBug(
+      //     "difftime: " + int2str(difftime(now, cli->getLastActive())));
       if (difftime(now, cli->getLastActive()) > WsrvLib::Settings.cgiTimeout) {
         Logger::logDbg1("Timing out CGI client..." + cli->getIfaceFdStr());
         cli->timeout();
         _epoll.modifyClient(cli->getFd(), EPOLLOUT);
         cli->setState(CLI_SEND);
         cli->getReq().getRespo().cgiCleanupFds();
+        cli->getReq().setStatusCode(HTTP_504);
       }
     }
     else if (difftime(now, cli->getLastActive()) > WsrvLib::Settings.reqTimeout)
@@ -284,8 +289,11 @@ void Webserv::_handleDiscoCGI(Client *cli, VServer *vsrv)
 {
   Logger::logSrv(vsrv->getName(), "Handling CGI Disco!");
   Response& respo = cli->getReq().getRespo();
-  respo.cgiKillProcess();
   respo.cgiCleanupFds();
+
+  // if child process is still running add to killQueue
+  if (waitpid(respo.cgiGetCpid(), 0, WNOHANG) == 0)
+    addCgiPidToKillQueue(respo.cgiGetCpid());
 
   int cliFd = cli->getFd();
 
@@ -295,4 +303,65 @@ void Webserv::_handleDiscoCGI(Client *cli, VServer *vsrv)
 
   _fdClientMap.erase(cliFd);
   _numOfClients--;
+}
+
+// add a CGI pid to webserv's killQueue. this makes monitoring the kill process
+// via epoll cycles possible
+void Webserv::addCgiPidToKillQueue(pid_t pid) { _killQueue[pid] = KILL_TERM; }
+
+// process the kill queue. Meaning we skip through the killQueue and send the
+// signal that corresponds to the entry's state. in the next epoll-cycle the
+// pid's status will be checked, if killing was successful we are good and
+// remove the pid from the queue. we also remove the pid from queue if killing
+// fails.
+//
+// this solution even gives meaning to have an epoll-timeout other than -1.
+//
+// Sending using `kill(-pid, SIGNAL)` here because we want to kill the whole
+// process-group belonging to the child process.
+bool Webserv::processCgiKillQueue()
+{
+  if (_killQueue.empty())
+    return KO;
+
+  std::map<pid_t, e_KillState>::iterator it = _killQueue.begin();
+
+  while (it != _killQueue.end()) {
+    pid_t       pid   = it->first;
+    e_KillState state = it->second;
+    int         kret  = 0;
+
+    int wret = waitpid(pid, 0, WNOHANG);
+
+    if (wret != 0) {
+      Logger::logDbg1("Webserv::processKillQueue",
+          "pid " + int2str(pid) + " gone or exited (" + int2str(wret) +
+              ") -> removing from _killQueue");
+      it = eraseIt(_killQueue, it);
+      continue;
+    }
+
+    if (state == KILL_TERM) {
+      Logger::logDbg1("Webserv::processKillQueue",
+          "Sending SIGTERM to pid " + int2str(pid));
+      kret       = kill(-pid, SIGTERM);
+      it->second = KILL_KILL;
+    }
+    else {
+      Logger::logDbg1("Webserv::processKillQueue",
+          "Sending SIGKILL to pid " + int2str(pid));
+      kret = kill(-pid, SIGKILL);
+    }
+
+    if (kret < 0) {
+      Logger::logDbg1("Webserv::processKillQueue",
+          "killing pid " + int2str(pid) +
+              " failed -> removing from _killQueue");
+      it = eraseIt(_killQueue, it);
+      continue;
+    }
+
+    ++it;
+  }
+  return OK;
 }

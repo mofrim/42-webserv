@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/23 19:11:06 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/20 09:30:56 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/26 15:19:42 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,11 @@
 class Request;
 class Client;
 class VServer;
+
+// we want to be positive (to make checking for errors via > 0 testing possible)
+// but not interfer with any exit status code, so 4242 is the natural choice.
+#define CHILD_GONE 4242
+#define CHILD_RUNNING -1
 
 class Response {
   private:
@@ -94,13 +99,14 @@ class Response {
 
     e_HTTPStatus handleCGI(Request& req);
     void         cgiWrite();
-    bool         cgiEvalChildState();
+    int          cgiEvalChildState();
     void         cgiRead();
     void         cgiProcessBody();
     void         cgiCleanupFds();
-    void         cgiKillProcess();
     bool         cgiIsWriteFd(int fd) const;
     bool         cgiIsRead(int fd) const;
+    bool         isChildReaped() const;
+    pid_t        cgiGetCpid() const;
 
     void reset();
 
