@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/14 23:12:17 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/26 10:22:22 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/26 23:08:57 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -126,6 +126,8 @@ int Epoll::getEventFd(int event_idx) const
 
 u32 Epoll::getEvent(int event_idx) const { return (_events[event_idx].events); }
 
+// print all components of a epoll event returned by epoll_wait. Supported
+// events: EPOLLIN, EPOLLOUT, EPOLLERR, EPOLLHUP
 str Epoll::getEventStr(const uint32_t& ev)
 {
   str ret;
@@ -141,6 +143,7 @@ str Epoll::getEventStr(const uint32_t& ev)
   return strip(ret);
 }
 
+// debugging output of the readylist after a epoll_wait return
 void Epoll::printReadylist() const
 {
   Logger::logDbg2("epoll_wait returned nfds = " + int2str(_nfds));
