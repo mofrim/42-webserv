@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/14 23:12:17 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/20 07:57:46 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/26 10:08:16 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -128,15 +128,17 @@ u32 Epoll::getEvent(int event_idx) const { return (_events[event_idx].events); }
 
 str Epoll::_getEventStr(const uint32_t& ev) const
 {
+  str ret;
+
   if (ev & EPOLLIN)
-    return str("EPOLLIN");
+    ret += str("EPOLLIN ");
   if (ev & EPOLLOUT)
-    return str("EPOLLOUT");
+    ret += str("EPOLLOUT ");
   if (ev & EPOLLERR)
-    return str("EPOLLERR");
+    ret += str("EPOLLERR ");
   if (ev & EPOLLHUP)
-    return str("EPOLLHUP");
-  return str("UNKNOWN EVENT");
+    ret += str("EPOLLHUP ");
+  return ret;
 }
 
 void Epoll::printReadylist() const
