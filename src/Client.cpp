@@ -6,11 +6,12 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/14 20:51:06 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/20 23:14:30 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/26 15:40:11 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Client.hpp"
+#include "Epoll.hpp"
 #include "Logger.hpp"
 #include "VServer.hpp"
 #include "Webserv.hpp"
@@ -43,6 +44,7 @@ Client::Client(
     _reqHandler.setVsrvName("__VIRTUAL__");
     _virtual = true;
   }
+  this->setLastActive();
 }
 
 // NEXT make virtual clients handling really virtual
@@ -107,6 +109,8 @@ Client *Client::newVirtualCli(Webserv *wsrv, int listenFd)
   Logger::logSrv("__VIRTUAL__",
       "New virtual client connected from " + newCli->getIfaceFdStr());
 
+  newCli->setLastActive();
+
   return newCli;
 }
 
@@ -114,42 +118,63 @@ void Client::handleEvent(u32 ev)
 {
   if (ev & (EPOLLIN | EPOLLOUT)) {
     this->setLastActive();
+    Logger::logMsg(
+        "Got " + Epoll::getEventStr(ev) + " on client " + getIfaceFdStr());
     if (ev & EPOLLIN) {
-      Logger::logMsg("Got EPOLLIN on client " + getIfaceFdStr());
       _reqHandler.readRequest();
     }
     if (ev & EPOLLOUT) {
-      Logger::logMsg("Got EPOLLOUT on client " + getIfaceFdStr());
       _reqHandler.writeResponse();
+    }
+  }
+}
+
+// extracted routine for evaluating any EPOLLHUP or EPOLLERR events received on
+// the pipeFds. there are 3 possible error scenacrios documented in the code
+// below. the 4th case is not an error.
+void Client::_cgiEvalEpollHupErr(u32 ev)
+{
+  // 1) parent's write end of the pipe closed prematurely. EPOLLERR can only
+  // happen on the writeFd! Always an error as we could not write the whole
+  // request body to pipe.
+  if (ev & EPOLLERR) {
+    Logger::logSrv(
+        _vsrv->getName(), "Got EPOLLERR from client " + getIfaceFdStr());
+    _state = CLI_CGIKO;
+    _req.setStatusCode(HTTP_502);
+  }
+
+  else if (ev & EPOLLHUP) {
+
+    // 2) This can only happen to a parent's read-fd! We get EPOLLHUP on the
+    // readFd which means the child process closed its stdout while we were
+    // still writing the request body. so the child can not have processed the
+    // request correctly.
+    if (_state == CLI_CGIRW) {
+      Logger::logSrv(_vsrv->getName(),
+          "EPOLLHUP from client " + getIfaceFdStr() +
+              " while still writing to pipe.");
+      _req.setStatusCode(HTTP_502);
+      _state = CLI_CGIKO;
+    }
+
+    // 3) We're done writing but we get an EPOLLHUP on the read fd. If the
+    // child's exit status is bad. We have an error. Otherwise we have to keep
+    // reading until we get EOF.
+    else if (_state == CLI_CGIREAD) {
+      if (_req.cgiEvalChildState() > 0)
+        _state = CLI_CGIKO;
     }
   }
 }
 
 void Client::handleEventCGI(u32 ev, int fd)
 {
-  if (ev & EPOLLERR) {
-    Logger::logSrv(
-        _vsrv->getName(), "Got EPOLLERR from client " + getIfaceFdStr());
-    _state = CLI_CGIKO;
-    _req.cgiEvalChildState();
-  }
+  str whichFd = _req.cgiIsWriteFd(fd) ? " CGI-Write-FD " : " CGI-Read-FD ";
+  Logger::logMsg(
+      "Got " + Epoll::getEventStr(ev) + " on" + whichFd + int2str(fd));
 
-  if (ev & EPOLLHUP) {
-    if (_req.cgiIsWriteFd(fd) && _state == CLI_CGIRW) {
-      Logger::logSrv(_vsrv->getName(),
-          "EPOLLHUP from client " + getIfaceFdStr() +
-              " while still writing to pipe!");
-      _state = CLI_CGIKO;
-      _req.cgiEvalChildState();
-    }
-    else if (_req.cgiIsReadFd(fd) && _state == CLI_CGIREAD) {
-      Logger::logSrv(_vsrv->getName(),
-          "EPOLLHUP from client " + getIfaceFdStr() +
-              " while reading from pipe.");
-      if (_req.cgiEvalChildState() == KO)
-        _state = CLI_CGIKO;
-    }
-  }
+  _cgiEvalEpollHupErr(ev);
 
   switch (_state) {
     case CLI_CGIRW:
@@ -162,7 +187,7 @@ void Client::handleEventCGI(u32 ev, int fd)
         _req.cgiRead();
       }
       if (_state == CLI_CGIOK || _state == CLI_CGIKO ||
-          _req.cgiEvalChildState() == KO)
+          _req.cgiEvalChildState() > 0)
         break;
       else
         return;
@@ -173,7 +198,7 @@ void Client::handleEventCGI(u32 ev, int fd)
         _req.cgiRead();
       }
       if (_state == CLI_CGIOK || _state == CLI_CGIKO ||
-          _req.cgiEvalChildState() == KO)
+          _req.cgiEvalChildState() > 0)
         break;
       else
         return;
@@ -182,20 +207,20 @@ void Client::handleEventCGI(u32 ev, int fd)
   }
 
   if (_state == CLI_CGIKO || _state == CLI_CGIOK) {
-    if (_state == CLI_CGIKO) {
-      _req.cgiCleanupFds();
-      _req.setStatusFromRespo();
-    }
-    else
+    if (_state == CLI_CGIOK)
       _req.cgiProcessBody();
 
+    if (_req.cgiEvalChildState() == CHILD_RUNNING)
+      _webserv->addCgiPidToKillQueue(_req.cgiGetCpid());
+
+    _req.cgiCleanupFds();
     _req.setStatusFromRespo();
     _req.buildResponse();
     _req.setCGIdone();
   }
 }
 
-// ----------------------=[ One-liner Getter-Setters ]=---------------------- //
+// -----------------------=[ One-liners, mostly... ]=----------------------- //
 
 Request& Client::getReq() { return _req; }
 void     Client::setReq(const Request& r) { _req = r; }

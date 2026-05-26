@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/14 20:50:12 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/20 12:05:19 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/26 15:38:18 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,7 +39,6 @@ typedef enum {
 
 class Client {
   private:
-    // only for CGI i had to add this >:(
     Webserv *_webserv;
 
     int    _clientFd;
@@ -63,6 +62,8 @@ class Client {
     Client();
 
     e_CliState _state;
+
+    void _cgiEvalEpollHupErr(u32 ev);
 
   public:
     ~Client();

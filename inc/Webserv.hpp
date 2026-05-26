@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:35:29 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/22 22:04:17 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/26 15:58:12 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,12 +36,13 @@ class Webserv {
     // this maps a server-socket fd to a list of vservers.
     std::map< int, std::vector<VServer *> > _vserverFdMap;
 
-    // this maps the a client fd to a list of possible vservers. when the first
-    // request is send it will be decided which server is responsible for
-    // handling it by serverName
+    // This maps fd to a Client. Fds can be sockets or pipes in the case of CGI
     std::map< int, Client * > _fdClientMap;
 
     u16 _numOfClients;
+
+    enum e_KillState { KILL_TERM, KILL_KILL };
+    std::map<pid_t, e_KillState> _killQueue;
 
     Epoll _epoll;
 
@@ -81,6 +82,9 @@ class Webserv {
     void removeCgiFdFromEpoll(int fd);
 
     bool isVsrvName(constr& s) const;
+
+    void addCgiPidToKillQueue(pid_t pid);
+    bool processCgiKillQueue();
 
     class WebservInitException: public std::runtime_error {
       public:

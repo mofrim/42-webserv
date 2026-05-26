@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/03 11:26:23 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/19 11:09:43 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/26 13:46:07 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -127,6 +127,19 @@ str getSetAsStr(const std::set< std::pair<T1, T2> >& s)
 // next elem after erasure. in C++98 they don't. that is a problem because like
 // that it is kind of difficult to safely iterate over a container while
 // possibly deleting elems from it.
+//
+// Example of safe usage:
+//
+//    std::vector<int>::it = vec.begin();
+//    while (it != vec.end())
+//    {
+//      if (condition) {
+//        it = eraseIt(vec, it);
+//        continue;
+//      }
+//      ...
+//      ++it;
+//    }
 template <typename T>
 typename T::iterator eraseIt(T& conti, typename T::iterator it)
 {
