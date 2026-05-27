@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/23 19:11:06 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/26 15:19:42 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/27 08:30:07 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -105,7 +105,6 @@ class Response {
     void         cgiCleanupFds();
     bool         cgiIsWriteFd(int fd) const;
     bool         cgiIsRead(int fd) const;
-    bool         isChildReaped() const;
     pid_t        cgiGetCpid() const;
 
     void reset();

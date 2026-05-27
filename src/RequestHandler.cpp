@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 19:13:35 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/26 10:54:24 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/27 06:30:22 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,7 +68,7 @@ void RequestHandler::readRequest()
       Logger::logSrv(
           _vsrvName, "Client disco -> closing client " + _cli->getIfaceFdStr());
     else
-      // Dear evalutor. I _AM_ checking errno here, but only for _LOGGING_ not
+      // Dear evalutor. I am checking errno here, but only for _LOGGING_ not
       // for "adjusting server behavior".
       Logger::logWarn(
           _vsrvName, "Read failed, " + getErrnoStr() + " -> disco!");

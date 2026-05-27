@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:36:43 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/26 15:59:15 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/26 23:14:20 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -111,17 +111,11 @@ void Webserv::_setupSingleServer(std::vector<VServer>::iterator srvIt)
     srvIt->printCfg();
 }
 
-// TODO: figure out the best timeout for epoll_wait. For now -1 is okay. but
-// even a small timeout like 10ms might be okay. what are the benefits here?
-//
-// NOTE: i think checking errno here is okay as the subject only demands not
-// checking it after read write.
-//
 // the logic here is simple: if we are getting an I/O event on one of our
 // servers listening sockets (aka ports) this is a connection request ->
 // add a new client!
 //
-// EINTR == epoll_wait was interrupted by signal_handler being calles (expl:
+// EINTR == epoll_wait was interrupted by signal_handler being called (expl:
 // epoll_wait is a syscall and as such atomic. so if any interupt is being
 // called the syscall exits)
 void Webserv::run()

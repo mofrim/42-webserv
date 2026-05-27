@@ -30,8 +30,7 @@ if [ $# -eq 3 ]; then
 else
 	hostname="$1"
 	port="$2"
-	# $webserv $cfgDir/simplest.wsrv > /dev/null &
-	$webserv $cfgDir/simplest.wsrv &
+	$webserv $cfgDir/simplest.wsrv > /dev/null &
 	sleep 0.1s
 fi
 
@@ -51,8 +50,6 @@ exec 3<&-
 if [ $# -eq 2 ]; then
 	pkill -INT webserv
 fi
-
-cat $tmpfile
 
 if [ -z "$(cat $tmpfile | grep 408)" ]; then
 	rm $tmpfile
