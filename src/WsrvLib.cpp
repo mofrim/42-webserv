@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/24 17:40:43 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/21 21:18:17 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/27 09:29:08 by fmaurer          ###   ########.fr       */
 /*                                                                            */ /* ************************************************************************** */
 
 #include "WsrvLib.hpp"
@@ -194,8 +194,9 @@ std::map<u16, str> WsrvLib::_initStatusCodes()
   s[401] = "Unauthorized";
   s[403] = "Forbidden";
   s[404] = "Not Found";
-  s[405] = "Not Allowed";
+  s[405] = "Method Not Allowed";
   s[408] = "Request Timeout";
+  s[411] = "Length Required";
   s[413] = "Content Too Large";
   s[415] = "Unsupported Media Type";
   s[418] = "I'm a teapot";
