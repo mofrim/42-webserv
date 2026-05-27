@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:37:25 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/27 06:24:56 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/27 12:22:07 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,9 +15,6 @@
 
 #include <iostream>
 #include <signal.h>
-#include <string.h>
-
-Webserv *g_webserv = NULL;
 
 volatile sig_atomic_t g_killme = 0;
 
@@ -30,7 +27,6 @@ void signalHandler(int signum)
 int main(int ac, char **av, char **envp)
 {
   Webserv webserv(envp);
-  g_webserv = &webserv;
 
   Logger::init();
 
