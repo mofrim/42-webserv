@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/24 20:49:55 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/18 11:32:36 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/27 06:24:56 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,12 +52,15 @@ typedef enum { INFO, WARN, ERROR } e_LogType;
 // ... gotta try this any time soon.
 class Logger {
   private:
+    static bool _isatty;
+
     Logger();
     Logger(const Logger& other);
     Logger& operator=(const Logger& other);
     ~Logger();
 
   public:
+    static void init();
     static void logErr(const str& msg);
     static void logErr(const str& pre, const str& msg);
     static void logMsg(const str& msg);
