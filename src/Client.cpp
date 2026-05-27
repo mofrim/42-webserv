@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/14 20:51:06 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/26 15:40:11 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/27 11:44:27 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -158,12 +158,11 @@ void Client::_cgiEvalEpollHupErr(u32 ev)
       _state = CLI_CGIKO;
     }
 
-    // 3) We're done writing but we get an EPOLLHUP on the read fd. If the
-    // child's exit status is bad. We have an error. Otherwise we have to keep
-    // reading until we get EOF.
+    // 3) We're done writing but we get an EPOLLHUP on the read fd. We still
+    // have to keep reading until we get EOF.
     else if (_state == CLI_CGIREAD) {
-      if (_req.cgiEvalChildState() > 0)
-        _state = CLI_CGIKO;
+      if (_req.cgiEvalChildState() != 0)
+        _state = CLI_CGICDONE;
     }
   }
 }

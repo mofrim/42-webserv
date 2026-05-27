@@ -144,8 +144,8 @@ void Response::cgiWrite()
     Logger::logDbg1("Response::cgiWrite", "No body to write!");
     _cli->setState(CLI_CGIREAD);
     _cli->delCgiFromEpoll(_cgiParentWriteFd);
-
     close(_cgiParentWriteFd);
+    return;
   }
 
   Logger::logDbg2("(Response::cgiWrite) writing body :\n" +
@@ -210,9 +210,8 @@ int Response::cgiEvalChildState()
       Logger::logDbg2("Response::cgiEvalChildState", "Child not yet done...");
       return CHILD_RUNNING;
     case -1:
-      Logger::logDbg1("Response::cgiEvalChildState",
-          "waitpid -> -1, errno: " + getErrnoStr());
-      _status = HTTP_500;
+      Logger::logDbg1(
+          "Response::cgiEvalChildState", "waitpid -> -1, " + getErrnoStr());
       return CHILD_GONE;
     default:
       Logger::logDbg1("Response::cgiEvalChildState", "Child done!");
@@ -221,14 +220,12 @@ int Response::cgiEvalChildState()
         if (WIFEXITED(status)) {
           Logger::logDbg1("Response::cgiEvalChildState",
               "execve() failed with status " + int2str(WEXITSTATUS(status)));
-          _status = HTTP_502;
           return WEXITSTATUS(status);
         }
 
         if (WIFSIGNALED(status)) {
           Logger::logDbg1("Response::cgiEvalChildState",
               "execve() signaled with signal " + int2str(WTERMSIG(status)));
-          _status = HTTP_502;
           return WTERMSIG(status);
         }
       }
