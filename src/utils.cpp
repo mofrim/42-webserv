@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/26 10:03:57 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/19 11:11:56 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/27 12:18:11 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -184,6 +184,40 @@ std::vector<str> splitStrWhite(const str& sstr, bool keepEmpty)
     if (!sub.empty() || keepEmpty)
       ret.push_back(sub);
     while (k < sstr.size() && isspace(sstr[k]))
+      ++k;
+    i = k;
+  }
+  return ret;
+}
+
+std::vector<str> splitMultiStr(const str& sstr, constr& delims, bool keepEmpty)
+{
+  std::vector<str> ret;
+  size_t           i = 0;
+  size_t           k = 0;
+
+  if (sstr.empty())
+    return ret;
+
+  if (delims.empty()) {
+    ret.push_back(sstr);
+    return ret;
+  }
+
+  i = sstr.find_first_not_of(delims);
+  if (i == str::npos)
+    return ret;
+
+  while (i < sstr.size() && k != str::npos) {
+    k = sstr.find_first_of(delims, i);
+    str sub;
+    if (k == str::npos)
+      sub = sstr.substr(i, str::npos);
+    else
+      sub = sstr.substr(i, k - i);
+    if (!sub.empty() || keepEmpty)
+      ret.push_back(sub);
+    while (k < sstr.size() && delims.find(sstr[k]) != str::npos)
       ++k;
     i = k;
   }

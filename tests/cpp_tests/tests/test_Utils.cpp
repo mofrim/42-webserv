@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/13 13:06:35 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/18 08:31:12 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/27 12:26:47 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,6 +59,58 @@ int _test_Utils()
     for (std::vector<str>::iterator it = sp.begin(); it != sp.end(); ++it)
       std::cout << "sp: '" << *it << "'" << std::endl;
   }
+
+  print_test_topic("test_utils", "splitMultiStr");
+  {
+    std::vector<str> sp;
+
+    sp = splitMultiStr("Hallo welt", " l", false);
+    for (std::vector<str>::iterator it = sp.begin(); it != sp.end(); ++it)
+      std::cout << "sp: '" << *it << "'" << std::endl;
+
+    std::cout << std::endl;
+
+    sp = splitMultiStr("l", " l", false);
+    for (std::vector<str>::iterator it = sp.begin(); it != sp.end(); ++it)
+      std::cout << "sp: '" << *it << "'" << std::endl;
+
+    std::cout << std::endl;
+
+    sp = splitMultiStr("l ", " l", false);
+    for (std::vector<str>::iterator it = sp.begin(); it != sp.end(); ++it)
+      std::cout << "sp: '" << *it << "'" << std::endl;
+
+    std::cout << std::endl;
+
+    sp = splitMultiStr("l ", "l", false);
+    for (std::vector<str>::iterator it = sp.begin(); it != sp.end(); ++it)
+      std::cout << "sp: '" << *it << "'" << std::endl;
+
+    std::cout << std::endl;
+
+    sp = splitMultiStr("lsdd ", "ldjalsdjfasdjflasdjf", false);
+    for (std::vector<str>::iterator it = sp.begin(); it != sp.end(); ++it)
+      std::cout << "sp: '" << *it << "'" << std::endl;
+
+    std::cout << std::endl;
+
+    sp = splitMultiStr("chunked; gzip", "; ", false);
+    for (std::vector<str>::iterator it = sp.begin(); it != sp.end(); ++it)
+      std::cout << "sp: '" << *it << "'" << std::endl;
+
+    std::cout << std::endl;
+
+    sp = splitMultiStr("", "; ", false);
+    for (std::vector<str>::iterator it = sp.begin(); it != sp.end(); ++it)
+      std::cout << "sp: '" << *it << "'" << std::endl;
+
+    std::cout << std::endl;
+
+    sp = splitMultiStr("chunked; gzip", "", false);
+    for (std::vector<str>::iterator it = sp.begin(); it != sp.end(); ++it)
+      std::cout << "sp: '" << *it << "'" << std::endl;
+  }
+
   return 0;
 }
 

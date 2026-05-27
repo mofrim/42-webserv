@@ -57,6 +57,7 @@ cat <<EOF >> $TEST_MAIN
 #include "test-utils.hpp"
 #include "test_hdr.hpp"
 bool g_GlobalResult = OK;
+volatile sig_atomic_t g_killme = 0;
 int main()
 {
   g_WsrvTesting = true;

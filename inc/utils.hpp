@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/03 11:26:23 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/26 13:46:07 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/27 12:28:47 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,10 +42,15 @@ str  getErrnoStr();
 
 std::set<str> listDirFiles(constr& directoryPath, bool dirSlash = true);
 
+// -----------------------------=[ splitters ]=----------------------------- //
+
 std::vector<str> splitString(
     constr& sstr, constr& delim, bool keepEmpty = false);
 
 std::vector<str> splitStrWhite(constr& sstr, bool keepEmpty = false);
+
+std::vector<str> splitMultiStr(
+    const str& sstr, constr& delims, bool keepEmpty = false);
 
 // -----------------------------=[ Templates ]=----------------------------- //
 
