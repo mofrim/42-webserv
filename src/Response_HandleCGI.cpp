@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/16 14:54:57 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/26 13:26:04 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/27 11:01:44 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -167,14 +167,14 @@ std::map<str, str> Response::_cgiEvalScriptPath()
   cgiParams["SCRIPT_FILENAME"] = cgiScript;
   cgiParams["EXEC"]            = extIt->second;
 
-  cgiParams["PATH_INFO"] = _targetPath;
-
   size_t scriptPos = _targetPath.find(cgiParams["SCRIPT_NAME"]);
   str    transPath;
   if (scriptPos != str::npos)
     transPath =
         _targetPath.substr(scriptPos + cgiParams["SCRIPT_NAME"].length());
   cgiParams["PATH_TRANSLATED"] = r.getRoot() + r.getPath() + transPath;
+
+  cgiParams["PATH_INFO"] = transPath;
 
   return cgiParams;
 }
