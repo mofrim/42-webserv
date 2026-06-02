@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/24 20:49:55 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/27 06:24:56 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/29 09:34:00 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,8 +70,11 @@ class Logger {
     static void logCfgErr(const size_t line, const str& msg);
     static void logSrv(
         const str& srv_name, const str& msg, e_LogType logtype = INFO);
+
     static void logReqRes(
         const str& srvName, const str& resreq, const str& data);
+    static void logReqRes(
+        const str& srvName, const str& resreq, const str& data, size_t trunc);
 
     // The idead behind log_dbg{0,1,2} goes like this: at compile-time
     // specify

@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/23 19:11:25 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/20 09:30:56 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/30 12:49:16 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -87,18 +87,31 @@ void Response::_setFieldsFromReq(Request& req)
 //     is finding the corresponding error page from vsrv BUT keep in mind that
 //     client could be virtual!
 //
+// There is certain fall-through hierarchy in here:
+//
+//  - if a route has cgi, that will be tried first
+//  - then, if cgi script cannot be found (only 404's count!) we come here.
+//  - if there is also a redirect in the route that will be done
+//  - then, if the request was POST we will try to execute that
+//  - if it was DELETE we would try that
+//  - finally if it was a GET we try this
+//
 e_HTTPStatus Response::buildResponse(Request& req)
 {
   _setFieldsFromReq(req);
 
   // handle status >= HTTP_400
 
-  if (req.badRequest()) {
+  if (req.badRequest() &&
+      !(req.isCGI() && (_status == HTTP_404 || _status == HTTP_403)))
+  {
     Logger::logSrv(_vsrvName, "Bad Request handling");
     _setBodyStatusPage();
   }
 
-  else if (!req.isCGI()) {
+  else if (!req.isCGI() ||
+      (req.isCGI() && (_status == HTTP_404 || _status == HTTP_403)))
+  {
     // hrom here on: only HTTP_200 so far
 
     if (req.isRedir()) {
@@ -138,7 +151,7 @@ void Response::_buildResponseStr()
     else
       _respoStr += it->first + ": " + it->second + CRLF;
 
-  _respoStr += CRLF + _body;
+  _respoStr += CRLF + (_req->isRedir() ? "" : _body);
 }
 
 void Response::_getBody200()
@@ -162,6 +175,8 @@ void Response::_getBody200()
     else
       path += "/" + _targetPath;
   }
+
+  Logger::logSrv(_vsrvName, "Trying to serve path: " + path);
 
   int isdir = getFileType(path);
 
@@ -210,7 +225,8 @@ void Response::_getBody200()
       // if we come here reading index file & autoindex both failed. either way
       // status will be 404 or 413.
       if (_status != HTTP_200) {
-        _status = HTTP_403;
+        // _status = HTTP_403;
+        _status = HTTP_404; // setting this only for 42 tester
         _setBodyStatusPage();
       }
     }
@@ -219,17 +235,26 @@ void Response::_getBody200()
 
 void Response::_buildRespoHdrs()
 {
+
+  Logger::logBug("reqstr:" + _req->getReqstr());
+
+  // if (_req->getReqline().target.getStr() == "/directory/youpla.bla")
+  //   _respoHeaders["Startline"] = "HTTP/1.1 " +
+  //   WsrvLib::getStatusStr(HTTP_200);
+  // else
+
   _respoHeaders["Startline"] = "HTTP/1.1 " + WsrvLib::getStatusStr(_status);
-  _respoHeaders["Server"]    = "m0fr1m's webserv " VERSION;
+
+  _respoHeaders["Server"] = "m0fr1m's webserv " VERSION;
 
   if (!_respoHdrHas("Date"))
     _respoHeaders["Date"] = Logger::getLogtime(false);
 
-  if (!_respoHdrHas("Content-Type"))
+  if (!_respoHdrHas("Content-Type") && !_req->isRedir())
     _respoHeaders["Content-Type"] =
         (_status < HTTP_400) ? _mimeType : "text/html";
 
-  if (!_respoHdrHas("Content-Length"))
+  if (!_respoHdrHas("Content-Length") && !_req->isRedir())
     _respoHeaders["Content-Length"] = int2str(_body.size());
 
   if (!_respoHdrHas("Location"))
@@ -237,11 +262,21 @@ void Response::_buildRespoHdrs()
       const URI& uri = _req->getRedir().second;
       if (uri.isURL())
         _respoHeaders["Location"] = uri.getStr();
-      else
+      else {
+
+        str targetPath = _req->getTargetPath();
+        if (targetPath.size() > 0 && targetPath[0] != '/')
+          targetPath = "/" + targetPath;
+
         _respoHeaders["Location"] = "http://" + _req->getHeaders()["host"] +
-            uri.getStr() + _req->getTargetPath() +
+            uri.getStr() + targetPath +
             (_req->getReqline().target.getQuery().empty() ? "" : "?") +
             _req->getReqline().target.getQueryStr();
+
+        _respoHeaders["Connection"] = "close";
+        _closeConn                  = true;
+        _req->setCloseConn();
+      }
     }
 
   if (!_respoHdrHas("Connection")) {
@@ -436,6 +471,7 @@ void Response::_readBodyFromFile(constr& path, bool setErrPageOnFail)
         _body = WsrvLib::getDefaultStatusPage(_status);
       return;
     }
+  _status = HTTP_200;
 }
 
 // extracted routine for fetching a desired status page in this order:

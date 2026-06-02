@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/03 11:26:23 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/27 12:28:47 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/29 09:23:42 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,10 +35,15 @@ str  strip(str str);
 void toLowerInPlace(str& s);
 str  toLower(str s);
 u16  str2u16(constr& s);
-str  data2hexStr(const char *s, size_t len);
-bool isValidFnameChar(char c);
-bool isValidFname(const str& s);
-str  getErrnoStr();
+
+str data2hexStr(const char *s, size_t len);
+str printDataTrunc(const char *s, size_t len, size_t trunc);
+
+bool   isValidFnameChar(char c);
+bool   isValidFname(const str& s);
+str    getErrnoStr();
+size_t findCRLF(const char *dat, size_t len);
+bool   parseU32HexStr(const str& hexStr, uint32_t& out);
 
 std::set<str> listDirFiles(constr& directoryPath, bool dirSlash = true);
 

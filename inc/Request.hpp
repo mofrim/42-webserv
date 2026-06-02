@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 23:39:07 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/26 15:28:40 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/30 12:18:05 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,6 +43,7 @@ class Request {
     size_t       _contentLength;
     str          _vsrvName;
     size_t       _bodySize;
+    bool         _isChunked;
 
     str _host;
     u16 _hostPort;
@@ -63,6 +64,7 @@ class Request {
     bool _isSimplePOST; // simple POST without CGI
     bool _isDELETE;     // DELETEs only have a filename as query param
     bool _isRedir;      // if route is a redir route
+    bool _isPOST;       // POST
 
     u16 _countReqLines(const str& nstr);
     str _getReqlineAsStr() const;
@@ -100,6 +102,7 @@ class Request {
     void         setStatusCode(e_HTTPStatus code);
     str          getMethodStr() const;
     bool         closeConn() const;
+    void         setCloseConn();
 
     const std::pair<e_HTTPStatus, URI>& getRedir() const;
 
@@ -134,7 +137,7 @@ class Request {
 
     RequestBody& getBody();
     const char  *getBodyRawData(size_t idx = 0) const;
-    str          getBodyDataAsStr() const;
+    str          getBodyDataAsStr(size_t trunc = str::npos) const;
     size_t       getBodySize() const;
     void         setBodySize(size_t s);
     str          getHdrsAsStr() const;

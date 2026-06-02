@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 19:13:35 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/27 06:30:22 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/29 22:54:31 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,11 +72,16 @@ void RequestHandler::readRequest()
       // for "adjusting server behavior".
       Logger::logWarn(
           _vsrvName, "Read failed, " + getErrnoStr() + " -> disco!");
-    _cli->setState(CLI_DISCO);
+    if (_cli->isCGIing())
+      _cli->setState(CLI_DISCO_CGI);
+    else
+      _cli->setState(CLI_DISCO);
     return;
   }
 
   Request& req = _cli->getReq();
+
+  Logger::logBug("Raw Read:\n" + printDataTrunc(_buffer, bytesRead, 300));
 
   // first time we come here cli will be in CLI_IDLE state, so a new Req is
   // started
@@ -88,15 +93,16 @@ void RequestHandler::readRequest()
     _cli->setState(CLI_READ);
   }
 
-  if (req.hdrTooBig()) {
+  if (!req.badRequest() && req.hdrTooBig()) {
     Logger::logSrv(_vsrvName, "Header too big!", WARN);
     req.setStatusCode(HTTP_400);
   }
 
   // to prevent being flooded by non-sense requests check if the reqline must
   // have been received already. this will be the case after sth like 8000 bytes
-  // or 2 read cycles. if this yields non-sense we can directly quit with 400
-  if (req.reqlineReceived() && !req.reqlineParsed()) {
+  // or 2 full read cycles. if this yields non-sense we can directly quit with
+  // 400
+  if (!req.badRequest() && req.reqlineReceived() && !req.reqlineParsed()) {
     Logger::logDbg1("RequestHandler::readRequest", "Parsing reqline...");
     req.parseReqLine();
   }
@@ -119,7 +125,7 @@ void RequestHandler::readRequest()
   }
 
   if (req.reqComplete() || req.badRequest()) {
-    Logger::logReqRes(_vsrvName, "Processing Request", req.getReqstr());
+    Logger::logReqRes(_vsrvName, "Processing Request", req.getReqstr(), 200);
     _cli->setState(CLI_SEND);
     req.processReq();
   }
@@ -180,7 +186,7 @@ void RequestHandler::writeResponse()
   Logger::logSrv(_vsrvName,
       "Sending Response (" + int2str(statusCode) + ") to " +
           _cli->getIfaceFdStr());
-  Logger::logReqRes(_vsrvName, "Response", response);
+  Logger::logReqRes(_vsrvName, "Response", response, 200);
 
   if (response.empty())
     throw ReqHandlerException("Cannot write response! Nothing to write!");

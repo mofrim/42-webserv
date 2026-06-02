@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/17 10:36:30 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/26 15:19:35 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/29 23:12:15 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,14 +77,20 @@ e_HTTPStatus Response::_cgiSetup(std::map<str, str> cgiParams)
     // make the CGI child process its own process group
     setpgid(0, 0);
 
+    char **envp = _cgiBuildEnv(cgiParams);
+
+    // char **pp = envp;
+    // while (*pp) {
+    //   std::cout << *pp << std::endl;
+    //   pp++;
+    // }
+
     close(stdinPipe[1]);
     close(stdoutPipe[0]);
     dup2(stdinPipe[0], STDIN_FILENO);
     dup2(stdoutPipe[1], STDOUT_FILENO);
     close(stdinPipe[0]);
     close(stdoutPipe[1]);
-
-    char **envp = _cgiBuildEnv(cgiParams);
 
     // handling possible cgiExecs like `/usr/bin/env bash`
     // NOTE: cgiScript is assumed to don't have any whitespaces
@@ -149,8 +155,9 @@ void Response::cgiWrite()
   }
 
   Logger::logDbg2("(Response::cgiWrite) writing body :\n" +
-      data2hexStr(_req->getBodyRawData(_cgiBytesWritten),
-          _cgiWriteBodySize - _cgiBytesWritten));
+      printDataTrunc(_req->getBodyRawData(_cgiBytesWritten),
+          _cgiWriteBodySize - _cgiBytesWritten,
+          100));
 
   ssize_t bytesWritten = write(_cgiParentWriteFd,
       _req->getBodyRawData(_cgiBytesWritten),
@@ -268,7 +275,8 @@ void Response::cgiRead()
 void Response::cgiProcessBody()
 {
   Logger::logDbg2("Response::cgiProcessBody",
-      "BODY FROM SCRIPT:\n" + data2hexStr(_cgiBody.data(), _cgiBody.size()));
+      "BODY FROM SCRIPT:\n" +
+          printDataTrunc(_cgiBody.data(), _cgiBody.size(), 200));
 
   size_t crlfx2 = _cgiBody.find(CRLFX2);
 
@@ -307,13 +315,23 @@ void Response::cgiProcessBody()
     return;
   }
 
+  if (_respoHdrHas("Status")) {
+    str          cgiStatus = _respoHeaders["Status"];
+    e_HTTPStatus s         = WsrvLib::str2HttpStatus(cgiStatus);
+    Logger::logBug("cgiStatus: " + int2str(s));
+    if (s != HTTP_0)
+      _status = s;
+    _respoHeaders.erase("Status");
+  }
+
   // PERF this is mem mgmt technically a bit painful to do. it'd be better to
   // just pass on cgiBody as a pointer here. But this is left for future
   // optimization!
   size_t bodySize = _cgiBody.size() - headers.size() - 2;
   _req->setBodySize(bodySize);
   _body.assign(_cgiBody.substr(crlfx2).data() + 4, bodySize);
-  _status = HTTP_200;
+  _status = (_status != HTTP_0 ? _status : HTTP_200);
+  // _status = HTTP_200;
 }
 
 void Response::cgiCleanupFds()

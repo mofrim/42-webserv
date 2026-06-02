@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/16 14:54:57 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/27 11:01:44 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/30 13:13:18 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@
 #include "VServer.hpp"
 #include "utils.hpp"
 
+#include <algorithm>
 #include <cerrno>
 #include <cstdlib>
 #include <cstring>
@@ -45,7 +46,7 @@ void Response::_cgiHandleBadScript(constr& s)
   if (access(s.c_str(), R_OK) == -1 && errno == EACCES)
     _status = HTTP_403;
   else
-    _status = HTTP_404;
+    _status = HTTP_403;
   _body = WsrvLib::getDefaultStatusPage(_status);
   Logger::logDbg1("CGI script " + s + " access " + getErrnoStr() + " -> " +
       int2str(_status));
@@ -174,7 +175,8 @@ std::map<str, str> Response::_cgiEvalScriptPath()
         _targetPath.substr(scriptPos + cgiParams["SCRIPT_NAME"].length());
   cgiParams["PATH_TRANSLATED"] = r.getRoot() + r.getPath() + transPath;
 
-  cgiParams["PATH_INFO"] = transPath;
+  cgiParams["PATH_INFO"]   = (transPath.empty() ? "/" : transPath);
+  cgiParams["REQUEST_URI"] = (transPath.empty() ? "/" : transPath);
 
   return cgiParams;
 }
@@ -195,6 +197,19 @@ char **Response::_cgiBuildEnv(std::map<str, str> cgiParams)
   env["SERVER_PORT"]       = int2str(_req->getHostPort());
   env["SERVER_PROTOCOL"] = WsrvLib::httpVer2Str(_req->getReqline().httpVersion);
   env["SERVER_SOFTWARE"] = "mofrim's WebServ";
+
+  // add all headers from request as "HTTP_HEADER_NAME=HEADER_VALUE" pairs to
+  // env
+  for (std::map<str, str>::iterator it = _req->getHeaders().begin();
+      it != _req->getHeaders().end();
+      ++it)
+  {
+    str env_name = "HTTP_" + it->first;
+    std::replace(env_name.begin(), env_name.end(), '-', '_');
+    std::transform(
+        env_name.begin(), env_name.end(), env_name.begin(), ::toupper);
+    env[env_name] = it->second;
+  }
 
   // get PATH from global env...
   // this is surely not optimal from a opssec perspective, but convenient for

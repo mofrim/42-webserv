@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/24 20:52:55 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/27 06:25:14 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/30 12:37:02 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -205,6 +205,28 @@ void Logger::logReqRes(const str& srvName, const str& resreq, const str& data)
       std::cout << data2hexStr(data.data(), data.size());
     else
       std::cout << data;
+    if (_isatty)
+      std::cout << "\n---" << RST << std::endl;
+    else
+      std::cout << "\n---" << std::endl;
+  }
+}
+
+void Logger::logReqRes(
+    const str& srvName, const str& resreq, const str& data, size_t trunc)
+{
+  if (LOGLEVEL >= LOG_DEBUG) {
+    str logtime = getLogtime();
+    if (_isatty)
+      std::cout << GRY << logtime << GRN << " (" << srvName << ") " << BGRY
+                << resreq << ":" << BGRY << "\n---" << std::endl;
+    else
+      std::cout << logtime << " (" << srvName << ") " << resreq << ":"
+                << "\n---" << std::endl;
+    if (resreq != "Processing Request")
+      std::cout << printDataTrunc(data.data(), data.size(), trunc);
+    else
+      std::cout << printDataTrunc(data.data(), data.size(), trunc);
     if (_isatty)
       std::cout << "\n---" << RST << std::endl;
     else

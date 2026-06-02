@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/26 10:03:57 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/27 12:18:11 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/29 09:54:16 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -293,6 +293,15 @@ str data2hexStr(const char *s, size_t len)
   return oss.str();
 }
 
+str printDataTrunc(const char *s, size_t len, size_t trunc)
+{
+  size_t printLen  = (len >= trunc ? trunc : len);
+  str    dataTrunc = data2hexStr(s, printLen);
+  dataTrunc += "... and " + int2str((len >= trunc ? len - trunc : 0)) +
+      " bytes more. Total: " + int2str(len);
+  return dataTrunc;
+}
+
 bool isValidFnameChar(char c)
 {
   return isalnum(c) || c == '.' || c == '-' || c == '_';
@@ -345,4 +354,62 @@ std::set<str> listDirFiles(constr& directoryPath, bool dirSlash)
 str getErrnoStr()
 {
   return str("errno: \"#" + int2str(errno) + " " + strerror(errno) + "\"");
+}
+
+// find a CRLF in raw bytes buffer. returns smth < str::npos if CRLF was found,
+// str::npos otherwise
+size_t findCRLF(const char *dat, size_t len)
+{
+  if (dat == NULL || len == 0)
+    return str::npos;
+
+  for (size_t i = 0; i < len; ++i)
+    if (i + 1 < len && dat[i] == '\r' && dat[i + 1] == '\n')
+      return i;
+
+  return str::npos;
+}
+
+// helper func for parsing a u32 hex string. if smth goes wrong false is
+// returned.
+bool parseU32HexStr(const str& hexStr, u32& out)
+{
+  if (hexStr.empty()) {
+    return false;
+  }
+
+  // Check for invalid characters (non-hex)
+  for (str::const_iterator it = hexStr.begin(); it != hexStr.end(); ++it) {
+    if (!std::isxdigit(static_cast<unsigned char>(*it))) {
+      return false;
+    }
+  }
+
+  uint32_t parsedSize = 0;
+  for (str::const_iterator it = hexStr.begin(); it != hexStr.end(); ++it) {
+    char     c = *it;
+    uint32_t digit;
+
+    if (c >= '0' && c <= '9') {
+      digit = c - '0';
+    }
+    else if (c >= 'A' && c <= 'F') {
+      digit = 10 + (c - 'A');
+    }
+    else if (c >= 'a' && c <= 'f') {
+      digit = 10 + (c - 'a');
+    }
+    else {
+      return false;
+    }
+
+    if (parsedSize > (UINT32_MAX - digit) / 16) {
+      return false;
+    }
+
+    parsedSize = parsedSize * 16 + digit;
+  }
+
+  out = parsedSize;
+  return true;
 }

@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/24 17:31:03 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/27 09:28:46 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/29 12:05:16 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -118,6 +118,7 @@ enum e_HTTPStatus {
   HTTP_300 = 300,
   HTTP_301 = 301,
   HTTP_302 = 302,
+  HTTP_307 = 307,
   HTTP_308 = 308,
   HTTP_400 = 400,
   HTTP_403 = 403,
@@ -159,7 +160,7 @@ class WsrvLib {
     static t_GlobalWsrvSettings _initWsrvSettings();
 
   public:
-    static const t_GlobalWsrvSettings Settings;
+    static t_GlobalWsrvSettings Settings;
 
     static str getDefaultStatusPage(e_HTTPStatus code, constr& opts = "");
     static str getTeapot();

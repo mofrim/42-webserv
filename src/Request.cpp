@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 23:39:57 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/26 15:28:30 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/06/01 20:48:00 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,6 +40,7 @@ Request& Request::operator=(const Request& o)
     _matchedRoute  = o._matchedRoute;
     _isCGI         = o._isCGI;
     _isSimplePOST  = o._isSimplePOST;
+    _isPOST        = o._isPOST;
     _isDELETE      = o._isDELETE;
     _isRedir       = o._isRedir;
     _redir         = o._redir;
@@ -51,6 +52,7 @@ Request& Request::operator=(const Request& o)
     _target        = o._target;
     _hostPort      = o._hostPort;
     _host          = o._host;
+    _isChunked     = o._isChunked;
   }
   return *this;
 }
@@ -85,6 +87,7 @@ Request::Request(Client *cli, const char *reqstr, size_t reqstrLen)
   _isSimplePOST        = false;
   _isDELETE            = false;
   _isRedir             = false;
+  _isPOST              = false;
   _redir               = std::make_pair(HTTP_0, "");
   _reqlineParsed       = false;
   _hdrsParsed          = false;
@@ -93,6 +96,7 @@ Request::Request(Client *cli, const char *reqstr, size_t reqstrLen)
   _requestTarget       = "";
   _bodySize            = 0;
   _hostPort            = _cli->getVsrvPort();
+  _isChunked           = false;
 
   _reqdata.assign(reqstr, reqstrLen);
 }
@@ -184,8 +188,11 @@ void Request::_matchRoute()
 
 // also handle the ability to "drain" the socket if the request was already
 // terminated prematurely due to too large content.
+// if appending body fails in some way we go HTTP_400!
 void Request::append(char *s, ssize_t bytesRead)
 {
+  // Logger::logDbg2("Request::append",
+  //     "Read this from socket:\n" + data2hexStr(s, bytesRead));
   if (_cli->isDraining()) {
     _bodySize += bytesRead;
     Logger::logBug("draining...");
@@ -196,8 +203,8 @@ void Request::append(char *s, ssize_t bytesRead)
     return;
   }
   else if (_hdrComplete) {
-    Logger::logDbg2("Appending this to body now:");
-    Logger::logDbg2(data2hexStr(s, bytesRead));
+    // Logger::logDbg2("Appending this to body now:");
+    // Logger::logDbg2(data2hexStr(s, bytesRead));
     _bodySize += bytesRead;
     switch (_body.appendData(s, bytesRead)) {
       case 1:
@@ -206,7 +213,14 @@ void Request::append(char *s, ssize_t bytesRead)
         Logger::logSrv(
             _vsrvName, "(RequestBody::appendData) truncating body data!", WARN);
         break;
+      case -2:
+        Logger::logSrv(_vsrvName,
+            "(RequestBody::appendData) Chunked request body too big!",
+            WARN);
+        _statusCode = HTTP_413;
+        break;
       default:
+        _statusCode = HTTP_400;
         Logger::logErr(
             "RequestBody::appendData", "Could not append to bodyData!");
     }
@@ -216,7 +230,7 @@ void Request::append(char *s, ssize_t bytesRead)
     _hdrLines += _countReqLines(s);
   }
   Logger::logDbg1("Request::append",
-      "Appending to req: '" + data2hexStr(s, bytesRead) + "'");
+      "Appending to req: '" + printDataTrunc(s, bytesRead, 100) + "'");
 }
 
 // @brief Simply checks if `CRLFCRLF` is found somewhere in the reqstr. for
@@ -243,8 +257,12 @@ bool Request::reqComplete()
           ", Content-Length: " + int2str(_contentLength));
 
   // req == POST. special treatment for draining situation necessary.
-  if (_hdrComplete && (_bodySize >= _contentLength && !_cli->isDraining())) {
-    Logger::logDbg1("Request::reqComplete", "Content-Length reached");
+  if (_hdrComplete &&
+      (((!_isChunked && _bodySize >= _contentLength) ||
+           _body.isChunkedComplete()) &&
+          !_cli->isDraining()))
+  {
+    Logger::logDbg1("Request::reqComplete", "Request complete!");
     return true;
   }
   return false;
@@ -284,6 +302,7 @@ void Request::reset()
   _isSimplePOST        = false;
   _isDELETE            = false;
   _isRedir             = false;
+  _isPOST              = false;
   _redir               = std::make_pair(HTTP_0, "");
   _reqlineParsed       = false;
   _hdrsParsed          = false;
@@ -291,6 +310,7 @@ void Request::reset()
   _closeConn           = false;
   _bodySize            = 0;
   _hostPort            = 0;
+  _isChunked           = false;
 
   _reqdata.clear();
   _body.reset();
@@ -349,7 +369,7 @@ str Request::getReqstr() const
   str ret = _getReqlineAsStr() + "\n";
   ret += getHdrsAsStr();
   ret += "\n";
-  ret += getBodyDataAsStr();
+  ret += getBodyDataAsStr(200);
   return ret;
 }
 
@@ -404,9 +424,9 @@ const char *Request::getBodyRawData(size_t idx) const
   return &_body.getBodyData()[idx];
 }
 
-str Request::getBodyDataAsStr() const
+str Request::getBodyDataAsStr(size_t trunc) const
 {
-  return data2hexStr(_body.getBodyData(), _body.getSize());
+  return printDataTrunc(_body.getBodyData(), _body.getSize(), trunc);
 }
 
 str Request::getHdrsAsStr() const
@@ -463,3 +483,4 @@ void  Request::cgiCleanupFds() { _respo.cgiCleanupFds(); }
 bool  Request::cgiIsWriteFd(int fd) const { return _respo.cgiIsWriteFd(fd); }
 bool  Request::cgiIsReadFd(int fd) const { return _respo.cgiIsRead(fd); }
 pid_t Request::cgiGetCpid() const { return _respo.cgiGetCpid(); }
+void  Request::setCloseConn() { _closeConn = true; }

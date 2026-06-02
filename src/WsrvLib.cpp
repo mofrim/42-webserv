@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/24 17:40:43 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/27 09:29:08 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/29 12:05:45 by fmaurer          ###   ########.fr       */
 /*                                                                            */ /* ************************************************************************** */
 
 #include "WsrvLib.hpp"
@@ -231,7 +231,7 @@ t_GlobalWsrvSettings WsrvLib::_initWsrvSettings()
   return s;
 }
 
-const t_GlobalWsrvSettings WsrvLib::Settings = _initWsrvSettings();
+t_GlobalWsrvSettings WsrvLib::Settings = _initWsrvSettings();
 
 // two vsrvInterfaces are the same iff their ip and cname match
 bool operator==(const t_vsrvInterface& i1, const t_vsrvInterface& i2)
@@ -277,6 +277,8 @@ e_HTTPStatus WsrvLib::short2HttpStatus(u16 s)
       return HTTP_301;
     case 302:
       return HTTP_302;
+    case 307:
+      return HTTP_307;
     case 308:
       return HTTP_308;
     case 400:

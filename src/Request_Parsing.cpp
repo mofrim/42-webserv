@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/01 18:46:40 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/22 13:18:16 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/05/30 12:19:09 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,24 +49,27 @@ void Request::evaluateTarget()
   Logger::logSrv(_vsrvName, "-> Target Path: " + _targetPath);
   Logger::logSrv(_vsrvName, "-> Query: " + _target.getQueryCSStr());
 
-  // check if method is allowed for this route, if not -> 403
+  // check if method is allowed for this route, if not -> 405
   const std::set<e_Method>& allowedMethods = _matchedRoute->getMethods();
   if (allowedMethods.find(_reqline.method) == allowedMethods.end()) {
     Logger::logSrv(_vsrvName,
         "forbidden meth " + meth2str(_reqline.method) + " for route " +
             _matchedRoute->getPath());
-    _statusCode = HTTP_403;
+    _statusCode = HTTP_405;
     return;
   }
 
   // classify request
   _isCGI        = (!_matchedRoute->getCgi().empty());
   _isSimplePOST = (!_isCGI && _reqline.method == M_POST);
+  _isPOST       = (_reqline.method == M_POST);
   _isDELETE     = (_reqline.method == M_DELETE);
 
   _isRedir = (_matchedRoute->getRedir().first != HTTP_0);
-  if (_isRedir)
-    _redir = _matchedRoute->getRedir();
+  if (_isRedir) {
+    _bodyComplete = true;
+    _redir        = _matchedRoute->getRedir();
+  }
 }
 
 // is only being called if CRLFX2 was found in reqdata! That means: we can
@@ -107,7 +110,7 @@ e_HTTPStatus Request::_readReqline()
             data2hexStr(
                 _reqdata.substr(i, k).data(), _reqdata.substr(i, k).size()) +
             "'");
-    return HTTP_400;
+    return HTTP_405;
   }
 
   i = i + k + 1;
@@ -212,27 +215,51 @@ e_HTTPStatus Request::_parseHeaders()
 // checks if content-length hdr field was set appropriately.
 e_HTTPStatus Request::_initializeBody(constr& onlyHdrs, size_t crlfx2)
 {
-
-  if (_headers.count("content-length") == 0) {
-    Logger::logSrv(_vsrvName, "No content with POST req", WARN);
-    return HTTP_400;
+  if (_headers.count("transfer-encoding") != 0) {
+    std::vector<str> tespl = splitMultiStr(_headers["transfer-encoding"], "; ");
+    for (std::vector<str>::iterator it = tespl.begin(); it != tespl.end(); ++it)
+      if (*it == "chunked")
+        _isChunked = true;
   }
 
-  _contentLength = std::atol(_headers["content-length"].c_str());
+  // processing content-length field iff we are not chunked
+  if (!_isChunked) {
 
-  if (_contentLength > MAX_CONTENT_LENGTH) {
-    Logger::logSrv(_vsrvName,
-        "Request Content-Length exceeds MAX_CONTENT_LENGTH -> 400",
-        WARN);
-    return HTTP_400;
+    if ((_headers.count("content-length") == 0)) {
+      Logger::logSrv(_vsrvName, "No content length specified with POST", WARN);
+      return HTTP_411;
+    }
+
+    _contentLength = std::atol(_headers["content-length"].c_str());
+
+    if (_contentLength > MAX_CONTENT_LENGTH) {
+      Logger::logSrv(_vsrvName,
+          "Request Content-Length exceeds MAX_CONTENT_LENGTH -> 400",
+          WARN);
+      return HTTP_413;
+    }
+
+    if (_matchedRoute != NULL &&
+        _contentLength > _matchedRoute->getMaxBodySize())
+    {
+      Logger::logSrv(
+          _vsrvName, "Requested Content-Length exceeds maxBodySize", WARN);
+      _cli->setState(CLI_DRAIN);
+      return HTTP_413;
+    }
   }
 
-  if (_matchedRoute != NULL && _contentLength > _matchedRoute->getMaxBodySize())
-  {
-    Logger::logSrv(
-        _vsrvName, "Requested Content-Length exceeds maxBodySize", WARN);
-    _cli->setState(CLI_DRAIN);
-    return HTTP_413;
+  // if we have chunked encoding we still want an upper bound for the request
+  // body
+  if (_isChunked) {
+    if (_matchedRoute != NULL)
+      _contentLength = _matchedRoute->getMaxBodySize();
+    else if (_cli->getVsrv() != NULL)
+      _contentLength = _cli->getVsrv()->getMaxBodySize();
+    else
+      _contentLength = MAX_BODY_SIZE;
+
+    _body.setChunked();
   }
 
   // Setting body's capacity to _contentLength as we will ignore anything
@@ -243,7 +270,10 @@ e_HTTPStatus Request::_initializeBody(constr& onlyHdrs, size_t crlfx2)
         "(Request::_parseHeaders) Could not set maxBodySize!");
 
   _bodySize = _reqdata.size() - onlyHdrs.size() - 2;
-  _body.appendData(_reqdata.substr(crlfx2).data() + 4, _bodySize);
+  if (_body.appendData(_reqdata.substr(crlfx2).data() + 4, _bodySize) == -1) {
+    Logger::logSrv(_vsrvName, "Appending to body failed!", WARN);
+    return HTTP_400;
+  };
   Logger::logDbg1("Request::_parseHeaders",
       "initialized body with " + int2str(_bodySize) + " bytes!");
 
@@ -255,16 +285,13 @@ e_HTTPStatus Request::_initializeBody(constr& onlyHdrs, size_t crlfx2)
 e_HTTPStatus Request::_evaluateHdrs()
 {
   if (_reqline.httpVersion == HTTPVER_1_1) {
-    if (_reqline.method == M_GET) {
-
-      // RFC MUST for HTTP/1.1
-      if (_headers.count("host") == 0) {
-        Logger::logSrv(_vsrvName, "GET Req without Host header", WARN);
-        return HTTP_400;
-      }
-      if (_headers.count("connection") > 0 && _headers["connection"] == "close")
-        _closeConn = true;
+    // RFC MUST for HTTP/1.1
+    if (_headers.count("host") == 0) {
+      Logger::logSrv(_vsrvName, "GET Req without Host header", WARN);
+      return HTTP_400;
     }
+    if (_headers.count("connection") > 0 && _headers["connection"] == "close")
+      _closeConn = true;
   }
   else {
     if (!(_headers.count("connection") > 0 &&
@@ -284,7 +311,6 @@ e_HTTPStatus Request::_evaluateHdrs()
 
   // set host and hostPort (which is the servers addr and port) from hdrs
   if (!_headers["host"].empty()) {
-    Logger::logBug("header(host): " + _headers["host"]);
     std::vector<str> hspl = splitString(_headers["host"], ":");
     if (hspl.size() == 2) {
       if (str2u16(hspl[1]) != _hostPort)
