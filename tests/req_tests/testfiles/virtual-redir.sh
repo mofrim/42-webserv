@@ -55,6 +55,8 @@ if [ -z "$RESPONSE" ]; then
 	exit 1;
 fi
 
+exec 3<>/dev/tcp/"$hostname"/"$port"
+
 sendHdrField "GET /v1 HTTP/1.1" 3
 sendHdrField "Host: v2" 3
 finishReq 3
@@ -71,6 +73,8 @@ if [ -z "$RESPONSE" ]; then
 	fi
 	exit 1;
 fi
+
+exec 3<>/dev/tcp/"$hostname"/"$port"
 
 RESPONSE="$(curl -s -v --follow $hostname:${port}/redir 2>&1 | grep 404)"
 echo "Response:"

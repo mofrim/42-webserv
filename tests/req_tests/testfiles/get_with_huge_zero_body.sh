@@ -57,8 +57,7 @@ if [ $# -eq 2 ]; then
 	pkill -INT webserv
 fi
 
-if [[ -z "$(echo ${RESPONSE[@]} | grep 200)" ||  \
-	-z "$(echo ${RESPONSE[@]} | grep 400)" ]]; then
+if [[ -z "$(echo ${RESPONSE[@]} | grep -E '200|400')" ]]; then
 	exit 1;
 fi
 

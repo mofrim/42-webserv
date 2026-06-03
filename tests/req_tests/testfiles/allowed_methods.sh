@@ -41,7 +41,7 @@ sendHdrField "GET /del HTTP/1.1" 3
 sendHdrField "Host: miep" 3
 finishReq 3
 
-RESPONSE="$(timeout 0.1s cat <&3 2>/dev/null | grep 403)"
+RESPONSE="$(timeout 0.1s cat <&3 2>/dev/null | grep 405)"
 echo "Response:"
 echo "---------"
 echo "${RESPONSE[@]}"

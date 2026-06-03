@@ -44,7 +44,7 @@ finishReq 3
 
 echo -n "body not allowed here!" >&3 2>/dev/null
 
-RESPONSE="$(timeout 0.1s cat <&3 2>/dev/null | grep 403)"
+RESPONSE="$(timeout 0.1s cat <&3 2>/dev/null | grep 405)"
 echo "Response:"
 echo "---------"
 echo "${RESPONSE[@]}"

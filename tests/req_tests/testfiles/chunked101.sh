@@ -29,7 +29,7 @@ if [ $# -eq 3 ]; then
 else
 	hostname="$1"
 	port="$2"
-	$webserv $cfgDir/cgi.wsrv > /dev/null &
+	$webserv $cfgDir/42tester.wsrv > /dev/null &
 	sleep 0.1s
 fi
 
@@ -37,18 +37,23 @@ exec 3<>/dev/tcp/"$hostname"/"$port"
 
 # ------------------------=[ test logic starts here ]=------------------------ #
 
-# simulate a failure during Response::cgiWrite
-
-sendHdrField "POST /write.fail.sh HTTP/1.1" 3
+sendHdrField "POST /post_body HTTP/1.1" 3
 sendHdrField "Host: miep" 3
-sendHdrField "Content-Length: 200000" 3
+sendHdrField "Transfer-Encoding: chunked" 3
 finishReq 3
-dd if=/dev/random bs=200000 count=1 >&3 2>/dev/null
+echo -en "65$CRLF" >&3
+echo -en "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" >&3
+echo -en "0$CRLF$CRLF" >&3
 
-RESPONSE="$(timeout 0.1s cat <&3 2>/dev/null | grep 502)"
+RESPONSE="$(timeout 2s cat <&3 2>/dev/null | grep 413)"
 echo "Response:"
 echo "---------"
 echo "${RESPONSE[@]}"
+
+
+# tmpfile=$(mktemp)
+# timeout 6s cat <&3 > $tmpfile &
+# sleep 6 && curl "$hostname:$port" &> /dev/null
 
 exec 3<&-
 

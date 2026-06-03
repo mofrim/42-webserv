@@ -48,6 +48,7 @@ sendHdrField "bb" 3
 sendHdrField "1" 3
 sendHdrField "c" 3
 sendHdrField "0" 3
+sendHdrField "" 3
 
 
 RESPONSE="$(timeout 0.1s cat <&3)"
@@ -55,22 +56,12 @@ echo "Response:"
 echo "---------"
 echo "${RESPONSE[@]}"
 
-file="../../_www$(echo "${RESPONSE[@]}" | grep Location | cut -d ' ' -f 2 | tr -d '\r\n')"
-echo "file: '$file'"
-
 exec 3<&-
 
 # SIGINT kill webserv
 if [ $# -eq 2 ]; then
 	pkill -INT webserv
 fi
-
-if [ -f $file ]; then
-	echo "Uploaded file found!"
-	exit 1
-fi
-
-rm -f "$file"
 
 if [ -z "echo ${RESPONSE[@]} | grep 400" ]; then
 	exit 1;

@@ -48,6 +48,7 @@ sendHdrField "b" 3
 sendHdrField "1" 3
 sendHdrField "c" 3
 sendHdrField "0" 3
+sendHdrField "" 3
 
 
 RESPONSE="$(timeout 0.1s cat <&3)"
