@@ -6,7 +6,7 @@
 #    By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/12/01 11:45:58 by fmaurer           #+#    #+#              #
-#    Updated: 2026/05/20 15:30:50 by fmaurer          ###   ########.fr        #
+#    Updated: 2026/06/03 16:13:30 by fmaurer          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -24,9 +24,7 @@ NAME 		= webserv
 # the magic vpath... by using this we will not have to specify in which
 # sub-directory a source file is located. the '%.o' and '%.cpp' wildcards will
 # find any file in any directory listed in the VPATH. The same holds true for
-# the header files. This also applies to change-detection!
-# TL;DR: it makes things pretty easy ;)
-VPATH		= ./src ./inc
+# the header files. This also applies to change-detection! TL;DR: it makes things pretty easy ;) VPATH		= ./src ./inc
 OBJDIR	= obj
 INC_DIR = ./inc
 
@@ -53,6 +51,34 @@ CPP			= c++
 # compiler flags
 CFLAGS	= -Wall -Werror -Wextra -std=c++98
 IFLAGS	= -I $(INC_DIR)
+
+# some colors for the log msgs
+GRN = \e[0;32m
+RED = \e[1;31m
+WHT = \e[1;37m
+GRE = \e[37m
+YLW = \e[1;93m
+RST = \e[0m
+MSGOPN = $(YLW)--(($(GRN)
+MSGEND = $(YLW)))--$(RST)
+
+ifeq ($(findstring wolfsburg,$(HOST)), wolfsburg)
+	ECHO = echo
+	ECHON = echo -n
+else
+	ECHO = echo -e
+	ECHON = echo -en
+endif
+
+# logmsg makefile functions
+log_msg_start = @$(ECHO) "\n$(MSGOPN) $(1) $(MSGEND)"
+log_msg_mid = @$(ECHO) "$(MSGOPN) $(1) $(MSGEND)"
+log_msg_end = @$(ECHO) "$(MSGOPN) $(1) $(MSGEND)\n"
+log_msg_single = @$(ECHO) "\n$(MSGOPN) $(1) $(MSGEND)\n"
+
+# output coloring
+output_color_grey = @$(ECHON) "$(GRE)"
+output_colr_reset =  @$(ECHON) "$(RST)"
 
 ifeq ($(DBG),0)
 	CFLAGS	+= -g -DLOGLEVEL=0
@@ -142,11 +168,19 @@ cpptests-clean:
 cpptests-bear:
 	@bear -- make -C tests/cpp_tests
 
-req_tests:
+reqtests:
 	@cd tests/req_tests && ./run_test.sh
 
-cfg_tests:
+cfgtests:
 	@cd tests/cfg_tests && ./run_test.sh
+
+allMyTests: cpptests-run reqtests cfgtests
+
+42tester:
+	$(call log_msg_single,Starting 42tester...)
+	$(call output_color_grey)
+	@tests/run_42tester.sh
+	$(call output_color_reset)
 
 fclean: clean
 	rm -f $(NAME)
@@ -157,4 +191,4 @@ re-run: re run
 
 .PHONY: all clean fclean re bear run cpptests cpptests-run cpptests-clean \
 	cpptests-bear shelltests debug debug-run run1 run2 re-run dbg1 dbg2 dbg1-re \
-	dbg2-re cfg_tests req_tests valfull val dbg0 dbg0-re
+	dbg2-re cfg_tests req_tests valfull val dbg0 dbg0-re 42tester allMyTests

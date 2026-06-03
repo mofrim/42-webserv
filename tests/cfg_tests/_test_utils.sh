@@ -44,3 +44,5 @@ cfgDir="$repoRoot/tests/_cfgs"
 wwwDir="$repoRoot/tests/_www"
 
 webserv="$repoRoot/webserv"
+
+valCmd="valgrind --leak-check=full --error-exitcode=1 --exit-on-first-error=yes -q --"

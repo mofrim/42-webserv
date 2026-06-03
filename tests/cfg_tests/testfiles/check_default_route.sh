@@ -2,11 +2,6 @@
 
 # test if webserv is really adding default route "/"
 
-if [ $# -ne 2 ]; then
-	echo "need 2 args: addr port"
-	exit 1
-fi
-
 if [ ! -e ../_test_utils.sh ]; then
 	echo "test-utils not found!"
 	exit 1
