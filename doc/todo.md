@@ -2,31 +2,6 @@
 
 ## current TODOs
 
-- [ ] for CGI child problem: there is these options:
-
-    1) we are still writing and not everything has been written but receive
-       EPOLLERR on the write fd. This means we could not write the whole reqBody
-       to the pipe -> 504. What must be handled?
-
-       - a 504 response can be send to the client immediately (no conn close!)
-       - the child must be killed and/or reaped
-       - if the client also disconnected (how to check that?)  -> disco client
-       - disco client means: only after the child is completely gone remove the
-         client from interest list and destroy
-
-    2) we still writing and we receive EPOLLHUP on the read fd. this would be
-       the same.
-
-    3) we are done writing and receive a EPOLLHUP on the read fd. we should
-       check child's exit status. if it exited with non-zero error or has not
-       yet exited there is probably an error. if not, then we will have keep
-       reading from the pipe until we get a read == 0. then we are fine and
-       processing can continue as usual.
-
-  So there is still to clarify how to handle the child killing. Should we
-  continue processing the request while the child is not yet killed? meaning, we
-  delay it until clients state is `CLI_CGIOK`? Or shall we do it asynchronously
-  outside the main if-else-epoll-branch?
 
 - [ ] add a cgi test where we write a line like "this is the start" and then a
   huge random bytes printable body and at the end a line "this is the end!" to
@@ -41,11 +16,7 @@
 - [ ] add func comments to hpp *not* to cpp files -> global visibility!
 
 
-
 - [ ] find out what should be handled differently with other HTTP-versions
-
-- [ ] add `isatty` based detection to `Logger` class in order to decide on
-  colored output
 
 - [ ] add more POST tests. especially one big file post test
 
@@ -76,16 +47,8 @@
 
 - [ ] make sure every cfg is terminated with `TOK_NULL`
 
-- [ ] understand, fix, refactor CGI child process termination via epoll (child
-  will send EPOLLHUP if kill was successful... but if not?)
 
 - [ ] fix CGI timeout not happening.
-
-- [x] add maximum body to CGI bodies
-
-- [x] CGI and redir prohibited per cfg parsing
-
-- [ ] rewrite RequestBody handling to just use a char array under the hood :(
 
 - [ ] make Logger::logReqRes treat seperated body and hdrs params
 
@@ -184,3 +147,17 @@ via `/route/` then this is forbidden 403
       the message.
 
 - [x] de-uglify the golbal var!
+
+- [x] add maximum body to CGI bodies
+
+- [x] CGI and redir prohibited per cfg parsing
+
+- [x] fix the CGI child process exit scenarios problem
+
+- [x] add `isatty` based detection to `Logger` class in order to decide on
+  colored output
+
+- [x] understand, fix, refactor CGI child process termination via epoll (child
+    will send EPOLLHUP if kill was successful... but if not?)
+
+- [x] rewrite RequestBody handling to just use a char array under the hood :(
