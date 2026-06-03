@@ -6,7 +6,7 @@
 #    By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/12/01 11:45:58 by fmaurer           #+#    #+#              #
-#    Updated: 2026/06/03 16:13:30 by fmaurer          ###   ########.fr        #
+#    Updated: 2026/06/03 22:10:15 by fmaurer          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -24,29 +24,31 @@ NAME 		= webserv
 # the magic vpath... by using this we will not have to specify in which
 # sub-directory a source file is located. the '%.o' and '%.cpp' wildcards will
 # find any file in any directory listed in the VPATH. The same holds true for
-# the header files. This also applies to change-detection! TL;DR: it makes things pretty easy ;) VPATH		= ./src ./inc
+# the header files. This also applies to change-detection! TL;DR: it makes things pretty easy ;) 
+VPATH		= ./src ./inc
+
 OBJDIR	= obj
 INC_DIR = ./inc
 
 # The files..
-SRCS			= main.cpp Webserv.cpp Logger.cpp VServerCfg.cpp \
-						ConfigParser.cpp utils.cpp VServer.cpp Client.cpp Epoll.cpp \
-						Webserv_Utils.cpp VServer_Utils.cpp RequestHandler.cpp \
-						Request.cpp Socket.cpp Route.cpp Request_Parsing.cpp Response.cpp \
-						WsrvLib.cpp URI.cpp ConfigParser_Tokenize.cpp \
-						ConfigParser_Process.cpp ConfigParser_ParseTok.cpp RequestBody.cpp \
-						Response_HandlePost.cpp Response_HandleCGI.cpp \
-						Response_HandleCGI_Run.cpp
+SRCS	= main.cpp Webserv.cpp Logger.cpp VServerCfg.cpp \
+				ConfigParser.cpp utils.cpp VServer.cpp Client.cpp Epoll.cpp \
+				Webserv_Utils.cpp VServer_Utils.cpp RequestHandler.cpp \
+				Request.cpp Socket.cpp Route.cpp Request_Parsing.cpp Response.cpp \
+				WsrvLib.cpp URI.cpp ConfigParser_Tokenize.cpp \
+				ConfigParser_Process.cpp ConfigParser_ParseTok.cpp RequestBody.cpp \
+				Response_HandlePost.cpp Response_HandleCGI.cpp \
+				Response_HandleCGI_Run.cpp
 
-HDRS			= Webserv.hpp Logger.hpp VServerCfg.hpp ConfigParser.hpp \
-						utils.hpp VServer.hpp Client.hpp Epoll.hpp RequestHandler.hpp \
-						Request.hpp Socket.hpp Route.hpp Response.hpp WsrvLib.hpp URI.hpp \
-						RequestBody.hpp
+HDRS	= Webserv.hpp Logger.hpp VServerCfg.hpp ConfigParser.hpp \
+				utils.hpp VServer.hpp Client.hpp Epoll.hpp RequestHandler.hpp \
+				Request.hpp Socket.hpp Route.hpp Response.hpp WsrvLib.hpp URI.hpp \
+				RequestBody.hpp
 
-OBJS		= $(patsubst %.cpp,$(OBJDIR)/%.o,$(SRCS))
+OBJS	= $(patsubst %.cpp,$(OBJDIR)/%.o,$(SRCS))
 
 # The programs..
-CPP			= c++
+CPP	= c++
 
 # compiler flags
 CFLAGS	= -Wall -Werror -Wextra -std=c++98
