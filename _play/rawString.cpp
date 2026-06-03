@@ -12,6 +12,17 @@ int main(int ac, char **av)
   std::cout << "str: " << str << std::endl;
   std::cout << "str.size() = " << str.size() << std::endl;
 
+  std::string str2;
+  str2.append(raw, 5);
+
+  std::cout << "str2: " << str2 << std::endl;
+  std::cout << "str2.size() = " << str2.size() << std::endl;
+
+  std::string str3 = str2.substr(0);
+
+  std::cout << "str3: " << str3 << std::endl;
+  std::cout << "str3.size() = " << str3.size() << std::endl;
+
   std::string str_raw;
   str_raw.assign(raw, 5);
 
