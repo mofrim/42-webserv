@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 19:13:35 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/29 22:54:31 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/06/03 13:08:07 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,8 +80,6 @@ void RequestHandler::readRequest()
   }
 
   Request& req = _cli->getReq();
-
-  Logger::logBug("Raw Read:\n" + printDataTrunc(_buffer, bytesRead, 300));
 
   // first time we come here cli will be in CLI_IDLE state, so a new Req is
   // started

@@ -30,3 +30,5 @@ tests/cpp_tests/Makefile
 tests/req_tests/testfiles/zero
 
 *.dat
+tester
+cgi_tester

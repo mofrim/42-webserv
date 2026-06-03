@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/24 17:40:43 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/29 12:05:45 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/06/03 12:50:28 by fmaurer          ###   ########.fr       */
 /*                                                                            */ /* ************************************************************************** */
 
 #include "WsrvLib.hpp"
@@ -225,8 +225,8 @@ t_GlobalWsrvSettings WsrvLib::_initWsrvSettings()
   t_GlobalWsrvSettings s = {
       .maxClients           = 1000,
       .connKeepaliveTimeout = 60,
-      .reqTimeout           = 5,
-      .cgiTimeout           = 5};
+      .reqTimeout           = 20,
+      .cgiTimeout           = 20};
 
   return s;
 }

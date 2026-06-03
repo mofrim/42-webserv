@@ -90,8 +90,6 @@ int RequestBody::appendData(const char *dat, size_t len)
     _size += len;
   }
 
-  Logger::logBug("ret: " + int2str(ret));
-
   return ret;
 }
 
@@ -184,17 +182,11 @@ int RequestBody::_parseChunkSize()
 //       sequence is not found!
 int RequestBody::_appendChunkToBody()
 {
-  Logger::logBug("_chunkBuffer.size(): " + int2str(_chunkBuffer.size()));
   if (_chunkBuffer.size() >= _chunkSize + 2 &&
       _chunkBuffer.compare(_chunkSize, 2, CRLF) == 0)
   {
-    // Logger::logBug("if-while - appending to chunkedBody: " +
-    //     _chunkBuffer.substr(0, _chunkSize));
     memcpy(_bodyData + _size, _chunkBuffer.data(), _chunkSize);
     _size += _chunkSize;
-    Logger::logBug(
-        "if - body by now:\n" + printDataTrunc(_bodyData, _size, 100));
-
     _chunkBuffer = _chunkBuffer.substr(_chunkSize + 2);
     _chunkSize   = 0;
     return 0;
@@ -225,8 +217,6 @@ int RequestBody::_appendChunked()
     while (_chunkSize == 0 && (ret = _parseChunkSize()) == 0) {
       Logger::logDbg2("RequestBody::_appendChunked",
           "if - Chunk size: " + int2str(_chunkSize));
-      // Logger::logBug("if - Chunk buffer so far:\n" +
-      //     data2hexStr(_chunkBuffer.data(), _chunkBuffer.size()));
 
       // FIXME we certainly have to limit the size of the
       // trailer-section here!
@@ -248,8 +238,6 @@ int RequestBody::_appendChunked()
     }
   }
   else {
-    Logger::logBug("else - Chunk buffer so far:\n" +
-        printDataTrunc(_chunkBuffer.data(), _chunkBuffer.size(), 100));
 
     if (_appendChunkToBody() == -1)
       return -1;
@@ -257,10 +245,6 @@ int RequestBody::_appendChunked()
     while (_chunkSize == 0 && (ret = _parseChunkSize()) == 0) {
       if (ret < 0)
         return -1;
-      Logger::logBug("Chunk size: " + int2str(_chunkSize));
-
-      // Logger::logBug("Chunk buffer so far:\n" +
-      //     data2hexStr(_chunkBuffer.data(), _chunkBuffer.size()));
 
       // FIXME we certainly have to limit the size of the
       // trailer-section here!
