@@ -51,7 +51,7 @@ sendHdrField "0" 3
 sendHdrField "" 3
 
 
-RESPONSE="$(timeout 0.1s cat <&3)"
+RESPONSE="$(timeout 0.1s cat <&3 2>/dev/null)"
 echo "Response:"
 echo "---------"
 echo "${RESPONSE[@]}"

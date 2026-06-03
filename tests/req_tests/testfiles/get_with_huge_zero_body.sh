@@ -35,6 +35,10 @@ else
 	sleep 0.1s
 fi
 
+if [ ! -e ./zero ]; then
+	dd if=/dev/zero of=./zero bs=1024 count=100000
+fi 
+
 exec 3<>/dev/tcp/"$hostname"/"$port"
 
 # ------------------------=[ test logic starts here ]=------------------------ #
@@ -43,7 +47,7 @@ sendHdrField "GET / HTTP/1.1" 3
 sendHdrField "Host: moep" 3
 finishReq 3
 
-cat < ./zero >&3
+cat < ./zero >&3 2>/dev/null
 
 RESPONSE="$(timeout 0.3s cat <&3 2>/dev/null | grep -E '200|400')"
 echo "Response:"

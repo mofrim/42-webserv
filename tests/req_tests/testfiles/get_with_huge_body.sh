@@ -3,7 +3,7 @@
 # sending huge body... should be 200 first and then 400 as the body does not
 # make any sense as header
 
-# create hugefile using: `dd if=/dev/random of=./hugefile bs=1024 count=100000 `
+# create hugefile using: `dd if=/dev/random of=./hugefile bs=1024 count=100000`
 # this will be 100MiB but less will also work
 
 if [ $# -lt 2 ]; then
@@ -34,6 +34,10 @@ else
 	port="$2"
 	$webserv $cfgDir/simplest.wsrv > /dev/null &
 	sleep 0.1s
+fi
+
+if [ ! -e ./hugefile ]; then
+	dd if=/dev/random of=./hugefile bs=1024 count=100000
 fi
 
 exec 3<>/dev/tcp/"$hostname"/"$port"

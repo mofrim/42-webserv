@@ -46,7 +46,7 @@ echo -en "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 echo -en "$CRLF" >&3
 echo -en "0$CRLF$CRLF" >&3
 
-RESPONSE="$(timeout 0.3s cat <&3 | grep 400)"
+RESPONSE="$(timeout 0.3s cat <&3 2>/dev/null | grep 400)"
 echo "Response:"
 echo "---------"
 echo "${RESPONSE[@]}"
