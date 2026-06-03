@@ -73,21 +73,9 @@ int RequestBody::appendData(const char *dat, size_t len)
 
   int ret = 1;
 
-  // truncate data if _maxSize would be exceeded. in chunked encoding however we
-  // must be able to receive the final `0CRLFX2`, so we add 5 bytes to maxSize
-  // in this case
-  //
-  // FIXME we need to add more bc we also need to leave enough space for the
-  // chunk size header.
-  int chunkXtra = 0;
-  if (_isChunked) {
-    if (_chunkSize == 0)
-      // FFFFFFFFCRLF
-      chunkXtra = 10;
-    // any possible 0CRLFX2
-    chunkXtra += 5;
-  }
-  if (len + _size > _maxSize + chunkXtra) {
+  // tuncate only if not chunked. if chunked, handle a possibly too large body
+  // in _appendChunked
+  if (!_isChunked && len + _size > _maxSize) {
     len = _maxSize - _size;
     ret = 0;
   }
@@ -101,6 +89,9 @@ int RequestBody::appendData(const char *dat, size_t len)
     memcpy(_bodyData + _size, dat, len);
     _size += len;
   }
+
+  Logger::logBug("ret: " + int2str(ret));
+
   return ret;
 }
 
@@ -183,6 +174,42 @@ int RequestBody::_parseChunkSize()
   return 0;
 }
 
+// check if there is a complete chunk in the chunkBuffer. if so, append it to
+// the req-body, remove it from chunkBuffer and reset _chunkSize to 0.
+// returns:
+//
+//  * 0 if a chunk was appended
+//  * 1 if no chunk could be appended
+//  * -1 if the chunkBuffer size is bigger then the lastChunk sequence but the
+//       sequence is not found!
+int RequestBody::_appendChunkToBody()
+{
+  Logger::logBug("_chunkBuffer.size(): " + int2str(_chunkBuffer.size()));
+  if (_chunkBuffer.size() >= _chunkSize + 2 &&
+      _chunkBuffer.compare(_chunkSize, 2, CRLF) == 0)
+  {
+    // Logger::logBug("if-while - appending to chunkedBody: " +
+    //     _chunkBuffer.substr(0, _chunkSize));
+    memcpy(_bodyData + _size, _chunkBuffer.data(), _chunkSize);
+    _size += _chunkSize;
+    Logger::logBug(
+        "if - body by now:\n" + printDataTrunc(_bodyData, _size, 100));
+
+    _chunkBuffer = _chunkBuffer.substr(_chunkSize + 2);
+    _chunkSize   = 0;
+    return 0;
+  }
+  else if (_chunkBuffer.size() >= _chunkSize + 2 &&
+      _chunkBuffer.compare(_chunkSize, 2, CRLF) != 0)
+  {
+    Logger::logDbg0("RequestBody::_appendChunkToBody",
+        "Chunk too big for given _chunkSize or malformed");
+    return -1;
+  }
+
+  return 1;
+}
+
 int RequestBody::_appendChunked()
 {
   int ret = 1;
@@ -195,13 +222,9 @@ int RequestBody::_appendChunked()
 
   if (_chunkSize == 0) {
 
-    if (_size + _chunkBuffer.size() > _maxSize + 5) {
-      Logger::logBug("Chunked request too big!");
-      return -2;
-    }
-
     while (_chunkSize == 0 && (ret = _parseChunkSize()) == 0) {
-      Logger::logBug("if - Chunk size: " + int2str(_chunkSize));
+      Logger::logDbg2("RequestBody::_appendChunked",
+          "if - Chunk size: " + int2str(_chunkSize));
       // Logger::logBug("if - Chunk buffer so far:\n" +
       //     data2hexStr(_chunkBuffer.data(), _chunkBuffer.size()));
 
@@ -214,47 +237,28 @@ int RequestBody::_appendChunked()
         return 1;
       }
 
-      if (_chunkBuffer.size() >= _chunkSize + 2 &&
-          _chunkBuffer.compare(_chunkSize, 2, CRLF) == 0)
-      {
-        // Logger::logBug("if-while - appending to chunkBody: " +
-        //     _chunkBuffer.substr(0, _chunkSize));
-        memcpy(_bodyData + _size, _chunkBuffer.data(), _chunkSize);
-        _size += _chunkSize;
-        Logger::logBug(
-            "if - body by now:\n" + printDataTrunc(_bodyData, _size, 100));
-
-        _chunkBuffer = _chunkBuffer.substr(_chunkSize + 2);
-        _chunkSize   = 0;
+      if (_chunkSize + _size > _maxSize) {
+        Logger::logDbg0(
+            "RequestBody::_appendChunked", "chunkSize + bodySize too big!");
+        return -2;
       }
-      else if (_chunkBuffer.size() >= _chunkSize + 2 &&
-          _chunkBuffer.compare(_chunkSize, 2, CRLF) != 0)
+
+      if (_appendChunkToBody() == -1)
         return -1;
     }
   }
   else {
     Logger::logBug("else - Chunk buffer so far:\n" +
         printDataTrunc(_chunkBuffer.data(), _chunkBuffer.size(), 100));
-    if (_chunkBuffer.size() >= _chunkSize + 2 &&
-        _chunkBuffer.compare(_chunkSize, 2, CRLF) == 0)
-    {
-      // Logger::logBug("else - appending to chunkBody: " +
-      //     _chunkBuffer.substr(0, _chunkSize));
-      memcpy(_bodyData + _size, _chunkBuffer.data(), _chunkSize);
-      _size += _chunkSize;
-      Logger::logBug(
-          "else - body by now:\n" + printDataTrunc(_bodyData, _size, 100));
-      _chunkBuffer = _chunkBuffer.substr(_chunkSize + 2);
-      _chunkSize   = 0;
-    }
-    else if (_chunkBuffer.size() >= _chunkSize + 2 &&
-        _chunkBuffer.compare(_chunkSize, 2, CRLF) != 0)
+
+    if (_appendChunkToBody() == -1)
       return -1;
 
     while (_chunkSize == 0 && (ret = _parseChunkSize()) == 0) {
       if (ret < 0)
         return -1;
       Logger::logBug("Chunk size: " + int2str(_chunkSize));
+
       // Logger::logBug("Chunk buffer so far:\n" +
       //     data2hexStr(_chunkBuffer.data(), _chunkBuffer.size()));
 
@@ -267,21 +271,7 @@ int RequestBody::_appendChunked()
         return 1;
       }
 
-      if (_chunkBuffer.size() >= _chunkSize + 2 &&
-          _chunkBuffer.compare(_chunkSize, 2, CRLF) == 0)
-      {
-        // Logger::logBug("else-while - appending to chunkBody: " +
-        //     _chunkBuffer.substr(0, _chunkSize));
-        memcpy(_bodyData + _size, _chunkBuffer.data(), _chunkSize);
-        _size += _chunkSize;
-        Logger::logBug(
-            "body by now:\n" + printDataTrunc(_bodyData, _size, 100));
-
-        _chunkBuffer = _chunkBuffer.substr(_chunkSize + 2);
-        _chunkSize   = 0;
-      }
-      else if (_chunkBuffer.size() >= _chunkSize + 2 &&
-          _chunkBuffer.compare(_chunkSize, 2, CRLF) != 0)
+      if (_appendChunkToBody() == -1)
         return -1;
     }
   }

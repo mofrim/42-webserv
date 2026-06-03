@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/14 10:17:58 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/30 08:09:06 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/06/03 09:19:45 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,6 +36,7 @@ class RequestBody {
 
     int _appendChunked();
     int _parseChunkSize();
+    int _appendChunkToBody();
 
   public:
     RequestBody();

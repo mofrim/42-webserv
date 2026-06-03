@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/26 10:03:57 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/29 09:54:16 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/06/03 09:55:09 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -297,7 +297,7 @@ str printDataTrunc(const char *s, size_t len, size_t trunc)
 {
   size_t printLen  = (len >= trunc ? trunc : len);
   str    dataTrunc = data2hexStr(s, printLen);
-  dataTrunc += "... and " + int2str((len >= trunc ? len - trunc : 0)) +
+  dataTrunc += " ... and " + int2str((len >= trunc ? len - trunc : 0)) +
       " bytes more. Total: " + int2str(len);
   return dataTrunc;
 }

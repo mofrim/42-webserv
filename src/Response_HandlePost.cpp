@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/14 17:51:57 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/22 11:14:39 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/06/03 10:08:33 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -132,8 +132,10 @@ void Response::_handleSimplePostFile(constr& upDir, constr& mimeType)
   if (outfile)
     outfile.write(_req->getBodyRawData(), _req->getBodySize());
 
-  if (!outfile)
+  if (!outfile) {
+    Logger::logDbg0("Response::_handleSimplePostFile", "outfile not good");
     _status = HTTP_500;
+  }
   else {
     _status = HTTP_201;
 

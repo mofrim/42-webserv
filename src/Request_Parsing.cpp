@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/01 18:46:40 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/30 12:19:09 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/06/03 11:35:38 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -270,10 +270,17 @@ e_HTTPStatus Request::_initializeBody(constr& onlyHdrs, size_t crlfx2)
         "(Request::_parseHeaders) Could not set maxBodySize!");
 
   _bodySize = _reqdata.size() - onlyHdrs.size() - 2;
-  if (_body.appendData(_reqdata.substr(crlfx2).data() + 4, _bodySize) == -1) {
-    Logger::logSrv(_vsrvName, "Appending to body failed!", WARN);
-    return HTTP_400;
-  };
+
+  int appRet = _body.appendData(_reqdata.substr(crlfx2).data() + 4, _bodySize);
+  switch (appRet) {
+    case -1:
+      Logger::logSrv(_vsrvName, "Appending to body failed!", WARN);
+      return HTTP_400;
+    case -2:
+      Logger::logSrv(_vsrvName, "Req-Body to big for MBS!", WARN);
+      return HTTP_413;
+  }
+
   Logger::logDbg1("Request::_parseHeaders",
       "initialized body with " + int2str(_bodySize) + " bytes!");
 

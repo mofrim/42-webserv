@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 23:39:57 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/06/01 20:48:00 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/06/03 11:41:49 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -207,22 +207,23 @@ void Request::append(char *s, ssize_t bytesRead)
     // Logger::logDbg2(data2hexStr(s, bytesRead));
     _bodySize += bytesRead;
     switch (_body.appendData(s, bytesRead)) {
-      case 1:
-        break;
-      case 0:
-        Logger::logSrv(
-            _vsrvName, "(RequestBody::appendData) truncating body data!", WARN);
-        break;
       case -2:
         Logger::logSrv(_vsrvName,
             "(RequestBody::appendData) Chunked request body too big!",
             WARN);
         _statusCode = HTTP_413;
         break;
-      default:
+      case -1:
         _statusCode = HTTP_400;
         Logger::logErr(
-            "RequestBody::appendData", "Could not append to bodyData!");
+            "RequestBody::appendData", "Could not append to RequestBody!");
+        break;
+      case 0:
+        Logger::logSrv(
+            _vsrvName, "(RequestBody::appendData) truncating body data!", WARN);
+        break;
+      case 1:
+        break;
     }
   }
   else {

@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/24 20:49:55 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/29 09:34:00 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/06/03 10:07:39 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -85,6 +85,7 @@ class Logger {
     // log_dbg0 will be printed, and in LOGLEVEL == INFO == 0 only log_dbg0
     // will be shown.
     static void logDbg0(const str& msg);
+    static void logDbg0(const str& pre, const str& msg);
 
     static void logDbg1(const str& msg);
     static void logDbg1(const str& pre, const str& msg);

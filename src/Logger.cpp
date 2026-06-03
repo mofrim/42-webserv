@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/24 20:52:55 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/30 12:37:02 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/06/03 10:07:44 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -131,6 +131,18 @@ void Logger::logDbg0(const str& msg)
   }
 }
 
+void Logger::logDbg0(const str& pre, const str& msg)
+{
+  if (LOGLEVEL >= LOG_INFO) {
+    str logtime = getLogtime();
+    if (_isatty)
+      std::cout << GRY << logtime << BGRY << " (" << pre << ") " << RST << GRY
+                << msg << RST << std::endl;
+    else
+      std::cout << logtime << " (" << pre << ") " << msg << std::endl;
+  }
+}
+
 void Logger::logDbg1(const str& msg)
 {
   if (LOGLEVEL >= LOG_DEBUG) {
@@ -201,10 +213,12 @@ void Logger::logReqRes(const str& srvName, const str& resreq, const str& data)
     else
       std::cout << logtime << " (" << srvName << ") " << resreq << ":"
                 << "\n---" << std::endl;
+
     if (resreq != "Processing Request")
       std::cout << data2hexStr(data.data(), data.size());
     else
       std::cout << data;
+
     if (_isatty)
       std::cout << "\n---" << RST << std::endl;
     else
@@ -223,10 +237,12 @@ void Logger::logReqRes(
     else
       std::cout << logtime << " (" << srvName << ") " << resreq << ":"
                 << "\n---" << std::endl;
+
     if (resreq != "Processing Request")
       std::cout << printDataTrunc(data.data(), data.size(), trunc);
     else
-      std::cout << printDataTrunc(data.data(), data.size(), trunc);
+      std::cout << data;
+
     if (_isatty)
       std::cout << "\n---" << RST << std::endl;
     else
