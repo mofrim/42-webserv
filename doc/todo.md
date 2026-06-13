@@ -57,8 +57,8 @@
 
 - [x] fix hanging cfg:
 
-- [x] finish virtual servers by making server listening on localhost:1111 and
-      127.0.0.1:1111 with the same srvName distinguishable... **or let it be!**
+- [x] finish virtual servers by making server listening on localhost:1234 and
+      127.0.0.1:1234 with the same srvName distinguishable... **or let it be!**
 
 - [x] impl redirection
 

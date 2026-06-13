@@ -4,7 +4,7 @@ allgood=1
 
 # set port and addr here
 addr="localhost"
-port="1111"
+port="1234"
 
 # i need my utils!
 if [ ! -e ./_test_utils.sh ]; then

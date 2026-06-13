@@ -1,12 +1,12 @@
 server {
   serverName v1!
-  listen localhost:1111!
+  listen localhost:1234!
   root ../../_www/v1!
 }
 
 server {
   serverName v2!
-  listen localhost:1111!
+  listen localhost:1234!
   root ../../_www/v2!
   route /redir {
     redirect 301:/redir-target!

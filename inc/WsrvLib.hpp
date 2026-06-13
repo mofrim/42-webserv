@@ -55,7 +55,7 @@ typedef std::string::const_iterator constrIt;
 
 #define MAX_CLIENTS 1000
 #define DEFAULT_SRV_NAME "localhost"
-#define DEFAULT_PORT 1111
+#define DEFAULT_PORT 1234
 
 // return value convenience
 #ifndef OK

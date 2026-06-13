@@ -1,6 +1,6 @@
 server {
   serverName autoindexSrv!
-  listen localhost:1111!
+  listen localhost:1234!
 
   # this will turn on autoindex for all subdirs if not explicitly tuned-off
   # in a specific route again!

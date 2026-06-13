@@ -1,6 +1,6 @@
 server {
   serverName webserv1!
-  listen localhost:1111!
+  listen localhost:1234!
   root www!
 }
 

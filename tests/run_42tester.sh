@@ -14,15 +14,30 @@ if [ ! -e ./www/42tester/cgi_tester ]; then
 	chmod +x ./www/42tester/cgi_tester
 fi
 
+if [[ -n "$(grep 'macmac' <<< "$HOSTNAME")" ]]; then
+	sed -i 's/frido/mofrim/g' ./cfgs/42tester.wsrv
+	sed -i 's/frido/mofrim/g' ./www/42tester/wrapper.sh
+elif [[ -n "$(grep 'jeanluc' <<< "$HOSTNAME")" ]]; then
+	sed -i 's/mofrim/frido/g' ./cfgs/42tester.wsrv
+	sed -i 's/mofrim/frido/g' ./www/42tester/wrapper.sh
+fi
+
+if pidof webserv; then
+	echo ">> killing exsting webserv instance..."
+	pkill webserv
+fi
+
+echo "now please run './webserv cfgs/42tester.sh' in another terminal!"
+echo -n "press any key to continue..." && read -r
+
+
 if ! pidof webserv; then
-	echo "Plz, start webserv with 42tester cfg before this!"
+	echo "Error: Webserv is not running!"
 	exit 1
 fi
 
 if [[ -z "$(grep -E 'jeanluc|macmac' <<< "$HOSTNAME")" ]]; then
-	./tester http://localhost:1111
+	./tester http://localhost:1234
 else
-	nix-alien ./tester http://localhost:1111
+	nix-alien ./tester http://localhost:1234
 fi
-
-
