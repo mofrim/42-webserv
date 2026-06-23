@@ -27,14 +27,19 @@ ax.grid(True)
 # does not work as planned, so far
 fig.canvas.mpl_connect('scroll_event', lambda event: ax.set_xlim(
     ax.get_xlim()[0] + event.step * 10, ax.get_xlim()[1] + event.step * 10))
-fig.canvas.mpl_connect('button_press_event', lambda event: ax.set_xlim(ax.get_xlim()[
-                       0] + (event.xdata - ax.get_xlim()[0]) * 0.1, ax.get_xlim()[1] + (event.xdata - ax.get_xlim()[0]) * 0.1))
+fig.canvas.mpl_connect(
+    'button_press_event',
+    lambda event: ax.set_xlim(ax.get_xlim()[0]
+                              + (event.xdata - ax.get_xlim()
+                                 [0]) * 0.1, ax.get_xlim()[1]
+                              + (event.xdata - ax.get_xlim()[0]) * 0.1))
 
 
 def get_memory_usage():
     try:
         result = subprocess.run(COMMAND, shell=True, check=True,
-                                stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+                                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                                text=True)
         return int(result.stdout.strip()) / 1024
     except (subprocess.CalledProcessError, ValueError):
         return None
@@ -85,6 +90,7 @@ def update(frame):
 
 
 ani = animation.FuncAnimation(
-    fig, update, init_func=init, interval=INTERVAL_MS, blit=False, cache_frame_data=False)
+    fig, update, init_func=init, interval=INTERVAL_MS, blit=False,
+    cache_frame_data=False)
 
 plt.show()
