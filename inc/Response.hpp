@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/23 19:11:06 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/27 08:30:07 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/06/13 11:01:20 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -95,7 +95,7 @@ class Response {
     ~Response();
 
     e_HTTPStatus buildResponse(Request& req);
-    str          getRespoStr() const;
+    const str&   getRespoStr() const;
 
     e_HTTPStatus handleCGI(Request& req);
     void         cgiWrite();

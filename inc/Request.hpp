@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 23:39:07 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/30 12:18:05 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/06/13 11:01:54 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -87,7 +87,7 @@ class Request {
     Request& operator=(const Request& other);
     ~Request();
 
-    str getResponseStr() const;
+    const str& getResponseStr() const;
 
     void processReq();
 
@@ -141,6 +141,7 @@ class Request {
     size_t       getBodySize() const;
     void         setBodySize(size_t s);
     str          getHdrsAsStr() const;
+    void         resetBody();
 
     void setHost(str host);
     str  getHost() const;

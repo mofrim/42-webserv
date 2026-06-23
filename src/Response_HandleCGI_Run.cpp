@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/17 10:36:30 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/29 23:12:15 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/06/23 10:00:57 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -129,7 +129,7 @@ e_HTTPStatus Response::_cgiSetup(std::map<str, str> cgiParams)
     exit(1);
   }
 
-  // |=--------------------------=[ the parent ]=--------------------------=| //
+  // ----------------------------=[ the parent ]=---------------------------- //
 
   _cli->setState(CLI_CGIRW);
   _cli->addCgiToEpoll(_cgiParentWriteFd, _cgiParentReadFd);
@@ -169,6 +169,7 @@ void Response::cgiWrite()
 
       Logger::logDbg1("Response::cgiWrite", "Done writing body to pipe!");
 
+      _req->resetBody();
       _cli->setState(CLI_CGIREAD);
       _cli->delCgiFromEpoll(_cgiParentWriteFd);
       close(_cgiParentWriteFd);
@@ -272,6 +273,7 @@ void Response::cgiRead()
   _cgiBody.append(_cgiReadBuffer, bytesRead);
 }
 
+// process the data returned from the CGI
 void Response::cgiProcessBody()
 {
   Logger::logDbg2("Response::cgiProcessBody",
@@ -330,8 +332,8 @@ void Response::cgiProcessBody()
   size_t bodySize = _cgiBody.size() - headers.size() - 2;
   _req->setBodySize(bodySize);
   _body.assign(_cgiBody.substr(crlfx2).data() + 4, bodySize);
+  reallyClearStr(_cgiBody);
   _status = (_status != HTTP_0 ? _status : HTTP_200);
-  // _status = HTTP_200;
 }
 
 void Response::cgiCleanupFds()

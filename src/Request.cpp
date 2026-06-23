@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 23:39:57 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/06/03 11:41:49 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/06/23 10:03:04 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,7 +77,6 @@ Request::Request(Client *cli, const char *reqstr, size_t reqstrLen)
         (_cli->getVsrv() != NULL ? _cli->getVsrv()->getName() : "__VIRTUAL__");
 
   _statusCode          = HTTP_200;
-  _hdrLines            = _countReqLines(reqstr);
   _hdrComplete         = false;
   _bodyComplete        = false;
   _reqline.httpVersion = HTTPVER_UNKNOWN;
@@ -99,6 +98,8 @@ Request::Request(Client *cli, const char *reqstr, size_t reqstrLen)
   _isChunked           = false;
 
   _reqdata.assign(reqstr, reqstrLen);
+
+  _hdrLines = _countReqLines(_reqdata);
 }
 
 // There are 2 options when we get here:
@@ -191,20 +192,16 @@ void Request::_matchRoute()
 // if appending body fails in some way we go HTTP_400!
 void Request::append(char *s, ssize_t bytesRead)
 {
-  // Logger::logDbg2("Request::append",
-  //     "Read this from socket:\n" + data2hexStr(s, bytesRead));
   if (_cli->isDraining()) {
     _bodySize += bytesRead;
-    Logger::logBug("draining...");
+    Logger::logDbg0("draining...");
     if (_bodySize >= _contentLength) {
       _cli->setState(CLI_SEND);
-      Logger::logBug("FINISHED DRAINING!");
+      Logger::logDbg0("FINISHED DRAINING!");
     }
     return;
   }
   else if (_hdrComplete) {
-    // Logger::logDbg2("Appending this to body now:");
-    // Logger::logDbg2(data2hexStr(s, bytesRead));
     _bodySize += bytesRead;
     switch (_body.appendData(s, bytesRead)) {
       case -2:
@@ -313,7 +310,8 @@ void Request::reset()
   _hostPort            = 0;
   _isChunked           = false;
 
-  _reqdata.clear();
+  reallyClearStr(_reqdata);
+
   _body.reset();
   _targetPath.clear();
   _requestTarget.clear();
@@ -384,7 +382,7 @@ t_RequestLine& Request::getReqline() { return _reqline; }
 
 std::map<str, str>& Request::getHeaders() { return _headers; }
 
-str Request::getResponseStr() const { return _respo.getRespoStr(); }
+constr& Request::getResponseStr() const { return _respo.getRespoStr(); }
 
 Route *Request::getMatchedRoute() { return _matchedRoute; }
 
@@ -445,6 +443,8 @@ str Request::getHdrsAsStr() const
   }
   return oss.str();
 }
+
+void Request::resetBody() { _body.reset(); }
 
 str Request::_getReqlineAsStr() const
 {

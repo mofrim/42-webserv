@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/23 19:11:25 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/30 12:49:16 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/06/14 08:52:51 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -152,6 +152,7 @@ void Response::_buildResponseStr()
       _respoStr += it->first + ": " + it->second + CRLF;
 
   _respoStr += CRLF + (_req->isRedir() ? "" : _body);
+  reallyClearStr(_body);
 }
 
 void Response::_getBody200()
@@ -292,7 +293,7 @@ void Response::_buildRespoHdrs()
     _respoHeaders["Accept-Ranges"] = "none";
 }
 
-str Response::getRespoStr() const { return _respoStr; }
+const str& Response::getRespoStr() const { return _respoStr; }
 
 // reset.
 void Response::reset()
@@ -309,14 +310,15 @@ void Response::reset()
   _cgiBytesWritten     = 0;
   _cgiWriteBodySize    = 0;
 
+  reallyClearStr(_body);
+  reallyClearStr(_respoStr);
+  reallyClearStr(_cgiBody);
+
   _reqline.target.clear();
   _respoHeaders.clear();
-  _body.clear();
-  _mimeType.clear();
-  _respoStr.clear();
   _targetPath.clear();
-  _vsrvName.clear();
-  _cgiBody.clear();
+  _mimeType = "";
+  _vsrvName = "";
 }
 
 // helper function for generating the response for a failes Req.

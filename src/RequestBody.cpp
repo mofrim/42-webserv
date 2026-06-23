@@ -73,7 +73,7 @@ int RequestBody::appendData(const char *dat, size_t len)
 
   int ret = 1;
 
-  // tuncate only if not chunked. if chunked, handle a possibly too large body
+  // truncate only if not chunked. if chunked, handle a possibly too large body
   // in _appendChunked
   if (!_isChunked && len + _size > _maxSize) {
     len = _maxSize - _size;
@@ -118,7 +118,7 @@ void RequestBody::reset()
   _bytesReadChunk  = 0;
   _lastChunkRead   = false;
   _chunkedComplete = false;
-  _chunkBuffer.clear();
+  reallyClearStr(_chunkBuffer);
 }
 
 size_t RequestBody::getSize() const { return _size; }

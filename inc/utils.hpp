@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/03 11:26:23 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/29 09:23:42 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/06/13 12:18:19 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,6 +44,7 @@ bool   isValidFname(const str& s);
 str    getErrnoStr();
 size_t findCRLF(const char *dat, size_t len);
 bool   parseU32HexStr(const str& hexStr, uint32_t& out);
+void   reallyClearStr(str& s);
 
 std::set<str> listDirFiles(constr& directoryPath, bool dirSlash = true);
 

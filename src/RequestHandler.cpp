@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 19:13:35 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/06/03 13:08:07 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/06/14 08:51:16 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,7 +52,7 @@ RequestHandler::RequestHandler(Client *cli):
 //  2) The connection is closed by the client (read == 0)
 void RequestHandler::readRequest()
 {
-  std::memset(_buffer, 0, READ_BUFSIZE);
+  // std::memset(_buffer, 0, READ_BUFSIZE);
 
   ssize_t bytesRead = read(_cli->getFd(), _buffer, READ_BUFSIZE);
 
@@ -148,7 +148,8 @@ void RequestHandler::readRequest()
 //
 void RequestHandler::writeResponse()
 {
-  str          response;
+  str          defaultRespoStr = "";
+  str&         response        = defaultRespoStr;
   e_HTTPStatus statusCode;
 
   // QUESTION what happens here if a client connected but never sent anything?
@@ -167,14 +168,14 @@ void RequestHandler::writeResponse()
       req.getRespo().cgiCleanupFds();
 
     if (_cli->isVirtual() && _cli->getVsrv() == NULL)
-      response = Response::genDefaultErrResponse(statusCode);
+      defaultRespoStr = Response::genDefaultErrResponse(statusCode);
     else if (_cli->getVsrv() != NULL && req.getMatchedRoute() != NULL) {
       req.setStatusCode(statusCode);
       req.processReq();
       response = req.getResponseStr();
     }
     else
-      response = Response::genDefaultErrResponse(statusCode);
+      defaultRespoStr = Response::genDefaultErrResponse(statusCode);
   }
   else {
     statusCode = req.getStatus();
@@ -184,6 +185,7 @@ void RequestHandler::writeResponse()
   Logger::logSrv(_vsrvName,
       "Sending Response (" + int2str(statusCode) + ") to " +
           _cli->getIfaceFdStr());
+
   Logger::logReqRes(_vsrvName, "Response", response, 200);
 
   if (response.empty())
@@ -192,7 +194,8 @@ void RequestHandler::writeResponse()
   _respoSize = response.size();
 
   // using MSG_NOSIGNAL here which has the same effect as signal(SIGPIPE,
-  // SIG_IGN) but on a per-call basis. Baam!
+  // SIG_IGN) but on a per-call basis. Nice to know, even though we are ignoring
+  // SIGPIPE globally.
   ssize_t bytesSent = send(_cli->getFd(),
       response.data() + _respoBytesSent,
       _respoSize - _respoBytesSent,

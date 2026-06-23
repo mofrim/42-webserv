@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/26 10:03:57 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/06/03 09:55:09 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/06/23 10:00:22 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -413,3 +413,7 @@ bool parseU32HexStr(const str& hexStr, u32& out)
   out = parsedSize;
   return true;
 }
+
+// crazy but true: this is the only way to force releasing the mem of a string
+// object immediately in consequence acting like a `delete[]`.
+void reallyClearStr(str& s) { std::string().swap(s); }
