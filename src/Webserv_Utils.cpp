@@ -45,14 +45,14 @@ void Webserv::_printSockname(int sock)
 //   VServerCfg cfg1;
 //   Route      r;
 //   cfg1.setServerName("virtual1");
-//   cfg1.addInterface("127.0.0.1", 1111);
+//   cfg1.addInterface("127.0.0.1", 1234);
 //   cfg1.addInterface("127.0.0.1", 1112);
 //   cfg1.addRoute(r);
 //   VServer dsrv1(cfg1);
 //
 //   VServerCfg cfg2;
 //   cfg2.setServerName("virtual1");
-//   cfg2.addInterface("localhost", 1111);
+//   cfg2.addInterface("localhost", 1234);
 //   cfg2.addRoute(r);
 //   VServer dsrv2(cfg2);
 //
@@ -74,8 +74,8 @@ void Webserv::_printSockname(int sock)
 //
 //   VServerCfg cfg2;
 //   cfg2.setServerName("virtual1");
-//   cfg2.addInterface("localhost", 1111);
-//   cfg2.addInterface("10.0.0.1", 1111);
+//   cfg2.addInterface("localhost", 1234);
+//   cfg2.addInterface("10.0.0.1", 1234);
 //   cfg2.addRoute(r);
 //   VServer dsrv2(cfg2);
 //
@@ -87,7 +87,7 @@ void Webserv::_initDefaultCfg()
 {
   VServerCfg cfg1;
   cfg1.setServerName("webserv");
-  cfg1.addInterface("localhost", 1111);
+  cfg1.addInterface("localhost", 1234);
 
   Route r;
   r.setAutoindex(true);
