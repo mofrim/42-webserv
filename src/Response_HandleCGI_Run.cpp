@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/17 10:36:30 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/06/23 10:00:57 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/06/24 17:08:58 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,17 +16,16 @@
 #include "Response.hpp"
 #include "utils.hpp"
 
-#include <cerrno>
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
 #include <sys/wait.h>
 #include <unistd.h>
 
-e_HTTPStatus Response::_cgiSetup(std::map<str, str> cgiParams)
+e_HTTPStatus Response::_cgiSetup(std::map<str, str>& cgiParams)
 {
   str cgiExec   = cgiParams["EXEC"];
-  str cgiScript = cgiParams["SCRIPT_FILENAME"];
+  str cgiScript = cgiParams["SCRIPT_NAME"];
 
   _cgiWriteBodySize = _req->getBodySize();
 
@@ -79,11 +78,24 @@ e_HTTPStatus Response::_cgiSetup(std::map<str, str> cgiParams)
 
     char **envp = _cgiBuildEnv(cgiParams);
 
-    // char **pp = envp;
-    // while (*pp) {
-    //   std::cout << *pp << std::endl;
-    //   pp++;
-    // }
+    // change to script's root dir for work
+    if (chdir(cgiParams["SCRIPT_WORKDIR"].c_str()) == -1) {
+      Logger::logErr("Response::_cgiSetup", "could not change CWD");
+      close(stdinPipe[0]);
+      close(stdinPipe[1]);
+      close(stdoutPipe[0]);
+      close(stdoutPipe[1]);
+      char **p = envp;
+      while (*p) {
+        delete[] *p;
+        ++p;
+      }
+      delete[] envp;
+      exit(1);
+    }
+
+    // set cgiScript to absolute path
+    cgiScript = cgiParams["SCRIPT_FILENAME"];
 
     close(stdinPipe[1]);
     close(stdoutPipe[0]);
@@ -112,6 +124,9 @@ e_HTTPStatus Response::_cgiSetup(std::map<str, str> cgiParams)
 
     execve(cgiExec.c_str(), argv, envp);
 
+    std::cerr << "CGI CHILD: EXECVE failed!!!" << std::endl;
+
+    // clean up in case execve failed
     char **p = envp;
     while (*p) {
       delete[] *p;
@@ -320,7 +335,6 @@ void Response::cgiProcessBody()
   if (_respoHdrHas("Status")) {
     str          cgiStatus = _respoHeaders["Status"];
     e_HTTPStatus s         = WsrvLib::str2HttpStatus(cgiStatus);
-    Logger::logBug("cgiStatus: " + int2str(s));
     if (s != HTTP_0)
       _status = s;
     _respoHeaders.erase("Status");

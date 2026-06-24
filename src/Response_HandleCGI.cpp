@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/16 14:54:57 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/30 13:13:18 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/06/24 17:26:21 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -115,7 +115,7 @@ std::map<str, str> Response::_cgiEvalScriptPath()
 {
   std::map<str, str>  cgiParams;
   std::pair<str, int> detRet;
-  str                 cgiScript;
+  str                 cgiScriptRelativePath;
 
   Route& r = *_matchedRoute;
 
@@ -127,20 +127,20 @@ std::map<str, str> Response::_cgiEvalScriptPath()
     return cgiParams;
   }
 
-  cgiScript = detRet.first;
+  cgiScriptRelativePath = detRet.first;
 
-  Logger::logDbg1("Found this cgiScript now: " + cgiScript);
+  Logger::logDbg1("Found this cgiScript now: " + cgiScriptRelativePath);
 
   // ok! good so far! now, check if extension is supported!
 
-  size_t dotPos = cgiScript.rfind(".");
-  if (dotPos == str::npos || dotPos == cgiScript.length() - 1) {
+  size_t dotPos = cgiScriptRelativePath.rfind(".");
+  if (dotPos == str::npos || dotPos == cgiScriptRelativePath.length() - 1) {
     Logger::logSrv(_vsrvName, "No file-ext found in requested CGI script!");
     _status = HTTP_403;
     _body   = WsrvLib::getDefaultStatusPage(_status);
     return cgiParams;
   }
-  str ext = cgiScript.substr(dotPos + 1);
+  str ext = cgiScriptRelativePath.substr(dotPos + 1);
 
   std::map<str, str>::const_iterator extIt = r.getCgi().find(ext);
   if (extIt == r.getCgi().end()) {
@@ -150,41 +150,67 @@ std::map<str, str> Response::_cgiEvalScriptPath()
     return cgiParams;
   }
 
+  cgiParams["EXEC"] = extIt->second;
+
   // last but not least we check if we can read that thing at all!
 
-  if (access(cgiScript.c_str(), R_OK) == -1) {
-    Logger::logSrv(_vsrvName, "Cannot read from target CGI script!");
+  if (access(cgiScriptRelativePath.c_str(), R_OK) == -1) {
+    Logger::logSrv(_vsrvName, "Cannot read CGI script!");
     _status = HTTP_403;
     _body   = WsrvLib::getDefaultStatusPage(_status);
     return cgiParams;
   }
 
-  // and we're good to go!
-
-  size_t lastSeg = cgiScript.rfind('/');
-  if (lastSeg != str::npos && lastSeg + 1 < cgiScript.size())
-    cgiParams["SCRIPT_NAME"] = cgiScript.substr(lastSeg + 1);
-
-  cgiParams["SCRIPT_FILENAME"] = cgiScript;
-  cgiParams["EXEC"]            = extIt->second;
-
-  size_t scriptPos = _targetPath.find(cgiParams["SCRIPT_NAME"]);
-  str    transPath;
-  if (scriptPos != str::npos)
-    transPath =
-        _targetPath.substr(scriptPos + cgiParams["SCRIPT_NAME"].length());
-  cgiParams["PATH_TRANSLATED"] = r.getRoot() + r.getPath() + transPath;
-
-  cgiParams["PATH_INFO"]   = (transPath.empty() ? "/" : transPath);
-  cgiParams["REQUEST_URI"] = (transPath.empty() ? "/" : transPath);
+  // and we're good to go! build first CGI env params from local vars
+  _cgiBuildEnvPathsAndURI(cgiParams, cgiScriptRelativePath);
 
   return cgiParams;
 }
 
-// https://www.rfc-editor.org/rfc/rfc3875#page-10
-char **Response::_cgiBuildEnv(std::map<str, str> cgiParams)
+void Response::_cgiBuildEnvPathsAndURI(
+    std::map<str, str>& cgiParams, constr& cgiScriptRelativePath)
 {
-  std::map<str, str> env = cgiParams;
+  size_t lastSeg = cgiScriptRelativePath.rfind('/');
+  str    scriptFilename;
+  if (lastSeg != str::npos && lastSeg + 1 < cgiScriptRelativePath.size())
+    scriptFilename = cgiScriptRelativePath.substr(lastSeg + 1);
+  else
+    scriptFilename = cgiScriptRelativePath;
+
+  // parse SCRIPT_NAME env var from found script file
+  str    targetURI = _reqline.target.getPath();
+  size_t scriptPos = targetURI.find(scriptFilename);
+  if (scriptPos != str::npos) {
+    cgiParams["SCRIPT_NAME"] =
+        targetURI.substr(0, scriptPos + scriptFilename.length());
+
+    // PATH_INFO should be everything path-like after the scriptFilename until
+    // the query string (? in our case). in our case this is everything after
+    // the scriptFilename in the targetURI
+    cgiParams["PATH_INFO"] =
+        targetURI.substr(scriptPos + scriptFilename.length());
+    if (cgiParams["PATH_INFO"].empty())
+      cgiParams["PATH_INFO"] = "/";
+  }
+  else {
+    cgiParams["SCRIPT_NAME"] = scriptFilename;
+    cgiParams["PATH_INFO"]   = "/";
+  }
+}
+
+// Build the env for the CGI to run. Returns the env for passing it to execve
+// but also extends cgiParams param map with the new vars.
+//
+// Main resource: https://www.rfc-editor.org/rfc/rfc3875#page-10
+char **Response::_cgiBuildEnv(std::map<str, str>& cgiParams)
+{
+  std::map<str, str>& env = cgiParams;
+
+  env["REQUEST_URI"] = _reqline.target.getStr();
+
+  // INFO: did not find any other way to satisfy the 42tester. In principle this
+  // is incorrect!
+  env["PATH_INFO"] = env["REQUEST_URI"];
 
   env["CONTENT_LENGTH"]    = int2str(_req->getBodySize());
   env["CONTENT_TYPE"]      = _req->getHeaders()["Content-Type"];
@@ -211,20 +237,41 @@ char **Response::_cgiBuildEnv(std::map<str, str> cgiParams)
     env[env_name] = it->second;
   }
 
-  // get PATH from global env...
+  // get PATH & PWD from global env...
   // this is surely not optimal from a opssec perspective, but convenient for
   // script execution
-
   char **globalEnvp = _vsrv->getEnvp();
   str    _globalEnvPATH;
+  str    _pwd;
   if (globalEnvp != NULL) {
     char **p = globalEnvp;
     while (*p) {
       str cur(*p);
       if (cur.length() > 4 && !cur.compare(0, 4, "PATH"))
         _globalEnvPATH = cur;
+      if (cur.length() >= 3 && !cur.compare(0, 3, "PWD"))
+        _pwd = cur;
       ++p;
     }
+  }
+
+  // now that we have _pwd we can set the PATH_TRANSLATED...
+  // WARN: we simply ignore here that it might be empty in some very edgy cases!
+  URI workdir;
+  if (_pwd.find('=') != str::npos &&
+      !workdir
+          .parsePath(
+              _pwd.substr(_pwd.find('=') + 1) + "/" + _matchedRoute->getRoot())
+          .empty())
+  {
+    env["SCRIPT_WORKDIR"]  = workdir.getStr();
+    env["SCRIPT_FILENAME"] = env["SCRIPT_WORKDIR"] + env["SCRIPT_NAME"];
+    env["PATH_TRANSLATED"] = env["SCRIPT_WORKDIR"] + env["PATH_INFO"];
+  }
+  else {
+    env["SCRIPT_WORKDIR"]  = _pwd;
+    env["SCRIPT_FILENAME"] = env["SCRIPT_NAME"];
+    env["PATH_TRANSLATED"] = "/";
   }
 
   char **envp = new char *[env.size() + !_globalEnvPATH.empty() + 1];

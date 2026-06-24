@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/23 19:11:06 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/06/13 11:01:20 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/06/24 15:08:42 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,8 +86,10 @@ class Response {
     void                _cgiHandleBadScript(constr& s);
     std::map<str, str>  _cgiEvalScriptPath();
     std::pair<str, int> _cgiDetermineScriptFile();
-    char              **_cgiBuildEnv(std::map<str, str> cgiParams);
-    e_HTTPStatus        _cgiSetup(std::map<str, str> cgiParams);
+    void                _cgiBuildEnvPathsAndURI(
+        std::map<str, str>& cgiParams, constr& cgiScriptRelativePath);
+    char       **_cgiBuildEnv(std::map<str, str>& cgiParams);
+    e_HTTPStatus _cgiSetup(std::map<str, str>& cgiParams);
 
   public:
     Response();
