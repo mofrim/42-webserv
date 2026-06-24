@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/07 20:08:59 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/19 12:48:06 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/06/24 17:52:00 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,6 +91,7 @@ ConfigParser::t_Token ConfigParser::_readTok(
     case TOK_NAME:
     case TOK_ERROR:
     case TOK_FNAME:
+    case TOK_TIME:
       newtok.type = TOK_BANG;
       break;
     case TOK_ROUTE:
@@ -120,12 +121,14 @@ ConfigParser::t_Token ConfigParser::_readTok(
 void ConfigParser::_evalScope(const t_Token& tok)
 {
   if (_scope.top() == S_GLOBAL && tok.type == TOK_DIREC &&
-      tok.direc != DIR_SERVER)
+      tok.direc != DIR_SERVER && tok.direc != DIR_TIMECGI &&
+      tok.direc != DIR_TIMEREQ)
     throw std::runtime_error(
         "Direc " + _direc2str(tok.direc) + " not allowed in global scope");
 
   if (_scope.top() != S_GLOBAL && tok.type == TOK_DIREC &&
-      tok.direc == DIR_SERVER)
+      (tok.direc == DIR_SERVER || tok.direc == DIR_TIMECGI ||
+          tok.direc == DIR_TIMEREQ))
     throw std::runtime_error("Direc " + _direc2str(tok.direc) +
         " not allowed in scope other than global");
 
@@ -191,6 +194,7 @@ void ConfigParser::_readTokVal(
       it        = itTmp;
       break;
     }
+    case TOK_TIME:
     case TOK_BYTES:
       while (itTmp != end && isdigit(*itTmp))
         ++itTmp;
@@ -276,6 +280,10 @@ ConfigParser::e_Direcs ConfigParser::_str2direc(const str& s)
     return DIR_UPLOAD;
   if (s == "redirect")
     return DIR_REDIRECT;
+  if (s == "timeoutCgi")
+    return DIR_TIMECGI;
+  if (s == "timeoutReq")
+    return DIR_TIMEREQ;
   return DIR_CGI;
 }
 
@@ -308,6 +316,10 @@ str ConfigParser::_direc2str(e_Direcs d) const
       return "redirect";
     case DIR_CGI:
       return "cgi";
+    case DIR_TIMECGI:
+      return "timeoutCgi";
+    case DIR_TIMEREQ:
+      return "timeoutReq";
     default:
       return "INVALID";
   }
@@ -342,6 +354,9 @@ ConfigParser::e_TokType ConfigParser::_nextTokFromDirec(e_Direcs direc)
       return TOK_REDIR;
     case DIR_CGI:
       return TOK_CGI;
+    case DIR_TIMECGI:
+    case DIR_TIMEREQ:
+      return TOK_TIME;
     default:
       return TOK_NULL;
   }
@@ -382,6 +397,8 @@ str ConfigParser::_toktype2str(e_TokType t) const
       return "CGI";
     case TOK_REDIR:
       return "REDIR";
+    case TOK_TIME:
+      return "TIME";
     default:
       return "NULL";
   }

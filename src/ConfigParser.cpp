@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/26 09:14:47 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/10 22:18:31 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/06/24 17:47:38 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,9 +66,11 @@ std::set<str> ConfigParser::_initKnownDirectives()
       "root",
       "upload",
       "redirect",
-      "cgi"};
+      "cgi",
+      "timeoutCgi",
+      "timeoutReq"};
 
-  std::set<str> s(dirNames, dirNames + 13);
+  std::set<str> s(dirNames, dirNames + 15);
   return s;
 }
 

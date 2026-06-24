@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/24 17:31:03 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/29 12:05:16 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/06/24 18:02:06 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,6 +35,9 @@ typedef uint16_t                    u16;
 typedef uint32_t                    u32;
 typedef std::string::iterator       strIt;
 typedef std::string::const_iterator constrIt;
+
+// the longest reasonable timeout: 1h
+#define MAX_TIMEOUT 3600
 
 // maximum number of headers. nginx has this set to 1000 per default. above that
 // -> HTTP_400
@@ -135,10 +138,10 @@ enum e_HTTPStatus {
 };
 
 typedef struct {
-    const u16 maxClients;
-    const u16 connKeepaliveTimeout;
-    const u16 reqTimeout;
-    const u16 cgiTimeout;
+    u16 maxClients;
+    u16 connKeepaliveTimeout;
+    u16 reqTimeout;
+    u16 cgiTimeout;
 } t_GlobalWsrvSettings;
 
 class WsrvLib {

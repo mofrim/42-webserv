@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/08 21:14:52 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/18 14:30:03 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/06/24 18:15:23 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,8 +15,6 @@
 #include "utils.hpp"
 
 #include <cstdlib>
-
-// ------------------------=[ Server Scope Parsing ]=------------------------ //
 
 // -------------------------------=[ Utils ]=-------------------------------- //
 
@@ -105,7 +103,39 @@ static std::vector<str> splitRedirStr(const str& rs)
   return ret;
 }
 
-// ---------------------------=[ The Real Stuff ]=--------------------------- //
+// -------------------------=[ The Real Stuff... ]=-------------------------- //
+
+// ------------------------=[ Global Scope Parsing ]=------------------------ //
+
+bool ConfigParser::_parseTokTime()
+{
+  e_Direcs direc = _tokIt->direc;
+
+  if ((++_tokIt)->type != TOK_TIME)
+    throw std::runtime_error("Wrong token while parsing timeout");
+
+  str& val = _tokIt->val;
+  strip(val);
+  if (!isNumStr(val)) {
+    Logger::logCfgErr(_tokIt->line, "Value for maxBodySize must be a number!");
+    return false;
+  }
+
+  size_t time = std::atoi(val.c_str());
+  if (time > MAX_TIMEOUT) {
+    Logger::logCfgErr(
+        _tokIt->line, "timeout > " + int2str(MAX_TIMEOUT) + " not allowed!");
+    return false;
+  }
+
+  if (direc == DIR_TIMECGI)
+    WsrvLib::Settings.cgiTimeout = time;
+  else
+    WsrvLib::Settings.reqTimeout = time;
+  return true;
+}
+
+// ------------------------=[ Server Scope Parsing ]=------------------------ //
 
 // serverName
 bool ConfigParser::_parseTokName(VServerCfg& vcfg)

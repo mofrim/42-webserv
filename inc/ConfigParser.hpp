@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/26 08:52:11 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/20 10:52:33 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/06/24 18:04:40 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,6 +60,7 @@ class ConfigParser {
       TOK_METH,   // GET POST ...
       TOK_CGI,    // py:/usr/bin/env python3
       TOK_REDIR,  // /moep or https://42.fr
+      TOK_TIME,   // seconds. 3600 = 1h is max!
       TOK_NULL
     };
 
@@ -77,6 +78,8 @@ class ConfigParser {
       DIR_UPLOAD,
       DIR_REDIRECT,
       DIR_CGI,
+      DIR_TIMEREQ,
+      DIR_TIMECGI,
       DIR_INVALID
     };
 
@@ -113,6 +116,10 @@ class ConfigParser {
     bool _isMetaToken() const;
     bool _parseServerDirec(VServerCfg& vcfg);
     bool _parseRouteDirec(VServerCfg& vcfg);
+
+    // ----------------------=[ Global Scope Parsing ]=---------------------- //
+
+    bool _parseTokTime();
 
     // ----------------------=[ Server Scope Parsing ]=---------------------- //
 

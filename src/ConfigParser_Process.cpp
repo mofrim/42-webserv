@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/08 16:14:27 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/18 17:52:20 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/06/24 18:20:37 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,6 +60,18 @@ void ConfigParser::_processTokens()
         _vcfgs.pop_back();
         _advanceTillSrvEnd();
       }
+    }
+    else if (_tokIt->type == TOK_DIREC &&
+        (_tokIt->direc == DIR_TIMECGI || _tokIt->direc == DIR_TIMEREQ))
+    {
+      bool success = false;
+      try {
+        success = _parseTokTime();
+      } catch (const std::runtime_error& e) {
+        throw;
+      }
+      if (!success)
+        throw std::runtime_error(("ConfigParser: Parsing timeout failed!"));
     }
     else
       throw std::runtime_error(

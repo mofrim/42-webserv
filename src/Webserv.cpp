@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:36:43 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/29 22:17:21 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/06/24 18:29:01 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,6 +69,10 @@ void Webserv::readConfig(const str& cfgFilename)
       it != cfgs.end();
       ++it)
     _vservers.push_back(VServer(*it));
+
+  Logger::logCfg("WebServ-Timeouts after cfg-parsing: reqTimeout = " +
+      int2str(WsrvLib::Settings.reqTimeout) +
+      ", cgiTimeout = " + int2str(WsrvLib::Settings.cgiTimeout));
 }
 
 // The main routine for setting up the servers listed in the Config.
