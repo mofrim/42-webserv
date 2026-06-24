@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 23:39:57 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/06/23 10:03:04 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/06/24 17:06:21 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -225,7 +225,7 @@ void Request::append(char *s, ssize_t bytesRead)
   }
   else {
     _reqdata.append(s, bytesRead);
-    _hdrLines += _countReqLines(s);
+    _hdrLines += _countReqLines(std::string(s, bytesRead));
   }
   Logger::logDbg1("Request::append",
       "Appending to req: '" + printDataTrunc(s, bytesRead, 100) + "'");
