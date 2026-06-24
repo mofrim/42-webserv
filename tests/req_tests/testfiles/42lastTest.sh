@@ -53,7 +53,7 @@ exec 3<>/dev/tcp/"$hostname"/"$port"
 
 hugeReq
 
-RESPONSE="$(timeout 10s cat <&3)"
+RESPONSE="$(timeout 8s cat <&3)"
 echo "Response:"
 echo "---------"
 respo="$(echo "${RESPONSE[@]}" | head -c 500)"

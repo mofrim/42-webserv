@@ -14,17 +14,17 @@ server {
   }
 
   route /directory {
-    maxBodySize 200000000!
+    maxBodySize 101000000!
     index youpi.bad_extension!
     methods GET POST!
-    cgi bla:/home/mofrim/c0de/42/CC/18-webserv/webserv/www/42tester/wrapper.sh!
+    cgi bla:/home/frido/c0de/42/CC/18-webserv/webserv/www/42tester/wrapper.sh!
   }
 
   route /YoupiBanane {
     index youpi.bad_extension!
-    maxBodySize 200000000!
+    maxBodySize 101000000!
     methods GET POST!
-    cgi bla:/home/mofrim/c0de/42/CC/18-webserv/webserv/www/42tester/wrapper.sh!
+    cgi bla:/home/frido/c0de/42/CC/18-webserv/webserv/www/42tester/wrapper.sh!
   }
 
   route /YoupiBanane/youpi.bad_extension {
