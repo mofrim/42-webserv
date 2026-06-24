@@ -6,14 +6,13 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/06 22:32:39 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/20 11:36:05 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/06/24 17:37:10 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "URI.hpp"
 #include "utils.hpp"
 
-#include <iostream>
 #include <sstream>
 #include <vector>
 
@@ -148,7 +147,7 @@ static str rebuildQueryStr(const std::map<str, str>& params)
   return query.str();
 }
 
-// ----------------------=[ The mai URL parsing func ]=---------------------- //
+// ----------------------=[ The main URL parsing func ]=--------------------- //
 
 // the main target-path/url parsing function
 //
