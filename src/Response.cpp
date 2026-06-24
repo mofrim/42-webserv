@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/23 19:11:25 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/06/14 08:52:51 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/06/24 09:35:46 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -236,14 +236,6 @@ void Response::_getBody200()
 
 void Response::_buildRespoHdrs()
 {
-
-  Logger::logBug("reqstr:" + _req->getReqstr());
-
-  // if (_req->getReqline().target.getStr() == "/directory/youpla.bla")
-  //   _respoHeaders["Startline"] = "HTTP/1.1 " +
-  //   WsrvLib::getStatusStr(HTTP_200);
-  // else
-
   _respoHeaders["Startline"] = "HTTP/1.1 " + WsrvLib::getStatusStr(_status);
 
   _respoHeaders["Server"] = "m0fr1m's webserv " VERSION;
