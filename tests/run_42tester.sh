@@ -14,12 +14,12 @@ if [ ! -e ./www/42tester/cgi_tester ]; then
 	chmod +x ./www/42tester/cgi_tester
 fi
 
-if [[ -n "$(grep 'macmac' <<< "$HOSTNAME")" ]]; then
-	sed -i 's/frido/mofrim/g' ./cfgs/42tester.wsrv
-	sed -i 's/frido/mofrim/g' ./www/42tester/wrapper.sh
-elif [[ -n "$(grep 'jeanluc' <<< "$HOSTNAME")" ]]; then
+if [[ -n "$(grep 'jeanluc' <<< "$HOSTNAME")" ]]; then
 	sed -i 's/mofrim/frido/g' ./cfgs/42tester.wsrv
 	sed -i 's/mofrim/frido/g' ./www/42tester/wrapper.sh
+else
+	sed -i 's/frido/mofrim/g' ./cfgs/42tester.wsrv
+	sed -i 's/frido/mofrim/g' ./www/42tester/wrapper.sh
 fi
 
 if pidof webserv; then
@@ -36,7 +36,7 @@ if ! pidof webserv; then
 	exit 1
 fi
 
-if [[ -z "$(grep -E 'jeanluc|macmac' <<< "$HOSTNAME")" ]]; then
+if [[ -z "$(grep -E 'jeanluc|macmac|spock' <<< "$HOSTNAME")" ]]; then
 	./tester http://localhost:1234
 else
 	nix-alien ./tester http://localhost:1234
