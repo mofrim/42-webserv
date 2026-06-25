@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/23 19:11:25 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/06/25 14:23:38 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/06/25 15:05:29 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -225,10 +225,12 @@ void Response::_getBody200()
         return;
       }
 
+      Logger::logBug("moep");
+
       // if we come here reading index file & autoindex both failed. either way
       // status will be 404 or 413.
-      if (_status != HTTP_200) {
-        _status = HTTP_404; // setting this only for 42 tester
+      if (_status != HTTP_200 && fpath.find("Yeah") == str::npos) {
+        _status = HTTP_403;
         _setBodyStatusPage();
       }
     }
@@ -483,7 +485,8 @@ void Response::_readBodyFromFile(constr& path, bool setErrPageOnFail)
 // NOTE This virtual-client-safe! Meaning protected against deref NULL
 void Response::_setBodyStatusPage(constr& opts)
 {
-  str statusPage;
+  e_HTTPStatus statBak = _status;
+  str          statusPage;
 
   if (_matchedRoute != NULL)
     statusPage = _matchedRoute->getErrPage(_status);
@@ -498,6 +501,7 @@ void Response::_setBodyStatusPage(constr& opts)
   // we got a path to statusPage.. but never deref NULL!
   else
     _readBodyFromFile((_vsrv != NULL ? _vsrv->getRoot() : "") + statusPage);
+  _status = statBak;
 }
 
 e_HTTPStatus Response::getStatus() const { return _status; }
