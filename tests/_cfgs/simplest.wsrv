@@ -1,3 +1,4 @@
+timeoutReq 5!
 server {
   serverName webserv!
   listen localhost:1234!
