@@ -6,7 +6,7 @@
 #    By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/12/01 11:45:58 by fmaurer           #+#    #+#              #
-#    Updated: 2026/06/03 22:10:15 by fmaurer          ###   ########.fr        #
+#    Updated: 2026/06/25 08:08:31 by fmaurer          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -102,11 +102,17 @@ $(OBJDIR):
 # !! Attention: Any misspelled filename in HDRS or SRCS will lead to `make` not
 # functioning without any meaningful error msg !!
 $(OBJDIR)/%.o: %.cpp $(HDRS) | $(OBJDIR)
+	$(call log_msg_mid,Compiling $<...)
+	$(call output_color_grey)
 	$(CPP) $(IFLAGS) $(CFLAGS) -c $< -o $@
+	$(call output_color_reset)
 
 
 $(NAME): $(OBJS)
+	$(call log_msg_mid,Linking / Compiling webserv binary...)
+	$(call output_color_grey)
 	$(CPP) $(IFLAGS) $(CFLAGS) -o $@ $^
+	$(call log_msg_end, Done!)
 
 clean:
 	rm -rf $(OBJDIR)
@@ -121,6 +127,10 @@ run1: fclean
 	make DBG=1
 	./$(NAME)
 
+run2: fclean
+	make DBG=2
+	./$(NAME)
+
 dbg0:
 	make DBG=0
 
@@ -132,10 +142,6 @@ dbg1:
 
 dbg1-re: fclean
 	make DBG=1
-
-run2: fclean
-	make DBG=2
-	./$(NAME)
 
 dbg2:
 	make DBG=2
