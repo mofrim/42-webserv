@@ -32,3 +32,4 @@ tests/req_tests/testfiles/zero
 *.dat
 tester
 cgi_tester
+tests/memory_log.csv
