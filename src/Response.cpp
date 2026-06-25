@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/23 19:11:25 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/06/24 09:35:46 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/06/25 14:23:38 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -220,13 +220,14 @@ void Response::_getBody200()
 
         if (!_body.empty())
           _status = HTTP_200;
+        else
+          _status = HTTP_403;
         return;
       }
 
       // if we come here reading index file & autoindex both failed. either way
       // status will be 404 or 413.
       if (_status != HTTP_200) {
-        // _status = HTTP_403;
         _status = HTTP_404; // setting this only for 42 tester
         _setBodyStatusPage();
       }

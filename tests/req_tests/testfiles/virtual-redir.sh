@@ -76,7 +76,7 @@ fi
 
 exec 3<>/dev/tcp/"$hostname"/"$port"
 
-RESPONSE="$(curl -s -v --follow $hostname:${port}/redir 2>&1 | grep 404)"
+RESPONSE="$(curl -s -v -L $hostname:${port}/redir 2>&1 | grep 404)"
 echo "Response:"
 echo "---------"
 echo "${RESPONSE[@]}"
