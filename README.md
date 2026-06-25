@@ -36,16 +36,18 @@ perspective the most challenging part of the whole project.
 
 ## Instructions
 
-The program was tested with the compiler clang v12.6. This and *GNU make* are the only
-prerequisites for building the project from source. To start the build simply
-run `make` in the repo-root. This will generate an executable called `webserv`.
-When launched without any command-line-arguments a default server configuration
-is loaded which would serve any GET-requested files under `./www`.
+The program was tested with the compiler `clang v12.6`. This and *GNU make* are
+the only prerequisites for building the project from source. To start the build
+simply run `make` in the repo-root. This will generate an executable called
+`webserv`. When launched without any command-line-arguments a default server
+configuration is loaded which would serve any GET-requested files under `./www`.
 
 To load a custom configuration file pass it as the single argument to `webserv`.
 Here is a configuration file with all supported directives:
 
 ```
+timeoutCgi 60!
+timeoutReq 5!
 server {
   serverName nginWebserv!
   listen localhost:1234!
@@ -68,9 +70,21 @@ server {
   route /42 {
     redirect 301:https://42.fr!
   }
-
 }
 ```
+
+The parsing is implemented in a very strict fashion. I.e., if there is something
+wrong in a server-block, the whole server-block the whole server-block will be
+rejected. On certain errors the whole config-file will be rejected. It was tried
+to make the error messages as descriptive as possible in order to assist the
+user with fixing the config.
+
+### Other Relevant Instructions
+
+- For launching the **42-Tester** run `make 42tester` ;)
+- with `make dbg1` / `make dbg2` it is possible to increase the verbosity of
+  debugging output. This can also be interesting to understand the whole
+  processing.
 
 ## Resources
 
@@ -98,6 +112,18 @@ server {
 - [Killer Stack-Overflow thread on SO_REUSEADDR](https://stackoverflow.com/questions/14388706/how-do-so-reuseaddr-and-so-reuseport-differ)
 - [Nginx config about error pages](https://nginx.org/en/docs/http/ngx_http_core_module.html#error_page)
 - [Nginx: alpabetical index of all directives](https://nginx.org/en/docs/dirindex.html)
+
+### AI Usage
+
+In this project AI was used for the following purposes:
+
+- Asking questions about protocol special cases. For example question about when
+  which status code should be returned.
+- Getting an overview about certain topics. For example i asked a chatbot about
+  the pros and cons of the different I/O-multiplexing methods in the very
+  beginning but then read more about on primary resources throughout the web.
+- Sometimes bug-hunting.
+- **This project does not contain any AI-generated code!**
 
 
 
