@@ -1,3 +1,4 @@
+timeoutCgi 5!
 server {
   serverName cgiserv!
   listen localhost:1234!
