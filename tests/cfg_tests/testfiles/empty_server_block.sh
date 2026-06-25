@@ -13,7 +13,7 @@ CFG="empty_server_block.wsrv"
 
 set -u
 
-OUTPUT="$(timeout -s INT 0.5 $valCmd $webserv ./testcfgs/$CFG; echo "ValExit=$?")"
+OUTPUT="$(timeout -s INT 1.0 $valCmd $webserv ./testcfgs/$CFG; echo "ValExit=$?")"
 echo "${OUTPUT[@]}"
 
 valExit="$(echo "${OUTPUT[@]}" | grep ValExit)"

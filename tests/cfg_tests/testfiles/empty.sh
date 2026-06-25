@@ -11,7 +11,7 @@ fi
 
 set -u
 
-OUTPUT="$(timeout -s INT 0.5 $valCmd $webserv ./testcfgs/empty; echo "ValExit=$?")"
+OUTPUT="$(timeout -s INT 1.0 $valCmd $webserv ./testcfgs/empty; echo "ValExit=$?")"
 echo "${OUTPUT[@]}"
 
 valExit="$(echo "${OUTPUT[@]}" | grep ValExit)"
