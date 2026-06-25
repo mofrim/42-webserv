@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/25 08:35:42 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/21 09:55:45 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/06/25 15:13:08 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,6 @@ VServerCfg::VServerCfg()
   _serverName  = "";
   _maxBodySize = MAX_BODY_SIZE;
   _root        = "./www";
-  _initSetDirecs();
 }
 
 VServerCfg::VServerCfg(const VServerCfg& o)
@@ -34,7 +33,6 @@ VServerCfg::VServerCfg(const VServerCfg& o)
   _routes      = o._routes;
   _errPages    = o._errPages;
   _root        = o._root;
-  _setDirecs   = o._setDirecs;
 }
 
 VServerCfg& VServerCfg::operator=(const VServerCfg& o)
@@ -46,7 +44,6 @@ VServerCfg& VServerCfg::operator=(const VServerCfg& o)
     _routes      = o._routes;
     _errPages    = o._errPages;
     _root        = o._root;
-    _setDirecs   = o._setDirecs;
   }
   return (*this);
 }
@@ -133,8 +130,6 @@ const std::map< str, std::set<u16> >& VServerCfg::getInterfaces() const
   return _interfaces;
 }
 
-// FIXME: is it okay to return a reference here? or should it be a complete
-// object?
 const std::set<u16>& VServerCfg::getPorts(const str& addr)
 {
   return _interfaces[addr];
@@ -182,18 +177,6 @@ str VServerCfg::getErrPage(e_HTTPStatus s) { return _errPages[s]; }
 std::map<e_HTTPStatus, str> VServerCfg::getErrPages() const
 {
   return _errPages;
-}
-
-// FIXME: think about this more later. Do i need? Or can i handle this with good
-// default values?
-void VServerCfg::_initSetDirecs()
-{
-  _setDirecs["serverName"]  = false;
-  _setDirecs["interfaces"]  = false;
-  _setDirecs["maxBodySize"] = false;
-  _setDirecs["root"]        = false;
-  _setDirecs["errPages"]    = false;
-  _setDirecs["routes"]      = false;
 }
 
 void VServerCfg::setRoot(str r) { _root = r; }

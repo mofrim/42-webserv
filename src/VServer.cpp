@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/03 12:51:23 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/18 19:54:12 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/06/25 15:11:51 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,8 +30,6 @@ VServer::VServer()
   _maxBodySize = MAX_BODY_SIZE;
 }
 
-// FIXME: think about if assignment and stuff like this really make sense for my
-// vserver classes
 VServer::VServer(const VServer& o)
 {
   if (this != &o) {
@@ -73,10 +71,6 @@ VServer& VServer::operator=(const VServer& o)
 
 // a little hack to avoid printing the "out of scope msg" for tmp servers not
 // fully initialized
-//
-// FIXME: can this client removal go wrong? question arises bc _removeAllClients
-// really deletes the Client object referenced by the pointers in _clients. But
-// technically the cline-server relation is one-to-one, no?
 VServer::~VServer()
 {
   if (!_listenFds.empty())
@@ -192,8 +186,6 @@ void VServer::_setupSockets(
       _listenFds.insert(sockFd);
       _ports.insert(*itp);
 
-      // FIXME: maybe later refactor to only use one of these
-
       // store IP and port
       // _activeInterfaces[ipCnameFd.ip].insert(*itp);
       _addActiveIface(ipCnameFd, *itp);
@@ -245,19 +237,6 @@ int VServer::_isActiveIface(const str& addr, u16 port) const
   return -1;
 }
 
-// TODO: maybe design some more helper functions to make this more compact.
-//
-// The crazy syntax of this block
-//
-// 	std::pair<std::map<int, Client>::iterator, bool> insertReturn =
-// 		_clients.insert(
-// 				std::pair<int, Client>(client_fd, Client(client_fd, clock())));
-//
-// explained: std::map::insert returns a std::pair where the `first` member is
-// an iterator pointing to the newly inserted element (a pair again) and the
-// `second` member is a bool flag indicating wether a new element could be
-// inserted or not. if the key already exists the new element can not be
-// inserted.
 Client *VServer::addClient(Webserv *wsrv, int fd)
 {
   if (_listenFds.find(fd) == _listenFds.end())
@@ -331,8 +310,7 @@ void VServer::_removeAllClients()
 
 // close all socket fds
 // not handling any errors for close except displaying a short warning msg.
-//
-// TODO: in principle i could try and have small retry loop here
+// TODO in principle i could try and have small retry loop here
 void VServer::cleanup()
 {
   for (std::set<int>::iterator it = _listenFds.begin(); it != _listenFds.end();

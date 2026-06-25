@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/28 07:26:35 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/17 14:53:34 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/06/25 15:12:14 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,8 +64,6 @@ struct addrinfo *Socket::getAddrInfo(const str& addr, u16 port)
   return result;
 }
 
-// FIXME: implement/use own version of inet_ntop() as it is not allowed by
-// subject.
 void Socket::printAddrlist(const str& addr, u16 port)
 {
   struct addrinfo *ai;

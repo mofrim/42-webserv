@@ -110,9 +110,6 @@ class VServer {
 
     void cleanup();
 
-    // TODO: think about the whole exception thing! Maybe there should be
-    // some base-class called like this one and the special exceptions for every
-    // thing that can fail (~ sounds like a lot of work to me :/ )
     class ServerInitException: public std::runtime_error {
       public:
         ServerInitException(const std::string& msg);

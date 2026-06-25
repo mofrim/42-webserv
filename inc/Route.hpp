@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/09 16:41:56 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/05/19 13:08:25 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/06/25 15:09:44 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,9 +14,6 @@
 
 #include "WsrvLib.hpp"
 
-// A Route must be able to store data for a config like this
-
-// TODO: add everything i want to parse!
 class Route {
   private:
     str  _path;
