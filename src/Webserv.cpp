@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:36:43 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/06/24 18:29:01 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/06/25 14:34:50 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -186,10 +186,7 @@ void Webserv::run()
 
         if (cli->isCGIing()) {
           if (currentFd == cli->getFd() && ev & (EPOLLIN | EPOLLERR | EPOLLHUP))
-          {
             cli->handleEvent(ev);
-            // cli->setState(CLI_DISCO_CGI);
-          }
           else
             cli->handleEventCGI(ev, currentFd);
         }
