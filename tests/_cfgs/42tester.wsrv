@@ -18,14 +18,14 @@ server {
     maxBodySize 200000000!
     index youpi.bad_extension!
     methods GET POST!
-    cgi bla:/home/mofrim/c0de/42/CC/18-webserv/webserv/www/42tester/wrapper.sh!
+cgi bla:/home/fmaurer/c0de/18-webserv/42-webserv/www/42tester/cgi_tester!
   }
 
   route /YoupiBanane {
     index youpi.bad_extension!
     maxBodySize 200000000!
     methods GET POST!
-    cgi bla:/home/mofrim/c0de/42/CC/18-webserv/webserv/www/42tester/wrapper.sh!
+cgi bla:/home/fmaurer/c0de/18-webserv/42-webserv/www/42tester/cgi_tester!
   }
 
   route /YoupiBanane/youpi.bad_extension {

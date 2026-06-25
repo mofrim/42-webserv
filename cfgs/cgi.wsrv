@@ -8,7 +8,8 @@ server {
     index hello.sh!
     methods GET POST!
     cgi sh:/usr/bin/env bash!
-    cgi py:/nix/store/0r6k8xa2kgqyp3r4v2w7yrb80ma2iawm-python3-3.13.12/bin/python3!
+    # cgi py:/nix/store/0r6k8xa2kgqyp3r4v2w7yrb80ma2iawm-python3-3.13.12/bin/python3!
+    cgi py:/usr/bin/env python3!
   }
 
   route /cgi-src {
@@ -26,14 +27,4 @@ server {
     methods GET POST!
     cgi sh:/usr/bin/env bash!
   }
-
-  # route /cgi-bin/hello.sh {
-  #   cgi sh:/nix/store/i27rhb3nr65rkrwz36bchkwmav6ggsmn-bash-5.3p9/bin/bash!
-  #   methods POST GET!
-  # }
-  #
-  # route /cgi-bin/env.sh {
-  #   cgi sh:/nix/store/i27rhb3nr65rkrwz36bchkwmav6ggsmn-bash-5.3p9/bin/bash!
-  #   methods POST GET!
-  # }
 }

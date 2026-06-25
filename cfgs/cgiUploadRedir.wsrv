@@ -4,7 +4,8 @@ server {
   root ./www/cgiUploadRedir!
 
   route / {
-    cgi py:/nix/store/0r6k8xa2kgqyp3r4v2w7yrb80ma2iawm-python3-3.13.12/bin/python3!
+    # cgi py:/nix/store/0r6k8xa2kgqyp3r4v2w7yrb80ma2iawm-python3-3.13.12/bin/python3!
+    cgi py:/usr/bin/env python3!
     upload /!
     autoindex on!
     methods GET POST DELETE!

@@ -6,7 +6,7 @@
 #    By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/12/01 11:45:58 by fmaurer           #+#    #+#              #
-#    Updated: 2026/06/25 08:08:31 by fmaurer          ###   ########.fr        #
+#    Updated: 2026/06/25 13:13:11 by fmaurer          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -64,6 +64,7 @@ RST = \e[0m
 MSGOPN = $(YLW)--(($(GRN)
 MSGEND = $(YLW)))--$(RST)
 
+HOST = $(shell hostname)
 ifeq ($(findstring wolfsburg,$(HOST)), wolfsburg)
 	ECHO = echo
 	ECHON = echo -n
@@ -184,11 +185,13 @@ cfgtests:
 
 allMyTests: cpptests-run reqtests cfgtests
 
+siege:
+	$(call log_msg_single,Running siege on webserv...)
+	siege -b --time 20s -f tests/siegeList.txt
+
 42tester:
 	$(call log_msg_single,Starting 42tester...)
-	$(call output_color_grey)
 	@tests/run_42tester.sh
-	$(call output_color_reset)
 
 fclean: clean
 	rm -f $(NAME)
