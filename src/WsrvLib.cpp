@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/24 17:40:43 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/06/12 21:12:10 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/06/25 13:22:27 by fmaurer          ###   ########.fr       */
 /*                                                                            */ /* ************************************************************************** */
 
 #include "WsrvLib.hpp"
@@ -342,7 +342,7 @@ str WsrvLib::getAutoindex(constr& path, constr& route)
       "linear-gradient(135deg, #020617 0%, #0f172a 40%, #111827 100%);"
       "color: #fff;"
       "background-attachment: fixed;"
-      "font-family: Fantasy, Arial, Helvetica, sans-serif;"
+      "font-family: Arial, Helvetica, sans-serif;"
       "margin: 100px 100px 0px 100px;"
       "text-align: left;"
       "}"
