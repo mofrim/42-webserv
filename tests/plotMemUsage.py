@@ -19,9 +19,9 @@ memory_usage_mb = []
 
 fig, ax = plt.subplots()
 line, = ax.plot([], [], 'b-')
-ax.set_xlabel('Time (s)')
-ax.set_ylabel('Memory (MB)')
-ax.set_title('Live Memory Usage of WebServ')
+ax.set_xlabel('time (s)')
+ax.set_ylabel('memory (MB)')
+ax.set_title('live memory usage of webserv')
 ax.grid(True)
 
 # does not work as planned, so far
