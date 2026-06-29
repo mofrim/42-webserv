@@ -6,4 +6,9 @@ server {
     methods POST GET!
     maxBodySize 1000000000!
   }
+  route /smallUp {
+    upload /smallUp!
+    methods POST GET!
+    maxBodySize 10!
+  }
 }

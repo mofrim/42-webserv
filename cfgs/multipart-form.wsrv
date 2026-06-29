@@ -8,6 +8,6 @@ server {
     upload /upload-multipart!
     # root ./www/upload-multipart!
     methods POST GET!
-    maxBodySize 800000000!
+    maxBodySize 500000000!
   }
 }
