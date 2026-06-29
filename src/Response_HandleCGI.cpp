@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/16 14:54:57 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/06/24 17:26:21 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/06/29 11:31:44 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -255,7 +255,9 @@ char **Response::_cgiBuildEnv(std::map<str, str>& cgiParams)
     }
   }
 
-  // now that we have _pwd we can set the PATH_TRANSLATED...
+  // now that we have _pwd we can set the PATH_TRANSLATED and the scripts
+  // workdir which defaults to matched routes root!
+  // definitely a TODO to make this configurable via a `cgiRoot` variable!
   // WARN: we simply ignore here that it might be empty in some very edgy cases!
   URI workdir;
   if (_pwd.find('=') != str::npos &&

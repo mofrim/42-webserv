@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/23 19:11:25 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/06/25 15:05:29 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/06/25 19:50:36 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -224,8 +224,6 @@ void Response::_getBody200()
           _status = HTTP_403;
         return;
       }
-
-      Logger::logBug("moep");
 
       // if we come here reading index file & autoindex both failed. either way
       // status will be 404 or 413.
