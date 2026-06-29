@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/01 18:46:40 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/06/03 11:35:38 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/06/25 19:36:20 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,7 +79,7 @@ e_HTTPStatus Request::parseReqHeaders()
   _hdrsParsed = true;
 
   if ((_statusCode = _parseHeaders()) >= HTTP_400) {
-    Logger::logDbg1("Request::_parseHeaders: 400");
+    Logger::logDbg1("Request::_parseHeaders: " + int2str(_statusCode));
     return _statusCode;
   }
   if ((_statusCode = _evaluateHdrs()) >= HTTP_400) {
@@ -222,6 +222,8 @@ e_HTTPStatus Request::_initializeBody(constr& onlyHdrs, size_t crlfx2)
         _isChunked = true;
   }
 
+  _bodySize = _reqdata.size() - onlyHdrs.size() - 2;
+
   // processing content-length field iff we are not chunked
   if (!_isChunked) {
 
@@ -232,19 +234,20 @@ e_HTTPStatus Request::_initializeBody(constr& onlyHdrs, size_t crlfx2)
 
     _contentLength = std::atol(_headers["content-length"].c_str());
 
-    if (_contentLength > MAX_CONTENT_LENGTH) {
-      Logger::logSrv(_vsrvName,
-          "Request Content-Length exceeds MAX_CONTENT_LENGTH -> 400",
-          WARN);
-      return HTTP_413;
-    }
-
-    if (_matchedRoute != NULL &&
-        _contentLength > _matchedRoute->getMaxBodySize())
+    // BUG we need to somehow check here if there is still something left to
+    // drain... but how?
+    // well, we can check if the so far transferred body-size is smaller then
+    // the request's content-length... but this can be tricked by spoofing the
+    // content-length field..
+    if (_contentLength > MAX_CONTENT_LENGTH ||
+        (_matchedRoute != NULL &&
+            _contentLength > _matchedRoute->getMaxBodySize()))
     {
-      Logger::logSrv(
-          _vsrvName, "Requested Content-Length exceeds maxBodySize", WARN);
-      _cli->setState(CLI_DRAIN);
+      Logger::logSrv(_vsrvName,
+          "Request Content-Length max allowed body-size -> 413",
+          WARN);
+      if (_bodySize < _contentLength)
+        _cli->setState(CLI_DRAIN);
       return HTTP_413;
     }
   }
@@ -268,8 +271,6 @@ e_HTTPStatus Request::_initializeBody(constr& onlyHdrs, size_t crlfx2)
   if (_body.setMaxSize(_contentLength) == KO)
     throw std::runtime_error(
         "(Request::_parseHeaders) Could not set maxBodySize!");
-
-  _bodySize = _reqdata.size() - onlyHdrs.size() - 2;
 
   int appRet = _body.appendData(_reqdata.substr(crlfx2).data() + 4, _bodySize);
   switch (appRet) {
