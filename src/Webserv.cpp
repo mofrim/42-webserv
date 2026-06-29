@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:36:43 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/06/25 14:34:50 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/06/29 09:36:46 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -213,8 +213,8 @@ void Webserv::run()
           _epoll.modifyClient(cli->getFd(), EPOLLOUT);
         }
       }
-      _timeoutClients();
     }
+    _timeoutClients();
     if (processCgiKillQueue() == OK || nfds > 0)
       Logger::drawCycleSep();
   }
@@ -229,13 +229,16 @@ void Webserv::_timeoutClients()
 
   while (it != _fdClientMap.end()) {
     Client *cli = it->second;
+    Logger::logDbg2("Timeout",
+        "Client " + cli->getIfaceFdStr() +
+            " difftime = " + int2str(difftime(now, cli->getLastActive())));
     if (cli->isCGIing()) {
       // Logger::logBug(
       //     "checking cgi client timeout: " + it->second->getIfaceFdStr());
       // Logger::logBug(
       //     "difftime: " + int2str(difftime(now, cli->getLastActive())));
       if (difftime(now, cli->getLastActive()) > WsrvLib::Settings.cgiTimeout) {
-        Logger::logDbg1("Timing out CGI client..." + cli->getIfaceFdStr());
+        Logger::logDbg0("Timing out CGI client..." + cli->getIfaceFdStr());
         cli->timeout();
         _epoll.modifyClient(cli->getFd(), EPOLLOUT);
         cli->setState(CLI_SEND);
