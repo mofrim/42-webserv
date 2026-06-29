@@ -21,6 +21,7 @@ body {
   background-attachment: fixed;
   color: #fff;
 }
+
 .card {
   z-index: 2;
   position: relative;
@@ -66,7 +67,7 @@ body {
 p {
   margin: 20px auto 0;
   max-width: 720px;
-  font-size: 1rem;
+  font-size: clamp(10px, 2.2vw, 26px);
   line-height: 1.45;
   color: rgba(255, 255, 255, 0.84);
 }
@@ -91,9 +92,11 @@ p {
   border-radius: 2px;
   margin: 20px auto;
 }
+
 .card h1 {
   font-size: 3rem;
 }
+
 .card h2 {
   font-size: 2rem;
 }
@@ -147,7 +150,8 @@ img {
 /* Form Groups */
 .form-group {
   margin-bottom: 24px;
-  width: clamp(200px, 60vw, 70vw);
+  /* width: clamp(200px, 60vw, 70vw); */
+  width: 100%;
   text-align: left;
   display: flex;
   flex-direction: column;
@@ -171,7 +175,7 @@ img {
 .form-group input:not([type="submit"]),
 .form-group textarea,
 .form-group select {
-  width: 80%;
+  width: 100%;
   padding: 14px 18px;
   border: 2px solid rgba(255, 255, 255, 0.16);
   border-radius: 12px;
@@ -217,6 +221,7 @@ img {
   color: #fff;
   font-family: Arial, Helvetica, sans-serif;
   font-size: clamp(16px, 1.5vw, 20px);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .form-button:hover {
@@ -266,6 +271,7 @@ img {
 
 code {
   color: #1f1;
+  font-size: 1.5rem;
 }
 
 .medTxt {

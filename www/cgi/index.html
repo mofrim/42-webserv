@@ -28,7 +28,7 @@
       <h2>Response:</h2>
       <!-- <div id="response" style="white-space: pre-wrap;"></div> -->
       <div class="form-group">
-        <textarea id="response" class="form-group" readonly style="width: 100%; margin-top: 10px;"></textarea>
+        <textarea id="response" class="form-group" readonly style="margin-top: 10px;"></textarea>
         <button id="copy" class="form-button tight" onclick="copyToClipboard()">📋 Copy</button>
       </div>
 
@@ -37,6 +37,16 @@
 
       <h1>env.sh</h1>
       <form id="envForm" class="form-group" action="/cgi-bin/env.sh" method="GET">
+        <label for="name">Params:</label>
+        <input type="text" id="envParams" name="params" required>
+        <br>
+        <input class="form-button form-actions" type="submit" value="Submit">
+      </form>
+
+      <div class="line"></div>
+
+      <h1>relative.sh</h1>
+      <form id="envForm" class="form-group" action="/cgi-bin/relative.sh" method="POST">
         <label for="name">Params:</label>
         <input type="text" id="envParams" name="params" required>
         <br>
@@ -54,28 +64,14 @@
       <!-- </form> -->
 
       <div class="line"></div>
-
       <button class="form-button bigTxt tight moreMargin"><a href="/cgi-bin/lsof.sh">lsof.sh!</a></button>
-
       <div class="line"></div>
-
       <button class="form-button bigTxt tight moreMargin"><a href="/cgi-bin/timeout.sh">timeout.sh!</a></button>
-
       <div class="line"></div>
-
       <p class="medTxt">Checkout the source files of cgi-scripts <a href="/cgi-src">here</a>!</p>
     </div>
 
     <script>
-
-function sendRaw() {
-  fetch("/cgi-bin/process.cgi", {
-    method: "POST",
-    body: document.getElementById("rawText").value,
-    headers: { "Content-Type": "text/plain" }
-  });
-}
-
 document.getElementById("rot13").addEventListener("submit", async (e) => {
   e.preventDefault();
   const form = e.target;
@@ -105,6 +101,15 @@ function copyToClipboard() {
     .then(() => alert("Copied!"))
     .catch(() => alert("Failed to copy"));
 }
+
+// // a function for sending a raw request to some endpoint
+// function sendRaw() {
+//   fetch("/cgi-bin/process.cgi", {
+//     method: "POST",
+//     body: document.getElementById("rawText").value,
+//     headers: { "Content-Type": "text/plain" }
+//   });
+// }
 
 
 // Sadly HTML forms do not support sending DELETE requests or POST Requests with
@@ -174,6 +179,6 @@ function copyToClipboard() {
 //   // alert("Sent!");
 // });
 
-    </script>
+</script>
   </body>
 </html>

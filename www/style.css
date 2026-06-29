@@ -21,6 +21,7 @@ body {
   background-attachment: fixed;
   color: #fff;
 }
+
 .card {
   z-index: 2;
   position: relative;
@@ -83,16 +84,19 @@ p {
   font-weight: bold;
   /* text-transform: uppercase; */
 }
+
 .line {
-  width: 40%;
+  width: 80%;
   height: 4px;
   background: linear-gradient(90deg, rgba(14, 165, 233, 0.8), rgba(168, 85, 247, 0.8));
   border-radius: 2px;
   margin: 20px auto;
 }
+
 .card h1 {
   font-size: 3rem;
 }
+
 .card h2 {
   font-size: 2rem;
 }
@@ -146,7 +150,8 @@ img {
 /* Form Groups */
 .form-group {
   margin-bottom: 24px;
-  width: clamp(200px, 60vw, 70vw);
+  /* width: clamp(200px, 60vw, 70vw); */
+  width: 100%;
   text-align: left;
   display: flex;
   flex-direction: column;
@@ -170,7 +175,7 @@ img {
 .form-group input:not([type="submit"]),
 .form-group textarea,
 .form-group select {
-  width: 80%;
+  width: 100%;
   padding: 14px 18px;
   border: 2px solid rgba(255, 255, 255, 0.16);
   border-radius: 12px;
@@ -227,7 +232,7 @@ img {
 }
 
 .form-button:active {
-  transform: translateY(0);
+  transform: translateY(2px);
 }
 
 .form-actions {
@@ -262,4 +267,25 @@ img {
 .form-group input::placeholder,
 .form-group textarea::placeholder {
   color: rgba(255, 255, 255, 0.4);
+}
+
+code {
+  color: #1f1;
+  font-size: 1.5rem;
+}
+
+.medTxt {
+  font-size: 1.5rem;
+}
+
+.bigTxt {
+  font-size: 2rem;
+}
+
+.tight {
+  padding: 6px 8px;
+}
+
+.moreMargin {
+  margin: 20px 0px 20px 0px;
 }
