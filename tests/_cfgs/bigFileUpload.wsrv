@@ -1,3 +1,4 @@
+timeoutReq 3!
 server {
   serverName webserv!
   listen localhost:1234!
@@ -6,5 +7,11 @@ server {
     upload /up!
     methods POST GET!
     maxBodySize 10000!
+  }
+
+  route /small {
+    upload /up!
+    methods POST GET!
+    maxBodySize 10!
   }
 }
