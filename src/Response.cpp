@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/23 19:11:25 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/06/25 19:50:36 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/06/29 14:29:24 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -220,8 +220,11 @@ void Response::_getBody200()
 
         if (!_body.empty())
           _status = HTTP_200;
-        else
+        else {
           _status = HTTP_403;
+          _setBodyStatusPage();
+        }
+
         return;
       }
 
