@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:36:43 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/06/29 09:36:46 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/06/29 14:09:37 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -232,16 +232,17 @@ void Webserv::_timeoutClients()
     Logger::logDbg2("Timeout",
         "Client " + cli->getIfaceFdStr() +
             " difftime = " + int2str(difftime(now, cli->getLastActive())));
-    if (cli->isCGIing()) {
-      // Logger::logBug(
-      //     "checking cgi client timeout: " + it->second->getIfaceFdStr());
-      // Logger::logBug(
-      //     "difftime: " + int2str(difftime(now, cli->getLastActive())));
+    if (cli->getState() == CLI_CGIREAD || cli->getState() == CLI_CGIRW) {
+      Logger::logDbg2(
+          "checking cgi client timeout: " + it->second->getIfaceFdStr() + "\n" +
+          "difftime: " + int2str(difftime(now, cli->getLastActive())));
       if (difftime(now, cli->getLastActive()) > WsrvLib::Settings.cgiTimeout) {
         Logger::logDbg0("Timing out CGI client..." + cli->getIfaceFdStr());
         cli->timeout();
         _epoll.modifyClient(cli->getFd(), EPOLLOUT);
         cli->setState(CLI_SEND);
+        // important to do this right here! otherwise the cgi-fds will remain in
+        // the epoll list even though the client is disco
         cli->getReq().getRespo().cgiCleanupFds();
         cli->getReq().setStatusCode(HTTP_504);
       }

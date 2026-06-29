@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/18 19:13:35 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/06/14 08:51:16 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/06/29 14:08:47 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -148,24 +148,25 @@ void RequestHandler::readRequest()
 //
 void RequestHandler::writeResponse()
 {
-  str          defaultRespoStr = "";
-  str&         response        = defaultRespoStr;
-  e_HTTPStatus statusCode;
+  str  defaultRespoStr = "";
+  str& response        = defaultRespoStr;
 
   // QUESTION what happens here if a client connected but never sent anything?
   // ANSWER timeout. the clients req object will have been default contructed.
   // that is reqComplete == false.
   Request& req = _cli->getReq();
 
+  e_HTTPStatus statusCode = req.getRespo().getStatus();
+
   // handle timeout
   if (_cli->isTimeout()) {
 
     Logger::logDbg1(
         "RequestHandler", "Sending 408 to client " + _cli->getIfaceFdStr());
-    statusCode = HTTP_408;
 
-    if (_cli->isCGIing())
-      req.getRespo().cgiCleanupFds();
+    if (!req.isCGI()) {
+      statusCode = HTTP_408;
+    }
 
     if (_cli->isVirtual() && _cli->getVsrv() == NULL)
       defaultRespoStr = Response::genDefaultErrResponse(statusCode);
