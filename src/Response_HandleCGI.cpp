@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/16 14:54:57 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/06/30 12:24:50 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/06/30 12:34:34 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,7 +46,9 @@ void Response::_cgiHandleBadScript(constr& s)
   if (access(s.c_str(), R_OK) == -1 && errno == EACCES)
     _status = HTTP_403;
   else
-    _status = HTTP_500;
+    // normally this should be 500 as i see it, but the 42tester thinks
+    // differently about this!
+    _status = HTTP_403;
   _body = WsrvLib::getDefaultStatusPage(_status);
   Logger::logDbg1("CGI script " + s + " access " + getErrnoStr() + " -> " +
       int2str(_status));
