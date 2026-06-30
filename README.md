@@ -82,6 +82,7 @@ user with fixing the config.
 ### Other Relevant Instructions
 
 - For launching the **42-Tester** run `make 42tester` ;)
+- For running my own tests i used during development enter `make allMyTests`
 - with `make dbg1` / `make dbg2` it is possible to increase the verbosity of
   debugging output. This can also be interesting to understand the whole
   processing.
@@ -123,7 +124,3 @@ In this project AI was used for the following purposes:
   the pros and cons of the different I/O-multiplexing methods in the very
   beginning but then read more about on primary resources throughout the web.
 - Sometimes bug-hunting.
-- **This project does not contain any AI-generated code!**
-
-
-

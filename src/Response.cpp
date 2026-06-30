@@ -6,7 +6,7 @@
 /*   By: fmaurer <fmaurer42@posteo.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/23 19:11:25 by fmaurer           #+#    #+#             */
-/*   Updated: 2026/06/29 15:03:05 by fmaurer          ###   ########.fr       */
+/*   Updated: 2026/06/30 11:16:24 by fmaurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -269,11 +269,10 @@ void Response::_buildRespoHdrs()
             uri.getStr() + targetPath +
             (_req->getReqline().target.getQuery().empty() ? "" : "?") +
             _req->getReqline().target.getQueryStr();
-
-        _respoHeaders["Connection"] = "close";
-        _closeConn                  = true;
-        _req->setCloseConn();
       }
+      _respoHeaders["Connection"] = "close";
+      _closeConn                  = true;
+      _req->setCloseConn();
     }
 
   if (!_respoHdrHas("Connection")) {
@@ -509,6 +508,7 @@ e_HTTPStatus Response::getStatus() const { return _status; }
 
 void Response::setStatus(e_HTTPStatus s) { _status = s; }
 
+// convenience function for checking if a std::map contains a non-empty field
 bool Response::_respoHdrHas(constr& hdr)
 {
   return _respoHeaders.find(hdr) != _respoHeaders.end() &&
